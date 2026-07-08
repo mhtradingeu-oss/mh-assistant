@@ -1,0 +1,241 @@
+AI Command syntax:
+
+Import/helper/detector markers:
+27:import { normalizeAiTeamRoleId } from "../runtime/ai-team/ai-team-operating-contract.js";
+119:const MODE_ID_ALIASES = {
+144:const SPECIALIST_DEFS = [
+626:function normalizeAiCommandSpecialistId(id, fallback = "operations") {
+627:    const localResolved = MODE_ID_ALIASES[id] || id;
+628:    return normalizeAiTeamRoleId(localResolved, fallback);
+631:function detectSpecialistFromBridgePrompt(prompt) {
+662:            if (text.includes(keyword)) return normalizeAiCommandSpecialistId(specialistId);
+666:    return normalizeAiCommandSpecialistId(classified?.modeId, "operations");
+671:		const resolvedId = MODE_ID_ALIASES[id] || id;
+672:		return SPECIALIST_DEFS.find((s) => s.id === resolvedId) ||
+673:			SPECIALIST_DEFS.find((s) => s.id === "operations") ||
+674:			SPECIALIST_DEFS[0];
+923:	const resolvedId = MODE_ID_ALIASES[id] || id;
+1327:	const id = MODE_ID_ALIASES[rawId] || rawId;
+2524:	const fallbackId = MODE_ID_ALIASES[getAiRoomRoleId(fallback)] || getAiRoomRoleId(fallback);
+2527:	const resolved = MODE_ID_ALIASES[legacy] || MODE_ID_ALIASES[getAiRoomRoleId(legacy)] || getAiRoomRoleId(legacy);
+2528:	const finalId = MODE_ID_ALIASES[resolved] || resolved;
+2529:	return SPECIALIST_DEFS.some((item) => item.id === finalId) ? finalId : fallbackId;
+3452:  const requestedId = normalize(MODE_ID_ALIASES[rawId] || rawId);
+3453:  const rawDefinitions = typeof SPECIALIST_DEFS !== "undefined" ? SPECIALIST_DEFS : [];
+3700:				${SPECIALIST_DEFS.map((spec) => {
+3856:	const toolModeId = MODE_ID_ALIASES[getAiRoomRoleId(session.modeId)] || getAiRoomRoleId(session.modeId);
+4000:                .map((id) => SPECIALIST_DEFS.find((item) => item.id === id))
+4196:				${SPECIALIST_DEFS.map((spec) => {
+4702:                                ${SPECIALIST_DEFS.map((spec) => {
+4759:                                                id="aicmdV2Input"
+4887:				${SPECIALIST_DEFS.map((spec) => {
+5168:        const promptModeId = MODE_ID_ALIASES[getAiRoomRoleId(session.modeId)] || getAiRoomRoleId(session.modeId);
+5329:	const promptModeId = MODE_ID_ALIASES[getAiRoomRoleId(session.modeId)] || getAiRoomRoleId(session.modeId);
+5518:		const normalizedSessionModeId = MODE_ID_ALIASES[getAiRoomRoleId(session.modeId)] || getAiRoomRoleId(session.modeId);
+5598:		const input = $("aicmdV2Input");
+
+AI Command bridge window:
+	progress: "",
+	result: ""
+};
+
+
+
+function normalizeAiCommandSpecialistId(id, fallback = "operations") {
+    const localResolved = MODE_ID_ALIASES[id] || id;
+    return normalizeAiTeamRoleId(localResolved, fallback);
+}
+
+function detectSpecialistFromBridgePrompt(prompt) {
+    const text = asString(prompt).toLowerCase();
+
+    const directMap = [
+            ["video", "video_lead"],
+            ["motion", "video_lead"],
+            ["reel", "video_lead"],
+            ["storyboard", "video_lead"],
+            ["shot list", "video_lead"],
+            ["voiceover", "video_lead"],
+            ["media", "video_lead"],
+            ["campaign", "strategist"],
+            ["strategy", "strategist"],
+            ["content", "copywriter"],
+            ["copy", "copywriter"],
+            ["caption", "copywriter"],
+            ["publish", "publisher"],
+            ["schedule", "publisher"],
+            ["ads", "ads_operator"],
+            ["budget", "ads_operator"],
+            ["customer", "customer_ops"],
+            ["crm", "customer_ops"],
+            ["support", "customer_ops"],
+            ["operations", "admin"],
+            ["blocker", "admin"],
+            ["readiness", "admin"],
+            ["setup", "admin"],
+            ["library", "admin"]
+    ];
+
+    for (const [keyword, specialistId] of directMap) {
+            if (text.includes(keyword)) return normalizeAiCommandSpecialistId(specialistId);
+    }
+
+    const classified = classifyIntent(text, null);
+    return normalizeAiCommandSpecialistId(classified?.modeId, "operations");
+}
+
+function buildAutoPlanFromCommand(commandText, session) {
+	function getSpecialistById(id) {
+		const resolvedId = MODE_ID_ALIASES[id] || id;
+		return SPECIALIST_DEFS.find((s) => s.id === resolvedId) ||
+			SPECIALIST_DEFS.find((s) => s.id === "operations") ||
+			SPECIALIST_DEFS[0];
+	}
+
+AI Command bridge load markers:
+		</section>
+	`;
+}
+
+// ============================================================
+
+export const aiCommandRoute = {
+	id: "ai-command",
+   disableStandardLayout: true,
+	meta: {
+		eyebrow: "AI & Build",
+		title: "AI Workspace",
+		description: "Talk to your AI team, run structured tasks, and turn intelligence into review-ready plans and routed handoffs."
+	},
+	template: `
+		<section class="page is-active" data-page="ai-command">
+			<div id="ctrlRoomRoot"></div>
+		</section>
+	`,
+	render(context) {
+		const {
+			getState,
+			$,
+			escapeHtml,
+			navigateTo,
+			showMessage,
+			consumeProjectHandoff,
+			executeProjectAiCommand,
+			fetchProjectInsights,
+			fetchProjectLearning,
+			reloadProjectData
+		} = context;
+
+		const state = getState();
+		const projectName = asString(selectCurrentProject(state) || "");
+		const sessionKey = projectName || "__default__";
+		const session = ensureSession(sessionKey);
+		hydrateSessionDraft(sessionKey, session);
+		const normalizedSessionModeId = MODE_ID_ALIASES[getAiRoomRoleId(session.modeId)] || getAiRoomRoleId(session.modeId);
+		if (normalizedSessionModeId && normalizedSessionModeId !== session.modeId) session.modeId = normalizedSessionModeId;
+		refreshAiChatSessions(sessionKey, session);
+           const savedOutput = asObject(loadLocalOutput(sessionKey));
+           if (
+                   asArray(savedOutput.messages).length &&
+                   !asArray(session.messages).length &&
+                   !session.isFreshAiChatSession
+           ) {
+                   session.messages = asArray(savedOutput.messages).slice(-40);
+           }
+		if (!session.outputPreview && !session.isFreshAiChatSession) {
+                        const preview = asObject(savedOutput.preview);
+			if (preview.outputType) {
+				session.outputPreview = preview;
+				session.outputWorkspaceTab = outputTabFromPreview(preview);
+			}
+		}
+		if (!session.responseHistoryLoaded && !session.isFreshAiChatSession) {
+                        session.responseHistory = asArray(savedOutput.responses).slice(0, 12);
+                        session.responseHistoryLoaded = true;
+                }
+
+		// ── HOME → AI COMMAND BRIDGE ────────────────────────────────
+		// Consume prompt set by home.js handleAiRoleClick via quickCommandInput.
+		// Once consumed we clear the global input so re-renders are idempotent.
+		const globalInput = $("quickCommandInput");
+		const bridgeValue = asString(globalInput?.value || "").trim();
+		if (bridgeValue) {
+			const detectedSpecialist = detectSpecialistFromBridgePrompt(bridgeValue);
+			if (detectedSpecialist) {
+				session.modeId = detectedSpecialist;
+				const bridgeSpecialist = getPhase1SpecialistById(detectedSpecialist);
+				session.bridgeContext = {
+					source: "Home",
+					specialistId: detectedSpecialist,
+					specialistLabel: bridgeSpecialist?.label || titleCase(detectedSpecialist),
+					loadedAt: nowIso()
+				};
+			} else {
+				session.bridgeContext = null;
+			}
+			StateKernel.write(session, normalizeAiComposerPrompt(bridgeValue), "ai");
+			persistSessionDraft(sessionKey, session, detectedSpecialist ? "Specialist context loaded from Home" : "AI prompt loaded from workspace");
+			if (globalInput) globalInput.value = "";
+		}
+		// ─────────────────────────────────────────────────────────────
+
+		const payload = asObject(selectProjectPayload(state));
+		const overview = asObject(payload.overview?.overview || payload.overview);
+		const readiness = asObject(payload.readiness?.dashboard || payload.readiness);
+		const operations = asObject(selectOperationsSnapshot(state));
+		applyDurableAiHandoff(sessionKey, operations, session, consumeProjectHandoff, showMessage);
+		const readinessScore = readiness.readiness_score ?? overview.readiness_score ?? null;
+
+		const intelligenceStatus = session.intelligence.status || "idle";
+		const aiContext = buildUnifiedAiContext(state, session.intelligence);
+		const bridgeStatus = getAiResponseBridgeStatus(executeProjectAiChat);
+		if (!session.workspaceTabInitialized) {
+			session.workspaceTab = bridgeStatus.available ? "chat" : "preview";
+			session.workspaceTabInitialized = true;
+		}
+		if (!PHASE35_WORKSPACE_TABS.includes(session.workspaceTab)) {
+			session.workspaceTab = bridgeStatus.available ? "chat" : "preview";
+		}
+		if (!["tools", "output", "flow"].includes(session.chatFirstTab)) {
+			session.chatFirstTab = asObject(session.outputPreview).outputType ? "output" : "tools";
+		}
+
+		const root = $("ctrlRoomRoot");
+		if (!root) return;
+
+		root.innerHTML = renderAiCommandChatFirstShell({
+			session,
+			projectName,
+			aiContext,
+			bridgeStatus,
+			escapeHtml
+		});
+
+		const input = $("aicmdV2Input");
+		const statusEl = $("aicmdV2Status");
+
+		const updateStatus = (msg) => {
+			if (statusEl) statusEl.textContent = msg;
+		};
+
+		const setPreviewFromIntent = (intent, fallbackPrompt = "", options = {}) => {
+			const value = asString(input?.value || session.draftMessage || fallbackPrompt || "").trim();
+			if (!value) {
+				updateStatus("Please write your request in the composer first.");
+				input?.focus?.();
+				return null;
+			}
+
+			StateKernel.write(session, value, "input");
+			/* composerText_FROZEN */ session.draftMessage;
+			session.modeId = normalizedSessionModeId;
+			session.teamMode = "solo";
+			session.routeSuggestions = [];
+			session.inboundHandoff = null;
+			session.draftStatus = "New session started";
+			session.outputPreview = buildPhase2OutputPreview({
+				intent,
+				session,
+				prompt: value,
+				projectName
+			});

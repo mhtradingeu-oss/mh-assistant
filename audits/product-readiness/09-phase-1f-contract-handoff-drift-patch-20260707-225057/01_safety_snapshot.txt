@@ -1,0 +1,136 @@
+Branch:
+main
+
+Status:
+ M data/projects/hairoticmen/ops/approvals.json
+ M data/projects/hairoticmen/ops/events.json
+ M data/projects/hairoticmen/ops/notifications.json
+ M data/projects/hairoticmen/ops/system.json
+ M public/control-center/pages/ai-command.js
+ M public/control-center/pages/home.js
+ M public/control-center/pages/home/render-sections.js
+ M public/control-center/styles/13-home-executive.css
+ M runtime/orchestrator-service/server.js
+?? audits/product-readiness/
+?? audits/system-truth/cloud-grade-readiness-20260706-171752/
+?? audits/system-truth/content-to-media-studio-truth-20260706-161134/
+?? audits/system-truth/media-engine-upgrade-phase-2a-truth-scan-20260706-122813/
+?? audits/system-truth/media-engine-upgrade-phase-2b-contract-20260706-123139/
+?? audits/system-truth/media-execution-activation-a0-deep-truth-scan-20260706-114055/
+?? audits/system-truth/media-execution-activation-a1-exact-execution-contract-20260706-114301/
+?? audits/system-truth/media-execution-activation-a2-api-media-route-truth-20260706-115001/
+?? audits/system-truth/media-execution-activation-a3-live-image-proof-20260706-115143/
+?? audits/system-truth/media-execution-activation-a3b-live-image-proof-with-control-key-20260706-115319/
+?? audits/system-truth/media-execution-activation-a3d-live-image-proof-correct-write-key-20260706-115622/
+?? audits/system-truth/media-studio-rebase-20260706-165209/
+?? infra/
+?? public/control-center/pages/media-studio.BACKUP.js
+?? public/control-center/pages/media-studio.BACKUP_FINAL_FLOW_LOCK.js
+?? public/control-center/pages/media-studio.BACKUP_FLOW_LOCK.js
+?? public/control-center/pages/media-studio.js
+?? public/control-center/runtime/ai-team/
+?? public/control-center/state/
+?? runtime/orchestrator-service/lib/media/cluster/
+?? runtime/orchestrator-service/lib/media/contracts/
+?? runtime/orchestrator-service/lib/media/events/
+?? runtime/orchestrator-service/lib/media/governance/
+?? runtime/orchestrator-service/lib/media/library-engine.js
+?? runtime/orchestrator-service/lib/media/orchestrator/
+?? runtime/orchestrator-service/lib/media/publishing/
+?? runtime/orchestrator-service/lib/media/queue/
+?? runtime/orchestrator-service/lib/media/realtime/
+?? scripts/audit/ai-team-contract-conformance-check.mjs
+?? scripts/audit/validate-ai-team-operating-contract.mjs
+
+Diff stat:
+ data/projects/hairoticmen/ops/approvals.json       | 127 ++++++++++
+ data/projects/hairoticmen/ops/events.json          |  18 ++
+ data/projects/hairoticmen/ops/notifications.json   |  22 ++
+ data/projects/hairoticmen/ops/system.json          |   2 +-
+ public/control-center/pages/ai-command.js          |  59 +++--
+ public/control-center/pages/home.js                | 120 ++++-----
+ .../control-center/pages/home/render-sections.js   |  71 +++++-
+ public/control-center/styles/13-home-executive.css |  62 +++++
+ runtime/orchestrator-service/server.js             | 281 +++++++++++++++++++++
+ 9 files changed, 678 insertions(+), 84 deletions(-)
+
+Contract handoff rules window:
+469:export const AI_TEAM_HANDOFF_RULES = Object.freeze({
+532:  return Array.isArray(AI_TEAM_HANDOFF_RULES[source]) && AI_TEAM_HANDOFF_RULES[source].includes(destination);
+    defaultAuthority: "review_only"
+  },
+  "notification-center": {
+    ownerRole: "operations",
+    supportRoles: ["compliance_reviewer", "analyst"],
+    allowedOutputs: ["guidance", "execution_review"],
+    forbiddenActions: ["approve", "publish", "send_customer_reply"],
+    defaultAuthority: "review_only"
+  },
+  "operations-centers": {
+    ownerRole: "operations",
+    supportRoles: ["customer_ops", "sales_crm", "publisher", "compliance_reviewer", "analyst"],
+    allowedOutputs: ["guidance", "task_preview", "workflow_preview", "handoff", "execution_review"],
+    forbiddenActions: ["publish", "send_customer_reply", "approve", "launch_ads", "mutate_crm", "run_provider_execution"],
+    defaultAuthority: "handoff_only"
+  },
+  "customer-center": {
+    ownerRole: "customer_ops",
+    supportRoles: ["sales_crm", "operations", "compliance_reviewer"],
+    allowedOutputs: ["guidance", "draft", "task_preview", "handoff", "approval_request"],
+    forbiddenActions: ["send_customer_reply", "mutate_crm", "change_ticket_status", "assign_conversation", "sync_provider"],
+    defaultAuthority: "draft_only"
+  },
+  governance: {
+    ownerRole: "compliance_reviewer",
+    supportRoles: ["operations", "publisher", "analyst"],
+    allowedOutputs: ["guidance", "approval_request", "handoff", "execution_review"],
+    forbiddenActions: ["approve", "reject_approval", "publish", "override_governance"],
+    defaultAuthority: "approval_required"
+  },
+  settings: {
+    ownerRole: "operations",
+    supportRoles: ["compliance_reviewer"],
+    allowedOutputs: ["guidance", "approval_request", "handoff"],
+    forbiddenActions: ["approve", "publish", "send_customer_reply"],
+    defaultAuthority: "approval_required"
+  }
+});
+
+export const AI_TEAM_HANDOFF_RULES = Object.freeze({
+  "ai-command": ["campaign-studio", "content-studio", "media-studio", "publishing", "ads-manager", "workflows", "task-center", "governance", "insights", "research", "customer-center", "operations-centers"],
+  "campaign-studio": ["ai-command", "content-studio", "media-studio", "publishing", "ads-manager", "workflows"],
+  "content-studio": ["ai-command", "media-studio", "publishing", "library", "governance"],
+  "media-studio": ["ai-command", "library", "publishing", "governance", "content-studio"],
+  publishing: ["ai-command", "governance", "content-studio", "media-studio"],
+  "ads-manager": ["ai-command", "campaign-studio", "insights", "governance"],
+  workflows: ["ai-command", "task-center", "campaign-studio", "content-studio", "media-studio", "publishing", "governance"],
+  "task-center": ["ai-command", "workflows", "operations-centers", "governance"],
+  "customer-center": ["ai-command", "task-center", "governance", "operations-centers"],
+  insights: ["ai-command", "campaign-studio", "content-studio", "ads-manager", "research"],
+  research: ["ai-command", "campaign-studio", "insights", "content-studio"],
+  library: ["ai-command", "media-studio", "publishing", "governance"],
+  governance: ["ai-command", "publishing", "content-studio", "media-studio", "operations-centers"]
+});
+
+export const AI_TEAM_FULL_TEAM_TRIGGERS = Object.freeze([
+  "campaign_project",
+  "project_setup",
+  "workflow_request",
+  "execution_request"
+]);
+
+export const AI_TEAM_SPECIALIST_REQUEST_MAP = Object.freeze({
+  general_question: "operations",
+  guidance_request: "operations",
+  single_task: "operations",
+  project_setup: "strategist",
+  campaign_project: "strategist",
+  content_request: "writer",
+  media_request: "media_director",
+  publishing_request: "publisher",
+
+Current refined conformance script:
+-rw-r--r--@ 1 nadeemnour  staff  16669 Jul  7 22:44 scripts/audit/ai-team-contract-conformance-check.mjs
+
+AI Command detector count:
+623:function detectSpecialistFromBridgePrompt(prompt) {

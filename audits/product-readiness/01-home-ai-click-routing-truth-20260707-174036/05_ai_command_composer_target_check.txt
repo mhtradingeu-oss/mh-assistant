@@ -1,0 +1,145 @@
+Composer ids and input render:
+513:// 4 quick-action prompts shown in the composer
+690:	const command = humanizeValue(commandText || session?.draftMessage, "Prepare workflow action from AI command.");
+795:function normalizeAiComposerPrompt(value) {
+817:  // If the composer contains a chain of quick actions, keep only the latest action.
+838:function setAiComposerValue(session, input, value) {
+839:  const cleanValue = normalizeAiComposerPrompt(value);
+840:  /* INPUT_WRITE */ StateKernel.write(session, cleanValue, "input");
+841:  /* composerText_FROZEN */ cleanValue;
+842:  if (input) {
+843:    input.value = cleanValue;
+844:    input.focus?.();
+893:		overview.input_language ||
+956:			draftMessage: "",
+980:			composerText: "",
+1037:		StateKernel.write(session, asString(localDraft.prompt), "input");
+1038:		/* composerText_FROZEN */ session.draftMessage;
+1052:		prompt: session.draftMessage,
+1189:                session.draftMessage ||
+1244:        /* SYSTEM_RESET */ StateKernel.write(session, "", "system");
+1245:        /* composerText_FROZEN */ '';
+2122:			routeSuggestion("Setup", "setup", "Close missing project basics, goals, and audience inputs."),
+2656:	const prompt = normalizeAiComposerPrompt(firstAiInboundText(
+2716:	/* AI_WRITE */ StateKernel.write(session, normalized.prompt, "ai");
+2717:	/* composerText_FROZEN */ normalized.prompt;
+2851:	/* SYSTEM_RESET */ StateKernel.write(session, "", "system");
+2989:		<div class="ctrl-composer-card">
+2990:			<div class="ctrl-composer-head">
+2994:			<div class="ctrl-composer-body">
+3170:		<div class="ctrl-composer-card">
+3171:			<div class="ctrl-composer-head">
+3175:			<div class="ctrl-composer-body">
+3227:		<div class="ctrl-composer-card">
+3228:			<div class="ctrl-composer-head">
+3232:			<div class="ctrl-composer-body">
+3309:                session.draftMessage ||
+3351:                "Use the conversation context, not only the composer text.",
+3457:  const normalize = (input) =>
+3458:    String(input || "")
+3510:	if (asString(session.draftMessage).trim()) return 0;
+3846:	const preferred = destinations.find((item) => !["chat-preview", "composer", "preview", "ai-command"].includes(asString(item)));
+3913:					<span class="aicmd-v2-tools-subtitle">Prompt tools for structured drafts, source-aware reviews, and destination handoffs. They prepare composer instructions only.</span>
+4109:                : asString(session.draftMessage).trim()
+4749:                : asString(session.draftMessage).trim()
+4763:                <div class="aicmd-chatfirst-composer aicmd-final-composer" data-role="${escapeHtml(roleId)}">
+4766:                        <div class="aicmd-chatfirst-input-shell aicmd-final-input-shell">
+4768:                                <div class="aicmd-final-input-row">
+4770:                                        <textarea
+4771:                                                id="aicmdV2Input"
+4772:                                                class="aicmd-chatfirst-textarea aicmd-final-textarea"
+4776:                                        >${escapeHtml(session.draftMessage)}</textarea>
+4794:                                <input id="aicmdFinalUploadInput" type="file" multiple hidden aria-hidden="true" />
+4828:                        <div class="aicmd-chatfirst-composer-context aicmd-final-context-row">
+4942:					<p>Prompt setup only. Tools prepare composer instructions, source-aware reviews, previews, and handoff context without executing actions.</p>
+5048:					<span>Start in the chat composer or open a Tool Drawer prompt to prepare a preview.</span>
+5092:		{ label: "Voice input", value: "Coming", className: "is-planned" },
+5374:	const sessionState = session.responseLoading ? "Generating" : (session.outputPreview ? "AI Team preview ready" : (asString(session.draftMessage).trim() ? "Drafting" : "AI ready"));
+5554:		// Consume prompt set by home.js handleAiRoleClick via quickCommandInput.
+5555:		// Once consumed we clear the global input so re-renders are idempotent.
+5556:		const globalInput = $("quickCommandInput");
+5572:			StateKernel.write(session, normalizeAiComposerPrompt(bridgeValue), "ai");
+5610:		const input = $("aicmdV2Input");
+5618:			const value = asString(input?.value || session.draftMessage || fallbackPrompt || "").trim();
+5620:				updateStatus("Please write your request in the composer first.");
+5621:				input?.focus?.();
+5625:			StateKernel.write(session, value, "input");
+5626:			/* composerText_FROZEN */ session.draftMessage;
+5684:                        /* SYSTEM_RESET */ StateKernel.write(session, "", "system");
+5685:                        /* composerText_FROZEN */ "";
+5760:                                const existingDraft = asString(session.draftMessage).trim();
+5770:                                        StateKernel.write(session, `Act as the ${spec?.label || titleCase(specId)} for ${projectName}. Review the project context and suggest the next best actions. Do not execute anything; prepare guidance only.`, "ai");
+5771:                                } else if (!session.draftMessage) {
+5772:                                        /* SYSTEM_RESET */ StateKernel.write(session, "", "system");
+5796:				/* AI_TEXT_WRITE */ StateKernel.write(session, text, "ai");
+5797:				if (input) input.value = text;
+5799:				updateStatus("Suggested prompt loaded into composer. Review it, then Ask AI Team or Draft.");
+5800:				input?.focus?.();
+5808:				/* AI_TEXT_WRITE */ StateKernel.write(session, text, "ai");
+5809:				if (input) input.value = text;
+5811:				updateStatus("Quick action loaded into composer. Review it, then ask or preview.");
+5812:				input?.focus?.();
+5887:                                        showMessage?.("AI Command will use current workspace context as planning input only.");
+5994:                        input,
+6421:if (input) {
+6422:			input.oninput = () => {
+6423:				InputController.write(session, input.value, "textarea") || "";
+6424:				/* composerText_FROZEN */ session.draftMessage;
+6428:			input.onkeydown = (event) => {
+6505:						updateStatus("Speech ended. Processing voice input...");
+6513:							updateStatus("Voice input returned no transcript. Try again and speak clearly after pressing the microphone.");
+6517:						setAiComposerValue(session, input, transcript);
+6518:						if (input) {
+6519:							input.value = transcript;
+6520:							input.focus();
+6522:						persistSessionDraft(sessionKey, session, "Voice input captured");
+6523:						updateStatus("Voice dictation captured in composer.");
+6528:                                                updateStatus(`Voice dictation stopped: ${errorName}. Try again or check microphone input.`.trim());
+6547:		                const value = asString(input?.value || session.draftMessage || "").trim();
+6549:		                        updateStatus("Please write your message in the composer first.");
+6550:		                        input?.focus?.();
+6587:		                /* SYSTEM_RESET */ StateKernel.write(session, "", "system");
+6588:		                /* composerText_FROZEN */ '';
+6731:                                const fallback = asString(input?.value || session.draftMessage || "").trim();
+6752:                                const value = asString(input?.value || session.draftMessage || "").trim();
+6775:                                const value = asString(input?.value || session.draftMessage || "").trim();
+6799:                                const value = asString(input?.value || session.draftMessage || "").trim();
+6844:					input,
+6862:				/* INPUT_FALLBACK */ StateKernel.write(session, input?.value, "input");
+6873:				/* SYSTEM_RESET */ StateKernel.write(session, "", "system");
+6874:				/* composerText_FROZEN */ '';
+6878:				if (input) input.value = "";
+6891:		                input?.focus?.();
+6918:				setAiComposerValue(session, input, latestResponse.responseText);
+6919:				if (input) {
+6920:					input.focus();
+6922:				persistSessionDraft(sessionKey, session, "Generated response inserted into composer");
+6923:				updateStatus("Response inserted into composer.");
+6945:		                const fallback = latestResponse?.prompt || asString(input?.value || session.draftMessage || "");
+7057:				/* AI_TEXT_WRITE */ StateKernel.write(session, text, "ai");
+7058:				if (input) {
+7059:					input.value = text;
+7060:					input.focus();
+7062:				persistSessionDraft(sessionKey, session, "Preview inserted into composer");
+7063:				updateStatus("Preview inserted into composer for refinement.");
+7634:        idle: "await_input",
+7689:    StateKernel.write(session, clean, "input");
+7699:    /* SYSTEM_RESET */ StateKernel.write(session, "", "system");
+7704:    return StateKernel.read(session);
+7714:const StateKernel = {
+7720:    // StateKernel is the ONLY direct writer to draftMessage.
+7721:    session.draftMessage = source === "system" ? "" : clean;
+7725:    return session.draftMessage;
+7729:    return session?.draftMessage || "";
+7744:    return StateKernel.read(session);
+7748:    return StateKernel.read(session);
+
+AI Command render shell references:
+4073:function renderAiCommandChatFirstShell({ session, projectName, aiContext, bridgeStatus, escapeHtml }) {
+4771:                                                id="aicmdV2Input"
+5508:			<div id="ctrlRoomRoot"></div>
+5554:		// Consume prompt set by home.js handleAiRoleClick via quickCommandInput.
+5556:		const globalInput = $("quickCommandInput");
+5599:		const root = $("ctrlRoomRoot");
+5602:		root.innerHTML = renderAiCommandChatFirstShell({
+5610:		const input = $("aicmdV2Input");

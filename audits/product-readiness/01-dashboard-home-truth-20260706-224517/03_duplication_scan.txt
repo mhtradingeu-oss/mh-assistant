@@ -1,0 +1,656 @@
+Potential duplicate dashboard/home files:
+public/control-center/index.html
+public/control-center/legacy/09-command-legacy-isolation.legacy.css
+public/control-center/pages/ai-command.js
+public/control-center/pages/ai-command/tool-dock.js
+public/control-center/pages/business/dashboard.js
+public/control-center/pages/governance/dashboard.js
+public/control-center/pages/home.js
+public/control-center/pages/home/render-sections.js
+public/control-center/pages/library/command-router.js
+public/control-center/runtime/command-runtime.js
+public/control-center/styles/04-command-layer.css
+public/control-center/styles/13-home-executive.css
+
+Duplicate function names in likely page files:
+
+----- public/control-center/index.html -----
+278:    (function bootstrapControlCenterFallback() {
+279:      function hideLoadingOverlay() {
+280:        var overlay = document.getElementById("loadingOverlay");
+289:      function showFatalStartupError(message, details) {
+292:        var panel = document.getElementById("fatalErrorPanel");
+293:        var text = document.getElementById("fatalErrorText");
+294:        var diagnostics = document.getElementById("fatalErrorDetails");
+295:        var globalError = document.getElementById("globalError");
+317:      var retryBtn = document.getElementById("fatalRetryBtn");
+319:        retryBtn.addEventListener("click", function () {
+320:          window.location.reload();
+324:      var accessKeyBtn = document.getElementById("fatalAccessKeyBtn");
+326:        accessKeyBtn.addEventListener("click", function () {
+328:            var entered = window.prompt("Paste Control Center access key:", "");
+330:              window.localStorage.setItem("mh-control-write-key", entered.trim());
+331:              window.location.reload();
+339:      window.addEventListener("error", function (event) {
+340:        if (window.__mhControlCenterStarted) return;
+342:        var target = event && event.target;
+343:        var src = target && target.src ? String(target.src) : "";
+344:        var tagName = target && target.tagName ? String(target.tagName).toUpperCase() : "";
+357:      window.addEventListener("unhandledrejection", function (event) {
+358:        if (window.__mhControlCenterStarted) return;
+360:        var reason = event && event.reason;
+361:        var message = reason && reason.message
+
+----- public/control-center/runtime/command-runtime.js -----
+23:const COMMAND_RUNTIME_VERSION = "phase-1-diagnostics";
+48:function getCommandRuntimeSnapshot({
+123:window.__MH_COMMAND_RUNTIME__ = {
+
+----- public/control-center/legacy/09-command-legacy-isolation.legacy.css -----
+
+----- public/control-center/styles/04-command-layer.css -----
+
+----- public/control-center/styles/13-home-executive.css -----
+
+----- public/control-center/pages/ai-command/tool-dock.js -----
+14:function moveFocusOutOfDrawer(drawer, fallbackTarget = null) {
+17:  const active = document.activeElement;
+24:    const composer = document.querySelector("[data-aicmd-composer-input], textarea, input");
+36:function escapeHtml(value = "") {
+46:function tryAutoOpenDrawerAfterLibrary(projectName) {
+47:  const returnContext = getSharedAiDrawerReturn(projectName) || getSharedAiDrawerReturn("__default__");
+50:  const drawer = document.querySelector("[data-aicmd-tool-drawer]");
+51:  const root = drawer?.closest?.("[data-page='ai-command'], .ai-command-page, body") || document;
+53:  let targetButton = null;
+69:  const activeDrawer = document.querySelector("[data-aicmd-tool-drawer]");
+70:  let drawerIsOpen = Boolean(
+78:    const fallbackTool = findToolMetadataById(returnContext.toolId);
+110:    const selectedSource = getSharedAiSource(projectName) || getSharedAiSource("__default__");
+111:    const msg = activeDrawer.querySelector("[data-aicmd-tool-drawer-status]") || document.querySelector("[data-aicmd-tool-drawer-status]");
+123:function findToolButton(root, attrName = "", attrValue = "") {
+131:function buildAiDrawerReturnContext({
+160:function handleOpenLibraryFromDrawer({
+170:  const payload = buildAiDrawerReturnContext({
+186:export function openLibrarySourcePickerFromAiCommand({
+195:  const project = projectName || "__default__";
+196:  const mapping = getSourceTypeMapping(sourceType || "auto");
+197:  const drawerReturnContext = buildAiDrawerReturnContext({
+209:  const payload = {
+229:    window.location.hash = "#library";
+235:function formatSharedAiSource(source = {}) {
+237:  const name = source.name || "(no name)";
+238:  const type = source.asset_type || source.type || "asset";
+239:  const path = source.file_path || source.filename || source.fileName || "";
+243:export function getSelectedLibrarySource(projectName = "") {
+247:function truncatePromptText(value = "", maxLength = 900) {
+248:  const text = String(value || "").replace(/\s+/g, " ").trim();
+253:function compactSourceReference(value = "", maxLength = 120) {
+254:  const text = String(value || "").trim();
+256:  const parts = text.split(/[\/]/).filter(Boolean);
+257:  const tail = parts.slice(-2).join("/");
+262:function buildSelectedSourceContextBlock(projectName = "") {
+263:  const source = getSelectedLibrarySource(projectName);
+266:  const name = source.name || source.filename || source.fileName || "Selected Library source";
+267:  const type = source.asset_type || source.type || source.source_type || "Library asset";
+268:  const sourceId = source.asset_id || source.id || source.mutation_id || "";
+269:  const path = source.file_path || source.path || source.filename || source.fileName || "";
+270:  const preview = truncatePromptText(source.text_preview || source.preview || source.notes || "");
+271:  const sourceOfTruth = typeof source.source_of_truth === "boolean"
+275:  const lines = [
+290:function setDrawerSourceWarning(drawer, message = "") {
+291:  const warning = drawer?.querySelector?.("[data-aicmd-tool-drawer-source-warning]");
+293:  const hasMessage = Boolean(message);
+298:function sourceMetadataNeedsLibrarySource(rawValue = "") {
+302:function isDrawerSourceRequired(drawer) {
+306:function validateDrawerSourceRequirement(drawer, projectName = "") {
+312:  const source = getSelectedLibrarySource(projectName);
+325:export function applySharedAiSourceToDrawer(drawer, projectName = "") {
+327:  const source = getSelectedLibrarySource(projectName);
+328:  const selectedNode = drawer.querySelector("[data-aicmd-tool-drawer-selected-source]");
+329:  const sourceInput = drawer.querySelector("[data-aicmd-tool-drawer-source-details]");
+330:  const sourceSelect = drawer.querySelector("[data-aicmd-tool-drawer-source-select]");
+344:  const { name, type, path } = formatSharedAiSource(source);
+367:    const libraryOption = Array.from(sourceSelect.options || []).find((option) => {
+368:      const value = `${option.value || ""} ${option.textContent || ""}`;
+376:    const changeBtn = selectedNode.querySelector('[data-aicmd-tool-drawer-change-source]');
+382:    const removeBtn = selectedNode.querySelector('[data-aicmd-tool-drawer-remove-source]');
+397:const BASE_TOOL_DOCK_TOOLS = [
+421:export const TOOL_DOCK_BY_SPECIALIST = {
+1222:function getSpecialistTools(specialistId = "") {
+1226:export function getAiToolDockTools({ specialistId = "", teamMode = "solo", limit = 9 } = {}) {
+1227:  const tools = teamMode === "team"
+1238:function getDockTools({ specialistId = "", teamMode = "solo" } = {}) {
+1250:function tokenReplace(template = "", values = {}) {
+1257:function joinMetaList(value = []) {
+1262:function getToolMetaList(tool = {}, key = "", fallback = []) {
+1263:  const value = tool?.[key];
+1269:function getAllToolDockTools() {
+1275:function findToolMetadataById(toolId = "") {
+1276:  const id = String(toolId || "").trim();
+1281:function createToolButtonAdapter(tool = {}) {
+1282:  const actionType = tool.requiresSelectedSource && !tool.actionType ? "source_required" : (tool.actionType || tool.action || "guided");
+1283:  const meta = {
+1304:function renderSmartToolDrawerShell(safe) {
+1413:export function renderAiToolDrawerShell({ escapeHtml } = {}) {
+1414:  const safe = typeof escapeHtml === "function"
+1420:export function renderAiToolDock({ projectName = "", specialistId = "", teamMode = "solo", escapeHtml }) {
+1421:  const safe = typeof escapeHtml === "function"
+1424:  const tools = getDockTools({ specialistId, teamMode });
+1425:  const label = teamMode === "team" ? "Team guided tools" : "Specialist guided tools";
+1462:function humanizeMeta(value = "") {
+1463:  const raw = String(value || "").trim();
+1464:  const normalized = raw.toLowerCase();
+1466:  const exactLabels = {
+1493:function getMetaValues(rawValue = "") {
+1500:function populateDrawerSelect(select, rawValue = "", fallbackLabel = "Auto") {
+1503:  const values = Array.isArray(rawValue)
+1510:  const options = values.length ? values : [String(fallbackLabel || "Auto").trim() || "Auto"];
+1513:    const safeValue = escapeHtml(value);
+1514:    const label = humanizeMeta(value || fallbackLabel || "Auto");
+1519:function getSelectedLabel(drawer, selector, fallback = "Auto") {
+1520:  const select = drawer?.querySelector?.(selector);
+1525:function getDrawerFieldValue(drawer, selector) {
+1526:  const node = drawer?.querySelector?.(selector);
+1530:function isSeoRelevantOutput(output = "") {
+1531:  const value = String(output || "").toLowerCase();
+1539:function buildOutputSpecificRules(output = "") {
+1555:function buildSmartToolComposerPrompt({ drawer, baseTemplate, projectName }) {
+1556:  const title = drawer?.querySelector?.("[data-aicmd-tool-drawer-title]")?.textContent || "Smart tool";
+1557:  const action = drawer?.querySelector?.("[data-aicmd-tool-drawer-action]")?.textContent || "Guided";
+1558:  const output = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-output-select]", "Auto / infer from request");
+1559:  const source = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-source-select]", "Current chat or ask if source is needed");
+1560:  const destination = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-destination-select]", "Chat preview");
+1561:  const language = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-language]", "Auto / project language");
+1562:  const tone = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-tone]", "Auto / brand tone");
+1563:  const sourceDetails = getDrawerFieldValue(drawer, "[data-aicmd-tool-drawer-source-details]");
+1564:  const extraBrief = getDrawerFieldValue(drawer, "[data-aicmd-tool-drawer-extra-brief]");
+1566:  const sourceInstruction = sourceDetails
+1569:  const selectedSourceContext = buildSelectedSourceContextBlock(projectName);
+1571:  const lines = [
+1609:  const outputRules = buildOutputSpecificRules(output);
+1628:function updateDrawerPromptSummary(drawer) {
+1630:  const summary = drawer.querySelector("[data-aicmd-tool-drawer-summary]");
+1633:  const output = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-output-select]", "Auto");
+1634:  const source = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-source-select]", "Auto");
+1635:  const destination = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-destination-select]", "Chat preview");
+1636:  const language = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-language]", "Auto language");
+1637:  const tone = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-tone]", "Auto tone");
+1638:  const sourceDetails = getDrawerFieldValue(drawer, "[data-aicmd-tool-drawer-source-details]");
+1639:  const extraBrief = getDrawerFieldValue(drawer, "[data-aicmd-tool-drawer-extra-brief]");
+1641:  let summaryParts = [];
+1653:function setDrawerText(root, selector, value) {
+1654:  const node = root.querySelector(selector);
+1658:function closeToolDrawer(drawer, fallbackTarget = null) {
+1666:function openToolDrawer({ drawer, btn, tool: explicitTool = null, text, input, session, projectName, persistSessionDraft, sessionKey, updateStatus }) {
+1671:  const actionType = btn.getAttribute("data-aicmd-tool-dock-action") || "guided";
+1686:  const toolId = btn.getAttribute("data-aicmd-tool-dock")
+1690:  const tool = explicitTool || findToolMetadataById(toolId) || {};
+1691:  const hardOutputDefaults = [toolId || "tool_output", "draft", "review_notes"];
+1692:  const hardSourceDefaults = ["current_chat", "market_notes", "customer_notes", "library_source", "manual_input"];
+1693:  const hardDestinationDefaults = ["chat-preview", "campaign-studio", "content-studio", "composer"];
+1694:  const rawOutputs = joinMetaList(getToolMetaList(tool, "outputTypes", []))
+1697:  const rawSources = joinMetaList(getToolMetaList(tool, "sourceTypes", []))
+1700:  const rawDestinations = joinMetaList(getToolMetaList(tool, "destinations", []))
+1731:export function openAiToolDrawerFromMetadata({
+1742:  const drawer = root?.querySelector?.("[data-aicmd-tool-drawer]");
+1743:  const btn = createToolButtonAdapter(tool);
+1759:export function bindAiToolDock({
+1772:  const drawer = root.querySelector("[data-aicmd-tool-drawer]");
+1778:  const openLibraryBtn = root.querySelector("[data-aicmd-tool-drawer-open-library]");
+1782:      const project = projectName || "__default__";
+1783:      const drawerSourceSelect = root.querySelector("[data-aicmd-tool-drawer-source-select]");
+1784:      const selectedSourceType = drawerSourceSelect?.value || "auto";
+1785:      const mapping = getSourceTypeMapping(selectedSourceType);
+1786:      const drawerReturnContext = buildAiDrawerReturnContext({
+1798:      const payload = {
+1815:        window.location.hash = "#library";
+1825:  const useBtn = root.querySelector("[data-aicmd-tool-drawer-use]");
+1828:      const template = drawer?.dataset?.pendingTemplate || "";
+1829:      const label = drawer?.dataset?.pendingTool || "tool";
+1836:      const text = tokenReplace(
+1865:      const template = btn.getAttribute("data-aicmd-tool-dock-template") || "";
+1866:      const label = btn.getAttribute("data-aicmd-tool-dock") || "tool";
+1867:      const actionType = btn.getAttribute("data-aicmd-tool-dock-action") || "prefill";
+1871:        const tool = findToolMetadataById(label);
+1872:        const opened = openToolDrawer({
+1887:      const text = tokenReplace(template, {
+1910:  const restoreProjectName = projectName || "__default__";
+
+----- public/control-center/pages/home/render-sections.js -----
+10:function asArray(value) {
+14:function asString(value) {
+19:function formatCount(value) {
+20:  const parsed = Number(value);
+24:export function renderBadge(tone, label, escapeHtml) {
+28:export function renderCompactList(items, escapeHtml, emptyText = "No active blocker detected.") {
+29:  const safeItems = asArray(items).slice(0, 5);
+44:export function renderBlockerColumn(title, items, tone, escapeHtml) {
+45:  const safeItems = asArray(items).slice(0, 5);
+58:export function renderActivityItems(items, escapeHtml) {
+59:  const safeItems = asArray(items).slice(0, 6);
+83:export function renderAiTeamCards(cards, escapeHtml) {
+84:  const safeCards = asArray(cards).slice(0, 7);
+105:export function renderHomeExecutiveIntro({
+
+----- public/control-center/pages/business/dashboard.js -----
+12:const legacyBusinessDashboardState = {
+25:function renderLegacyBusinessDashboardNotice() {
+42:  window.__LEGACY_BUSINESS_DASHBOARD__ = {
+
+----- public/control-center/pages/library/command-router.js -----
+1:const LIBRARY_COMMANDS = Object.freeze({
+18:export function getLibraryCommands() {
+22:export function createLibraryCommand(command, payload = {}) {
+30:export function isLibraryMutationCommand(command) {
+41:export function isLibraryAiCommand(command) {
+45:export function routeLibraryCommand(commandEnvelope, handlers = {}) {
+46:  const envelope = commandEnvelope || {};
+47:  const command = envelope.command;
+48:  const handler = handlers[command];
+
+----- public/control-center/pages/ai-command.js -----
+36:const MODE_DEFS = [
+117:const MODE_ID_ALIASES = {
+142:const SPECIALIST_DEFS = [
+289:const SPECIALIST_SUGGESTED_PROMPTS = {
+359:const TEAM_SUGGESTED_PROMPTS = [
+366:const PHASE35_WORKSPACE_TABS = ["chat", "preview", "tools", "context", "history"];
+368:const AI_ROOM_FLOW_STEPS = [
+377:const AI_ROOM_OUTPUT_TABS = [
+385:const AI_ROOM_TEAM_CHAIN = ["Strategist", "Writer", "Media / Video", "Compliance", "Publisher", "Operations"];
+386:const AI_ROOM_BUSINESS_BRANCH = ["Customer Ops", "Sales / CRM", "Operations"];
+388:const AI_ROOM_ROLE_INITIALS = {
+402:const AI_ROOM_BACKEND_ROLE_ALIASES = {
+408:const AI_ROOM_PLANNED_SPECIALISTS = [
+429:const PHASE35_SPECIALIST_TOOLS = {
+514:const QUICK_ACTIONS = [
+521:const AI_COMMAND_LOCAL_DRAFTS_KEY = "mh-ai-command-local-drafts-v1";
+522:const AI_COMMAND_LOCAL_OUTPUTS_KEY = "mh-ai-command-local-outputs-v1";
+524:const COMMAND_TYPES = [
+535:const TARGET_TYPES = [
+542:const IMPACT_CHIP_LABELS = [
+551:const AGENT_CARDS = [
+610:const aiSessions = new Map();
+611:const AI_COMMAND_CHAT_SESSIONS_KEY = "mh_ai_command_chat_sessions_v1";
+612:const aiInboundHandoffObjectIds = typeof WeakMap !== "undefined" ? new WeakMap() : null;
+613:let aiInboundHandoffCounter = 0;
+614:let lastRenderContext = null;
+615:let aiCommandBridgeRegistered = false;
+616:let aiAutoModeUnsubscribe = null;
+617:const aiAutomationState = {
+622:function buildAutoPlanFromCommand(commandText, session) {
+623:	function getSpecialistById(id) {
+624:		const resolvedId = MODE_ID_ALIASES[id] || id;
+630:	function detectSpecialistFromBridgePrompt(prompt) {
+631:		const text = asString(prompt);
+644:		const classified = classifyIntent(text, null);
+651:	const command = humanizeValue(commandText || session?.draftMessage, "Prepare workflow action from AI command.");
+652:	const plan = [
+694:function asArray(value) {
+698:function asObject(value) {
+702:function asString(value) {
+707:function humanizeValue(value, fallback = "") {
+710:		const clean = value.trim();
+720:		const title = humanizeValue(value.title || value.label || value.name || value.headline || value.hook);
+721:		const detail = humanizeValue(
+744:function applyTokenTemplate(template, context = {}) {
+745:	const tokenMap = {
+756:function normalizeAiComposerPrompt(value) {
+757:  let text = asString(value).trim();
+761:  const commandPrefixes = [
+773:    const escaped = prefix.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+774:    const repeatedPattern = new RegExp(`^(?:${escaped}\\s*){2,}`, "i");
+779:  const latestMarker = commandPrefixes
+790:    const duplicate = `${prefix} ${prefix}`;
+799:function setAiComposerValue(session, input, value) {
+800:  const cleanValue = normalizeAiComposerPrompt(value);
+810:function normalizeDisplayList(value, limit = 8) {
+817:function toNumber(value, fallback = null) {
+819:	const parsed = Number(value);
+823:function nowIso() {
+827:function isMissingIntelligenceError(error) {
+828:	const status = Number(error?.status);
+830:	const message = asString(error?.message).toLowerCase();
+834:function formatTime(value) {
+835:	const date = value ? new Date(value) : new Date();
+840:function getWorkspaceLanguagePlan(aiContext = {}) {
+841:	const overview = asObject(aiContext.overview);
+842:	const rawMarket = asString(aiContext.market || overview.market || "").trim();
+843:	const market = rawMarket || "Germany";
+844:	const configuredPublishLanguage = asString(
+851:	const publishLanguage = configuredPublishLanguage || "German";
+852:	const conversationLanguage = asString(
+866:function titleCase(value) {
+872:function formatCompactNumber(value) {
+873:	const parsed = Number(value);
+881:function formatCurrency(value, currency = "USD") {
+882:	const parsed = Number(value);
+895:function getModeMeta(id) {
+896:	const resolvedId = MODE_ID_ALIASES[id] || id;
+900:function extractTopMessage(item = {}) {
+908:function ensureSession(projectName) {
+909:	const key = projectName || "__default__";
+959:function readLocalDraftMap() {
+962:		const raw = window.localStorage?.getItem(AI_COMMAND_LOCAL_DRAFTS_KEY) || "{}";
+963:		const parsed = JSON.parse(raw);
+970:function writeLocalDraftMap(map) {
+973:		window.localStorage?.setItem(AI_COMMAND_LOCAL_DRAFTS_KEY, JSON.stringify(map || {}));
+977:function loadLocalDraft(projectName) {
+978:	const key = projectName || "__default__";
+982:function saveLocalDraft(projectName, draftPayload) {
+983:	const key = projectName || "__default__";
+984:	const map = readLocalDraftMap();
+994:function hydrateSessionDraft(projectName, session) {
+996:	const localDraft = loadLocalDraft(projectName);
+1011:function persistSessionDraft(projectName, session, hint) {
+1012:	const saved = saveLocalDraft(projectName, {
+1022:function readLocalOutputMap() {
+1025:		const raw = window.localStorage?.getItem(AI_COMMAND_LOCAL_OUTPUTS_KEY) || "{}";
+1026:		const parsed = JSON.parse(raw);
+1033:function writeLocalOutputMap(map) {
+1036:		window.localStorage?.setItem(AI_COMMAND_LOCAL_OUTPUTS_KEY, JSON.stringify(map || {}));
+1040:function loadLocalOutput(projectName) {
+1041:	const key = projectName || "__default__";
+1045:function saveLocalOutput(projectName, outputPayload) {
+1046:	const key = projectName || "__default__";
+1047:	const map = readLocalOutputMap();
+1057:function getAiResponseBridgeStatus(executeProjectAiGuidanceFn) {
+1061:			reason: "AI response guidance bridge is not connected yet (API function unavailable)."
+1071:function readAiChatSessionsMap() {
+1074:                const raw = window.localStorage?.getItem(AI_COMMAND_CHAT_SESSIONS_KEY) || "{}";
+1075:                const parsed = JSON.parse(raw);
+1082:function writeAiChatSessionsMap(map) {
+1085:                window.localStorage?.setItem(AI_COMMAND_CHAT_SESSIONS_KEY, JSON.stringify(map || {}));
+1089:function getAiChatSessions(projectName) {
+1090:        const key = projectName || "__default__";
+1095:function getAiCommandSessionSpecialistLabel(session = {}) {
+1097:        const spec = getPhase1SpecialistById(session.modeId);
+1101:function summarizeAiCommandSessionIntent(value = "", fallback = "Session") {
+1102:        const text = asString(value || "")
+1109:        const compact = text
+1114:        const source = compact || text;
+1118:function formatAiCommandSessionTime(value) {
+1119:        const date = value ? new Date(value) : new Date();
+1122:        const now = new Date();
+1123:        const sameDay = date.toDateString() === now.toDateString();
+1124:        const yesterday = new Date(now);
+1127:        const time = date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+1134:function buildAiCommandHistoryTitle(session = {}, options = {}) {
+1135:        const specialist = getAiCommandSessionSpecialistLabel(session);
+1136:        const messages = asArray(session.messages);
+1137:        const responses = asArray(session.responseHistory);
+1138:        const latestResponse = responses[0] || {};
+1139:        const latestUser = messages.slice().reverse().find((message) => asString(message.role) === "user");
+1140:        const preview = asObject(session.outputPreview);
+1141:        const explicit = asString(options.title || "").trim();
+1143:        const intent = summarizeAiCommandSessionIntent(
+1155:        const time = formatAiCommandSessionTime(options.updatedAt || session.updatedAt || nowIso());
+1160:function saveAiChatSession(projectName, session, options = {}) {
+1161:        const key = projectName || "__default__";
+1162:        const messages = asArray(session.messages);
+1163:        const responses = asArray(session.responseHistory);
+1164:        const hasContent = messages.length || responses.length || asObject(session.outputPreview).title;
+1167:        const map = readAiChatSessionsMap();
+1168:        const sessions = asArray(map[key]);
+1169:        const now = nowIso();
+1170:        const sessionId = asString(options.sessionId || session.activeChatSessionId || `chat-session-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`);
+1171:        const titleSeed = buildAiCommandHistoryTitle(session, { ...options, updatedAt: now });
+1172:        const record = {
+1184:        const nextSessions = [record, ...sessions.filter((item) => asString(item.id) !== sessionId)].slice(0, 20);
+1194:function loadAiChatSessionIntoState(projectName, session, sessionId) {
+1195:        const record = getAiChatSessions(projectName).find((item) => asString(item.id) === asString(sessionId));
+1216:function refreshAiChatSessions(projectName, session) {
+1221:function buildSpecialistChatPrompt({ prompt, specialistLabel, modeLabel, projectName, language, outputLanguage, market }) {
+1222:	const cleanPrompt = asString(prompt).trim();
+1223:	const safeProject = asString(projectName || "current project").trim();
+1224:	const safeSpecialist = asString(specialistLabel || "Specialist").trim();
+1225:	const safeMode = asString(modeLabel || "Solo Specialist").trim();
+1226:	const safeLanguage = asString(language || "user language").trim();
+1227:	const safeOutputLanguage = asString(outputLanguage || "German").trim();
+1228:	const safeMarket = asString(market || "Germany").trim();
+1229:	const teamWorkflowLines = safeMode === "Full Team"
+1260:function extractGeneratedResponseText(response = {}) {
+1261:	const direct = humanizeValue(
+1271:	const bullets = normalizeDisplayList(response.bullets, 6)
+1277:	const recommendationLine = normalizeDisplayList(response.recommendations, 4)
+1281:	const findingLine = normalizeDisplayList(response.findings, 4)
+1285:	const sectionLine = asArray(response.sections)
+1287:			const title = humanizeValue(section?.title);
+1288:			const items = normalizeDisplayList(section?.items, 4);
+1298:function destinationRouteForSpecialist(specialistId, outputType) {
+1299:	const rawId = getAiRoomRoleId(specialistId || "operations");
+1300:	const id = MODE_ID_ALIASES[rawId] || rawId;
+1316:function resolveAiResponseOutputRoute(session, response = {}) {
+1317:        const activeTab = getOutputWorkspaceTab(session);
+1318:        const specialistId = getAiRoomRoleId(session?.modeId || "operations");
+1319:        const explicitDestination = asString(response.destinationRoute || "").trim();
+1321:        const text = [
+1330:        let outputType = asString(response.outputType || "").toLowerCase();
+1341:        const looksTaskLike = /\b(task|tasks|handoff|ticket|tickets|follow-up|follow up|owner|owners|assignee|assigned|due date|priority|priorities|backlog|checklist|next task|action item|action items)\b/.test(text);
+1342:        const looksWorkflowLike = /\b(workflow|workflows|process|sequence|phase|phases|approval flow|automation|operating loop|step-by-step|steps|dependencies|trigger|review gate|execution flow)\b/.test(text);
+1343:        const looksContentLike = /\b(content|caption|captions|post|posts|email|blog|article|copy|headline|landing page|script|message|cta|product copy|social post)\b/.test(text);
+1344:        const looksMediaLike = /\b(media|visual|creative|image|images|video|reel|storyboard|shot list|asset|assets|design|production|creative direction|voiceover)\b/.test(text);
+1345:        const looksPublishingLike = /\b(publish|publishing|schedule|channel package|channel payload|approval-ready post|final post|ready to publish|publishing package)\b/.test(text);
+1346:        const looksGovernanceLike = /\b(compliance|governance|claim|claims|risk|risks|approval|approvals|policy|privacy|legal|safe language|safety review)\b/.test(text);
+1347:        const looksInsightLike = /\b(insight|insights|seo|keyword|keywords|analytics|performance|traffic|ranking|search intent|metrics|research|competitor|competitors|market research)\b/.test(text);
+1348:        const looksCampaignLike = /\b(campaign|launch|audience|offer|funnel|positioning|channel mix|campaign brief|go-to-market|go to market)\b/.test(text);
+1393:        const destinationRoute = explicitDestination || destinationRouteForSpecialist(session?.modeId || "operations", outputType);
+1397:function routeLabel(route) {
+1398:	const labels = {
+1415:function specialistTemplateForOutput({ specialist, outputType, prompt, projectName }) {
+1416:	const cleanPrompt = asString(prompt).trim();
+1417:	const promptSnippet = cleanPrompt || `Project request for ${projectName || "current project"}`;
+1418:	const specialistId = asString(specialist?.id || "operations");
+1419:	const route = destinationRouteForSpecialist(specialistId, outputType);
+1421:	const base = {
+1712:function buildPhase2OutputPreview({ intent, session, prompt, projectName }) {
+1713:	const teamMode = session.teamMode === "team";
+1714:	const specialist = teamMode
+1718:	const intentToType = {
+1724:	const outputType = intentToType[intent] || "guidance";
+1726:	const base = specialistTemplateForOutput({
+1762:function formatOutputTypeLabel(outputType) {
+1763:	const labels = {
+1773:function buildPreviewText(output, specialistLabel) {
+1775:	const lines = [
+1796:function compactPreviewText(value, maxLength = 360) {
+1797:        const text = humanizeValue(value, "").replace(/\s+/g, " ").trim();
+1803:function splitPreviewLines(value, limit = 6) {
+1804:        const text = humanizeValue(value, "");
+1813:function normalizeUniqueDisplayList(items, limit = 6) {
+1814:        const seen = new Set();
+1818:                        const key = item.replace(/\s+/g, " ").trim().toLowerCase();
+1826:function buildStructuredPreviewBlocks(preview = {}) {
+1827:        const summary = humanizeValue(preview.summary, "");
+1828:        const sourceText = humanizeValue(
+1837:        const compactSummary = compactPreviewText(sourceText || summary, 420);
+1838:        const blocks = [];
+1840:        const mainLines = splitPreviewLines(sourceText || summary, 14)
+1847:        const bullets = normalizeUniqueDisplayList(preview.bullets, 8)
+1854:        const steps = normalizeUniqueDisplayList(preview.steps, 8)
+1870:function isProviderLikelyConfigured(aiContext) {
+
+----- public/control-center/pages/home.js -----
+19:function asArray(value) {
+23:function asObject(value) {
+27:function asString(value) {
+32:function asNumber(value, fallback = 0) {
+33:  const parsed = Number(value);
+37:function formatPercent(value) {
+41:function formatCount(value) {
+45:function statusTone(input, score) {
+46:  const text = asString(input).toLowerCase();
+77:  const parsed = Number(score);
+87:function toneLabel(tone) {
+94:function humanizeStatus(value, fallback = "Unknown") {
+95:  const raw = asString(value).trim();
+102:function parseTimestamp(item) {
+103:  const fields = ["updated_at", "completed_at", "executed_at", "scheduled_for", "created_at"];
+105:    const value = item?.[field];
+107:    const stamp = Date.parse(value);
+115:function formatRelativeDate(value) {
+116:  const stamp = Date.parse(value || "");
+121:function dedupe(values = []) {
+125:function compact(value, fallback = "-") {
+126:  const text = asString(value).trim();
+130:function humanizeExecutiveAction(value, fallback = "Next executive action") {
+131:  const raw = asString(value).trim();
+134:  const normalized = raw
+139:  const known = {
+152:  const key = normalized.toLowerCase();
+158:function compactModuleState(value, fallback = "Not enabled yet") {
+159:  const text = asString(value).trim();
+167:function buildOperatingPath(dashboard = {}) {
+168:  const blockers = asObject(dashboard.blockers);
+169:  const campaign = asObject(dashboard.campaign);
+170:  const launch = asObject(dashboard.launchSnapshot);
+171:  const health = asObject(dashboard.health);
+207:function pickRecommendedSpecialist(aiTeamCards = [], dashboard = {}) {
+208:  const blockers = asObject(dashboard.blockers);
+209:  const next = asString(dashboard.nextBestAction?.recommendation).toLowerCase();
+228:function routeForAction(action) {
+229:  const text = asString(action).toLowerCase();
+241:function buildAiTeamCards(state) {
+242:  const operations = asObject(selectOperationsSnapshot(state));
+243:  const notifications = asArray(operations.notifications?.items);
+244:  const tasks = asArray(operations.tasks?.items);
+245:  const approvals = asArray(operations.approvals?.items);
+247:  const projectedMembers = getProjectedTeamMembers(state);
+248:  const projectedActiveRole = asString(
+252:  const roles = projectedMembers.length
+280:    const roleNotifications = notifications.filter((item) => asString(item?.owner_role).toLowerCase() === role.id);
+281:    const roleTasks = tasks.filter((item) => asString(item?.owner_role).toLowerCase() === role.id);
+282:    const roleApprovals = approvals.filter((item) => asString(item?.reviewer_role).toLowerCase() === role.id);
+284:    const latest = roleNotifications[0] || roleTasks[0] || roleApprovals[0] || null;
+285:    const statusRaw = asString(latest?.status || latest?.level || "idle");
+286:    const tone = statusTone(statusRaw);
+302:function buildExecutiveData(state) {
+303:  const overview = asObject(state.data.overview);
+304:  const readiness = asObject(state.data.readiness);
+305:  const integrations = asObject(state.data.integrations);
+306:  const activity = asObject(state.data.activity);
+307:  const assets = asObject(state.data.assets);
+308:  const operations = asObject(selectOperationsSnapshot(state));
+310:  const overviewData = asObject(overview.overview);
+311:  const readinessData = asObject(readiness.dashboard);
+312:  const readinessPriorities = asObject(readinessData.priorities || readiness.priorities);
+314:  const scheduledJobs = asArray(activity.scheduled_jobs);
+315:  const executionResults = asArray(activity.execution_results);
+316:  const recommendations = asArray(readinessData.next_best_actions).length
+320:  const insights = asObject(activity.insights);
+321:  const learning = asObject(activity.learning);
+322:  const notifications = asArray(operations.notifications?.items);
+324:  const sortedExecution = executionResults
+327:  const sortedSchedule = scheduledJobs
+331:  const latestExecution = sortedExecution[0] || null;
+332:  const nextScheduled = sortedSchedule[0] || null;
+348:  const criticalGaps = asArray(readinessPriorities.critical);
+349:  const failedExecutions = sortedExecution.filter((item) => statusTone(item?.execution_status) === "danger");
+350:  const unreadNotifications = notifications.filter((item) => !item?.read_at);
+352:  const connectorChecks = asObject(integrations.readiness?.checks);
+353:  const connectorKeys = Object.keys(connectorChecks);
+354:  const connectedConnectorCount = connectorKeys.filter((key) => Boolean(connectorChecks[key])).length;
+355:  const missingIntegrations = asArray(integrations.readiness?.missing).map((item) => humanizeStatus(item)).filter(Boolean);
+357:  const categoryReadiness = asArray(assets.category_readiness?.categories);
+358:  const missingAssetLabels = [
+366:  const missingAssets = dedupe(missingAssetLabels).map((item) => humanizeStatus(item));
+368:  const assetItems = asArray(assets.assets);
+369:  const sourceOfTruthCount = assetItems.filter((item) => Boolean(item.source_of_truth || item.use_as_source_of_truth)).length;
+371:  const insightsRecommendations = asArray(insights.recommendations);
+372:  const learningLessons = asArray(learning.system_lessons);
+373:  const tasks = asArray(operations.tasks?.items);
+374:  const approvals = asArray(operations.approvals?.items);
+376:  const automationTone = failedExecutions.length
+382:  const intelligenceScore = insightsRecommendations.length + learningLessons.length;
+383:  const intelligenceTone = intelligenceScore > 0 ? "success" : "warning";
+392:  const rawNextAction = asString(recommendations[0]).trim() || fallbackAction;
+393:  const nextAction = humanizeExecutiveAction(rawNextAction, "Ask AI Command");
+394:  const nextActionRoute = routeForAction(rawNextAction || nextAction);
+396:  const whyItMatters = criticalGaps.length
+407:  const activeChannels = dedupe([
+412:  const currentStage = humanizeStatus(
+420:  const systemScore = Math.round((asNumber(readinessScore) + asNumber(connectorScore)) / 2);
+422:  const pendingTasks = tasks.filter((item) => {
+423:    const text = asString(item?.status || "").toLowerCase();
+427:  const pendingApprovals = approvals.filter((item) => {
+428:    const text = asString(item?.status || "").toLowerCase();
+432:  const urgencyLabel = criticalGaps.length
+438:  const workflowImpact = criticalGaps.length
+444:  const continuationSummary = nextScheduled
+448:  const confidenceSummary = intelligenceScore > 0
+452:  const escalationSummary = pendingApprovals.length
+456:  const mediaJobs = asArray(operations.media_jobs?.items);
+457:  const mediaReadyCount = mediaJobs.filter((item) => statusTone(item?.status) === "success").length;
+459:  const publishingQueue = asArray(operations.queues?.items).filter((item) =>
+462:  const publishReadyCount = publishingQueue.filter((item) => {
+463:    const status = asString(item.status || item.publish_status || item.execution_status).toLowerCase();
+467:  const emailConnected = Boolean(
+471:  const readinessMissing = [
+476:  const completedExecutions = sortedExecution.filter((item) => statusTone(item?.execution_status) === "success");
+478:  const readyCount = [
+484:  const recentExecutionSummary = sortedExecution.slice(0, 4).map((item) => {
+485:    const channel = humanizeStatus(item?.channel, "Channel");
+486:    const status = humanizeStatus(item?.execution_status, "Unknown");
+487:    const when = formatRelativeDate(item?.executed_at || item?.updated_at || item?.created_at);
+496:  const schedulerQueue = sortedSchedule.slice(0, 4).map((item) => {
+497:    const channel = humanizeStatus(item?.channel, "Channel");
+498:    const status = humanizeStatus(item?.status, "Scheduled");
+499:    const when = formatRelativeDate(item?.scheduled_for || item?.updated_at || item?.created_at);
+508:  const recentActivity = [
+535:  const blockers = {
+553:  const campaignReadinessTone = totalBlockers ? "warning" : "success";
+731:function dashboardLabelFromScore(score) {
+736:function setGlobalAiPrompt($, prompt) {
+737:  const input = $("quickCommandInput");
+744:export const homeRoute = {
+758:    const state = getState();
+759:    const dashboard = buildExecutiveData(state);
+760:    const root = $("homeExecRoot");
+762:    const aiTeamCards = buildAiTeamCards(state);
+764:    const capabilityCards = asArray(dashboard.capabilities).slice(0, 4);
+765:    const statusItems = asArray(dashboard.statusBoard).slice(0, 6);
+766:    const campaignChannels = asArray(dashboard.campaign.channels);
+767:    const blockerColumns = [
+773:    const activeBlockerColumns = blockerColumns.filter((column) => asArray(column.items).length).slice(0, 4);
+775:    const topAttentionCards = [
+799:    const operatingPath = buildOperatingPath(dashboard);
+800:    const recommendedSpecialist = pickRecommendedSpecialist(aiTeamCards, dashboard);
+801:    const attentionBlockerColumns = activeBlockerColumns.slice(0, 3);
+1068:    const openRoute = (route, message = "") => {
+1073:    const openAiWithPrompt = (prompt) => {
+1080:    const handleAiRoleClick = (roleId, roleName) => {
+1081:      const projectLabel = dashboard.projectName || "this project";
+1082:      const rolePrompts = {
+1094:      const prompt = rolePrompts[roleId] || `Act as the ${roleName} specialist for ${projectLabel}. Review the current project context and recommend the next best actions. Do not execute anything; prepare guidance only.`;
+1099:    const nextBtn = $("homePrimaryActionBtn");
+1109:    const askNextActionBtn = $("homeAskNextActionBtn");
+1114:    const operationsBtn = $("homeOpenOperationsBtn");
+1117:    const aiTeamBtn = $("homeOpenAiTeamBtn");
+1119:    const fullAiTeamBtn = $("homeOpenFullAiTeamBtn");
+1122:    const quickCampaignBtn = $("homeQuickStartCampaignBtn");
+1125:    const quickAssetBtn = $("homeQuickAssetLibraryBtn") || $("homeQuickUploadAssetBtn");
+1128:    const quickReadinessBtn = $("homeQuickReviewReadinessBtn");
+1131:    const quickAiBtn = $("homeQuickOpenAiBtn");
+1136:    const promptNextBtn = $("homePromptNextBtn");
+1141:    const promptReadinessBtn = $("homePromptReadinessBtn");
+1146:    const promptLaunchBtn = $("homePromptLaunchBtn");
+1151:    const promptPlanBtn = $("homePromptPlanBtn");
+1156:    const aiRoleCards = document.querySelectorAll(".home-ai-team-card, .mhos-specialist, .mhos-workflow-step[data-role-id]");
+1158:      const roleId = card.getAttribute("data-role-id");
+1159:      const roleName = card.querySelector("strong")?.textContent || "AI Specialist";
+
+----- public/control-center/pages/governance/dashboard.js -----
+11:const legacyGovernanceDashboardState = {
+28:function renderLegacyGovernanceDashboardNotice() {
+45:  window.__LEGACY_GOVERNANCE_DASHBOARD__ = {
+
+Repeated render/init patterns:
+public/control-center/pages/home/render-sections.js:105:export function renderHomeExecutiveIntro({
+public/control-center/pages/media-studio-workspace.js:4671:function renderOverview(metrics, escapeHtml) {
+public/control-center/pages/media-studio-workspace.js:9491:        ${renderOverview(metrics, escapeHtml)}
+public/control-center/pages/home.js:7:  renderHomeExecutiveIntro
+public/control-center/pages/content-studio-workspace.js:1095:function renderOverview(metrics, escapeHtml) {
+public/control-center/pages/publishing.js:1086:function renderOverview(counts, queue, escapeHtml) {
+public/control-center/pages/publishing.js:2099:        ${renderOverview(counts, queue, escapeHtml)}
+public/control-center/pages/workflows.js:620:function renderOverviewSection(metrics, context, escapeHtml) {
+public/control-center/pages/workflows.js:915:      ${renderOverviewSection(metrics, context, escapeHtml)}

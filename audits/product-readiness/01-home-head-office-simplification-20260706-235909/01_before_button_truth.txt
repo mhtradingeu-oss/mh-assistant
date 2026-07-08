@@ -1,0 +1,197 @@
+Git state:
+ M public/control-center/pages/home.js
+ M public/control-center/pages/home/render-sections.js
+ M public/control-center/styles/13-home-executive.css
+ M runtime/orchestrator-service/server.js
+?? audits/product-readiness/
+?? audits/system-truth/cloud-grade-readiness-20260706-171752/
+?? audits/system-truth/content-to-media-studio-truth-20260706-161134/
+?? audits/system-truth/media-engine-upgrade-phase-2a-truth-scan-20260706-122813/
+?? audits/system-truth/media-engine-upgrade-phase-2b-contract-20260706-123139/
+?? audits/system-truth/media-execution-activation-a0-deep-truth-scan-20260706-114055/
+?? audits/system-truth/media-execution-activation-a1-exact-execution-contract-20260706-114301/
+?? audits/system-truth/media-execution-activation-a2-api-media-route-truth-20260706-115001/
+?? audits/system-truth/media-execution-activation-a3-live-image-proof-20260706-115143/
+?? audits/system-truth/media-execution-activation-a3b-live-image-proof-with-control-key-20260706-115319/
+?? audits/system-truth/media-execution-activation-a3d-live-image-proof-correct-write-key-20260706-115622/
+?? audits/system-truth/media-studio-rebase-20260706-165209/
+?? infra/
+?? public/control-center/pages/media-studio.BACKUP.js
+?? public/control-center/pages/media-studio.BACKUP_FINAL_FLOW_LOCK.js
+?? public/control-center/pages/media-studio.BACKUP_FLOW_LOCK.js
+?? public/control-center/pages/media-studio.js
+?? public/control-center/state/
+?? runtime/orchestrator-service/lib/media/cluster/
+?? runtime/orchestrator-service/lib/media/contracts/
+?? runtime/orchestrator-service/lib/media/events/
+?? runtime/orchestrator-service/lib/media/governance/
+?? runtime/orchestrator-service/lib/media/library-engine.js
+?? runtime/orchestrator-service/lib/media/orchestrator/
+?? runtime/orchestrator-service/lib/media/publishing/
+?? runtime/orchestrator-service/lib/media/queue/
+?? runtime/orchestrator-service/lib/media/realtime/
+
+Home buttons and actions:
+public/control-center/pages/home.js:399:  const nextAction = humanizeExecutiveAction(rawNextAction, "Ask AI Command");
+public/control-center/pages/home.js:580:    primaryActionLabel: nextActionRoute === "ai-command" ? "Prepare AI Guidance" : `Open ${humanizeStatus(nextActionRoute)} Workspace`,
+public/control-center/pages/home.js:601:      buttonLabel: nextActionRoute === "ai-command" ? "Prepare AI Guidance" : `Open ${humanizeStatus(nextActionRoute)} Workspace`,
+public/control-center/pages/home.js:874:                <button id="homePrimaryActionBtn" class="mhos-next-action-btn" type="button">
+public/control-center/pages/home.js:875:                  ${escapeHtml(dashboard.nextBestAction.buttonLabel)}
+public/control-center/pages/home.js:876:                </button>
+public/control-center/pages/home.js:877:                <button id="homeAskNextActionBtn" class="mhos-next-action-btn is-ghost" type="button">
+public/control-center/pages/home.js:878:                  Prepare AI Explanation
+public/control-center/pages/home.js:879:                </button>
+public/control-center/pages/home.js:880:                <button id="homeOpenOperationsBtn" class="btn btn-secondary btn-sm" type="button">
+public/control-center/pages/home.js:882:                </button>
+public/control-center/pages/home.js:987:                <p class="mhos-os-panel-copy">These buttons open the right workspace. Home does not save, upload, approve, publish, send, or execute.</p>
+public/control-center/pages/home.js:990:              <button id="homeQuickReviewReadinessBtn" class="quick-action-btn" type="button">
+public/control-center/pages/home.js:993:              </button>
+public/control-center/pages/home.js:994:              <button id="homeQuickAssetLibraryBtn" class="quick-action-btn" type="button">
+public/control-center/pages/home.js:997:              </button>
+public/control-center/pages/home.js:998:              <button id="homeQuickStartCampaignBtn" class="quick-action-btn" type="button">
+public/control-center/pages/home.js:1001:              </button>
+public/control-center/pages/home.js:1009:                  ${escapeHtml(recommendedSpecialist?.summary || "Use AI Command to turn the current state into a clear operating plan.")}
+public/control-center/pages/home.js:1015:                <button class="quick-action-btn mhos-motion-soft" type="button" data-role-id="${escapeHtml(recommendedSpecialist.id)}">
+public/control-center/pages/home.js:1017:                  <span class="home-action-meta">${escapeHtml(recommendedSpecialist.status || "Ready to guide")}. Opens AI Command with context.</span>
+public/control-center/pages/home.js:1018:                </button>
+public/control-center/pages/home.js:1021:              <button id="homeQuickOpenAiBtn" class="quick-action-btn" type="button">
+public/control-center/pages/home.js:1022:                <span class="home-action-title">Open AI Workspace</span>
+public/control-center/pages/home.js:1024:              </button>
+public/control-center/pages/home.js:1026:              <button id="homeOpenAiTeamBtn" class="btn btn-ghost btn-sm" type="button">
+public/control-center/pages/home.js:1027:                Open AI Command
+public/control-center/pages/home.js:1028:              </button>
+public/control-center/pages/home.js:1029:              <button id="homeOpenFullAiTeamBtn" class="btn btn-ghost btn-sm" type="button">
+public/control-center/pages/home.js:1031:              </button>
+public/control-center/pages/home.js:1038:                <p class="mhos-os-panel-copy">Prompt buttons fill AI Command with reviewed guidance requests. They do not execute actions.</p>
+public/control-center/pages/home.js:1041:              <button id="homePromptNextBtn" class="home-ai-prompt-card" type="button">
+public/control-center/pages/home.js:1044:              </button>
+public/control-center/pages/home.js:1045:              <button id="homePromptReadinessBtn" class="home-ai-prompt-card" type="button">
+public/control-center/pages/home.js:1048:              </button>
+public/control-center/pages/home.js:1049:              <button id="homePromptLaunchBtn" class="home-ai-prompt-card" type="button">
+public/control-center/pages/home.js:1052:              </button>
+public/control-center/pages/home.js:1053:              <button id="homePromptPlanBtn" class="home-ai-prompt-card" type="button">
+public/control-center/pages/home.js:1056:              </button>
+public/control-center/pages/home.js:1079:    const openAiWithPrompt = (prompt) => {
+public/control-center/pages/home.js:1082:      showMessage?.("Prompt prepared in AI Command.");
+public/control-center/pages/home.js:1101:      openAiWithPrompt(prompt);
+public/control-center/pages/home.js:1102:      showMessage?.(`${roleName} context prepared in AI Command.`);
+public/control-center/pages/home.js:1105:    const nextBtn = $("homePrimaryActionBtn");
+public/control-center/pages/home.js:1115:    const askNextActionBtn = $("homeAskNextActionBtn");
+public/control-center/pages/home.js:1116:    if (askNextActionBtn) {
+public/control-center/pages/home.js:1117:      askNextActionBtn.onclick = () => openAiWithPrompt(`Explain this next best action like an operations director and give me the exact safe steps: ${dashboard.nextBestAction.recommendation}. Include which workspace owns it, what it unlocks for campaign creation, scheduled posts, publishing, ads, and customer operations. Do not execute anything.`);
+public/control-center/pages/home.js:1120:    const operationsBtn = $("homeOpenOperationsBtn");
+public/control-center/pages/home.js:1123:    const aiTeamBtn = $("homeOpenAiTeamBtn");
+public/control-center/pages/home.js:1125:    const fullAiTeamBtn = $("homeOpenFullAiTeamBtn");
+public/control-center/pages/home.js:1128:    const quickCampaignBtn = $("homeQuickStartCampaignBtn");
+public/control-center/pages/home.js:1131:    const quickAssetBtn = $("homeQuickAssetLibraryBtn") || $("homeQuickUploadAssetBtn");
+public/control-center/pages/home.js:1134:    const quickReadinessBtn = $("homeQuickReviewReadinessBtn");
+public/control-center/pages/home.js:1137:    const quickAiBtn = $("homeQuickOpenAiBtn");
+public/control-center/pages/home.js:1139:      quickAiBtn.onclick = () => openAiWithPrompt(dashboard.nextBestAction.recommendation);
+public/control-center/pages/home.js:1142:    const promptNextBtn = $("homePromptNextBtn");
+public/control-center/pages/home.js:1143:    if (promptNextBtn) {
+public/control-center/pages/home.js:1144:      promptNextBtn.onclick = () => openAiWithPrompt("What is the best next executive action for this project? Prioritize the answer based on readiness, blockers, campaign state, scheduled posts, publishing safety, ads readiness, customer operations, and recent activity. Give one clear recommendation and the reason.");
+public/control-center/pages/home.js:1147:    const promptReadinessBtn = $("homePromptReadinessBtn");
+public/control-center/pages/home.js:1148:    if (promptReadinessBtn) {
+public/control-center/pages/home.js:1149:      promptReadinessBtn.onclick = () => openAiWithPrompt("Why is readiness low? Explain the missing integrations, assets, failed jobs, campaign gaps, scheduled post risks, publishing blockers, and ad launch risks in simple business language. End with the fastest safe fix path.");
+public/control-center/pages/home.js:1152:    const promptLaunchBtn = $("homePromptLaunchBtn");
+public/control-center/pages/home.js:1153:    if (promptLaunchBtn) {
+public/control-center/pages/home.js:1154:      promptLaunchBtn.onclick = () => openAiWithPrompt("Summarize the launch blockers and tell me what must be fixed before publishing.");
+public/control-center/pages/home.js:1157:    const promptPlanBtn = $("homePromptPlanBtn");
+public/control-center/pages/home.js:1159:      promptPlanBtn.onclick = () => openAiWithPrompt("Prepare today's action plan from the current dashboard. Give me prioritized tasks with owners and expected outcomes.");
+public/control-center/pages/home/render-sections.js:87:    return `<p class="home-empty-note">AI team status is not available yet. AI Command can still prepare guidance for the next action.</p>`;
+public/control-center/pages/home/render-sections.js:93:          <button class="home-ai-team-card" type="button" data-role-id="${escapeHtml(agent.id || "")}" title="Prepare ${escapeHtml(agent.name)} guidance in AI Command">
+public/control-center/pages/home/render-sections.js:99:          </button>
+public/control-center/pages/home/render-sections.js:118:    : "Open AI Command or the owning workspace to generate the next reviewed action. Home only guides; it does not execute.";
+public/control-center/pages/home/render-sections.js:145:        <button id="homeExecutivePrimaryActionBtn" class="btn btn-primary" type="button">
+public/control-center/pages/home/render-sections.js:147:        </button>
+public/control-center/pages/home/render-sections.js:148:        <button id="homeSecondaryActionBtn" class="btn btn-secondary" type="button">
+public/control-center/pages/home/render-sections.js:150:        </button>
+public/control-center/pages/home/render-sections.js:151:        <button id="homeAskExecutiveAiBtn" class="btn btn-ghost" type="button">
+public/control-center/pages/home/render-sections.js:152:          Prepare AI Guidance
+public/control-center/pages/home/render-sections.js:153:        </button>
+
+Head Office / coverage signals:
+public/control-center/pages/home.js:103:  const fields = ["updated_at", "completed_at", "executed_at", "scheduled_for", "created_at"];
+public/control-center/pages/home.js:141:    "brand guideline": "Add the brand guideline so content, media, ads, and publishing stay consistent",
+public/control-center/pages/home.js:142:    "brand guidelines": "Add the brand guideline so content, media, ads, and publishing stay consistent",
+public/control-center/pages/home.js:143:    "pricing doc": "Add the pricing document so campaigns and offers use approved numbers",
+public/control-center/pages/home.js:144:    "legal doc": "Add the legal document so publishing and ads can pass review",
+public/control-center/pages/home.js:145:    "product video": "Create product videos to unblock media, campaign, and ad readiness",
+public/control-center/pages/home.js:155:    "campaign studio": "Prepare the next campaign wave"
+public/control-center/pages/home.js:175:  const campaign = asObject(dashboard.campaign);
+public/control-center/pages/home.js:199:      title: "Build campaign",
+public/control-center/pages/home.js:200:      meta: campaign.name ? `Active: ${campaign.name}` : "No active campaign selected",
+public/control-center/pages/home.js:201:      tone: campaign.name ? "is-live" : "is-warning",
+public/control-center/pages/home.js:202:      status: campaign.name ? "Active" : "Missing"
+public/control-center/pages/home.js:206:      meta: launch.campaignReadiness === "Ready" ? "Execution path looks clear" : "Resolve blockers before publishing",
+public/control-center/pages/home.js:207:      tone: launch.campaignReadiness === "Ready" ? "is-live" : "is-warning",
+public/control-center/pages/home.js:208:      status: launch.campaignReadiness || "At risk"
+public/control-center/pages/home.js:239:  if (/(campaign|launch wave|brief)/.test(text)) return "campaign-studio";
+public/control-center/pages/home.js:240:  if (/(publish|schedule|queue)/.test(text)) return "publishing";
+public/control-center/pages/home.js:241:  if (/(ad|budget|paid)/.test(text)) return "ads-manager";
+public/control-center/pages/home.js:274:    { id: "strategist", name: "Strategist", fallback: "Align campaign priorities and launch sequencing." },
+public/control-center/pages/home.js:278:    { id: "publisher", name: "Publisher", fallback: "Prepare publishing packages, schedules, and manual handoffs." },
+public/control-center/pages/home.js:279:    { id: "ads_operator", name: "Ads Optimizer", fallback: "Optimize paid testing, creative variants, and budget decisions." },
+public/control-center/pages/home.js:320:  const scheduledJobs = asArray(activity.scheduled_jobs);
+public/control-center/pages/home.js:333:  const sortedSchedule = scheduledJobs
+public/control-center/pages/home.js:384:    : scheduledJobs.length
+public/control-center/pages/home.js:451:    ? `Next: ${humanizeStatus(nextScheduled.status, "Scheduled")} — ${formatRelativeDate(nextScheduled.scheduled_for || nextScheduled.updated_at)}`
+public/control-center/pages/home.js:452:    : "No scheduled action yet";
+public/control-center/pages/home.js:465:  const publishingQueue = asArray(operations.queues?.items).filter((item) =>
+public/control-center/pages/home.js:466:    asString(item.entity_type) === "publishing_job" || asString(item.queue_type) === "publishing"
+public/control-center/pages/home.js:468:  const publishReadyCount = publishingQueue.filter((item) => {
+public/control-center/pages/home.js:470:    return ["ready", "manual_publish_ready", "scheduled", "queued"].includes(status);
+public/control-center/pages/home.js:471:  }).length + scheduledJobs.length;
+public/control-center/pages/home.js:505:    const when = formatRelativeDate(item?.scheduled_for || item?.updated_at || item?.created_at);
+public/control-center/pages/home.js:527:      when: formatRelativeDate(item?.scheduled_for || item?.updated_at || item?.created_at),
+public/control-center/pages/home.js:559:  const campaignReadinessTone = totalBlockers ? "warning" : "success";
+public/control-center/pages/home.js:563:          statusLabel: campaignReadinessTone === "success" ? "Healthy" : totalBlockers ? "Attention" : "Unknown",
+public/control-center/pages/home.js:624:        value: formatCount(scheduledJobs.length),
+public/control-center/pages/home.js:637:        detail: activeCampaignName || "No campaign selected",
+public/control-center/pages/home.js:681:    campaign: {
+public/control-center/pages/home.js:687:        ? `${humanizeStatus(nextScheduled.status, "Scheduled")}: ${formatRelativeDate(nextScheduled.scheduled_for || nextScheduled.updated_at)}`
+public/control-center/pages/home.js:688:        : "No scheduled action yet — open Publishing or Campaign Studio to prepare the next launch step."
+public/control-center/pages/home.js:701:      scheduledJobs: scheduledJobs.length,
+public/control-center/pages/home.js:702:      campaignReadiness: campaignReadinessTone === "success" ? "Ready" : "At risk"
+public/control-center/pages/home.js:719:        : "No execution recorded yet — start with a campaign or publishing package to create the first signal.",
+public/control-center/pages/home.js:721:      feedback: asString(learningLessons[0]).trim() || "Connect insights or run a reviewed campaign so the learning engine can capture feedback."
+public/control-center/pages/home.js:729:      scheduledJobs: scheduledJobs.length,
+public/control-center/pages/home.js:731:      nextSchedule: nextScheduled ? formatRelativeDate(nextScheduled.scheduled_for || nextScheduled.updated_at) : "Not available",
+public/control-center/pages/home.js:772:    const campaignChannels = asArray(dashboard.campaign.channels);
+public/control-center/pages/home.js:871:                <span class="mhos-os-chip">No approval, publishing, sending, or record changes here</span>
+public/control-center/pages/home.js:949:                  <strong>${escapeHtml(formatCount(dashboard.launchSnapshot.scheduledJobs))}</strong>
+public/control-center/pages/home.js:1000:                <span class="home-action-meta">Plan the next campaign wave in its workspace.</span>
+public/control-center/pages/home.js:1089:        strategist: `Act as the Strategist for ${projectLabel}. Review readiness, blockers, campaign state, and next best action. Give me the highest-impact strategic moves. Do not execute anything; prepare guidance only.`,
+public/control-center/pages/home.js:1093:        publisher: `Act as the Publisher for ${projectLabel}. Review publishing readiness, scheduled jobs, blockers, and what must be checked before publishing. Do not execute anything; prepare guidance only.`,
+public/control-center/pages/home.js:1094:        ads_operator: `Act as the Ads Optimizer for ${projectLabel}. Review campaign readiness, channels, and paid media opportunities. Suggest next ad actions safely. Do not execute anything; prepare guidance only.`,
+public/control-center/pages/home.js:1096:        compliance_reviewer: `Act as the Compliance Reviewer for ${projectLabel}. Review launch blockers, claims, approvals, and publishing safety. Tell me what must be checked before release. Do not execute anything; prepare guidance only.`,
+public/control-center/pages/home.js:1117:      askNextActionBtn.onclick = () => openAiWithPrompt(`Explain this next best action like an operations director and give me the exact safe steps: ${dashboard.nextBestAction.recommendation}. Include which workspace owns it, what it unlocks for campaign creation, scheduled posts, publishing, ads, and customer operations. Do not execute anything.`);
+public/control-center/pages/home.js:1129:    if (quickCampaignBtn) quickCampaignBtn.onclick = () => openRoute("campaign-studio");
+public/control-center/pages/home.js:1144:      promptNextBtn.onclick = () => openAiWithPrompt("What is the best next executive action for this project? Prioritize the answer based on readiness, blockers, campaign state, scheduled posts, publishing safety, ads readiness, customer operations, and recent activity. Give one clear recommendation and the reason.");
+public/control-center/pages/home.js:1149:      promptReadinessBtn.onclick = () => openAiWithPrompt("Why is readiness low? Explain the missing integrations, assets, failed jobs, campaign gaps, scheduled post risks, publishing blockers, and ad launch risks in simple business language. End with the fastest safe fix path.");
+public/control-center/pages/home.js:1154:      promptLaunchBtn.onclick = () => openAiWithPrompt("Summarize the launch blockers and tell me what must be fixed before publishing.");
+public/control-center/pages/home/render-sections.js:113:    ? "Head Office live brief"
+public/control-center/pages/home/render-sections.js:114:    : "Head Office is waiting for a reviewed signal";
+public/control-center/pages/home/render-sections.js:117:    ? `Best move now: ${dashboard.nextBestAction.recommendation}. This protects campaign planning, scheduled posts, publishing, ads, and customer operations from avoidable mistakes.`
+public/control-center/pages/home/render-sections.js:120:  const campaignSignal = dashboard?.campaign?.name
+public/control-center/pages/home/render-sections.js:121:    ? `Active campaign: ${dashboard.campaign.name}`
+public/control-center/pages/home/render-sections.js:122:    : "No active campaign selected";
+public/control-center/pages/home/render-sections.js:125:    ? `Next scheduled item: ${dashboard.execution.nextSchedule}`
+public/control-center/pages/home/render-sections.js:126:    : "No scheduled post is confirmed yet";
+public/control-center/pages/home/render-sections.js:155:      <div class="home-head-office-strip" aria-label="Head Office live operating brief">
+public/control-center/pages/home/render-sections.js:157:          <span class="data-label">Head Office</span>
+public/control-center/pages/home/render-sections.js:161:        <div class="home-head-office-signals">
+public/control-center/pages/home/render-sections.js:162:          <span>${escapeHtml(campaignSignal)}</span>
+public/control-center/pages/home/render-sections.js:167:      <p class="home-empty-note">Home is the executive overview. It opens workspaces and prepares AI guidance only; approvals, publishing, ads, uploads, customer sends, and execution stay in their owning workspace.</p>
+public/control-center/styles/13-home-executive.css:285:.home-campaign-info {
+public/control-center/styles/13-home-executive.css:290:.home-campaign-row {
+public/control-center/styles/13-home-executive.css:300:.home-campaign-row:last-child {
+public/control-center/styles/13-home-executive.css:313:.home-campaign-row strong {
+public/control-center/styles/13-home-executive.css:927:  .home-campaign-row {
+public/control-center/styles/13-home-executive.css:932:  .home-campaign-row strong {
+public/control-center/styles/13-home-executive.css:1253:.home-head-office-strip {
+public/control-center/styles/13-home-executive.css:1268:.home-head-office-strip strong {
+public/control-center/styles/13-home-executive.css:1276:.home-head-office-strip p {
+public/control-center/styles/13-home-executive.css:1282:.home-head-office-signals {
+public/control-center/styles/13-home-executive.css:1288:.home-head-office-signals span {
+public/control-center/styles/13-home-executive.css:1327:  .home-head-office-strip {

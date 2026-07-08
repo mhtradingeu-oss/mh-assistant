@@ -1,0 +1,484 @@
+============================================================
+AI TEAM CONTRACT CONFORMANCE CHECK
+============================================================
+
+1) CONTRACT BASELINE
+PASS - contract file exists
+PASS - contract role count >= 12
+PASS - contract has page owners
+PASS - contract has aliases
+PASS - contract request types exist
+PASS - contract output types exist
+PASS - contract authority levels exist
+
+2) AI COMMAND LOCAL MAP CONFORMANCE
+PASS - AI Command exists
+PASS - AI Command has MODE_DEFS
+PASS - AI Command has MODE_ID_ALIASES
+PASS - AI Command has SPECIALIST_DEFS
+PASS - AI Command detector count is 1
+INFO - AI Command role/alias signals: operations, strategist, writer, media_director, video_lead, publisher, ads_operator, analyst, researcher, compliance_reviewer, customer_ops, sales_crm, admin, executive, campaign, strategy, copywriter, content_writer, content, copy, designer, media, creative, visual, video, motion, reel, storyboard, voiceover, publish, publishing, schedule, ads, paid, roas, seo, insights, research, compliance, governance, safety, approval, customer_operations, customer, support, inbox, ticket, sales, crm, lead
+PASS - AI Command covers operations
+PASS - AI Command covers strategist
+PASS - AI Command covers writer
+PASS - AI Command covers video_lead
+PASS - AI Command covers publisher
+PASS - AI Command covers ads_operator
+PASS - AI Command covers analyst
+PASS - AI Command covers compliance_reviewer
+PASS - AI Command covers customer_ops
+WARN - AI Command still uses admin alias: should normalize to operations in a later integration
+
+3) HOME CONFORMANCE
+PASS - Home exists
+PASS - Home has recommended specialist logic
+PASS - Home has role prompt bridge
+PASS - Home selector can bind data-role-id
+PASS - Home references AI Command route
+PASS - Home covers strategist
+PASS - Home covers publisher
+PASS - Home covers ads_operator
+PASS - Home covers compliance_reviewer
+PASS - Home covers operations
+WARN - Home uses admin alias: should normalize to operations later
+
+4) ROUTE ROLE FALLBACK CONFORMANCE
+PASS - route-role-fallback exists
+PASS - authority-projection exists
+INFO - route-role-fallback role/alias signals: strategist, writer, video_lead, publisher, ads_operator, analyst, compliance_reviewer, admin, campaign, content, designer, media, publishing, ads, insights, research, governance
+WARN - route-role-fallback uses admin alias: later contract integration should normalize to operations carefully
+WARN - route-role-fallback uses designer alias: later contract integration should normalize to media_director carefully
+PASS - route/page layer references home
+PASS - route/page layer references ai-command
+PASS - route/page layer references campaign-studio
+PASS - route/page layer references content-studio
+PASS - route/page layer references media-studio
+PASS - route/page layer references publishing
+PASS - route/page layer references ads-manager
+PASS - route/page layer references insights
+PASS - route/page layer references research
+PASS - route/page layer references workflows
+PASS - route/page layer references governance
+PASS - route/page layer references customer-center
+
+5) ROUTER VS CONTRACT PAGE OWNER MATRIX
+INFO - route ids discovered: __access-denied__, meta, google, tiktok, amazon, ads-manager, adsTotalBudgetInput, adsDailyBudgetInput, adsSpendInput, adsCtrInput, adsCpcInput, adsCpaInput, adsRoasInput, rewrite, translate, improve, campaign-plan, launch-plan, audience, offer, funnel, priority, write, check, sources, seo, repurpose, send, visual-brief, moodboard, image-prompt, asset-list, layout, brand-check, reel-script, storyboard, shot-list, voiceover, video-cta, publish-check, channel-pack, schedule, hashtags, approval-pack, ad-angle, ad-copy, targeting, creative-test, landing-match, seo-brief, insights, keywords, performance, content-gap, claims-check, safe-rewrite, evidence, gdpr, approval-notes, task-plan, workflow, handoff, timeline, checklist, reply-draft, ticket, sla, summary, sales-pitch, follow-up, objections, lead-brief, strategist, writer, media, video_lead, publisher, ads, analyst, compliance_reviewer, operations, customer_ops, sales_crm, ask, draft, review, route, execute, monitor, task, export, campaign-angle-generator, funnel-mapping, prioritize-next-move, hook-generator, caption-builder, cta-refiner, publisher-package, creative-brief-builder, format-mapper, asset-checklist, visual-direction, open-media-studio, write-video-hook, draft-script, build-storyboard, prepare-voiceover, map-video-asset-needs, publishing-checklist, final-packaging, channel-formatting, schedule-draft, open-publishing, ad-angle-generator, copy-variants, test-ideas, budget-notes, open-ads-manager, keyword-intent, meta-direction, opportunity-summary, analysis-plan, open-insights, approval-flags, safety-checklist, publish-readiness, open-governance, timeline-draft, handoff-routing, blocker-review, open-workflows, review-unified-inbox, summarize-customer-thread, draft-customer-reply, create-ticket-draft, check-sla-risk, prepare-escalation, customer-profile-snapshot, route-support-sales-ops, lead-qualification, outreach-draft, follow-up-sequence, crm-profile-summary, pipeline-next-step, dealer-salon-outreach, influencer-lead-plan, sales-handoff-draft, strategy, content, campaign, integration, asset, research, report, automation, current-project, selected-context, product, designer, researcher, team, chat, preview, tools, context, history, lead, publish, output, flow, ai-command, campaign-studio, content-strategist, copywriter, seo-writer, social-writer, email-writer, script-writer, marketplace-copywriter, brand-guardian, v1, content-studio, customer-center, governance, ads_operator, admin, home, facebook, instagram, youtube, website, paid, sales-channels, social-channels, marketing-tracking-tools, email-crm, ai-automation-tools, website-commerce, woocommerce, shopify, ebay, social, linkedin, analytics, ga4, gtm, meta-pixel, tiktok-pixel, search-console, custom-analytics, smtp, mailer, mailchimp, crm, meta-ads, google-ads, tiktok-ads, ops, google-drive, slack, telegram, notion, zapier-make, webhook, ai-media, openai, higgsfield, kling, runway, luma, google-ai, bytedance, recraft, elevenlabs, minimax, comfyui, coqui, bark, musicgen, integrations, library, back-to-ai-command, dismiss-guide, visual-director, video-strategist, voice-director, prompt-engineer, publishing-assistant, mediaProjectInput, mediaCampaignInput, mediaProductInput, mediaChannelInput, mediaFormatInput, mediaPurposeInput, mediaObjectiveInput, mediaBrandStyleInput, mediaPromptInput, mediaReferenceInput, mediaTitleInput, mediaReviewNotesInput, scene-1-hook-problem, scene-2-product-reveal, scene-3-texture-or-feature, scene-4-action-use, scene-5-result-confidence, scene-6-hero-cta, prompt_only, openai_gpt_image, higgsfield_soul, nano_banana, seedream, comfyui_flux, comfyui_sdxl, higgsfield_video, sora, veo, wan_video, hunyuan_video, cogvideox, animatediff, openai_audio, seed_audio, minimax_speech, coqui_tts, campaign_auto_route, campaign_paid_cloud, campaign_local_open, campaign_hybrid, campaign_paid_route, campaign_local_route, campaign_hybrid_route, media-studio, task-center, queue-center, job-monitor, notification-center, operations-centers, publishing, executive, videoLead, adsOperator, complianceReviewer, project, operating, ai, approval, presets, sync, alerts, safety, project-config, ai-automation, team-permissions, integration-sync, default, settings, business-basics, brand-identity, market-language, goals, competitors, channels, setupBusinessIdentityStatus, setupBrandStatus, setupLocalizationStatus, setupChannelsStatus, setupContentTruthStatus, setupAiGuidanceStatus, setup, launch-campaign, create-content-plan, build-media-job, prepare-publishing-package, generate-report, research-competitors, fix-integrations, workflows
+PASS - contract page home appears in route/page layer
+PASS - contract page ai-command appears in route/page layer
+PASS - contract page setup appears in route/page layer
+PASS - contract page library appears in route/page layer
+PASS - contract page integrations appears in route/page layer
+PASS - contract page campaign-studio appears in route/page layer
+PASS - contract page content-studio appears in route/page layer
+PASS - contract page media-studio appears in route/page layer
+PASS - contract page publishing appears in route/page layer
+PASS - contract page ads-manager appears in route/page layer
+PASS - contract page insights appears in route/page layer
+PASS - contract page research appears in route/page layer
+PASS - contract page workflows appears in route/page layer
+PASS - contract page task-center appears in route/page layer
+PASS - contract page queue-center appears in route/page layer
+PASS - contract page job-monitor appears in route/page layer
+PASS - contract page notification-center appears in route/page layer
+PASS - contract page operations-centers appears in route/page layer
+PASS - contract page customer-center appears in route/page layer
+PASS - contract page governance appears in route/page layer
+PASS - contract page settings appears in route/page layer
+WARN - route __access-denied__ missing contract owner: may be non-operational/system route or should be added later
+WARN - route meta missing contract owner: may be non-operational/system route or should be added later
+WARN - route google missing contract owner: may be non-operational/system route or should be added later
+WARN - route tiktok missing contract owner: may be non-operational/system route or should be added later
+WARN - route amazon missing contract owner: may be non-operational/system route or should be added later
+PASS - route ads-manager has contract owner
+WARN - route adsTotalBudgetInput missing contract owner: may be non-operational/system route or should be added later
+WARN - route adsDailyBudgetInput missing contract owner: may be non-operational/system route or should be added later
+WARN - route adsSpendInput missing contract owner: may be non-operational/system route or should be added later
+WARN - route adsCtrInput missing contract owner: may be non-operational/system route or should be added later
+WARN - route adsCpcInput missing contract owner: may be non-operational/system route or should be added later
+WARN - route adsCpaInput missing contract owner: may be non-operational/system route or should be added later
+WARN - route adsRoasInput missing contract owner: may be non-operational/system route or should be added later
+WARN - route rewrite missing contract owner: may be non-operational/system route or should be added later
+WARN - route translate missing contract owner: may be non-operational/system route or should be added later
+WARN - route improve missing contract owner: may be non-operational/system route or should be added later
+WARN - route campaign-plan missing contract owner: may be non-operational/system route or should be added later
+WARN - route launch-plan missing contract owner: may be non-operational/system route or should be added later
+WARN - route audience missing contract owner: may be non-operational/system route or should be added later
+WARN - route offer missing contract owner: may be non-operational/system route or should be added later
+WARN - route funnel missing contract owner: may be non-operational/system route or should be added later
+WARN - route priority missing contract owner: may be non-operational/system route or should be added later
+WARN - route write missing contract owner: may be non-operational/system route or should be added later
+WARN - route check missing contract owner: may be non-operational/system route or should be added later
+WARN - route sources missing contract owner: may be non-operational/system route or should be added later
+WARN - route seo missing contract owner: may be non-operational/system route or should be added later
+WARN - route repurpose missing contract owner: may be non-operational/system route or should be added later
+WARN - route send missing contract owner: may be non-operational/system route or should be added later
+WARN - route visual-brief missing contract owner: may be non-operational/system route or should be added later
+WARN - route moodboard missing contract owner: may be non-operational/system route or should be added later
+WARN - route image-prompt missing contract owner: may be non-operational/system route or should be added later
+WARN - route asset-list missing contract owner: may be non-operational/system route or should be added later
+WARN - route layout missing contract owner: may be non-operational/system route or should be added later
+WARN - route brand-check missing contract owner: may be non-operational/system route or should be added later
+WARN - route reel-script missing contract owner: may be non-operational/system route or should be added later
+WARN - route storyboard missing contract owner: may be non-operational/system route or should be added later
+WARN - route shot-list missing contract owner: may be non-operational/system route or should be added later
+WARN - route voiceover missing contract owner: may be non-operational/system route or should be added later
+WARN - route video-cta missing contract owner: may be non-operational/system route or should be added later
+WARN - route publish-check missing contract owner: may be non-operational/system route or should be added later
+WARN - route channel-pack missing contract owner: may be non-operational/system route or should be added later
+WARN - route schedule missing contract owner: may be non-operational/system route or should be added later
+WARN - route hashtags missing contract owner: may be non-operational/system route or should be added later
+WARN - route approval-pack missing contract owner: may be non-operational/system route or should be added later
+WARN - route ad-angle missing contract owner: may be non-operational/system route or should be added later
+WARN - route ad-copy missing contract owner: may be non-operational/system route or should be added later
+WARN - route targeting missing contract owner: may be non-operational/system route or should be added later
+WARN - route creative-test missing contract owner: may be non-operational/system route or should be added later
+WARN - route landing-match missing contract owner: may be non-operational/system route or should be added later
+WARN - route seo-brief missing contract owner: may be non-operational/system route or should be added later
+PASS - route insights has contract owner
+WARN - route keywords missing contract owner: may be non-operational/system route or should be added later
+WARN - route performance missing contract owner: may be non-operational/system route or should be added later
+WARN - route content-gap missing contract owner: may be non-operational/system route or should be added later
+WARN - route claims-check missing contract owner: may be non-operational/system route or should be added later
+WARN - route safe-rewrite missing contract owner: may be non-operational/system route or should be added later
+WARN - route evidence missing contract owner: may be non-operational/system route or should be added later
+WARN - route gdpr missing contract owner: may be non-operational/system route or should be added later
+WARN - route approval-notes missing contract owner: may be non-operational/system route or should be added later
+WARN - route task-plan missing contract owner: may be non-operational/system route or should be added later
+WARN - route workflow missing contract owner: may be non-operational/system route or should be added later
+WARN - route handoff missing contract owner: may be non-operational/system route or should be added later
+WARN - route timeline missing contract owner: may be non-operational/system route or should be added later
+WARN - route checklist missing contract owner: may be non-operational/system route or should be added later
+WARN - route reply-draft missing contract owner: may be non-operational/system route or should be added later
+WARN - route ticket missing contract owner: may be non-operational/system route or should be added later
+WARN - route sla missing contract owner: may be non-operational/system route or should be added later
+WARN - route summary missing contract owner: may be non-operational/system route or should be added later
+WARN - route sales-pitch missing contract owner: may be non-operational/system route or should be added later
+WARN - route follow-up missing contract owner: may be non-operational/system route or should be added later
+WARN - route objections missing contract owner: may be non-operational/system route or should be added later
+WARN - route lead-brief missing contract owner: may be non-operational/system route or should be added later
+WARN - route strategist missing contract owner: may be non-operational/system route or should be added later
+WARN - route writer missing contract owner: may be non-operational/system route or should be added later
+WARN - route media missing contract owner: may be non-operational/system route or should be added later
+WARN - route video_lead missing contract owner: may be non-operational/system route or should be added later
+WARN - route publisher missing contract owner: may be non-operational/system route or should be added later
+WARN - route ads missing contract owner: may be non-operational/system route or should be added later
+WARN - route analyst missing contract owner: may be non-operational/system route or should be added later
+WARN - route compliance_reviewer missing contract owner: may be non-operational/system route or should be added later
+WARN - route operations missing contract owner: may be non-operational/system route or should be added later
+WARN - route customer_ops missing contract owner: may be non-operational/system route or should be added later
+WARN - route sales_crm missing contract owner: may be non-operational/system route or should be added later
+WARN - route ask missing contract owner: may be non-operational/system route or should be added later
+WARN - route draft missing contract owner: may be non-operational/system route or should be added later
+WARN - route review missing contract owner: may be non-operational/system route or should be added later
+WARN - route route missing contract owner: may be non-operational/system route or should be added later
+WARN - route execute missing contract owner: may be non-operational/system route or should be added later
+WARN - route monitor missing contract owner: may be non-operational/system route or should be added later
+WARN - route task missing contract owner: may be non-operational/system route or should be added later
+WARN - route export missing contract owner: may be non-operational/system route or should be added later
+WARN - route campaign-angle-generator missing contract owner: may be non-operational/system route or should be added later
+WARN - route funnel-mapping missing contract owner: may be non-operational/system route or should be added later
+WARN - route prioritize-next-move missing contract owner: may be non-operational/system route or should be added later
+WARN - route hook-generator missing contract owner: may be non-operational/system route or should be added later
+WARN - route caption-builder missing contract owner: may be non-operational/system route or should be added later
+WARN - route cta-refiner missing contract owner: may be non-operational/system route or should be added later
+WARN - route publisher-package missing contract owner: may be non-operational/system route or should be added later
+WARN - route creative-brief-builder missing contract owner: may be non-operational/system route or should be added later
+WARN - route format-mapper missing contract owner: may be non-operational/system route or should be added later
+WARN - route asset-checklist missing contract owner: may be non-operational/system route or should be added later
+WARN - route visual-direction missing contract owner: may be non-operational/system route or should be added later
+WARN - route open-media-studio missing contract owner: may be non-operational/system route or should be added later
+WARN - route write-video-hook missing contract owner: may be non-operational/system route or should be added later
+WARN - route draft-script missing contract owner: may be non-operational/system route or should be added later
+WARN - route build-storyboard missing contract owner: may be non-operational/system route or should be added later
+WARN - route prepare-voiceover missing contract owner: may be non-operational/system route or should be added later
+WARN - route map-video-asset-needs missing contract owner: may be non-operational/system route or should be added later
+WARN - route publishing-checklist missing contract owner: may be non-operational/system route or should be added later
+WARN - route final-packaging missing contract owner: may be non-operational/system route or should be added later
+WARN - route channel-formatting missing contract owner: may be non-operational/system route or should be added later
+WARN - route schedule-draft missing contract owner: may be non-operational/system route or should be added later
+WARN - route open-publishing missing contract owner: may be non-operational/system route or should be added later
+WARN - route ad-angle-generator missing contract owner: may be non-operational/system route or should be added later
+WARN - route copy-variants missing contract owner: may be non-operational/system route or should be added later
+WARN - route test-ideas missing contract owner: may be non-operational/system route or should be added later
+WARN - route budget-notes missing contract owner: may be non-operational/system route or should be added later
+WARN - route open-ads-manager missing contract owner: may be non-operational/system route or should be added later
+WARN - route keyword-intent missing contract owner: may be non-operational/system route or should be added later
+WARN - route meta-direction missing contract owner: may be non-operational/system route or should be added later
+WARN - route opportunity-summary missing contract owner: may be non-operational/system route or should be added later
+WARN - route analysis-plan missing contract owner: may be non-operational/system route or should be added later
+WARN - route open-insights missing contract owner: may be non-operational/system route or should be added later
+WARN - route approval-flags missing contract owner: may be non-operational/system route or should be added later
+WARN - route safety-checklist missing contract owner: may be non-operational/system route or should be added later
+WARN - route publish-readiness missing contract owner: may be non-operational/system route or should be added later
+WARN - route open-governance missing contract owner: may be non-operational/system route or should be added later
+WARN - route timeline-draft missing contract owner: may be non-operational/system route or should be added later
+WARN - route handoff-routing missing contract owner: may be non-operational/system route or should be added later
+WARN - route blocker-review missing contract owner: may be non-operational/system route or should be added later
+WARN - route open-workflows missing contract owner: may be non-operational/system route or should be added later
+WARN - route review-unified-inbox missing contract owner: may be non-operational/system route or should be added later
+WARN - route summarize-customer-thread missing contract owner: may be non-operational/system route or should be added later
+WARN - route draft-customer-reply missing contract owner: may be non-operational/system route or should be added later
+WARN - route create-ticket-draft missing contract owner: may be non-operational/system route or should be added later
+WARN - route check-sla-risk missing contract owner: may be non-operational/system route or should be added later
+WARN - route prepare-escalation missing contract owner: may be non-operational/system route or should be added later
+WARN - route customer-profile-snapshot missing contract owner: may be non-operational/system route or should be added later
+WARN - route route-support-sales-ops missing contract owner: may be non-operational/system route or should be added later
+WARN - route lead-qualification missing contract owner: may be non-operational/system route or should be added later
+WARN - route outreach-draft missing contract owner: may be non-operational/system route or should be added later
+WARN - route follow-up-sequence missing contract owner: may be non-operational/system route or should be added later
+WARN - route crm-profile-summary missing contract owner: may be non-operational/system route or should be added later
+WARN - route pipeline-next-step missing contract owner: may be non-operational/system route or should be added later
+WARN - route dealer-salon-outreach missing contract owner: may be non-operational/system route or should be added later
+WARN - route influencer-lead-plan missing contract owner: may be non-operational/system route or should be added later
+WARN - route sales-handoff-draft missing contract owner: may be non-operational/system route or should be added later
+WARN - route strategy missing contract owner: may be non-operational/system route or should be added later
+WARN - route content missing contract owner: may be non-operational/system route or should be added later
+WARN - route campaign missing contract owner: may be non-operational/system route or should be added later
+WARN - route integration missing contract owner: may be non-operational/system route or should be added later
+WARN - route asset missing contract owner: may be non-operational/system route or should be added later
+PASS - route research has contract owner
+WARN - route report missing contract owner: may be non-operational/system route or should be added later
+WARN - route automation missing contract owner: may be non-operational/system route or should be added later
+WARN - route current-project missing contract owner: may be non-operational/system route or should be added later
+WARN - route selected-context missing contract owner: may be non-operational/system route or should be added later
+WARN - route product missing contract owner: may be non-operational/system route or should be added later
+WARN - route designer missing contract owner: may be non-operational/system route or should be added later
+WARN - route researcher missing contract owner: may be non-operational/system route or should be added later
+WARN - route team missing contract owner: may be non-operational/system route or should be added later
+WARN - route chat missing contract owner: may be non-operational/system route or should be added later
+WARN - route preview missing contract owner: may be non-operational/system route or should be added later
+WARN - route tools missing contract owner: may be non-operational/system route or should be added later
+WARN - route context missing contract owner: may be non-operational/system route or should be added later
+WARN - route history missing contract owner: may be non-operational/system route or should be added later
+WARN - route lead missing contract owner: may be non-operational/system route or should be added later
+WARN - route publish missing contract owner: may be non-operational/system route or should be added later
+WARN - route output missing contract owner: may be non-operational/system route or should be added later
+WARN - route flow missing contract owner: may be non-operational/system route or should be added later
+PASS - route ai-command has contract owner
+PASS - route campaign-studio has contract owner
+WARN - route content-strategist missing contract owner: may be non-operational/system route or should be added later
+WARN - route copywriter missing contract owner: may be non-operational/system route or should be added later
+WARN - route seo-writer missing contract owner: may be non-operational/system route or should be added later
+WARN - route social-writer missing contract owner: may be non-operational/system route or should be added later
+WARN - route email-writer missing contract owner: may be non-operational/system route or should be added later
+WARN - route script-writer missing contract owner: may be non-operational/system route or should be added later
+WARN - route marketplace-copywriter missing contract owner: may be non-operational/system route or should be added later
+WARN - route brand-guardian missing contract owner: may be non-operational/system route or should be added later
+WARN - route v1 missing contract owner: may be non-operational/system route or should be added later
+PASS - route content-studio has contract owner
+PASS - route customer-center has contract owner
+PASS - route governance has contract owner
+WARN - route ads_operator missing contract owner: may be non-operational/system route or should be added later
+WARN - route admin missing contract owner: may be non-operational/system route or should be added later
+PASS - route home has contract owner
+WARN - route facebook missing contract owner: may be non-operational/system route or should be added later
+WARN - route instagram missing contract owner: may be non-operational/system route or should be added later
+WARN - route youtube missing contract owner: may be non-operational/system route or should be added later
+WARN - route website missing contract owner: may be non-operational/system route or should be added later
+WARN - route paid missing contract owner: may be non-operational/system route or should be added later
+WARN - route sales-channels missing contract owner: may be non-operational/system route or should be added later
+WARN - route social-channels missing contract owner: may be non-operational/system route or should be added later
+WARN - route marketing-tracking-tools missing contract owner: may be non-operational/system route or should be added later
+WARN - route email-crm missing contract owner: may be non-operational/system route or should be added later
+WARN - route ai-automation-tools missing contract owner: may be non-operational/system route or should be added later
+WARN - route website-commerce missing contract owner: may be non-operational/system route or should be added later
+WARN - route woocommerce missing contract owner: may be non-operational/system route or should be added later
+WARN - route shopify missing contract owner: may be non-operational/system route or should be added later
+WARN - route ebay missing contract owner: may be non-operational/system route or should be added later
+WARN - route social missing contract owner: may be non-operational/system route or should be added later
+WARN - route linkedin missing contract owner: may be non-operational/system route or should be added later
+WARN - route analytics missing contract owner: may be non-operational/system route or should be added later
+WARN - route ga4 missing contract owner: may be non-operational/system route or should be added later
+WARN - route gtm missing contract owner: may be non-operational/system route or should be added later
+WARN - route meta-pixel missing contract owner: may be non-operational/system route or should be added later
+WARN - route tiktok-pixel missing contract owner: may be non-operational/system route or should be added later
+WARN - route search-console missing contract owner: may be non-operational/system route or should be added later
+WARN - route custom-analytics missing contract owner: may be non-operational/system route or should be added later
+WARN - route smtp missing contract owner: may be non-operational/system route or should be added later
+WARN - route mailer missing contract owner: may be non-operational/system route or should be added later
+WARN - route mailchimp missing contract owner: may be non-operational/system route or should be added later
+WARN - route crm missing contract owner: may be non-operational/system route or should be added later
+WARN - route meta-ads missing contract owner: may be non-operational/system route or should be added later
+WARN - route google-ads missing contract owner: may be non-operational/system route or should be added later
+WARN - route tiktok-ads missing contract owner: may be non-operational/system route or should be added later
+WARN - route ops missing contract owner: may be non-operational/system route or should be added later
+WARN - route google-drive missing contract owner: may be non-operational/system route or should be added later
+WARN - route slack missing contract owner: may be non-operational/system route or should be added later
+WARN - route telegram missing contract owner: may be non-operational/system route or should be added later
+WARN - route notion missing contract owner: may be non-operational/system route or should be added later
+WARN - route zapier-make missing contract owner: may be non-operational/system route or should be added later
+WARN - route webhook missing contract owner: may be non-operational/system route or should be added later
+WARN - route ai-media missing contract owner: may be non-operational/system route or should be added later
+WARN - route openai missing contract owner: may be non-operational/system route or should be added later
+WARN - route higgsfield missing contract owner: may be non-operational/system route or should be added later
+WARN - route kling missing contract owner: may be non-operational/system route or should be added later
+WARN - route runway missing contract owner: may be non-operational/system route or should be added later
+WARN - route luma missing contract owner: may be non-operational/system route or should be added later
+WARN - route google-ai missing contract owner: may be non-operational/system route or should be added later
+WARN - route bytedance missing contract owner: may be non-operational/system route or should be added later
+WARN - route recraft missing contract owner: may be non-operational/system route or should be added later
+WARN - route elevenlabs missing contract owner: may be non-operational/system route or should be added later
+WARN - route minimax missing contract owner: may be non-operational/system route or should be added later
+WARN - route comfyui missing contract owner: may be non-operational/system route or should be added later
+WARN - route coqui missing contract owner: may be non-operational/system route or should be added later
+WARN - route bark missing contract owner: may be non-operational/system route or should be added later
+WARN - route musicgen missing contract owner: may be non-operational/system route or should be added later
+PASS - route integrations has contract owner
+PASS - route library has contract owner
+WARN - route back-to-ai-command missing contract owner: may be non-operational/system route or should be added later
+WARN - route dismiss-guide missing contract owner: may be non-operational/system route or should be added later
+WARN - route visual-director missing contract owner: may be non-operational/system route or should be added later
+WARN - route video-strategist missing contract owner: may be non-operational/system route or should be added later
+WARN - route voice-director missing contract owner: may be non-operational/system route or should be added later
+WARN - route prompt-engineer missing contract owner: may be non-operational/system route or should be added later
+WARN - route publishing-assistant missing contract owner: may be non-operational/system route or should be added later
+WARN - route mediaProjectInput missing contract owner: may be non-operational/system route or should be added later
+WARN - route mediaCampaignInput missing contract owner: may be non-operational/system route or should be added later
+WARN - route mediaProductInput missing contract owner: may be non-operational/system route or should be added later
+WARN - route mediaChannelInput missing contract owner: may be non-operational/system route or should be added later
+WARN - route mediaFormatInput missing contract owner: may be non-operational/system route or should be added later
+WARN - route mediaPurposeInput missing contract owner: may be non-operational/system route or should be added later
+WARN - route mediaObjectiveInput missing contract owner: may be non-operational/system route or should be added later
+WARN - route mediaBrandStyleInput missing contract owner: may be non-operational/system route or should be added later
+WARN - route mediaPromptInput missing contract owner: may be non-operational/system route or should be added later
+WARN - route mediaReferenceInput missing contract owner: may be non-operational/system route or should be added later
+WARN - route mediaTitleInput missing contract owner: may be non-operational/system route or should be added later
+WARN - route mediaReviewNotesInput missing contract owner: may be non-operational/system route or should be added later
+WARN - route scene-1-hook-problem missing contract owner: may be non-operational/system route or should be added later
+WARN - route scene-2-product-reveal missing contract owner: may be non-operational/system route or should be added later
+WARN - route scene-3-texture-or-feature missing contract owner: may be non-operational/system route or should be added later
+WARN - route scene-4-action-use missing contract owner: may be non-operational/system route or should be added later
+WARN - route scene-5-result-confidence missing contract owner: may be non-operational/system route or should be added later
+WARN - route scene-6-hero-cta missing contract owner: may be non-operational/system route or should be added later
+WARN - route prompt_only missing contract owner: may be non-operational/system route or should be added later
+WARN - route openai_gpt_image missing contract owner: may be non-operational/system route or should be added later
+WARN - route higgsfield_soul missing contract owner: may be non-operational/system route or should be added later
+WARN - route nano_banana missing contract owner: may be non-operational/system route or should be added later
+WARN - route seedream missing contract owner: may be non-operational/system route or should be added later
+WARN - route comfyui_flux missing contract owner: may be non-operational/system route or should be added later
+WARN - route comfyui_sdxl missing contract owner: may be non-operational/system route or should be added later
+WARN - route higgsfield_video missing contract owner: may be non-operational/system route or should be added later
+WARN - route sora missing contract owner: may be non-operational/system route or should be added later
+WARN - route veo missing contract owner: may be non-operational/system route or should be added later
+WARN - route wan_video missing contract owner: may be non-operational/system route or should be added later
+WARN - route hunyuan_video missing contract owner: may be non-operational/system route or should be added later
+WARN - route cogvideox missing contract owner: may be non-operational/system route or should be added later
+WARN - route animatediff missing contract owner: may be non-operational/system route or should be added later
+WARN - route openai_audio missing contract owner: may be non-operational/system route or should be added later
+WARN - route seed_audio missing contract owner: may be non-operational/system route or should be added later
+WARN - route minimax_speech missing contract owner: may be non-operational/system route or should be added later
+WARN - route coqui_tts missing contract owner: may be non-operational/system route or should be added later
+WARN - route campaign_auto_route missing contract owner: may be non-operational/system route or should be added later
+WARN - route campaign_paid_cloud missing contract owner: may be non-operational/system route or should be added later
+WARN - route campaign_local_open missing contract owner: may be non-operational/system route or should be added later
+WARN - route campaign_hybrid missing contract owner: may be non-operational/system route or should be added later
+WARN - route campaign_paid_route missing contract owner: may be non-operational/system route or should be added later
+WARN - route campaign_local_route missing contract owner: may be non-operational/system route or should be added later
+WARN - route campaign_hybrid_route missing contract owner: may be non-operational/system route or should be added later
+PASS - route media-studio has contract owner
+PASS - route task-center has contract owner
+PASS - route queue-center has contract owner
+PASS - route job-monitor has contract owner
+PASS - route notification-center has contract owner
+PASS - route operations-centers has contract owner
+PASS - route publishing has contract owner
+WARN - route executive missing contract owner: may be non-operational/system route or should be added later
+WARN - route videoLead missing contract owner: may be non-operational/system route or should be added later
+WARN - route adsOperator missing contract owner: may be non-operational/system route or should be added later
+WARN - route complianceReviewer missing contract owner: may be non-operational/system route or should be added later
+WARN - route project missing contract owner: may be non-operational/system route or should be added later
+WARN - route operating missing contract owner: may be non-operational/system route or should be added later
+WARN - route ai missing contract owner: may be non-operational/system route or should be added later
+WARN - route approval missing contract owner: may be non-operational/system route or should be added later
+WARN - route presets missing contract owner: may be non-operational/system route or should be added later
+WARN - route sync missing contract owner: may be non-operational/system route or should be added later
+WARN - route alerts missing contract owner: may be non-operational/system route or should be added later
+WARN - route safety missing contract owner: may be non-operational/system route or should be added later
+WARN - route project-config missing contract owner: may be non-operational/system route or should be added later
+WARN - route ai-automation missing contract owner: may be non-operational/system route or should be added later
+WARN - route team-permissions missing contract owner: may be non-operational/system route or should be added later
+WARN - route integration-sync missing contract owner: may be non-operational/system route or should be added later
+WARN - route default missing contract owner: may be non-operational/system route or should be added later
+PASS - route settings has contract owner
+WARN - route business-basics missing contract owner: may be non-operational/system route or should be added later
+WARN - route brand-identity missing contract owner: may be non-operational/system route or should be added later
+WARN - route market-language missing contract owner: may be non-operational/system route or should be added later
+WARN - route goals missing contract owner: may be non-operational/system route or should be added later
+WARN - route competitors missing contract owner: may be non-operational/system route or should be added later
+WARN - route channels missing contract owner: may be non-operational/system route or should be added later
+WARN - route setupBusinessIdentityStatus missing contract owner: may be non-operational/system route or should be added later
+WARN - route setupBrandStatus missing contract owner: may be non-operational/system route or should be added later
+WARN - route setupLocalizationStatus missing contract owner: may be non-operational/system route or should be added later
+WARN - route setupChannelsStatus missing contract owner: may be non-operational/system route or should be added later
+WARN - route setupContentTruthStatus missing contract owner: may be non-operational/system route or should be added later
+WARN - route setupAiGuidanceStatus missing contract owner: may be non-operational/system route or should be added later
+PASS - route setup has contract owner
+WARN - route launch-campaign missing contract owner: may be non-operational/system route or should be added later
+WARN - route create-content-plan missing contract owner: may be non-operational/system route or should be added later
+WARN - route build-media-job missing contract owner: may be non-operational/system route or should be added later
+WARN - route prepare-publishing-package missing contract owner: may be non-operational/system route or should be added later
+WARN - route generate-report missing contract owner: may be non-operational/system route or should be added later
+WARN - route research-competitors missing contract owner: may be non-operational/system route or should be added later
+WARN - route fix-integrations missing contract owner: may be non-operational/system route or should be added later
+PASS - route workflows has contract owner
+
+6) HANDOFF CONFORMANCE
+PASS - shared-context exists
+PASS - shared-context has setSharedHandoff
+PASS - shared-context has getSharedHandoff
+INFO - handoff pair signals: campaign-studio->ai-command, content-studio->media-studio, content-studio->publishing, content-studio->library, content-studio->ai-command, insights->ai-command, media-studio->library, media-studio->publishing, media-studio->ai-command, publishing->ai-command, research->ai-command, settings->governance, workflows->ai-command, workflows->workflows, workflows->task-center, unknown->ai-command, unknown->library, unknown->publishing, unknown->workflows, unknown->task-center
+PASS - handoff campaign-studio -> ai-command conforms
+PASS - handoff content-studio -> media-studio conforms
+PASS - handoff content-studio -> publishing conforms
+PASS - handoff content-studio -> library conforms
+PASS - handoff content-studio -> ai-command conforms
+PASS - handoff insights -> ai-command conforms
+PASS - handoff media-studio -> library conforms
+PASS - handoff media-studio -> publishing conforms
+PASS - handoff media-studio -> ai-command conforms
+PASS - handoff publishing -> ai-command conforms
+PASS - handoff research -> ai-command conforms
+WARN - handoff settings -> governance not in contract rules: verify before enforcing handoff rules
+PASS - handoff workflows -> ai-command conforms
+WARN - handoff workflows -> workflows not in contract rules: verify before enforcing handoff rules
+PASS - handoff workflows -> task-center conforms
+PASS - handoff destination ai-command has contract owner
+PASS - handoff destination library has contract owner
+PASS - handoff destination publishing has contract owner
+PASS - handoff destination workflows has contract owner
+PASS - handoff destination task-center has contract owner
+
+7) REQUEST / OUTPUT VOCABULARY CONFORMANCE
+WARN - runtime does not mention output type answer_only: may be contract-only vocabulary
+PASS - runtime mentions output type guidance
+PASS - runtime mentions output type draft
+PASS - runtime mentions output type task_preview
+WARN - runtime does not mention output type workflow_preview: may be contract-only vocabulary
+PASS - runtime mentions output type handoff
+WARN - runtime does not mention output type approval_request: may be contract-only vocabulary
+WARN - runtime does not mention output type execution_review: may be contract-only vocabulary
+WARN - runtime does not mention request type general_question: expected until intake router integration
+WARN - runtime does not mention request type guidance_request: expected until intake router integration
+WARN - runtime does not mention request type single_task: expected until intake router integration
+WARN - runtime does not mention request type project_setup: expected until intake router integration
+WARN - runtime does not mention request type campaign_project: expected until intake router integration
+WARN - runtime does not mention request type content_request: expected until intake router integration
+WARN - runtime does not mention request type media_request: expected until intake router integration
+WARN - runtime does not mention request type publishing_request: expected until intake router integration
+WARN - runtime does not mention request type ads_request: expected until intake router integration
+WARN - runtime does not mention request type customer_request: expected until intake router integration
+WARN - runtime does not mention request type workflow_request: expected until intake router integration
+WARN - runtime does not mention request type task_request: expected until intake router integration
+WARN - runtime does not mention request type governance_request: expected until intake router integration
+WARN - runtime does not mention request type execution_request: expected until intake router integration
+
+8) INTEGRATION READINESS DECISION
+PASS - no hard conformance failures
+WARN - runtime integration should wait: 318 risky warning(s) require review
+
+SUMMARY
+Failures: 0
+Warnings: 341
+Risky warnings: 318
+
+VERDICT: HOLD RUNTIME INTEGRATION — REVIEW DRIFT FIRST

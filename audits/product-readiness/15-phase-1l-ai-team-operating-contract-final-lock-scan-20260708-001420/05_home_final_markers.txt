@@ -1,0 +1,167 @@
+Home syntax:
+
+Home bridge + label markers:
+742:function setGlobalAiPrompt($, prompt) {
+878:                  Ask Head Office AI
+1047:                <h2 class="mhos-os-panel-title">${escapeHtml(recommendedSpecialist?.name || "Executive AI")}</h2>
+1055:                <button class="quick-action-btn mhos-motion-soft" type="button" data-role-id="${escapeHtml(recommendedSpecialist.id)}">
+1056:                  <span class="home-action-title">Ask ${escapeHtml(recommendedSpecialist?.name || "Recommended AI")}</span>
+1057:                  <span class="home-action-meta">Uses the recommended specialist context. No execution from Home.</span>
+1101:      setGlobalAiPrompt($, prompt);
+1102:      navigateTo("ai-command");
+1107:    const handleAiRoleClick = (roleId, roleName) => {
+1130:          setGlobalAiPrompt($, dashboard.nextBestAction.recommendation);
+1158:    const aiRoleCards = document.querySelectorAll(".quick-action-btn[data-role-id], .home-ai-team-card[data-role-id], .mhos-specialist[data-role-id], .mhos-workflow-step[data-role-id]");
+1160:      const roleId = card.getAttribute("data-role-id");
+1162:      card.onclick = () => handleAiRoleClick(roleId, roleName);
+
+Home recommended specialist render window:
+
+          <aside class="mhos-os-rail" aria-label="Action and AI Guidance">
+
+            <section class="mhos-os-action-panel">
+              <div>
+                <p class="mhos-os-kicker">Workspaces</p>
+                <h2 class="mhos-os-panel-title">Open the owner</h2>
+                <p class="mhos-os-panel-copy">These buttons open the right workspace. Home does not save, upload, approve, publish, send, or execute.</p>
+              </div>
+
+              <button id="homeQuickReviewReadinessBtn" class="quick-action-btn" type="button">
+                <span class="home-action-title">Open Setup Readiness</span>
+                <span class="home-action-meta">Review foundation gaps in the Setup workspace.</span>
+              </button>
+              <button id="homeQuickAssetLibraryBtn" class="quick-action-btn" type="button">
+                <span class="home-action-title">Open Asset Library</span>
+                <span class="home-action-meta">Review source assets in the Library workspace.</span>
+              </button>
+              <button id="homeQuickStartCampaignBtn" class="quick-action-btn" type="button">
+                <span class="home-action-title">Open Campaign Studio</span>
+                <span class="home-action-meta">Plan the next campaign wave in its workspace.</span>
+              </button>
+            </section>
+
+            <section class="mhos-os-ai-panel">
+              <div>
+                <p class="mhos-os-kicker">Recommended AI Specialist</p>
+                <h2 class="mhos-os-panel-title">${escapeHtml(recommendedSpecialist?.name || "Executive AI")}</h2>
+                <p class="mhos-os-panel-copy">
+                  ${escapeHtml(recommendedSpecialist?.summary || "Use AI Command to turn the current state into a clear operating plan.")}
+                  AI prepares guidance only; destination workspaces own any execution.
+                </p>
+              </div>
+
+              ${recommendedSpecialist ? `
+                <button class="quick-action-btn mhos-motion-soft" type="button" data-role-id="${escapeHtml(recommendedSpecialist.id)}">
+                  <span class="home-action-title">Ask ${escapeHtml(recommendedSpecialist?.name || "Recommended AI")}</span>
+                  <span class="home-action-meta">Uses the recommended specialist context. No execution from Home.</span>
+                </button>
+              ` : ""}
+
+</section>
+
+            <section class="mhos-os-ai-panel">
+              <div>
+                <p class="mhos-os-kicker">AI guidance</p>
+                <h2 class="mhos-os-panel-title">Ask safely</h2>
+                <p class="mhos-os-panel-copy">Use one AI prompt when you need explanation or a safe action plan. Nothing executes from Home.</p>
+              </div>
+
+              <button id="homePromptNextBtn" class="home-ai-prompt-card" type="button">
+                <span class="home-prompt-title">What is the next executive action?</span>
+                <span class="home-prompt-meta">Prepare a short explanation and handoff path.</span>
+              </button>
+              <button id="homePromptReadinessBtn" class="home-ai-prompt-card" type="button">
+                <span class="home-prompt-title">Why is readiness low?</span>
+                <span class="home-prompt-meta">Explain blockers and readiness gaps in simple terms.</span>
+              </button>
+</section>
+
+            <section class="mhos-os-evidence-panel">
+              <p class="mhos-os-kicker">Customer operations</p>
+              <h2 class="mhos-os-panel-title">Not enabled as a live channel yet</h2>
+              <p class="mhos-os-panel-copy">
+                ${escapeHtml(compactModuleState(dashboard.health?.customerOpsStatus, "Customer Ops activates when CRM/live channels are connected."))}
+              </p>
+
+Home click binding window:
+              </p>
+              <span class="mhos-os-chip">${escapeHtml(compactModuleState(dashboard.health?.commReadiness, "Communication readiness activates when live channels are connected."))}</span>
+            </section>
+
+          </aside>
+        </div>
+
+      </div>
+    `;
+    
+    const openRoute = (route, message = "") => {
+      navigateTo(route);
+      if (message) showMessage?.(message);
+    };
+
+    const openAiWithPrompt = (prompt) => {
+      setGlobalAiPrompt($, prompt);
+      navigateTo("ai-command");
+      showMessage?.("Prompt prepared in AI Command.");
+    };
+
+
+    const handleAiRoleClick = (roleId, roleName) => {
+      const projectLabel = dashboard.projectName || "this project";
+      const rolePrompts = {
+        strategist: `Act as the Strategist for ${projectLabel}. Review readiness, blockers, campaign state, and next best action. Give me the highest-impact strategic moves. Do not execute anything; prepare guidance only.`,
+        writer: `Act as the Content Writer for ${projectLabel}. Review the current project context and suggest the next best writing actions, messaging angles, and content priorities. Do not execute anything; prepare guidance only.`,
+        designer: `Act as the Media Director for ${projectLabel}. Review the visual/asset readiness and suggest the next best creative actions. Do not execute anything; prepare guidance only.`,
+        video_lead: `Act as the Video Lead for ${projectLabel}. Review the project context and suggest the next best short-form/video actions. Do not execute anything; prepare guidance only.`,
+        publisher: `Act as the Publisher for ${projectLabel}. Review publishing readiness, scheduled jobs, blockers, and what must be checked before publishing. Do not execute anything; prepare guidance only.`,
+        ads_operator: `Act as the Ads Optimizer for ${projectLabel}. Review campaign readiness, channels, and paid media opportunities. Suggest next ad actions safely. Do not execute anything; prepare guidance only.`,
+        analyst: `Act as the SEO & Insights Analyst for ${projectLabel}. Review readiness, signals, gaps, and recent activity. Tell me what data matters most and what to improve next. Do not execute anything; prepare guidance only.`,
+        compliance_reviewer: `Act as the Compliance Reviewer for ${projectLabel}. Review launch blockers, claims, approvals, and publishing safety. Tell me what must be checked before release. Do not execute anything; prepare guidance only.`,
+        admin: `Act as the Operations Lead for ${projectLabel}. Review tasks, blockers, failed jobs, and execution health. Give me the next operational steps. Do not execute anything; prepare guidance only.`
+      };
+
+      const prompt = rolePrompts[roleId] || `Act as the ${roleName} specialist for ${projectLabel}. Review the current project context and recommend the next best actions. Do not execute anything; prepare guidance only.`;
+      openAiWithPrompt(prompt);
+      showMessage?.(`${roleName} context prepared in AI Command. Review and send when ready.`);
+    };
+
+    const nextBtn = $("homePrimaryActionBtn");
+    if (nextBtn) {
+      nextBtn.onclick = () => {
+        if (dashboard.nextBestAction.route === "ai-command") {
+          setGlobalAiPrompt($, dashboard.nextBestAction.recommendation);
+        }
+        openRoute(dashboard.nextBestAction.route, "Next best action opened.");
+      };
+    }
+
+    const askNextActionBtn = $("homeAskNextActionBtn");
+    if (askNextActionBtn) {
+      askNextActionBtn.onclick = () => openAiWithPrompt(`Explain this next best action like an operations director and give me the exact safe steps: ${dashboard.nextBestAction.recommendation}. Include which workspace owns it, what it unlocks for campaign creation, scheduled posts, publishing, ads, and customer operations. Do not execute anything.`);
+    }
+
+    const quickCampaignBtn = $("homeQuickStartCampaignBtn");
+    if (quickCampaignBtn) quickCampaignBtn.onclick = () => openRoute("campaign-studio");
+
+    const quickAssetBtn = $("homeQuickAssetLibraryBtn") || $("homeQuickUploadAssetBtn");
+    if (quickAssetBtn) quickAssetBtn.onclick = () => openRoute("library");
+
+    const quickReadinessBtn = $("homeQuickReviewReadinessBtn");
+    if (quickReadinessBtn) quickReadinessBtn.onclick = () => openRoute("setup");
+    const promptNextBtn = $("homePromptNextBtn");
+    if (promptNextBtn) {
+      promptNextBtn.onclick = () => openAiWithPrompt("What is the best next executive action for this project? Prioritize the answer based on readiness, blockers, campaign state, scheduled posts, publishing safety, ads readiness, customer operations, and recent activity. Give one clear recommendation and the reason.");
+    }
+
+    const promptReadinessBtn = $("homePromptReadinessBtn");
+    if (promptReadinessBtn) {
+      promptReadinessBtn.onclick = () => openAiWithPrompt("Why is readiness low? Explain the missing integrations, assets, failed jobs, campaign gaps, scheduled post risks, publishing blockers, and ad launch risks in simple business language. End with the fastest safe fix path.");
+    }
+    const aiRoleCards = document.querySelectorAll(".quick-action-btn[data-role-id], .home-ai-team-card[data-role-id], .mhos-specialist[data-role-id], .mhos-workflow-step[data-role-id]");
+    aiRoleCards.forEach((card) => {
+      const roleId = card.getAttribute("data-role-id");
+      const roleName = card.querySelector("strong")?.textContent || "AI Specialist";
+      card.onclick = () => handleAiRoleClick(roleId, roleName);
+    });
+  }
+};

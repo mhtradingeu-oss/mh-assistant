@@ -1,0 +1,191 @@
+Branch:
+main
+
+Status:
+ M data/projects/hairoticmen/ops/approvals.json
+ M data/projects/hairoticmen/ops/events.json
+ M data/projects/hairoticmen/ops/notifications.json
+ M data/projects/hairoticmen/ops/system.json
+ M public/control-center/pages/ai-command.js
+ M public/control-center/pages/home.js
+ M public/control-center/pages/home/render-sections.js
+ M public/control-center/styles/13-home-executive.css
+ M runtime/orchestrator-service/server.js
+?? audits/product-readiness/
+?? audits/system-truth/cloud-grade-readiness-20260706-171752/
+?? audits/system-truth/content-to-media-studio-truth-20260706-161134/
+?? audits/system-truth/media-engine-upgrade-phase-2a-truth-scan-20260706-122813/
+?? audits/system-truth/media-engine-upgrade-phase-2b-contract-20260706-123139/
+?? audits/system-truth/media-execution-activation-a0-deep-truth-scan-20260706-114055/
+?? audits/system-truth/media-execution-activation-a1-exact-execution-contract-20260706-114301/
+?? audits/system-truth/media-execution-activation-a2-api-media-route-truth-20260706-115001/
+?? audits/system-truth/media-execution-activation-a3-live-image-proof-20260706-115143/
+?? audits/system-truth/media-execution-activation-a3b-live-image-proof-with-control-key-20260706-115319/
+?? audits/system-truth/media-execution-activation-a3d-live-image-proof-correct-write-key-20260706-115622/
+?? audits/system-truth/media-studio-rebase-20260706-165209/
+?? infra/
+?? public/control-center/pages/media-studio.BACKUP.js
+?? public/control-center/pages/media-studio.BACKUP_FINAL_FLOW_LOCK.js
+?? public/control-center/pages/media-studio.BACKUP_FLOW_LOCK.js
+?? public/control-center/pages/media-studio.js
+?? public/control-center/runtime/ai-team/
+?? public/control-center/state/
+?? runtime/orchestrator-service/lib/media/cluster/
+?? runtime/orchestrator-service/lib/media/contracts/
+?? runtime/orchestrator-service/lib/media/events/
+?? runtime/orchestrator-service/lib/media/governance/
+?? runtime/orchestrator-service/lib/media/library-engine.js
+?? runtime/orchestrator-service/lib/media/orchestrator/
+?? runtime/orchestrator-service/lib/media/publishing/
+?? runtime/orchestrator-service/lib/media/queue/
+?? runtime/orchestrator-service/lib/media/realtime/
+?? scripts/audit/ai-team-contract-conformance-check.mjs
+?? scripts/audit/validate-ai-team-operating-contract.mjs
+
+Diff stat:
+ data/projects/hairoticmen/ops/approvals.json       | 127 ++++++++++
+ data/projects/hairoticmen/ops/events.json          |  18 ++
+ data/projects/hairoticmen/ops/notifications.json   |  22 ++
+ data/projects/hairoticmen/ops/system.json          |   2 +-
+ public/control-center/pages/ai-command.js          |  59 +++--
+ public/control-center/pages/home.js                | 120 ++++-----
+ .../control-center/pages/home/render-sections.js   |  71 +++++-
+ public/control-center/styles/13-home-executive.css |  62 +++++
+ runtime/orchestrator-service/server.js             | 281 +++++++++++++++++++++
+ 9 files changed, 678 insertions(+), 84 deletions(-)
+
+AI Command imports window:
+import {
+        bindAiToolDock,
+        getAiToolDockTools,
+        getSelectedLibrarySource,
+        openAiToolDrawerFromMetadata,
+        openLibrarySourcePickerFromAiCommand,
+        renderAiToolDrawerShell
+} from "./ai-command/tool-dock.js";
+import { getProjectedActiveRole, getProjectedTeamMembers } from "../runtime/authority/authority-projection.js";
+
+import {
+        selectCurrentProject,
+        selectOperationsSnapshot,
+        selectProjectPayload
+} from "../state.js";
+
+import {
+        getSharedHandoff,
+        setSharedAiDraft,
+        setSharedHandoff
+} from "../shared-context.js";
+
+import {
+        getCategoryReadinessList
+} from "../asset-library.js";
+
+import {
+        executeProjectAiChat,
+        executeProjectAiGuidance,
+        generateAiCommandCampaignPreview
+} from "../api.js";
+
+//  AI TEAM DEFINITIONS
+// ============================================================
+
+
+Detector/helper window before patch:
+	},
+	{
+		id: "operations",
+		name: "Operations Assistant",
+		purpose: "Translate intent into executable workflows and handoffs.",
+		bestUse: "When actions span multiple pages and teams.",
+		suggestedPrompt: "Act as Operations Assistant and convert priorities into a practical execution sequence."
+	}
+];
+
+const aiSessions = new Map();
+const AI_COMMAND_CHAT_SESSIONS_KEY = "mh_ai_command_chat_sessions_v1";
+const aiInboundHandoffObjectIds = typeof WeakMap !== "undefined" ? new WeakMap() : null;
+let aiInboundHandoffCounter = 0;
+let lastRenderContext = null;
+let aiCommandBridgeRegistered = false;
+let aiAutoModeUnsubscribe = null;
+const aiAutomationState = {
+	progress: "",
+	result: ""
+};
+
+
+function detectSpecialistFromBridgePrompt(prompt) {
+    const text = asString(prompt).toLowerCase();
+
+    const directMap = [
+            ["video", "video_lead"],
+            ["motion", "video_lead"],
+            ["reel", "video_lead"],
+            ["storyboard", "video_lead"],
+            ["shot list", "video_lead"],
+            ["voiceover", "video_lead"],
+            ["media", "video_lead"],
+            ["campaign", "strategist"],
+            ["strategy", "strategist"],
+            ["content", "copywriter"],
+            ["copy", "copywriter"],
+            ["caption", "copywriter"],
+            ["publish", "publisher"],
+            ["schedule", "publisher"],
+            ["ads", "ads_operator"],
+            ["budget", "ads_operator"],
+            ["customer", "customer_ops"],
+            ["crm", "customer_ops"],
+            ["support", "customer_ops"],
+            ["operations", "admin"],
+            ["blocker", "admin"],
+            ["readiness", "admin"],
+            ["setup", "admin"],
+            ["library", "admin"]
+    ];
+
+    for (const [keyword, specialistId] of directMap) {
+            if (text.includes(keyword)) return MODE_ID_ALIASES[specialistId] || specialistId;
+    }
+
+    const classified = classifyIntent(text, null);
+    return MODE_ID_ALIASES[classified?.modeId] || classified?.modeId || "operations";
+}
+
+function buildAutoPlanFromCommand(commandText, session) {
+	function getSpecialistById(id) {
+		const resolvedId = MODE_ID_ALIASES[id] || id;
+		return SPECIALIST_DEFS.find((s) => s.id === resolvedId) ||
+			SPECIALIST_DEFS.find((s) => s.id === "operations") ||
+			SPECIALIST_DEFS[0];
+	}
+
+
+	const command = humanizeValue(commandText || session?.draftMessage, "Prepare workflow action from AI command.");
+	const plan = [
+		{
+			id: `auto-generate-${Date.now()}`,
+			type: "generate_prompt",
+			targetPage: "ai-command",
+			action: "Generate prompt from AI command",
+			payload: {
+				prompt: command,
+				title: "AI command auto plan"
+			},
+			priority: "recommended"
+		},
+		{
+			id: `auto-workflow-${Date.now()}`,
+			type: "prepare_workflow",
+			targetPage: "workflows",
+			action: "Prepare workflow from AI command",
+			payload: {
+				prompt: command,
+				reason: "AI command prepared for workflow execution."
+
+Contract normalize export:
+511:export function normalizeAiTeamRoleId(roleId, fallback = "operations") {
+
+Detector count:
+623:function detectSpecialistFromBridgePrompt(prompt) {

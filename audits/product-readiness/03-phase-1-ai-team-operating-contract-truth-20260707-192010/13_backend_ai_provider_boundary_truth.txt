@@ -1,0 +1,1572 @@
+AI provider files:
+
+===== runtime/orchestrator-service/lib/ai/provider-config.js =====
+function asString(value) {
+  if (value == null) return '';
+  return String(value).trim();
+}
+
+function toPositiveInt(value, fallback) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return fallback;
+  }
+  return Math.round(parsed);
+}
+
+function createProviderConfigError(message, details = {}) {
+  const error = new Error(String(message || 'AI provider configuration is invalid'));
+  error.code = details.code || 'AI_PROVIDER_CONFIG_INVALID';
+  error.statusCode = Number(details.statusCode) || 503;
+  error.details = details;
+  return error;
+}
+
+const AI_MODE_PROMPTS = {
+  executive: {
+    label: 'Executive',
+    purpose: 'strategic decisions, blockers, priorities, and next best action',
+    outputType: 'executive_brief',
+    prompt: [
+      'You are the Executive mode for MH Assistant OS.',
+      'Make strategic decisions, identify blockers, rank priorities, and state the next best action.',
+      'Do not drift into generic marketing copy unless the command asks for it.'
+    ].join(' ')
+  },
+  campaign: {
+    label: 'Campaign Strategist',
+    purpose: 'campaign concepts, launch plans, channel mix, audience segments, and offer strategy',
+    outputType: 'campaign_package',
+    prompt: [
+      'You are the Campaign Strategist mode for MH Assistant OS.',
+      'Build campaign concepts, launch plans, channel mix, audience segments, offer strategy, launch phases, assets, blockers, and handoffs.',
+      'When the command asks to build, launch, or plan a campaign, return a complete campaign package.'
+    ].join(' ')
+  },
+  content: {
+    label: 'Content Creator',
+    purpose: 'captions, hooks, scripts, post ideas, email copy, and landing page sections',
+    outputType: 'content_pack',
+    prompt: [
+      'You are the Content Creator mode for MH Assistant OS.',
+      'Produce direct content outputs: captions, hooks, scripts, post ideas, emails, and landing page sections.',
+      'Avoid operational summaries when the user asked for copy.'
+    ].join(' ')
+  },
+  ads: {
+    label: 'Ads Specialist',
+    purpose: 'ad concepts, paid media strategy, budget split, targeting angles, and platform ad copy',
+    outputType: 'ad_ideas',
+    prompt: [
+      'You are the Ads Specialist mode for MH Assistant OS.',
+      'Produce ad ideas, paid strategy, targeting angles, budget guidance, and Meta, TikTok, Google, or Facebook ad copy.',
+      'When asked for ad ideas or ad copy, return 3 to 5 concrete ad ideas with hook, primary text, headline, CTA, audience segment, emotional trigger, platform fit, and visual direction.'
+    ].join(' ')
+  },
+  seo: {
+    label: 'SEO Specialist',
+    purpose: 'keywords, blog topics, landing page SEO, search intent, and meta title or description',
+    outputType: 'seo_plan',
+    prompt: [
+      'You are the SEO Specialist mode for MH Assistant OS.',
+      'Produce keyword plans, blog topics, landing page SEO, search intent mapping, and metadata.',
+      'Tie search recommendations to the market, audience, and offer context.'
+    ].join(' ')
+  },
+  research: {
+    label: 'Research Analyst',
+    purpose: 'competitor analysis, market trends, audience research, and positioning gaps',
+    outputType: 'research_report',
+    prompt: [
+      'You are the Research Analyst mode for MH Assistant OS.',
+      'Produce competitor analysis, market trends, audience research, positioning gaps, and evidence needs.',
+      'Separate known context from assumptions.'
+    ].join(' ')
+  },
+  operations: {
+    label: 'Operations Planner',
+    purpose: 'tasks, timelines, handoffs, approvals, and execution planning',
+    outputType: 'operations_plan',
+    prompt: [
+      'You are the Operations Planner mode for MH Assistant OS.',
+      'Produce task plans, timelines, handoffs, approvals, ownership, and execution plans.',
+      'Make work routable into the correct MH Assistant OS workspace.'
+    ].join(' ')
+  }
+};
+
+function normalizeAiModeId(value) {
+  const clean = asString(value).toLowerCase().replace(/[\s-]+/g, '_');
+  const aliases = {
+    campaign_strategist: 'campaign',
+    content_creator: 'content',
+    ads_specialist: 'ads',
+    seo_specialist: 'seo',
+    research_analyst: 'research',
+    operations_planner: 'operations'
+  };
+  return aliases[clean] || clean || 'executive';
+}
+
+function getAiModePrompt(modeId) {
+  const normalized = normalizeAiModeId(modeId);
+  return AI_MODE_PROMPTS[normalized] || AI_MODE_PROMPTS.executive;
+}
+
+function resolveAiProviderConfig(env = process.env) {
+  const provider = asString(env.MH_AI_PROVIDER || env.AI_PROVIDER || 'openai').toLowerCase();
+  const model = asString(env.MH_AI_MODEL || env.OPENAI_MODEL || 'gpt-4.1-mini');
+  const apiKey = asString(env.OPENAI_API_KEY || env.MH_OPENAI_API_KEY || env.AI_PROVIDER_API_KEY);
+  const baseUrl = asString(env.OPENAI_BASE_URL || 'https://api.openai.com/v1').replace(/\/+$/, '');
+  const timeoutMs = toPositiveInt(env.MH_AI_TIMEOUT_MS || env.OPENAI_TIMEOUT_MS, 30000);
+
+  return {
+    provider,
+    model,
+    apiKey,
+    baseUrl,
+    timeoutMs,
+    isConfigured: Boolean(apiKey)
+  };
+}
+
+function assertAiProviderConfig(config = {}) {
+  const provider = asString(config.provider).toLowerCase();
+
+  if (!provider) {
+    throw createProviderConfigError('AI provider is not configured', {
+      code: 'AI_PROVIDER_MISSING',
+      statusCode: 503
+    });
+  }
+
+  if (provider === 'openai' && !asString(config.apiKey)) {
+    throw createProviderConfigError('OPENAI_API_KEY is missing for AI command execution', {
+      code: 'OPENAI_API_KEY_MISSING',
+      statusCode: 503,
+      provider
+    });
+  }
+
+  return config;
+}
+
+module.exports = {
+  resolveAiProviderConfig,
+  assertAiProviderConfig,
+  createProviderConfigError,
+  AI_MODE_PROMPTS,
+  getAiModePrompt,
+  normalizeAiModeId
+};
+
+===== runtime/orchestrator-service/lib/ai/provider-registry.js =====
+const { createOpenAiProvider } = require('./providers/openai');
+
+const PROVIDER_FACTORIES = {
+  openai: createOpenAiProvider
+};
+
+function asString(value) {
+  if (value == null) return '';
+  return String(value).trim().toLowerCase();
+}
+
+function getAiProvider(providerId, options = {}) {
+  const normalizedProvider = asString(providerId);
+  const factory = PROVIDER_FACTORIES[normalizedProvider] || null;
+
+  if (!factory) {
+    return null;
+  }
+
+  return factory(options);
+}
+
+function isAiProviderSupported(providerId) {
+  return Boolean(PROVIDER_FACTORIES[asString(providerId)]);
+}
+
+function listAiProviders() {
+  return Object.keys(PROVIDER_FACTORIES);
+}
+
+module.exports = {
+  getAiProvider,
+  isAiProviderSupported,
+  listAiProviders
+};
+
+===== runtime/orchestrator-service/lib/ai/providers/openai.js =====
+const axios = require('axios');
+const { getAiModePrompt } = require('../provider-config');
+
+function asString(value) {
+  if (value == null) return '';
+  return String(value).trim();
+}
+
+function asArray(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+function humanizeValue(value, fallback = '') {
+  if (value == null) return fallback;
+  if (typeof value === 'string') {
+    const clean = value.trim();
+    return clean === '[object Object]' ? fallback : clean;
+  }
+  if (typeof value === 'number' || typeof value === 'boolean') {
+    return String(value);
+  }
+  if (Array.isArray(value)) {
+    return value.map((item) => humanizeValue(item)).filter(Boolean).join('; ') || fallback;
+  }
+  if (typeof value === 'object') {
+    const title = humanizeValue(value.title || value.label || value.name || value.headline || value.hook);
+    const detail = humanizeValue(
+      value.action ||
+      value.summary ||
+      value.description ||
+      value.recommendation ||
+      value.reason ||
+      value.insight ||
+      value.body ||
+      value.text ||
+      value.value
+    );
+    if (title && detail && title !== detail) return `${title}: ${detail}`;
+    if (title || detail) return title || detail;
+
+    return Object.entries(value)
+      .filter(([, item]) => item != null && typeof item !== 'object')
+      .slice(0, 4)
+      .map(([key, item]) => `${key.replace(/[_-]+/g, ' ')}: ${humanizeValue(item)}`)
+      .filter(Boolean)
+      .join('; ') || fallback;
+  }
+  return fallback;
+}
+
+function compactList(values, limit = 5) {
+  return asArray(values).map((item) => humanizeValue(item)).filter(Boolean).slice(0, limit);
+}
+
+function normalizeReadableList(values, limit = 12) {
+  return asArray(values).map((item) => humanizeValue(item)).filter(Boolean).slice(0, limit);
+}
+
+function renderNumberedLines(items = []) {
+  return asArray(items)
+    .map((item, index) => `${index + 1}. ${item}`)
+    .join('\n');
+}
+
+function buildContentPackText(contentPack = {}, nextActions = []) {
+  const pack = contentPack && typeof contentPack === 'object' ? contentPack : {};
+  const hooks = normalizeReadableList(pack.hooks, 12);
+  const captions = normalizeReadableList(pack.captions, 8);
+  const scripts = normalizeReadableList(pack.scripts || pack.reelScripts || pack.reel_scripts, 8);
+  const emailCopy = normalizeReadableList(pack.emailCopy || pack.email_copy || pack.emails, 6);
+  const landingPageSections = normalizeReadableList(pack.landingPageSections || pack.landing_page_sections, 8);
+  const postIdeas = normalizeReadableList(pack.postIdeas || pack.post_ideas || pack.ideas, 8);
+  const blocks = [];
+
+  if (hooks.length) {
+    blocks.push(renderNumberedLines(hooks));
+  }
+  if (captions.length) {
+    blocks.push(['Captions:', renderNumberedLines(captions)].join('\n'));
+  }
+  if (scripts.length) {
+    blocks.push(['Scripts:', renderNumberedLines(scripts)].join('\n'));
+  }
+  if (emailCopy.length) {
+    blocks.push(['Email Copy:', renderNumberedLines(emailCopy)].join('\n'));
+  }
+  if (landingPageSections.length) {
+    blocks.push(['Landing Page Sections:', renderNumberedLines(landingPageSections)].join('\n'));
+  }
+  if (postIdeas.length) {
+    blocks.push(['Post Ideas:', renderNumberedLines(postIdeas)].join('\n'));
+  }
+
+  const suggestion = normalizeReadableList(nextActions, 1)[0];
+  if (suggestion) {
+    blocks.push(`Next step: ${suggestion}`);
+  }
+
+  return blocks.filter(Boolean).join('\n\n').trim();
+}
+
+function buildAdIdeasText(adIdeas = [], nextActions = []) {
+  const ideas = asArray(adIdeas).map((item) => {
+    if (typeof item === 'string') {
+      return humanizeValue(item);
+    }
+
+    const record = item && typeof item === 'object' ? item : {};
+    const hook = humanizeValue(record.hook || record.title || record.headline || record.angle);
+    const primaryText = humanizeValue(record.primaryText || record.primary_text || record.copy || record.text || record.body);
+    const headline = humanizeValue(record.headline || record.title);
+    const cta = humanizeValue(record.cta || record.CTA || record.callToAction || record.call_to_action);
+    const parts = [hook, primaryText, headline ? `Headline: ${headline}` : '', cta ? `CTA: ${cta}` : ''].filter(Boolean);
+    return parts.join(' | ');
+  }).filter(Boolean);
+
+  const blocks = [];
+  if (ideas.length) {
+    blocks.push(renderNumberedLines(ideas));
+  }
+  const suggestion = normalizeReadableList(nextActions, 1)[0];
+  if (suggestion) {
+    blocks.push(`Next step: ${suggestion}`);
+  }
+  return blocks.filter(Boolean).join('\n\n').trim();
+}
+
+function buildStructuredContent(parsed = {}) {
+  const outputType = asString(parsed.outputType || parsed.output_type);
+  const nextActions = parsed.nextActions || parsed.next_actions || parsed.actions;
+
+  if (outputType === 'content_pack') {
+    return buildContentPackText(parsed.contentPack || parsed.content_pack || {}, nextActions);
+  }
+
+  if (outputType === 'ad_ideas') {
+    return buildAdIdeasText(parsed.adIdeas || parsed.ad_ideas || [], nextActions);
+  }
+
+  return '';
+}
+
+function shouldPreferStructuredContent(parsed = {}, content = '', structuredContent = '') {
+  if (!structuredContent) return false;
+
+  const outputType = asString(parsed.outputType || parsed.output_type);
+  if (!['content_pack', 'ad_ideas'].includes(outputType)) {
+    return false;
+  }
+
+  if (!content) return true;
+
+  const shortFlatContent = content.length < 140 && !content.includes('\n');
+  const structuredHasDepth = structuredContent.length > content.length;
+  return shortFlatContent && structuredHasDepth;
+}
+
+function normalizeRouteSuggestions(value) {
+  return asArray(value)
+    .map((item) => {
+      if (typeof item === 'string') {
+        return { label: item, route: '', reason: item };
+      }
+      if (!item || typeof item !== 'object') return null;
+      return {
+        label: humanizeValue(item.label || item.title || item.route),
+        route: asString(item.route || item.destination || item.page),
+        reason: humanizeValue(item.reason || item.summary || item.description)
+      };
+    })
+    .filter((item) => item && (item.label || item.route || item.reason));
+}
+
+function parseJsonObject(text) {
+  const clean = asString(text);
+  if (!clean) return null;
+
+  try {
+    return JSON.parse(clean);
+  } catch (_) {
+    const match = clean.match(/\{[\s\S]*\}/);
+    if (!match) return null;
+    try {
+      return JSON.parse(match[0]);
+    } catch {
+      return null;
+    }
+  }
+}
+
+function extractMessageContent(payload = {}) {
+  const content = payload?.choices?.[0]?.message?.content;
+
+  if (typeof content === 'string') {
+    return content.trim();
+  }
+
+  if (Array.isArray(content)) {
+    return content
+      .map((item) => {
+        if (typeof item === 'string') return item;
+        if (item && typeof item.text === 'string') return item.text;
+        return '';
+      })
+      .join('\n')
+      .trim();
+  }
+
+  return '';
+}
+
+function normalizeProviderOutput(rawText) {
+  const parsed = parseJsonObject(rawText);
+
+  if (parsed && typeof parsed === 'object') {
+    const structuredContent = buildStructuredContent(parsed);
+    let content = humanizeValue(parsed.content || parsed.message || parsed.output);
+    if (shouldPreferStructuredContent(parsed, content, structuredContent)) {
+      content = structuredContent;
+    }
+    if (!content) {
+      content = humanizeValue(structuredContent || parsed.summary);
+    }
+    const summary = humanizeValue(parsed.summary || content);
+    const analysis = humanizeValue(parsed.analysis || parsed.rationale || parsed.reasoning || parsed.context);
+    const recommendations = compactList(
+      parsed.recommendations || parsed.actions || parsed.next_actions || parsed.nextActions
+    );
+
+    return {
+      title: humanizeValue(parsed.title),
+      summary,
+      content,
+      analysis,
+      recommendations,
+      nextActions: compactList(parsed.nextActions || parsed.next_actions || parsed.actions, 8),
+      findings: compactList(parsed.findings || parsed.keyFindings || parsed.key_findings, 8),
+      routeSuggestions: normalizeRouteSuggestions(parsed.routeSuggestions || parsed.route_suggestions),
+      outputType: asString(parsed.outputType || parsed.output_type),
+      adIdeas: asArray(parsed.adIdeas || parsed.ad_ideas),
+      campaignPackage: parsed.campaignPackage || parsed.campaign_package || null,
+      contentPack: parsed.contentPack || parsed.content_pack || null,
+      seoPlan: parsed.seoPlan || parsed.seo_plan || null,
+      researchReport: parsed.researchReport || parsed.research_report || null,
+      operationsPlan: parsed.operationsPlan || parsed.operations_plan || null,
+      executiveBrief: parsed.executiveBrief || parsed.executive_brief || null,
+      missingData: compactList(parsed.missingData || parsed.missing_data || parsed.blockers, 8),
+      chat_answer: humanizeValue(parsed.chat_answer || parsed.chatAnswer || content),
+      raw: parsed
+    };
+  }
+
+  return {
+    title: '',
+    summary: '',
+    content: asString(rawText),
+    analysis: '',
+    recommendations: [],
+    nextActions: [],
+    findings: [],
+
+===== runtime/orchestrator-service/lib/ops/ai-orchestrator.js =====
+const path = require('path');
+const { readJsonFile } = require('../integrations/storage');
+const { resolveProjectPath } = require('../security/project-isolation');
+const {
+  resolveAiProviderConfig,
+  assertAiProviderConfig,
+  createProviderConfigError,
+  getAiModePrompt,
+  normalizeAiModeId
+} = require('../ai/provider-config');
+const {
+  getAiProvider,
+  isAiProviderSupported,
+  listAiProviders
+} = require('../ai/provider-registry');
+const { serializeErrorForLog } = require('../observability/logger');
+const {
+  createAiCommandRecord,
+  createAiArtifact,
+  createAiRecommendation,
+  upsertAiMemory,
+  createTask,
+  recordWorkflowRun,
+  createApproval,
+  createHandoff
+} = require('./backbone');
+
+const PROJECTS_DIR = path.join(process.env.MH_ASSISTANT_ROOT || path.resolve(__dirname, '../../../..'), 'data', 'projects');
+
+function asArray(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+function asObject(value) {
+  return value && typeof value === 'object' ? value : {};
+}
+
+function asString(value) {
+  if (value == null) return '';
+  return String(value).trim();
+}
+
+function humanizeValue(value, fallback = '') {
+  if (value == null) return fallback;
+  if (typeof value === 'string') {
+    const clean = value.trim();
+    return clean === '[object Object]' ? fallback : clean;
+  }
+  if (typeof value === 'number' || typeof value === 'boolean') {
+    return String(value);
+  }
+  if (Array.isArray(value)) {
+    return value.map((item) => humanizeValue(item)).filter(Boolean).join('; ') || fallback;
+  }
+  if (typeof value === 'object') {
+    const title = humanizeValue(value.title || value.label || value.name || value.headline || value.hook);
+    const detail = humanizeValue(
+      value.action ||
+      value.summary ||
+      value.description ||
+      value.recommendation ||
+      value.reason ||
+      value.insight ||
+      value.body ||
+      value.text ||
+      value.value
+    );
+    if (title && detail && title !== detail) return `${title}: ${detail}`;
+    if (title || detail) return title || detail;
+
+    return Object.entries(value)
+      .filter(([key, item]) => {
+        const normalizedKey = asString(key).toLowerCase();
+        if (/credential|secret|token|key|payload|raw/.test(normalizedKey)) return false;
+        return item != null && typeof item !== 'object';
+      })
+      .slice(0, 4)
+      .map(([key, item]) => `${titleCase(key)}: ${humanizeValue(item)}`)
+      .filter(Boolean)
+      .join('; ') || fallback;
+  }
+  return fallback;
+}
+
+function titleCase(value) {
+  return asString(value)
+    .replace(/[_-]+/g, ' ')
+    .replace(/\b\w/g, (match) => match.toUpperCase());
+}
+
+function compactList(values, limit = 4) {
+  return asArray(values).map((item) => humanizeValue(item)).filter(Boolean).slice(0, limit);
+}
+
+function createAiCommandExecutionError(message, details = {}) {
+  const error = new Error(asString(message) || 'AI command execution failed');
+  error.code = asString(details.code) || 'AI_COMMAND_EXECUTION_FAILED';
+  error.statusCode = Number(details.statusCode) || 500;
+  error.details = details;
+  return error;
+}
+
+function loadProjectSettings(projectName) {
+  const resolvedProject = resolveProjectPath(PROJECTS_DIR, projectName, 'project.json');
+  const projectPath = resolvedProject.targetPath;
+  return asObject(readJsonFile(projectPath, {}));
+}
+
+function normalizeRouteSuggestion(route, reason) {
+  const routeId = asString(route);
+  return {
+    route: routeId,
+    label: titleCase(routeId),
+    reason: asString(reason)
+  };
+}
+
+const MODE_ROUTE_TARGETS = {
+  executive: 'home',
+  campaign: 'campaign-studio',
+  content: 'content-studio',
+  ads: 'ads-manager',
+  seo: 'insights',
+  research: 'research',
+  operations: 'workflows'
+};
+
+const OUTPUT_TYPE_BY_MODE = {
+  executive: 'executive_brief',
+  campaign: 'campaign_package',
+  content: 'content_pack',
+  ads: 'ad_ideas',
+  seo: 'seo_plan',
+  research: 'research_report',
+  operations: 'operations_plan'
+};
+
+const SPECIALIST_MODE_MAP = {
+  strategist: 'campaign',
+  writer: 'content',
+  designer: 'content',
+  media: 'content',
+  video_lead: 'content',
+  publisher: 'operations',
+  ads: 'ads',
+  analyst: 'seo',
+  researcher: 'research',
+  compliance_reviewer: 'operations',
+  operations: 'operations',
+  team: 'executive'
+};
+
+function inferConversationLanguage(input = {}) {
+  // Detect from request text — the language the user is writing/chatting in
+  const source = asString(input.request || input.prompt || input.command);
+  if (!source) return 'user language';
+  if (/[\u0600-\u06FF]/.test(source)) return 'Arabic';
+  if (/[\u0400-\u04FF]/.test(source)) return 'Cyrillic language';
+  if (/[\u4E00-\u9FFF]/.test(source)) return 'Chinese';
+  return 'user language';
+}
+
+function inferOutputLanguage(input = {}) {
+  // Publishing/content output language: explicit override > project/market/setup language > fallback
+  const explicit = asString(
+    input.outputLanguage ||
+    input.output_language ||
+    input.marketLanguage ||
+    input.market_language
+  );
+  if (explicit) return explicit;
+  const projectLang = asString(input.language || input.languagePreference || input.language_preference);
+  if (projectLang) return projectLang;
+  return 'user language';
+}
+
+// Backward-compatible alias — now resolves publishing/output language
+function inferLanguagePreference(input = {}) {
+  return inferOutputLanguage(input);
+}
+
+function resolveGuidanceModeId(input = {}) {
+  const requestedMode = normalizeAiModeId(input.mode_id || input.modeId);
+  if (requestedMode && OUTPUT_TYPE_BY_MODE[requestedMode]) {
+    return requestedMode;
+  }
+
+  const specialistId = asString(input.specialistId || input.specialist_id).toLowerCase();
+  const mapped = SPECIALIST_MODE_MAP[specialistId];
+  return normalizeAiModeId(mapped || 'executive');
+}
+
+function buildGuidancePrompt(input = {}) {
+  const request = asString(input.request || input.prompt || input.command);
+  const specialistId = asString(input.specialistId || input.specialist_id || 'specialist').toLowerCase();
+  const specialistName = asString(input.specialistName || input.specialist_name || specialistId || 'Specialist');
+  const teamMode = asString(input.mode || input.teamMode || 'solo').toLowerCase() === 'team' ? 'team' : 'solo';
+  const conversationLanguage = inferConversationLanguage(input);
+  const outputLanguage = inferOutputLanguage(input);
+  const market = asString(input.market || '');
+  const languagesDiffer = outputLanguage !== 'user language' && outputLanguage !== conversationLanguage;
+  const contextSummary = humanizeValue(input.contextSummary || input.context_summary || '');
+  const safetyInstruction = asString(
+    input.safetyInstruction ||
+    input.safety_instruction ||
+    'Guidance-only response. Do not execute operations. Do not claim execution happened.'
+  );
+
+  const specialistInstruction = specialistId === 'writer'
+    ? 'As Content Writer, return actual copy now: hooks, captions, CTA lines, emails, scripts, and landing copy. Never answer with only a description of what the copy could be.'
+    : specialistId === 'video_lead'
+      ? 'As Video Lead, return actual script output now: hooks, script lines, storyboard beats, and shot-list style sequencing when requested.'
+      : specialistId === 'strategist'
+        ? 'As Strategist, return a practical priority plan with positioning, rationale, and ordered next moves.'
+        : specialistId === 'compliance_reviewer'
+          ? 'As Compliance Reviewer, return concrete risks, safer wording replacements, and approval notes.'
+          : specialistId === 'operations'
+            ? 'As Operations Lead, return draft checklist/task/workflow steps only; do not execute or claim execution.'
+            : 'Produce concrete specialist chat output, not a high-level summary.';
+
+  return [
+    `Guidance-only live specialist chat response for MH Assistant OS.`,
+    `Specialist ID: ${specialistId || 'specialist'}`,
+    `Specialist name: ${specialistName}`,
+    `Mode: ${teamMode}`,
+    `Conversation language (language the user is writing in): ${conversationLanguage}`,
+    `Output/publishing language (language for publishable content, copy, hooks, captions, scripts): ${outputLanguage}`,
+    market ? `Market: ${market}` : '',
+    `Safety instruction: ${safetyInstruction}`,
+    'You are answering inside a live specialist chat.',
+    'Answer the user directly as the selected specialist.',
+    'Language separation rule: explanations, notes, and next-step guidance must stay in the conversation language.',
+    'If publishable content uses a different output language, do not make the entire answer that output language.',
+    'Start with one brief sentence in the conversation language, then add a clearly labeled publishable content section in the output language.',
+    conversationLanguage !== 'user language'
+      ? `Always respond to the user, explain, and interact in ${conversationLanguage}.`
+      : 'Match the language the user writes in for all explanations and interaction.',
+    languagesDiffer
+      ? `Generate all publishable content (hooks, captions, scripts, emails, copy, headlines) in ${outputLanguage} because that is the project publishing language.`
+      : 'Generate publishable content in the same language as your conversation.',
+    languagesDiffer
+      ? `When the output language differs from the conversation language, label the publishable section clearly, for example: "${outputLanguage} hooks for the ${market || outputLanguage} market:".`
+      : '',
+    'If the user explicitly requests a different output language, use that language for publishable content instead.',
+    'If the user asks for N items, return exactly N items.',
+    'Example rule: if the user asks for 3 hooks, return exactly 3 hooks.',
+    'If the user asks for hooks, captions, scripts, emails, headlines, tasks, workflow steps, or checklists, produce the actual requested items.',
+    'Do not summarize the task.',
+    'Do not say "I can create" or "I would create".',
+    'Create the requested output now.',
+    'Do not describe what you would do.',
+    'Do not answer with a generic summary.',
+    'Give practical, ready-to-copy output.',
+    'After delivering the requested output, add one short next-step suggestion.',
+    'The next-step suggestion must be in the conversation language, not the publishing/output language, unless they are the same.',
+    'Provide practical guidance/content only.',
+    specialistInstruction,
+    'Do not claim task/workflow/handoff/approval/publish actions were executed.',
+    'Do not claim task creation, workflow run, handoff creation, or approval creation happened.',
+    'Do not claim approvals were granted.',
+
+Server AI endpoint anchors:
+163:} = require('./lib/integrations/provider-registry');
+170:} = require('./lib/media/provider-layer');
+217:const { createAiOrchestrationService } = require('./lib/ops/ai-orchestrator');
+233:} = require('./lib/media/native/providers/provider-model-catalog');
+236:} = require('./lib/media/native/providers/provider-readiness');
+281: * - adds response headers and warning telemetry for public mutation aliases
+322:    const classification = classifyPublicAliasAccess(req.method, req.path || req.originalUrl || "", {
+326:    const headers = buildPublicAliasHeaders(classification);
+332:    if (classification && classification.publicAlias) {
+336:    if (classification && classification.publicAlias && classification.allowed === false) {
+337:      if (classification.code === 'route_permission_denied') {
+346:        reason: classification.reason
+350:    res.setHeader("X-MH-Public-Alias-Warning", "classification_failed");
+468:  /^\/telegram-command\/?$/i,
+479:  /^\/generate_media_from_prompt\/?$/i,
+648:  return /\/ai(?:\/|$)/i.test(requestPath) || /^\/api\/media\//i.test(requestPath);
+656:  if (/^\/telegram-command\/?$/i.test(requestPath)) {
+658:    action = 'telegram_command';
+698:let aiOrchestrator = null;
+746:  const prompt = asString(req?.body?.prompt || '');
+747:  const provider = asString(output.provider || req?.body?.provider || req?.body?.media_provider || '');
+755:        revised_prompt: output.revised_prompt || ''
+819:          provider,
+821:          prompt,
+822:          revised_prompt: asString(image?.revised_prompt || output.revised_prompt || ''),
+865:          provider,
+867:          prompt,
+868:          revised_prompt: asString(image?.revised_prompt || output.revised_prompt || asset.metadata?.revised_prompt || ''),
+901:  const prompt = asString(req?.body?.prompt || '');
+914:      prompt,
+917:      provider: asString(req?.body?.provider || req?.body?.media_provider || ''),
+1216:const PROMPTS_DIR = path.join(BASE_DIR, 'prompts');
+1253:    error?.statusCode || error?.status || error?.response?.status || fallbackStatus
+2377:    provider: renderRequest.result?.provider || renderRequest.provider || null,
+2804:${renderRequest.final_generation_prompt}
+2875:  form.append('prompt', finalPrompt);
+2885:  const response = await axios.post(
+2899:  const imageBase64 = response.data?.data?.[0]?.b64_json;
+2901:    throw new Error('No image data returned from provider');
+2916:  provider: 'openai',
+3052:  // مثل SMTP / WordPress mail bridge / provider API
+3056:    status: 'pending_provider_send',
+3062:    note: 'Prepared and verified. Waiting for provider integration or send bridge.'
+3074:  const response = await axios.get(
+3088:  return Array.isArray(response.data) ? response.data : [];
+3094:  const response = await axios.get(
+3107:  return response.data?.[0] || null;
+3505:    minimum_resolution_guidance: '>= 540x960',
+3596:      max_duration_guidance: 'up to 3 minutes',
+3603:      max_duration_guidance: 'long-form',
+3630:      ? 'Target mobile-first short-form viewers with low patience and high novelty response.'
+3651:    duration_guidance: rules.max_duration_guidance,
+3793:      max_images_common_guidance: 24,
+3907:      'Marketplace-safe image guidance',
+4073:      route: '/telegram-command',
+4113:      route: '/telegram-command',
+4245:    prompt_pack: p.prompt_pack || {},
+4517:    visual_prompt: String(input.visual_prompt || base.visual_prompt || '').trim(),
+4546:      visual_prompt: channelAsset.visual_prompt || '',
+5249:    provider: 'provider_pending',
+5253:    final_generation_prompt: job.final_generation_prompt,
+5501:    final_generation_prompt: buildGenerationPrompt(projectName, assetType, goal),
+5520:  const promptPackage = generateBrandControlledPrompt(projectName, assetType, goal);
+5538:    final_prompt: promptPackage.final_prompt
+5633:  const contextPath = path.join(paths.baseDir, 'prompt-engine-context.json');
+5686:    final_prompt: lines.join(' ')
+6523:  const promptFileMap = {
+6533:    path.join(PROMPTS_DIR, promptFileMap[agent] || 'orchestrator.md')
+6561:      agent_prompt_loaded: agentPrompt.length > 0,
+6647:    aiCommandsPath: path.join(opsDir, 'ai-commands.json'),
+7010:      ai_commands: {
+7662:    has_ai_commands: baselineValidation.required_files.ai_commands.exists,
+8164:// Keys matching this pattern are redacted from provider summary objects before
+8254:    provider_metadata: redactProviderSummaryObject(asPlainObject(normalizedRecord.provider_metadata)),
+8256:    provider_account: redactProviderSummaryObject(asPlainObject(normalizedRecord.provider_account)),
+8352:      status: 'unsupported_provider'
+8406:    const providerResult = await executeAdapterAction({
+8419:      status: providerResult.status,
+8420:      token_expires_at: normalizeTextValue(providerResult.token_expires_at || nextRecord.token_expires_at),
+8421:      permission_scope: normalizeTextValue(providerResult.permission_scope || nextRecord.permission_scope),
+8422:      connection_method: normalizeTextValue(providerResult.connection_method || nextRecord.connection_method),
+8423:      data_scopes: normalizeStringArray(providerResult.data_scopes?.length ? providerResult.data_scopes : nextRecord.data_scopes),
+8424:      read_scopes: normalizeStringArray(providerResult.read_scopes?.length ? providerResult.read_scopes : nextRecord.read_scopes),
+8425:      write_scopes: normalizeStringArray(providerResult.write_scopes?.length ? providerResult.write_scopes : nextRecord.write_scopes),
+8426:      provider_metadata: asPlainObject(providerResult.metadata),
+8427:      provider_account: asPlainObject(providerResult.account),
+8428:      insights_ready: asPlainObject(providerResult.insights_ready),
+8431:      notes: normalizeTextValue(providerResult.notes || nextRecord.notes),
+8432:      health_summary: normalizeTextValue(providerResult.health || ''),
+8433:      health_state: asPlainObject(providerResult.health_state)
+8525:      status: 'unsupported_provider'
+8552:      const providerResult = await executeAdapterAction({
+8563:      nextRecord.status = providerResult.status;
+8564:      nextRecord.token_expires_at = normalizeTextValue(providerResult.token_expires_at || nextRecord.token_expires_at);
+8565:      nextRecord.provider_metadata = asPlainObject(providerResult.metadata);
+8566:      nextRecord.provider_account = asPlainObject(providerResult.account);
+8567:      nextRecord.insights_ready = asPlainObject(providerResult.insights_ready);
+8569:      nextRecord.notes = normalizeTextValue(providerResult.notes || nextRecord.notes);
+8570:      nextRecord.health_summary = normalizeTextValue(providerResult.health || '');
+8571:      nextRecord.health_state = asPlainObject(providerResult.health_state);
+8577:        nextRecord.last_sync_summary = asPlainObject(providerResult.sync_summary);
+8580:        nextRecord.last_sync_summary = asPlainObject(providerResult.sync_summary);
+8660:      guidance: {
+8675:      description: 'Brand identity, voice, visual rules, and usage guidance.',
+8676:      guidance: {
+8677:        what_to_upload: 'Brand book, tone guide, design system notes, claim rules, and visual do/dont guidance.',
+8692:      guidance: {
+8708:      guidance: {
+8724:      guidance: {
+8740:      guidance: {
+8756:      guidance: {
+8772:      guidance: {
+8788:      guidance: {
+8804:      guidance: {
+8820:      guidance: {
+8836:      guidance: {
+8852:      guidance: {
+9398:      guidance: item.guidance,
+9421:            ? `Review ${item.label} classification, file availability, or folder placement.`
+9479:      guidance: item.guidance,
+9924:      requestedAction: 'provider_send',
+9935:      requestedAction: 'provider_send',
+9961:      ready_for_provider_send: true,
+9970:        ready_for_provider_send: true
+10002:app.post('/generate_media_from_prompt', async (req, res) => {
+10009:      action: 'generate_media_from_prompt',
+10011:      entityId: 'generate_media_from_prompt',
+10020:      action: 'generate_media_from_prompt',
+10022:      entityId: 'generate_media_from_prompt',
+10026:      linkedExecutionId: 'generate_media_from_prompt',
+10029:      summary: 'Approval required before media generation from prompt.'
+10040:    const log = writeExecutionBridgeLog(projectName, 'generate_media_from_prompt', {
+10043:        has_image_prompt: Boolean(bridgeResult.image_prompt),
+10055:      image_prompt: bridgeResult.image_prompt,
+10065:      writeExecutionBridgeLog(logProject, 'generate_media_from_prompt', {
+10078:      message: error.message || 'Failed to generate media from prompt'
+10171:    const response = await axios.get(`${process.env.WC_BASE_URL}/products`, {
+10179:      products: response.data
+10194:    const response = await axios.get(`${process.env.WC_BASE_URL}/products/${productId}`, {
+10201:    const product = response.data;
+10239:    const response = await axios.get(`${process.env.WC_BASE_URL}/products/${productId}`, {
+10246:    const product = response.data;
+10324:    const response = await axios.get(`${process.env.WC_BASE_URL}/products/${productId}`, {
+10331:    const product = response.data;
+11238:app.patch('/media-manager/project/:project/assets/:assetId/classification', express.json({ limit: '1mb' }), (req, res) => {
+11278:      asset.reclassification_note = note || `Reclassified from ${previousAssetType || 'unknown'} to ${canonicalType} from Control Center Library.`;
+11661:      no_provider_execution_performed: true,
+11685:        no_provider_execution_performed: true
+11691:app.post('/api/ai-command/project/:project/campaign-preview', handleAiCommandCampaignPreviewOnly);
+12143:  const source = String(req.body?.source || 'ai-command').trim();
+12148:    action: 'ai_command_run',
+12149:    entityType: 'ai_command',
+12159:    action: 'ai_command_run',
+12160:    entityType: 'ai_command',
+12167:    title: 'AI command approval',
+12168:    summary: 'Approval required before AI command execution.'
+12173:  appLogger.info('ai_command_http_received', {
+12174:    route: 'ai-command',
+12183:    appLogger.info('ai_command_http_returned', {
+12184:      route: 'ai-command',
+12188:      provider: result?.provider?.id || result?.response?.provider || null,
+12189:      command_id: result?.command?.id || null
+12201:        error: error.message || 'Failed to execute AI command'
+12204:    appLogger.error('ai_command_http_error', {
+12205:      route: 'ai-command',
+12222:    action: 'ai_chat_run',
+12223:    entityType: 'ai_command',
+12233:    action: 'ai_chat_run',
+12234:    entityType: 'ai_command',
+12241:    title: 'AI chat approval',
+12242:    summary: 'Approval required before AI chat execution.'
+12247:  appLogger.info('ai_chat_http_received', {
+12248:    route: 'ai-chat',
+12256:    appLogger.info('ai_chat_http_returned', {
+12257:      route: 'ai-chat',
+12261:      provider: result?.provider?.id || null,
+12271:        error: error.message || 'Failed to execute AI chat'
+12274:    appLogger.error('ai_chat_http_error', {
+12275:      route: 'ai-chat',
+12292:    action: 'ai_guidance_run',
+12293:    entityType: 'ai_command',
+12303:    action: 'ai_guidance_run',
+12304:    entityType: 'ai_command',
+12311:    title: 'AI guidance approval',
+12312:    summary: 'Approval required before AI guidance execution.'
+12317:  appLogger.info('ai_guidance_http_received', {
+12318:    route: 'ai-guidance',
+12326:    appLogger.info('ai_guidance_http_returned', {
+12327:      route: 'ai-guidance',
+12331:      provider: result?.provider?.id || null,
+12341:        error: error.message || 'Failed to execute AI guidance'
+12344:    appLogger.error('ai_guidance_http_error', {
+12345:      route: 'ai-guidance',
+12411:      error: error.message || 'Failed to list AI commands'
+12418:    const command = getAiCommandRecord(req.params.project, req.params.commandId);
+12419:    if (!command) {
+12420:      return res.status(404).json({ error: 'AI command not found' });
+12422:    return res.json({ command });
+12425:      error: error.message || 'Failed to load AI command'
+12478:app.get('/media-manager/project/:project/ai/commands', handleListAiCommands);
+12479:app.get('/public/media-manager/project/:project/ai/commands', handleListAiCommands);
+12480:app.get('/media-manager/project/:project/ai/commands/:commandId', handleGetAiCommand);
+12481:app.get('/public/media-manager/project/:project/ai/commands/:commandId', handleGetAiCommand);
+12482:app.post('/media-manager/project/:project/ai/command', handleExecuteAiCommand);
+12483:app.post('/public/media-manager/project/:project/ai/command', handleExecuteAiCommand);
+12484:app.post('/media-manager/project/:project/ai/chat', handleExecuteAiChat);
+12485:app.post('/public/media-manager/project/:project/ai/chat', handleExecuteAiChat);
+12486:app.post('/media-manager/project/:project/ai/guidance', handleExecuteAiGuidance);
+12487:app.post('/public/media-manager/project/:project/ai/guidance', handleExecuteAiGuidance);
+12488:app.post('/media-manager/project/:project/ai/workflows/:workflowId/run', handleExecuteAiWorkflow);
+12489:app.post('/public/media-manager/project/:project/ai/workflows/:workflowId/run', handleExecuteAiWorkflow);
+12490:app.get('/media-manager/project/:project/ai/artifacts', handleListAiArtifacts);
+12491:app.get('/public/media-manager/project/:project/ai/artifacts', handleListAiArtifacts);
+12492:app.get('/media-manager/project/:project/ai/recommendations', handleListAiRecommendations);
+12493:app.get('/public/media-manager/project/:project/ai/recommendations', handleListAiRecommendations);
+12494:app.get('/media-manager/project/:project/ai/memory', handleListAiMemory);
+12495:app.get('/public/media-manager/project/:project/ai/memory', handleListAiMemory);
+13023:  if (status === 'unsupported_provider') {
+13051:    summary: `Review ${req.params.integrationId} ${requestedAction} before applying integration credential or provider-state changes.`
+13165:    summary: `Review ${req.params.integrationId} ${normalizedActionType} before applying integration provider action.`
+13206:    const providers = mediaType
+13212:      providers,
+13213:      count: providers.length
+13217:      error: 'Failed to list native media providers',
+13232:      error: 'Failed to load native media provider readiness',
+13298:// place calls, trigger IVR, send provider messages, or auto-reply.
+13528:app.get('/media-manager/project/:project/native-media/providers', handleGetNativeMediaProviders);
+13529:app.get('/public/media-manager/project/:project/native-media/providers', handleGetNativeMediaProviders);
+13530:app.get('/media-manager/project/:project/native-media/providers/readiness', handleGetNativeMediaProviderReadiness);
+13531:app.get('/public/media-manager/project/:project/native-media/providers/readiness', handleGetNativeMediaProviderReadiness);
+13551:      provider: req.body?.provider || DEFAULT_NATIVE_MEDIA_PROVIDER,
+13554:      prompt: req.body?.prompt || '',
+14358:      visual_prompt:
+14367:      video_prompt:
+14397:  const pp = product.prompt_pack || {};
+14406:      visual_prompt: b.visual_prompt,
+14416:      video_prompt: r.video_prompt,
+14432:      video_prompt: r.video_prompt,
+14448:      visual_prompt: m.visual_prompt,
+14460:      visual_prompt: b.visual_prompt
+14534:      prompt_pack: product.prompt_pack || {},
+14597:    const promptPack = product.prompt_pack || {};
+14609:      fallback_prompt_pack:
+14611:          ? promptPack.marketplace || null
+14613:          ? promptPack.branding || null
+14614:          : promptPack.branding || null
+14955:        video_prompt: String(channelAsset.video_prompt || channelAsset.visual_prompt || '').trim(),
+15018:function buildMediaGenerationMock(promptPack = {}, input = {}) {
+15019:  const source = promptPack && typeof promptPack === 'object' ? promptPack : {};
+15025:    input.image_prompt
+15026:    || branding.visual_prompt
+15027:    || feature.visual_prompt
+15032:    String(reel.video_prompt || 'Show product usage with a clear before/after context and one main benefit.').trim(),
+15037:    image_prompt: imagePrompt,
+15050:        direction: String(reel.video_prompt || feature.video_prompt || imagePrompt).trim()
+15091:  const promptPack = primary.prompt_pack && typeof primary.prompt_pack === 'object'
+15092:    ? primary.prompt_pack
+15094:  const offer = promptPack.offer && typeof promptPack.offer === 'object' ? promptPack.offer : {};
+15095:  const branding = promptPack.branding && typeof promptPack.branding === 'object' ? promptPack.branding : {};
+15125:function deriveMediaExecutionPrompt(promptPack = {}, input = {}) {
+15126:  const source = promptPack && typeof promptPack === 'object' ? promptPack : {};
+15132:    input.prompt
+15133:    || input.image_prompt
+15134:    || branding.visual_prompt
+15135:    || feature.visual_prompt
+15136:    || reel.video_prompt
+15164:    ready_for_provider_send: true,
+15172:async function executeMediaGenerationRuntime({ project, payload, promptPack }) {
+15175:  const prompt = deriveMediaExecutionPrompt(promptPack, payload || {});
+15179:    provider: payload?.provider || DEFAULT_NATIVE_MEDIA_PROVIDER,
+15182:    prompt,
+15199:    image_prompt: prompt,
+15206:  const basePrompt = String(payload?.prompt || adPackage?.ad_copy || adPackage?.headline || '').trim();
+15208:    const error = new Error('Unable to execute ad package: prompt data is missing.');
+15215:    prompt: basePrompt,
+15222:    const message = String(campaignPack?.message || 'Ad execution provider is not configured.').trim();
+15233:    execution_backend: 'ad_ai_provider_runtime',
+15236:    headline: String(generated.image_prompt || adPackage.headline || '').trim(),
+15240:    provider: campaignPack.provider,
+15681:  res.status(403).json(decision.response);
+15718:  res.status(403).json(decision.response);
+16293:  if (!aiOrchestrator) {
+16294:    aiOrchestrator = createAiOrchestrationService({
+16303:  return aiOrchestrator;
+16331:app.post('/telegram-command', async (req, res) => {
+16339:        message: 'No command text provided'
+16344:    const command = parts[0];
+16346:    const commandProject = resolveRequestProjectName(req, {
+16351:    const commandBrandName = commandProject ? getProjectDisplayName(commandProject) : 'Project';
+16352:    const commandHashtag = commandProject ? buildProjectHashtag(commandProject) : '#Project';
+16354:    if (command === '/products') {
+16355:      const response = await axios.get(`${process.env.WC_BASE_URL}/products`, {
+16363:        command,
+16364:        result: response.data.slice(0, 10).map(p => ({
+16374:    if (command === '/optimize_product') {
+16384:      const response = await axios.get(`http://localhost:${PORT}/optimize-product/${productId}`);
+16386:        command,
+16387:        result: response.data
+16391:    if (command === '/prepare_product_update') {
+16401:      const response = await axios.get(`http://localhost:${PORT}/prepare-product-update/${productId}`);
+16403:        command,
+16404:        result: response.data
+16408:    if (command === '/clone_product') {
+16418:      const response = await axios.post(`http://localhost:${PORT}/backup-and-clone-product/${productId}`);
+16420:        command,
+16421:        result: response.data
+16425:    if (command === '/apply_to_clone') {
+16437:      const response = await axios.post(
+16442:        command,
+16443:        result: response.data
+16447:       if (command === '/content_plan') {
+16448:      const taskBoardPath = getLegacyContentQueuePath(commandProject, 'tasks');
+16453:          String(t.project || '').trim().toLowerCase() === commandProject &&
+16458:        command,
+16460:          project: commandProject,
+16466:        if (command === '/create_post') {
+16467:      const topic = args.join(' ') || `${commandBrandName} launch post`;
+16474:        caption: `Entdecke ${topic} mit ${commandBrandName}. Premium Positionierung für Kunden, die Wert auf Stil, Qualität und Wirkung legen.`,
+16477:          commandHashtag,
+16487:        creative_prompt:
+16493:      const queuePath = getLegacyContentQueuePath(commandProject, 'social');
+16500:        command,
+16505:         if (command === '/create_blog') {
+16512:        title: `${topic} | ${commandBrandName} Blog`,
+16514:          `${topic} – praktische Tipps, moderne Routinen und Premium Positionierung von ${commandBrandName}.`,
+16515:        seo_title: `${topic} | ${commandBrandName}`,
+16517:          `${topic} – entdecke Tipps, Routinen und Premium Positionierung von ${commandBrandName} für einen klaren und starken Auftritt.`,
+16531:          commandBrandName,
+16543:        featured_image_prompt:
+16546:          `${topic} – Premium Artikel von ${commandBrandName}`,
+16560:<p>Viele Kunden investieren in Stil und Auftreten, unterschätzen aber die Wirkung einer klaren Routine. Genau hier setzt ${commandBrandName} an: mit Premium Produkten und einer einfachen, wirksamen Struktur.</p>
+16582:<p>${topic} ist nicht nur ein Produktthema, sondern Teil eines modernen, selbstbewussten und klaren Lebensstils. Mit ${commandBrandName} entsteht eine Routine, die zu Kunden passt, die Wert auf Qualität, Stil und Wirkung legen.</p>
+16584:<p><strong>CTA:</strong> Entdecke jetzt ${commandBrandName} und bringe deine Routine auf das nächste Level.</p>`
+16587:      const queuePath = getLegacyContentQueuePath(commandProject, 'blog');
+16594:        command,
+16599:   if (command === '/create_email') {
+16600:      const topic = args.join(' ') || `${commandBrandName} Launch`;
+16612:          `Entdecke ${topic} mit ${commandBrandName}. Premium Produkte für Kunden, die ihre Routine auf das nächste Level bringen wollen.`,
+16616:      const { data: queue } = readLiveEmailQueue(commandProject, emailDraft.id);
+16618:      writeLiveEmailQueue(commandProject, queue);
+16621:        command,
+16626:    if (command === '/create_ads') {
+16627:      const topic = args.join(' ') || `${commandBrandName} Launch`;
+16634:          `Mit ${topic} von ${commandBrandName} setzt du auf Premium Qualität, klare Routine und einen starken Auftritt.`,
+16638:      const queuePath = getLegacyContentQueuePath(commandProject, 'ads');
+16645:        command,
+16650:       if (command === '/review_ads') {
+16651:      const queuePath = getLegacyContentQueuePath(commandProject, 'ads');
+16656:        command,
+16661:    if (command === '/review_posts') {
+16662:      const queuePath = getLegacyContentQueuePath(commandProject, 'social');
+16667:        command,
+16672:    if (command === '/review_blog') {
+16673:      const queuePath = getLegacyContentQueuePath(commandProject, 'blog');
+16678:        command,
+16683:    if (command === '/review_emails') {
+16684:      const { data: queue } = readLiveEmailQueue(commandProject, 'review-emails');
+16687:        command,
+16692:    if (command === '/approve_ad') {
+16698:      const queuePath = getLegacyContentQueuePath(commandProject, 'ads');
+16712:        command,
+16717:    if (command === '/approve_post') {
+16723:      const queuePath = getLegacyContentQueuePath(commandProject, 'social');
+16737:        command,
+16742:    if (command === '/approve_blog') {
+16748:      const queuePath = getLegacyContentQueuePath(commandProject, 'blog');
+16762:        command,
+16767:    if (command === '/approve_email') {
+16773:      const { data: queue } = readLiveEmailQueue(commandProject, draftId);
+16782:      writeLiveEmailQueue(commandProject, queue);
+16785:        command,
+16790:    if (command === '/improve_ad') {
+16796:      const queuePath = getLegacyContentQueuePath(commandProject, 'ads');
+16806:      item.headline = `Jetzt entdecken: ${item.topic} – Premium Angebot von ${commandBrandName}`;
+16808:        `Für Kunden, die Wert auf Qualität, Wirkung und eine klare Routine legen: ${item.topic} von ${commandBrandName} verbindet Premium Positionierung mit einem klaren Auftritt.`;
+16825:        command,
+16830:    if (command === '/improve_post') {
+16836:      const queuePath = getLegacyContentQueuePath(commandProject, 'social');
+16847:        `Ein stärkerer Auftritt beginnt mit der richtigen Routine. ${item.topic} mit ${commandBrandName} steht für Premium Positionierung, klare Wirkung und einen hochwertigen Eindruck.`;
+16857:      item.overlay_text = `${commandBrandName} | ${item.topic}`;
+16858:      item.creative_prompt =
+16865:        command,
+16870:    if (command === '/improve_blog') {
+16876:      const queuePath = getLegacyContentQueuePath(commandProject, 'blog');
+16886:      item.seo_title = `${item.topic} | ${commandBrandName}`;
+16888:        `${item.topic} – Tipps, Routine und Premium Positionierung von ${commandBrandName} für einen klaren und starken Auftritt.`;
+16902:        commandBrandName,
+16913:      item.featured_image_prompt =
+16916:        `${item.topic} – Premium Artikel von ${commandBrandName}`;
+16937:<p>Mit einer klaren Struktur, hochwertigen Produkten und einem Fokus auf echte Wirkung wird die Routine einfacher, effizienter und sichtbarer. Genau dafür steht ${commandBrandName}.</p>
+16947:<h3>Warum ${commandBrandName} dazu passt</h3>
+16948:<p>${commandBrandName} verbindet Premium Positionierung mit einer modernen, klaren und wirksamen Routine. Für Kunden, die nicht einfach nur Produkte wollen, sondern einen stärkeren Auftritt.</p>
+16953:<p><strong>CTA:</strong> Entdecke jetzt ${commandBrandName} und entwickle eine Routine, die wirklich zu dir passt.</p>`;
+16958:        command,
+16963:    if (command === '/improve_email') {
+16969:      const { data: queue } = readLiveEmailQueue(commandProject, draftId);
+16983:        `Entdecke ${item.topic} mit ${commandBrandName}. Premium Positionierung für Kunden, die Qualität, Wirkung und einen starken Auftritt verbinden wollen. Jetzt ist der richtige Moment, deine Routine auf das nächste Level zu bringen.`;
+16986:      writeLiveEmailQueue(commandProject, queue);
+16989:        command,
+16994:    if (command === '/execute_ad') {
+17000:      const queuePath = getLegacyContentQueuePath(commandProject, 'ads');
+17014:        command,
+17020:    if (command === '/execute_post') {
+17026:      const queuePath = getLegacyContentQueuePath(commandProject, 'social');
+17040:        command,
+17046:    if (command === '/execute_blog') {
+17052:      const queuePath = getLegacyContentQueuePath(commandProject, 'blog');
+17066:        command,
+17072:    if (command === '/execute_email') {
+17078:      const { data: queue } = readLiveEmailQueue(commandProject, draftId);
+17087:      writeLiveEmailQueue(commandProject, queue);
+17090:        command,
+17095:if (command === '/publish_blog') {
+17101:  const response = await fetch(
+17102:    `http://localhost:${PORT}/publish-blog/${draftId}?project=${encodeURIComponent(commandProject)}`,
+17106:  const data = await response.json();
+17109:    command,
+17113:    if (command === '/prepare_blog_media') {
+17119:      const queuePath = getLegacyContentQueuePath(commandProject, 'blog');
+17129:        command,
+17133:          featured_image_prompt: item.featured_image_prompt || '',
+17137:          media_ready: Boolean(item.featured_image_prompt && item.featured_image_alt)
+17142:    if (command === '/review_blog_assets') {
+17148:      const queuePath = getLegacyContentQueuePath(commandProject, 'blog');
+17158:        command,
+17169:          featured_image_prompt: item.featured_image_prompt || '',
+17176:       if (command === '/generate_blog_image') {
+17182:      const blogQueuePath = getLegacyContentQueuePath(commandProject, 'blog');
+17191:      const mediaDir = getProjectMediaDir(commandProject);
+17192:      const mediaQueuePath = getProjectBlogImageQueuePath(commandProject);
+17218:        prompt: blogItem.featured_image_prompt || '',
+17226:        media_ready: Boolean(blogItem.featured_image_prompt && blogItem.featured_image_alt)
+17237:        command,
+17242:    if (command === '/review_blog_media_asset') {
+17248:      const mediaQueue = readJsonFile(getProjectBlogImageQueuePath(commandProject), []);
+17265:        command,
+17269:if (command === '/generate_image_real') {
+17276:  const mediaQueuePath = getProjectBlogImageQueuePath(commandProject);
+17293:  if (!asset.prompt) {
+17294:    return res.json({ error: 'Missing prompt in asset' });
+17300:    const response = await axios.post(
+17304:        prompt: asset.prompt,
+17315:    const imageBase64 = response.data.data[0].b64_json;
+17330:      command,
+17347:if (command === '/attach_blog_image') {
+17354:  const blogQueuePath = getLegacyContentQueuePath(commandProject, 'blog');
+17363:  const mediaQueuePath = getProjectBlogImageQueuePath(commandProject);
+17432:      command,
+17447:      details: sanitizeErrorPayloadForClient(error.response?.data || error.message)
+17452:    if (command === '/enhance_published_blog') {
+17459:      const blogQueuePath = getLegacyContentQueuePath(commandProject, 'blog');
+17564:          command,
+17580:          details: sanitizeErrorPayloadForClient(error.response?.data || error.message)
+17585:    if (command === '/review_published_blog') {
+17592:      const blogQueuePath = getLegacyContentQueuePath(commandProject, 'blog');
+17602:        command,
+17623:    if (command === '/review_email_asset') {
+17629:      const { data: queue } = readLiveEmailQueue(commandProject, draftId);
+17637:        command,
+17659:    if (command === '/generate_email_image') {
+17665:      const { data: emailQueue } = readLiveEmailQueue(commandProject, draftId);
+17672:      const mediaDir = getProjectMediaDir(commandProject);
+17676:      const { data: mediaQueue } = readLiveEmailMediaQueue(commandProject, draftId);
+17691:      const prompt =
+17695:        `${emailItem.topic} – Premium Kampagne von ${commandBrandName}`;
+17704:        prompt,
+17716:      writeLiveEmailMediaQueue(commandProject, mediaQueue);
+17719:        command,
+17724:    if (command === '/review_email_media') {
+17730:      const { data: mediaQueue } = readLiveEmailMediaQueue(commandProject, ref);
+17747:        command,
+17752:    if (command === '/attach_email_image') {
+17758:  const { data: emailQueue } = readLiveEmailQueue(commandProject, draftId);
+17765:  const { data: mediaQueue } = readLiveEmailMediaQueue(commandProject, draftId);
+17809:    const projectWebsiteUrl = getProjectWebsiteUrl(commandProject) || '#';
+17820:    writeLiveEmailMediaQueue(commandProject, mediaQueue);
+17821:    writeLiveEmailQueue(commandProject, emailQueue);
+17824:      command,
+17838:      details: sanitizeErrorPayloadForClient(error.response?.data || error.message)
+17843:    if (command === '/generate_email_image_real') {
+17850:      const { data: mediaQueue } = readLiveEmailMediaQueue(commandProject, ref);
+17866:      if (!asset.prompt) {
+17867:        return res.json({ error: 'Missing prompt in asset' });
+17871:        const response = await axios.post(
+17875:            prompt: asset.prompt,
+17886:        const imageBase64 = response.data.data[0].b64_json;
+17894:        writeLiveEmailMediaQueue(commandProject, mediaQueue);
+17897:          command,
+17909:          details: sanitizeErrorPayloadForClient(error.response?.data || error.message)
+17914:     if (command === '/send_email_draft') {
+17926:        const { data: emailQueue } = readLiveEmailQueue(commandProject, draftId);
+17938:        const response = await axios.post(
+17957:        emailItem.send_result = response.data;
+17959:        writeLiveEmailQueue(commandProject, emailQueue);
+17962:          command,
+17968:            bridge_result: response.data
+17974:          details: sanitizeErrorPayloadForClient(error.response?.data || error.message)
+17979:    if (command === '/create_project_profile') {
+18023:        command,
+18028:    if (command === '/review_project_profile') {
+18043:        command,
+18048:    if (command === '/create_campaign_strategy') {
+18121:        command,
+18126:    if (command === '/review_campaign_strategy') {
+18148:        command,
+18153:    if (command === '/plan_campaign_assets') {
+18204:        command,
+18209:if (command === '/enrich_project_profile') {
+18324:    command,
+18331:if (command === '/reuse_blog_to_social') {
+18338:  const blogQueuePath = getLegacyContentQueuePath(commandProject, 'blog');
+18357:        caption: `Ein stärkerer Look beginnt mit der richtigen Routine. ${blog.topic} mit ${commandBrandName} steht für Premium Positionierung und klare Ergebnisse.`,
+18359:        hashtags: [commandHashtag, '#MensGrooming', '#PremiumCare', '#BarberStyle', '#MensStyle']
+18369:      script: `Routine entscheidet alles. ${blog.topic} mit ${commandBrandName} bringt Klarheit und Wirkung.`,
+18380:    command,
+18385:if (command === '/reuse_email_to_social') {
+18392:  const { candidate, data: emailQueue } = readLiveEmailQueue(commandProject, emailId);
+18419:    command,
+18424:if (command === '/generate_reel_from_blog') {
+18443:    command,
+18448:    if (command === '/analyze_competitors') {
+18495:        command,
+18500:    if (command === '/find_trends') {
+18539:        command,
+18544:    if (command === '/keyword_map') {
+18591:        command,
+18596:    if (command === '/hashtag_engine') {
+18630:        command,
+18635:    if (command === '/create_intelligence_brief') {
+18670:        command,
+18674:if (command === '/enrich_trend_live') {
+18723:    command,
+18727:if (command === '/enrich_competitor_live') {
+18775:    command,
+18779:if (command === '/enrich_keyword_live') {
+18821:    command,
+18825:    if (command === '/build_campaign_from_intelligence') {
+18950:        command,
+18955:    if (command === '/recommend_campaign_angles') {
+18975:        command,
+18987:    if (command === '/recommend_platform_priorities') {
+19007:        command,
+19022:    if (command === '/create_weekly_market_plan') {
+19060:        command,
+19064:if (command === '/execute_campaign_brain') {
+19090:  const brainProject = normalizeOptionalProjectSlug(brain.project_id) || commandProject;
+19148:    media_prompts: [
+19161:    command,
+19165:    if (command === '/autogen_campaign_assets') {
+19177:      const campaignProject = commandProject;
+19186:      const { data: emailQueue } = readLiveEmailQueue(commandProject, execId);
+19232:          featured_image_prompt: `Create a premium editorial blog image for ${campaignExec.blog.topic}, masculine grooming, luxury brand style, clear premium composition.`,
+19282:            creative_prompt: `Create a premium ${post.platform} creative for ${campaignExec.blog?.topic || 'campaign'}, masculine luxury grooming style.`,
+19347:      writeLiveEmailQueue(commandProject, emailQueue);
+19363:        command,
+19371:    if (command === '/review_campaign_autogen') {
+19391:        command,
+19401:    if (command === '/campaign_publish_blog') {
+19427:        const response = await axios.post(
+19428:          `http://localhost:${PORT}/publish-blog/${blogId}?project=${encodeURIComponent(commandProject)}`
+19435:          result: response.data,
+19446:          command,
+19452:          details: sanitizeErrorPayloadForClient(error.response?.data || error.message)
+19457:    if (command === '/campaign_send_email') {
+19484:        const response = await axios.post(
+19485:          `http://localhost:${PORT}/telegram-command`,
+19487:            project: commandProject,
+19497:          result: response.data,
+19508:          command,
+19514:          details: sanitizeErrorPayloadForClient(error.response?.data || error.message)
+19519:    if (command === '/campaign_review_publish_state') {
+19539:        command,
+19552:    if (command === '/init_brand_assets') {
+19605:        prompt_constraints: {
+19617:        command,
+19622:    if (command === '/review_brand_assets') {
+19642:        command,
+19647:    if (command === '/set_brand_rules') {
+19666:      brandProfile.prompt_constraints = {
+19686:        command,
+19691:    if (command === '/register_product_asset') {
+19726:        command,
+19732:    if (command === '/import_wc_product_media') {
+19752:    const response = await axios.get(
+19763:    const product = response.data?.[0];
+19840:      command,
+19853:      details: sanitizeErrorPayloadForClient(error.response?.data || error.message)
+19857:if (command === '/register_local_brand_file') {
+19898:      command,
+19923:    command,
+19927:if (command === '/register_reference_link') {
+19956:      command,
+19982:    command,
+19986:if (command === '/review_media_inputs') {
+20017:    command,
+20026:if (command === '/build_prompt_engine_context') {
+20036:      command,
+20041:      error: 'Failed to build prompt engine context',
+20046:if (command === '/review_prompt_guardrails') {
+20057:      command,
+20078:      error: 'Failed to review prompt guardrails',
+20083:if (command === '/generate_brand_controlled_prompt') {
+20095:      command,
+20100:      error: 'Failed to generate brand controlled prompt',
+20106:if (command === '/evaluate_execution_readiness') {
+20117:      command,
+20128:if (command === '/build_execution_package') {
+20140:      command,
+20150:if (command === '/review_execution_package') {
+20167:      command,
+20177:if (command === '/generate_ad_visual') {
+20188:      command,
+20198:if (command === '/generate_email_hero') {
+20209:      command,
+20219:if (command === '/generate_blog_visual') {
+20230:      command,
+20240:if (command === '/review_generation_job') {
+20262:      command,
+20272:if (command === '/build_render_request') {
+20282:      command,
+20292:if (command === '/review_render_request') {
+20302:      command,
+20312:if (command === '/mark_render_result') {
+20328:      command,
+20338:if (command === '/render_generation_job') {
+20349:      command,
+20355:      details: sanitizeErrorPayloadForClient(error.response?.data || error.message)
+20359:if (command === '/evaluate_email_readiness') {
+20369:      command,
+20379:if (command === '/auto_prepare_email_asset') {
+20391:      command,
+20401:if (command === '/review_email_prepare_package') {
+20411:      command,
+20421:if (command === '/validate_email_prepare_package') {
+20431:      command,
+20447:if (command === '/evaluate_prepared_email_for_send') {
+20457:      command,
+20467:if (command === '/send_prepared_email') {
+20478:      command,
+20488:if (command === '/review_email_delivery') {
+20517:      command,
+20527:if (command === '/generate_meta_package') {
+20539:      command,
+20550:if (command === '/review_meta_package') {
+20560:      command,
+20570:if (command === '/generate_tiktok_package') {
+20580:    return res.json({ command, result });
+20589:if (command === '/review_tiktok_package') {
+20598:    return res.json({ command, result });
+20607:if (command === '/generate_youtube_package') {
+20618:    return res.json({ command, result });
+20627:if (command === '/review_youtube_package') {
+20636:    return res.json({ command, result });
+20644:if (command === '/generate_marketplace_package') {
+20656:      command,
+20667:if (command === '/review_marketplace_package') {
+20678:      command,
+20688:if (command === '/review_asset_fidelity') {
+20703:      command,
+20713:if (command === '/init_product_intelligence') {
+20723:      command,
+20738:if (command === '/sync_wc_product_intelligence') {
+20747:    const response = await axios.get(
+20760:    const product = response.data?.[0];
+20770:      command,
+20784:      details: sanitizeErrorPayloadForClient(error.response?.data || error.message)
+20789:if (command === '/review_product_intelligence') {
+20800:      command,
+20811:if (command === '/list_product_intelligence') {
+20821:      command,
+20842:if (command === '/list_wc_products') {
+20850:      command,
+20866:if (command === '/read_wc_product') {
+20881:      command,
+20892:if (command === '/sync_all_wc_products') {
+20902:      command,
+20913:if (command === '/review_wc_sync_summary') {
+20923:      command,
+20934:if (command === '/enrich_product_intelligence') {
+20964:      command,
+20979:if (command === '/bulk_enrich_product_intelligence') {
+21006:      command,
+21019:if (command === '/build_product_creative_map') {
+21046:      command,
+21060:if (command === '/bulk_build_creative_maps') {
+21082:      command,
+21095:if (command === '/review_product_creative_map') {
+21107:      command,
+21122:if (command === '/build_product_prompt_pack') {
+21142:    const promptPack = buildProductPromptPack(product);
+21143:    product.prompt_pack = promptPack;
+21149:      command,
+21153:        prompt_pack: promptPack
+21158:      error: 'Failed to build product prompt pack',
+21163:if (command === '/bulk_build_product_prompt_packs') {
+21177:      product.prompt_pack = buildProductPromptPack(product);
+21185:      command,
+21188:        prompt_packs_built: count
+21193:      error: 'Failed to bulk build product prompt packs',
+21198:if (command === '/review_product_prompt_pack') {
+21210:      command,
+21215:        prompt_pack: product.prompt_pack || null
+21220:      error: 'Failed to review product prompt pack',
+21225:if (command === '/build_product_channel_pack') {
+21246:      command,
+21256:if (command === '/bulk_build_channel_packs') {
+21276:      command,
+21286:if (command === '/review_product_channel_pack') {
+21298:      command,
+21310:if (command === '/build_campaign_execution_package') {
+21332:      command,
+21342:if (command === '/review_campaign_execution_package') {
+21354:      command,
+21364:if (command === '/build_channel_execution_payload') {
+21381:      command,
+21391:if (command === '/build_campaign_media_job') {
+21403:      command,
+21413:if (command === '/prepare_campaign_email') {
+21424:      command,
+21434:if (command === '/build_campaign_publish_package') {
+21446:      command,
+21456:if (command === '/review_campaign_finalization') {
+21467:      command,
+21477:if (command === '/build_german_launch_plan') {
+21482:    return res.json({ command, result });
+21487:if (command === '/review_german_launch_plan') {
+21495:    return res.json({ command, result: data });
+21500:if (command === '/build_launch_wave') {
+21506:    return res.json({ command, result });
+21511:if (command === '/review_launch_wave') {
+21520:    return res.json({ command, result: data });
+21525:if (command === '/build_channel_connector_payload') {
+21536:    return res.json({ command, result });
+21544:if (command === '/schedule_launch_job') {
+21556:    return res.json({ command, result });
+21564:if (command === '/review_scheduled_jobs') {
+21573:    return res.json({ command, result });
+21581:if (command === '/update_scheduled_job_status') {
+21592:    return res.json({ command, result });
+21600:if (command === '/record_manual_publish') {
+21617:    return res.json({ command, result });
+21625:if (command === '/set_execution_mode') {
+21635:    return res.json({ command, result });
+21643:if (command === '/review_execution_mode') {
+21652:    return res.json({ command, result });
+21660:if (command === '/execute_scheduled_job') {
+21670:    return res.json({ command, result });
+21678:if (command === '/review_execution_result') {
+21688:    return res.json({ command, result });
+21696:if (command === '/list_execution_results') {
+21705:    return res.json({ command, result });
+21713:if (command === '/review_channel_post') {
+21724:    return res.json({ command, result });
+21732:if (command === '/improve_channel_post') {
+21743:    return res.json({ command, result });
+21751:if (command === '/save_post_performance') {
+21763:    return res.json({ command, result });
+21771:if (command === '/review_product_performance') {
+21781:    return res.json({ command, result });
+21789:if (command === '/review_channel_learning') {
+21799:    return res.json({ command, result });
+21807:if (command === '/list_system_docs') {
+21810:    return res.json({ command, result });
+21819:if (command === '/read_system_doc') {
+21828:    return res.json({ command, result });
+21836:if (command === '/create_project') {
+21856:    return res.json({ command, result });
+21865:if (command === '/list_projects') {
+21868:    return res.json({ command, result });
+21877:if (command === '/review_project') {
+21886:    return res.json({ command, result });
+21895:if (command === '/review_project_readiness') {
+21904:    return res.json({ command, result });
+21912:if (command === '/register_project_asset') {
+21923:    return res.json({ command, result });
+21932:if (command === '/list_project_assets') {
+21941:  return res.json({ command, result });
+21950:if (command === '/set_project_source_of_truth') {
+21961:    return res.json({ command, result });
+21970:if (command === '/review_project_sources') {
+21979:    return res.json({ command, result });
+21988:if (command === '/review_project_missing_assets') {
+21997:    return res.json({ command, result });
+22005:if (command === '/list_asset_type_catalog') {
+22008:    return res.json({ command, result });
+22017:if (command === '/review_project_upload_mapping') {
+22026:    return res.json({ command, result });
+22035:if (command === '/review_project_connector_readiness') {
+22044:    return res.json({ command, result });
+22052:if (command === '/route_project_asset') {
+22063:    return res.json({ command, result });
+22072:if (command === '/review_project_asset_routes') {
+22081:    return res.json({ command, result });
+22090:if (command === '/review_project_folder_health') {
+22099:    return res.json({ command, result });
+22107:if (command === '/review_project_alignment_status') {
+22116:    return res.json({ command, result });
+22125:if (command === '/review_project_missing_priorities') {
+22134:    return res.json({ command, result });
+22143:if (command === '/review_project_dashboard') {
+22152:    return res.json({ command, result });
+22160:if (command === '/project_control_center_overview') {
+22169:    return res.json({ command, result });
+22178:if (command === '/project_control_center_assets') {
+22187:    return res.json({ command, result });
+22196:if (command === '/project_control_center_connectors') {
+22205:    return res.json({ command, result });
+22214:if (command === '/project_control_center_readiness') {
+22223:    return res.json({ command, result });
+22232:if (command === '/project_control_center_activity') {
+22241:    return res.json({ command, result });
+22264:      message: `Unsupported command: ${command}`
+22270:      message: 'Failed to execute telegram command'
+22283:    const response = await axios.put(
+22296:    const publishedProduct = response.data;
+22313:      error: sanitizeErrorPayloadForClient(error.response?.data || error.message) || 'Failed to publish clone product'
+22402:      error: sanitizeErrorPayloadForClient(error.response?.data || error.message) || 'Failed to replace original product'
+22418:    const response = await axios.put(
+22431:    const updated = response.data;
+22495:    const response = await fetch(WP_URL, {
+22510:    const data = await response.json();
+22512:        if (!response.ok) {
+22514:        statusCode: response.status || 502,
+22516:        message: `WordPress publish failed with status ${response.status}`
+22529:      item.featured_image_prompt && item.featured_image_alt
+22544:        item.featured_image_prompt && item.featured_image_alt
+22595:    const response = await axios.put(
+22606:    const restored = response.data;
+23329:app.post('/api/media/improve-prompt', async (req, res) => {
+23332:    if (!result.ok && result.status === 'provider_not_configured') {
+23338:      output: { improved_prompt: result.improved_prompt },
+23339:      status: 'prompt_ready'
+23344:      status: 'prompt_ready',
+23345:      improved_prompt: result.improved_prompt,
+23346:      provider: result.provider,
+23354:      message: error.message || 'Failed to improve media prompt'
+23362:    if (!result.ok && result.status === 'provider_not_configured') {
+23376:      provider: result.provider,
+23392:    if (!result.ok && result.status === 'provider_not_configured') {
+23405:      provider: result.provider,
+23422:    if (!result.ok && result.status === 'provider_not_configured') {
+23435:      provider: result.provider,
+23452:    if (!result.ok && result.status === 'provider_not_configured') {
+23465:      provider: result.provider,
+23482:    if (!result.ok && result.status === 'provider_not_configured') {
+23495:      provider: result.provider,
+23540:  const responseMessage = statusCode >= 500 && isProduction
+23560:      message: responseMessage

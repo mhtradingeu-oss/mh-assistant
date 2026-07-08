@@ -1,0 +1,51 @@
+Contract file:
+-rw-r--r--@ 1 nadeemnour  staff  24168 Jul  7 22:50 public/control-center/runtime/ai-team/ai-team-operating-contract.js
+
+Contract exports:
+17:export const AI_TEAM_CONTRACT_VERSION = "phase-1b-2026-ready-v1";
+19:export const AI_TEAM_ROLE_CATEGORIES = Object.freeze({
+32:export const AI_TEAM_AUTHORITY_LEVELS = Object.freeze([
+43:export const AI_TEAM_REQUEST_TYPES = Object.freeze([
+60:export const AI_TEAM_OUTPUT_TYPES = Object.freeze([
+71:export const AI_TEAM_FORBIDDEN_ACTIONS = Object.freeze([
+89:export const AI_TEAM_CANONICAL_ROLES = Object.freeze([
+260:export const AI_TEAM_ROLE_ALIASES = Object.freeze({
+319:export const AI_TEAM_PAGE_OWNER_MATRIX = Object.freeze({
+469:export const AI_TEAM_HANDOFF_RULES = Object.freeze({
+487:export const AI_TEAM_FULL_TEAM_TRIGGERS = Object.freeze([
+494:export const AI_TEAM_SPECIALIST_REQUEST_MAP = Object.freeze({
+511:export function normalizeAiTeamRoleId(roleId, fallback = "operations") {
+520:export function getAiTeamRole(roleId) {
+526:export function getAiTeamPageOwner(pageId) {
+531:export function canAiTeamHandoff(sourcePage, destinationPage) {
+537:export function getAiTeamDefaultRoleForRequest(requestType) {
+542:export function shouldUseFullAiTeam(requestType) {
+
+Contract role/handoff/page markers:
+17:export const AI_TEAM_CONTRACT_VERSION = "phase-1b-2026-ready-v1";
+89:export const AI_TEAM_CANONICAL_ROLES = Object.freeze([
+95:    ownerSummary: "Tasks, workflows, queues, jobs, notifications, approvals, handoffs, and execution safety.",
+96:    primaryPages: ["home", "ai-command", "workflows", "task-center", "queue-center", "job-monitor", "notification-center", "operations-centers"],
+98:    outputTargets: ["task-center", "workflows", "operations-centers", "governance"],
+111:    supportPages: ["workflows", "insights", "research", "ads-manager"],
+112:    outputTargets: ["campaign-studio", "workflows", "content-studio", "ads-manager"],
+237:    supportPages: ["task-center", "governance", "workflows"],
+251:    supportPages: ["campaign-studio", "workflows", "task-center"],
+252:    outputTargets: ["customer-center", "task-center", "workflows", "operations-centers"],
+260:export const AI_TEAM_ROLE_ALIASES = Object.freeze({
+319:export const AI_TEAM_PAGE_OWNER_MATRIX = Object.freeze({
+404:  workflows: {
+460:  settings: {
+469:export const AI_TEAM_HANDOFF_RULES = Object.freeze({
+470:  "automation-engine": ["publishing", "workflows"],
+471:  "ai-command": ["campaign-studio", "content-studio", "media-studio", "publishing", "ads-manager", "workflows", "task-center", "governance", "insights", "research", "customer-center", "operations-centers"],
+472:  "campaign-studio": ["ai-command", "content-studio", "media-studio", "publishing", "ads-manager", "workflows"],
+477:  workflows: ["ai-command", "task-center", "workflows", "campaign-studio", "content-studio", "media-studio", "publishing", "governance"],
+478:  "task-center": ["ai-command", "workflows", "operations-centers", "governance"],
+484:  settings: ["governance"]
+515:  if (AI_TEAM_CANONICAL_ROLES.some((role) => role.id === raw)) return raw;
+517:  return AI_TEAM_ROLE_ALIASES[raw] || fallback;
+522:  return AI_TEAM_CANONICAL_ROLES.find((role) => role.id === normalized) ||
+523:    AI_TEAM_CANONICAL_ROLES.find((role) => role.id === "operations");
+528:  return AI_TEAM_PAGE_OWNER_MATRIX[key] || null;
+534:  return Array.isArray(AI_TEAM_HANDOFF_RULES[source]) && AI_TEAM_HANDOFF_RULES[source].includes(destination);

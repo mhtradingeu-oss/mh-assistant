@@ -1,0 +1,21 @@
+FINDINGS
+YES - contract exists
+YES - contract currently not imported by pages
+YES - AI Command has local MODE_ID_ALIASES
+YES - AI Command has local SPECIALIST_DEFS
+YES - AI Command has local destinationRouteForSpecialist
+YES - Home has local recommended specialist logic
+YES - route-role-fallback has local route role map
+YES - shared-context is separate and should not change first
+
+INTEGRATION OPTIONS RISK
+RECOMMENDED - validator_only: Keep contract standalone + strengthen validator | risk=lowest | behavior=none
+HOLD - home_read_only: Import contract into Home for labels/prompts only | risk=low-medium | behavior=possible UI text drift
+HOLD - ai_command_alias_only: Import contract into AI Command for alias normalization only | risk=medium | behavior=possible specialist routing change
+HOLD - route_role_fallback_replace: Replace route-role-fallback maps with contract owners | risk=medium-high | behavior=authority projection may change
+HOLD - handoff_rules_enforce: Enforce contract handoff rules | risk=high | behavior=handoffs can be blocked
+
+RECOMMENDED PHASE 1C DECISION
+Do not integrate runtime pages yet.
+First create a contract conformance audit that compares current AI Command/Home/route-role-fallback against the contract and reports drift.
+Then integrate one narrow surface: AI Command alias normalization only, after drift report is clean.

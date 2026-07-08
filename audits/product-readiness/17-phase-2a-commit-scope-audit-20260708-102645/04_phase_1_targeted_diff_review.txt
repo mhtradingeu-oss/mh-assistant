@@ -1,0 +1,968 @@
+Diff stat for Phase 1 candidate files only:
+ public/control-center/pages/ai-command.js          |  67 ++++++++----
+ public/control-center/pages/home.js                | 120 +++++++++++----------
+ .../control-center/pages/home/render-sections.js   |  71 +++++++++++-
+ public/control-center/styles/13-home-executive.css |  62 +++++++++++
+ 4 files changed, 237 insertions(+), 83 deletions(-)
+
+Diff for Phase 1 tracked candidate files:
+diff --git a/public/control-center/pages/ai-command.js b/public/control-center/pages/ai-command.js
+index c5a9e2e..173ac2d 100644
+--- a/public/control-center/pages/ai-command.js
++++ b/public/control-center/pages/ai-command.js
+@@ -24,6 +24,8 @@ import {
+         getCategoryReadinessList
+ } from "../asset-library.js";
+ 
++import { normalizeAiTeamRoleId } from "../runtime/ai-team/ai-team-operating-contract.js";
++
+ import {
+         executeProjectAiChat,
+         executeProjectAiGuidance,
+@@ -619,6 +621,51 @@ const aiAutomationState = {
+ 	result: ""
+ };
+ 
++
++
++function normalizeAiCommandSpecialistId(id, fallback = "operations") {
++    const localResolved = MODE_ID_ALIASES[id] || id;
++    return normalizeAiTeamRoleId(localResolved, fallback);
++}
++
++function detectSpecialistFromBridgePrompt(prompt) {
++    const text = asString(prompt).toLowerCase();
++
++    const directMap = [
++            ["video", "video_lead"],
++            ["motion", "video_lead"],
++            ["reel", "video_lead"],
++            ["storyboard", "video_lead"],
++            ["shot list", "video_lead"],
++            ["voiceover", "video_lead"],
++            ["media", "video_lead"],
++            ["campaign", "strategist"],
++            ["strategy", "strategist"],
++            ["content", "copywriter"],
++            ["copy", "copywriter"],
++            ["caption", "copywriter"],
++            ["publish", "publisher"],
++            ["schedule", "publisher"],
++            ["ads", "ads_operator"],
++            ["budget", "ads_operator"],
++            ["customer", "customer_ops"],
++            ["crm", "customer_ops"],
++            ["support", "customer_ops"],
++            ["operations", "admin"],
++            ["blocker", "admin"],
++            ["readiness", "admin"],
++            ["setup", "admin"],
++            ["library", "admin"]
++    ];
++
++    for (const [keyword, specialistId] of directMap) {
++            if (text.includes(keyword)) return normalizeAiCommandSpecialistId(specialistId);
++    }
++
++    const classified = classifyIntent(text, null);
++    return normalizeAiCommandSpecialistId(classified?.modeId, "operations");
++}
++
+ function buildAutoPlanFromCommand(commandText, session) {
+ 	function getSpecialistById(id) {
+ 		const resolvedId = MODE_ID_ALIASES[id] || id;
+@@ -627,26 +674,6 @@ function buildAutoPlanFromCommand(commandText, session) {
+ 			SPECIALIST_DEFS[0];
+ 	}
+ 
+-	function detectSpecialistFromBridgePrompt(prompt) {
+-		const text = asString(prompt);
+-		if (/act as the strategist/i.test(text)) return "strategist";
+-		if (/act as the content writer/i.test(text)) return "writer";
+-		if (/act as the media director/i.test(text)) return "media";
+-		if (/act as the video lead/i.test(text)) return "video_lead";
+-		if (/act as the publisher/i.test(text)) return "publisher";
+-		if (/act as the ads optimizer|act as the ads operator/i.test(text)) return "ads";
+-		if (/act as the seo|act as the insights analyst/i.test(text)) return "analyst";
+-		if (/act as the compliance reviewer/i.test(text)) return "compliance_reviewer";
+-		if (/act as the operations lead/i.test(text)) return "operations";
+-		if (/act as the customer operations lead|act as customer ops/i.test(text)) return "customer_ops";
+-		if (/act as the sales|act as the crm|sales \/ crm lead/i.test(text)) return "sales_crm";
+-		// Fallback: use keyword scoring from existing classifyIntent
+-		const classified = classifyIntent(text, null);
+-		if (classified.resolvedModeId && classified.resolvedModeId !== "operations") {
+-			return classified.resolvedModeId;
+-		}
+-		return null;
+-	}
+ 
+ 	const command = humanizeValue(commandText || session?.draftMessage, "Prepare workflow action from AI command.");
+ 	const plan = [
+diff --git a/public/control-center/pages/home.js b/public/control-center/pages/home.js
+index ae79671..af7687d 100644
+--- a/public/control-center/pages/home.js
++++ b/public/control-center/pages/home.js
+@@ -137,6 +137,12 @@ function humanizeExecutiveAction(value, fallback = "Next executive action") {
+     .trim();
+ 
+   const known = {
++    "logo": "Upload or approve the brand logo to unblock launch readiness",
++    "brand guideline": "Add the brand guideline so content, media, ads, and publishing stay consistent",
++    "brand guidelines": "Add the brand guideline so content, media, ads, and publishing stay consistent",
++    "pricing doc": "Add the pricing document so campaigns and offers use approved numbers",
++    "legal doc": "Add the legal document so publishing and ads can pass review",
++    "product video": "Create product videos to unblock media, campaign, and ad readiness",
+     "product videos": "Create product videos to unblock launch readiness",
+     "connector ecommerce": "Connect ecommerce data to improve launch confidence",
+     "ecommerce": "Connect ecommerce data to improve launch confidence",
+@@ -391,7 +397,7 @@ function buildExecutiveData(state) {
+ 
+   const rawNextAction = asString(recommendations[0]).trim() || fallbackAction;
+   const nextAction = humanizeExecutiveAction(rawNextAction, "Ask AI Command");
+-  const nextActionRoute = routeForAction(rawNextAction || nextAction);
++  const nextActionRoute = routeForAction(nextAction || rawNextAction);
+ 
+   const whyItMatters = criticalGaps.length
+     ? "Removing this blocker increases launch confidence and prevents avoidable delays."
+@@ -869,11 +875,51 @@ export const homeRoute = {
+                   ${escapeHtml(dashboard.nextBestAction.buttonLabel)}
+                 </button>
+                 <button id="homeAskNextActionBtn" class="mhos-next-action-btn is-ghost" type="button">
+-                  Prepare AI Explanation
+-                </button>
+-                <button id="homeOpenOperationsBtn" class="btn btn-secondary btn-sm" type="button">
+-                  Open Operations
++                  Ask Head Office AI
+                 </button>
++</div>
++            </section>
++
++
++            <section class="mhos-real-head-office-coverage" aria-label="Head Office campaign execution coverage">
++              <div class="mhos-section-head">
++                <div>
++                  <p class="mhos-os-kicker">HEAD OFFICE COVERAGE</p>
++                  <h2 class="mhos-os-section-title">Campaign execution at a glance</h2>
++                  <p class="mhos-os-panel-copy">One-second view of campaign, schedule, publishing, ads, and operations readiness. Home shows ownership only; execution stays inside the owning workspace.</p>
++                </div>
++              </div>
++
++              <div class="mhos-real-head-office-grid">
++                <article class="mhos-real-head-office-card">
++                  <span class="data-label">Campaign</span>
++                  <strong>${escapeHtml(dashboard.campaign?.name || "No active campaign selected")}</strong>
++                  <p>${escapeHtml(dashboard.campaign?.name ? "Campaign context is available." : "Open Campaign Studio to plan the next campaign wave.")}</p>
++                </article>
++
++                <article class="mhos-real-head-office-card">
++                  <span class="data-label">Scheduled Posts</span>
++                  <strong>${escapeHtml(dashboard.campaign?.nextScheduledAction || "No confirmed schedule")}</strong>
++                  <p>${escapeHtml(dashboard.launchSnapshot?.scheduledJobs ? "Scheduled work exists for review." : "No scheduled post is confirmed yet.")}</p>
++                </article>
++
++                <article class="mhos-real-head-office-card">
++                  <span class="data-label">Publishing</span>
++                  <strong>${escapeHtml(dashboard.launchSnapshot?.campaignReadiness || "At risk")}</strong>
++                  <p>Resolve blockers before publishing or scheduling live content.</p>
++                </article>
++
++                <article class="mhos-real-head-office-card">
++                  <span class="data-label">Ads</span>
++                  <strong>${escapeHtml(dashboard.blockers?.integrations?.length ? "Needs platform connections" : "Ready for strategy review")}</strong>
++                  <p>Ad readiness depends on campaign, assets, integrations, and approval safety.</p>
++                </article>
++
++                <article class="mhos-real-head-office-card">
++                  <span class="data-label">Operations</span>
++                  <strong>${escapeHtml(dashboard.nextBestAction?.recommendation ? "Next action identified" : "Needs reviewed action")}</strong>
++                  <p>Operations owns handoff, review order, and safe execution sequence.</p>
++                </article>
+               </div>
+             </section>
+ 
+@@ -1007,29 +1053,18 @@ export const homeRoute = {
+ 
+               ${recommendedSpecialist ? `
+                 <button class="quick-action-btn mhos-motion-soft" type="button" data-role-id="${escapeHtml(recommendedSpecialist.id)}">
+-                  <span class="home-action-title">Prepare ${escapeHtml(recommendedSpecialist.name)} Guidance</span>
+-                  <span class="home-action-meta">${escapeHtml(recommendedSpecialist.status || "Ready to guide")}. Opens AI Command with context.</span>
++                  <span class="home-action-title">Ask ${escapeHtml(recommendedSpecialist?.name || "Recommended AI")}</span>
++                  <span class="home-action-meta">Uses the recommended specialist context. No execution from Home.</span>
+                 </button>
+               ` : ""}
+ 
+-              <button id="homeQuickOpenAiBtn" class="quick-action-btn" type="button">
+-                <span class="home-action-title">Open AI Workspace</span>
+-                <span class="home-action-meta">Prepare guidance for the next best action.</span>
+-              </button>
+-
+-              <button id="homeOpenAiTeamBtn" class="btn btn-ghost btn-sm" type="button">
+-                Open AI Command
+-              </button>
+-              <button id="homeOpenFullAiTeamBtn" class="btn btn-ghost btn-sm" type="button">
+-                Open Full Team
+-              </button>
+-            </section>
++</section>
+ 
+             <section class="mhos-os-ai-panel">
+               <div>
+                 <p class="mhos-os-kicker">AI guidance</p>
+                 <h2 class="mhos-os-panel-title">Ask safely</h2>
+-                <p class="mhos-os-panel-copy">Prompt buttons fill AI Command with reviewed guidance requests. They do not execute actions.</p>
++                <p class="mhos-os-panel-copy">Use one AI prompt when you need explanation or a safe action plan. Nothing executes from Home.</p>
+               </div>
+ 
+               <button id="homePromptNextBtn" class="home-ai-prompt-card" type="button">
+@@ -1040,15 +1075,7 @@ export const homeRoute = {
+                 <span class="home-prompt-title">Why is readiness low?</span>
+                 <span class="home-prompt-meta">Explain blockers and readiness gaps in simple terms.</span>
+               </button>
+-              <button id="homePromptLaunchBtn" class="home-ai-prompt-card" type="button">
+-                <span class="home-prompt-title">Summarize launch blockers</span>
+-                <span class="home-prompt-meta">Prepare a launch risk summary for review.</span>
+-              </button>
+-              <button id="homePromptPlanBtn" class="home-ai-prompt-card" type="button">
+-                <span class="home-prompt-title">Turn next action into a plan</span>
+-                <span class="home-prompt-meta">Convert the next action into a reviewed plan.</span>
+-              </button>
+-            </section>
++</section>
+ 
+             <section class="mhos-os-evidence-panel">
+               <p class="mhos-os-kicker">Customer operations</p>
+@@ -1093,7 +1120,7 @@ export const homeRoute = {
+ 
+       const prompt = rolePrompts[roleId] || `Act as the ${roleName} specialist for ${projectLabel}. Review the current project context and recommend the next best actions. Do not execute anything; prepare guidance only.`;
+       openAiWithPrompt(prompt);
+-      showMessage?.(`${roleName} context prepared in AI Command.`);
++      showMessage?.(`${roleName} context prepared in AI Command. Review and send when ready.`);
+     };
+ 
+     const nextBtn = $("homePrimaryActionBtn");
+@@ -1108,17 +1135,9 @@ export const homeRoute = {
+ 
+     const askNextActionBtn = $("homeAskNextActionBtn");
+     if (askNextActionBtn) {
+-      askNextActionBtn.onclick = () => openAiWithPrompt(`Explain this next best action and give me the exact steps: ${dashboard.nextBestAction.recommendation}`);
++      askNextActionBtn.onclick = () => openAiWithPrompt(`Explain this next best action like an operations director and give me the exact safe steps: ${dashboard.nextBestAction.recommendation}. Include which workspace owns it, what it unlocks for campaign creation, scheduled posts, publishing, ads, and customer operations. Do not execute anything.`);
+     }
+ 
+-    const operationsBtn = $("homeOpenOperationsBtn");
+-    if (operationsBtn) operationsBtn.onclick = () => openRoute("operations-centers");
+-
+-    const aiTeamBtn = $("homeOpenAiTeamBtn");
+-    if (aiTeamBtn) aiTeamBtn.onclick = () => openRoute("ai-command");
+-    const fullAiTeamBtn = $("homeOpenFullAiTeamBtn");
+-    if (fullAiTeamBtn) fullAiTeamBtn.onclick = () => openRoute("ai-command");
+-
+     const quickCampaignBtn = $("homeQuickStartCampaignBtn");
+     if (quickCampaignBtn) quickCampaignBtn.onclick = () => openRoute("campaign-studio");
+ 
+@@ -1127,33 +1146,16 @@ export const homeRoute = {
+ 
+     const quickReadinessBtn = $("homeQuickReviewReadinessBtn");
+     if (quickReadinessBtn) quickReadinessBtn.onclick = () => openRoute("setup");
+-
+-    const quickAiBtn = $("homeQuickOpenAiBtn");
+-    if (quickAiBtn) {
+-      quickAiBtn.onclick = () => openAiWithPrompt(dashboard.nextBestAction.recommendation);
+-    }
+-
+     const promptNextBtn = $("homePromptNextBtn");
+     if (promptNextBtn) {
+-      promptNextBtn.onclick = () => openAiWithPrompt("What should I do next for this project? Prioritize the answer based on readiness, blockers, campaign state, and recent activity.");
++      promptNextBtn.onclick = () => openAiWithPrompt("What is the best next executive action for this project? Prioritize the answer based on readiness, blockers, campaign state, scheduled posts, publishing safety, ads readiness, customer operations, and recent activity. Give one clear recommendation and the reason.");
+     }
+ 
+     const promptReadinessBtn = $("homePromptReadinessBtn");
+     if (promptReadinessBtn) {
+-      promptReadinessBtn.onclick = () => openAiWithPrompt("Why is readiness low? Explain the missing integrations, assets, failed jobs, and readiness gaps in simple steps.");
+-    }
+-
+-    const promptLaunchBtn = $("homePromptLaunchBtn");
+-    if (promptLaunchBtn) {
+-      promptLaunchBtn.onclick = () => openAiWithPrompt("Summarize the launch blockers and tell me what must be fixed before publishing.");
++      promptReadinessBtn.onclick = () => openAiWithPrompt("Why is readiness low? Explain the missing integrations, assets, failed jobs, campaign gaps, scheduled post risks, publishing blockers, and ad launch risks in simple business language. End with the fastest safe fix path.");
+     }
+-
+-    const promptPlanBtn = $("homePromptPlanBtn");
+-    if (promptPlanBtn) {
+-      promptPlanBtn.onclick = () => openAiWithPrompt("Prepare today's action plan from the current dashboard. Give me prioritized tasks with owners and expected outcomes.");
+-    }
+-
+-    const aiRoleCards = document.querySelectorAll(".home-ai-team-card, .mhos-specialist, .mhos-workflow-step[data-role-id]");
++    const aiRoleCards = document.querySelectorAll(".quick-action-btn[data-role-id], .home-ai-team-card[data-role-id], .mhos-specialist[data-role-id], .mhos-workflow-step[data-role-id]");
+     aiRoleCards.forEach((card) => {
+       const roleId = card.getAttribute("data-role-id");
+       const roleName = card.querySelector("strong")?.textContent || "AI Specialist";
+diff --git a/public/control-center/pages/home/render-sections.js b/public/control-center/pages/home/render-sections.js
+index c27ad17..9c4ee8d 100644
+--- a/public/control-center/pages/home/render-sections.js
++++ b/public/control-center/pages/home/render-sections.js
+@@ -109,6 +109,50 @@ export function renderHomeExecutiveIntro({
+   formatPercent,
+   toneLabel
+ }) {
++  const headOfficeTitle = dashboard?.nextBestAction?.recommendation
++    ? "Head Office live brief"
++    : "Head Office is waiting for a reviewed signal";
++
++  const headOfficeDetail = dashboard?.nextBestAction?.recommendation
++    ? `Best move now: ${dashboard.nextBestAction.recommendation}. This protects campaign planning, scheduled posts, publishing, ads, and customer operations from avoidable mistakes.`
++    : "Open AI Command or the owning workspace to generate the next reviewed action. Home only guides; it does not execute.";
++
++  const campaignSignal = dashboard?.campaign?.name
++    ? `Active campaign: ${dashboard.campaign.name}`
++    : "No active campaign selected";
++
++  const scheduleSignal = dashboard?.execution?.nextSchedule && dashboard.execution.nextSchedule !== "Not available"
++    ? `Next scheduled item: ${dashboard.execution.nextSchedule}`
++    : "No scheduled post is confirmed yet";
++
++  const coverageItems = [
++    {
++      label: "Campaign",
++      value: dashboard?.campaign?.name ? "Active campaign selected" : "Needs campaign selection",
++      tone: dashboard?.campaign?.name ? "success" : "warning"
++    },
++    {
++      label: "Scheduled Posts",
++      value: dashboard?.execution?.nextSchedule && dashboard.execution.nextSchedule !== "Not available" ? dashboard.execution.nextSchedule : "No confirmed schedule",
++      tone: dashboard?.execution?.nextSchedule && dashboard.execution.nextSchedule !== "Not available" ? "success" : "warning"
++    },
++    {
++      label: "Publishing",
++      value: dashboard?.launchSnapshot?.campaignReadiness === "Ready" ? "Ready to review schedule" : "Resolve blockers first",
++      tone: dashboard?.launchSnapshot?.campaignReadiness === "Ready" ? "success" : "warning"
++    },
++    {
++      label: "Ads",
++      value: dashboard?.blockers?.integrations?.length ? "Needs platform connections" : "Ready for strategy review",
++      tone: dashboard?.blockers?.integrations?.length ? "warning" : "success"
++    },
++    {
++      label: "Operations",
++      value: dashboard?.nextBestAction?.recommendation ? "Next action identified" : "Needs reviewed action",
++      tone: dashboard?.nextBestAction?.recommendation ? "success" : "warning"
++    }
++  ];
++
+   return `
+     <section class="card home-exec-hero">
+       <div class="home-exec-hero-main">
+@@ -132,11 +176,30 @@ export function renderHomeExecutiveIntro({
+         <button id="homeSecondaryActionBtn" class="btn btn-secondary" type="button">
+           ${escapeHtml(dashboard.secondaryActionLabel)}
+         </button>
+-        <button id="homeAskExecutiveAiBtn" class="btn btn-ghost" type="button">
+-          Prepare AI Guidance
+-        </button>
+       </div>
+-      <p class="home-empty-note">Home opens workspaces or prepares AI guidance only. It does not approve, publish, send, upload, delete, archive, or execute.</p>
++      <div class="home-head-office-strip" aria-label="Head Office live operating brief">
++        <div>
++          <span class="data-label">Head Office</span>
++          <strong>${escapeHtml(headOfficeTitle)}</strong>
++          <p>${escapeHtml(headOfficeDetail)}</p>
++        </div>
+
+Untracked Phase 1 candidate source/audit files:
+===== public/control-center/runtime/ai-team/ai-team-operating-contract.js =====
+/**
+ * MH-OS Canonical AI Team Operating Contract
+ *
+ * Purpose:
+ * - Single source of truth for AI Team roles, aliases, page ownership,
+ *   request types, output types, authority levels, and handoff rules.
+ *
+ * Important:
+ * - This file is contract-only in Phase 1B.
+ * - It does not change runtime behavior until later integration phases.
+ * - AI Command prepares, explains, drafts, and routes.
+ * - Owning workspaces execute.
+ * - Governance reviews risk.
+ * - User confirmation is required for sensitive actions.
+ */
+
+export const AI_TEAM_CONTRACT_VERSION = "phase-1b-2026-ready-v1";
+
+export const AI_TEAM_ROLE_CATEGORIES = Object.freeze({
+  ORCHESTRATION: "orchestration",
+  STRATEGY: "strategy",
+  CONTENT: "content",
+  MEDIA: "media",
+  PUBLISHING: "publishing",
+  PAID_MEDIA: "paid_media",
+  INTELLIGENCE: "intelligence",
+  GOVERNANCE: "governance",
+  CUSTOMER: "customer",
+  SALES: "sales"
+});
+
+export const AI_TEAM_AUTHORITY_LEVELS = Object.freeze([
+  "review_only",
+  "draft_only",
+  "handoff_only",
+  "approval_required",
+  "owner_workspace_required",
+  "manual_execution_only",
+  "auto_mode_later",
+  "forbidden_from_ai_command"
+]);
+
+export const AI_TEAM_REQUEST_TYPES = Object.freeze([
+  "general_question",
+  "guidance_request",
+  "single_task",
+  "project_setup",
+  "campaign_project",
+  "content_request",
+  "media_request",
+  "publishing_request",
+  "ads_request",
+  "customer_request",
+  "workflow_request",
+  "task_request",
+  "governance_request",
+  "execution_request"
+]);
+
+export const AI_TEAM_OUTPUT_TYPES = Object.freeze([
+  "answer_only",
+  "guidance",
+  "draft",
+  "task_preview",
+  "workflow_preview",
+  "handoff",
+  "approval_request",
+  "execution_review"
+]);
+
+export const AI_TEAM_FORBIDDEN_ACTIONS = Object.freeze([
+  "publish",
+  "send_customer_reply",
+  "send_email",
+  "approve",
+  "reject_approval",
+  "launch_ads",
+  "change_budget",
+  "mutate_crm",
+  "change_ticket_status",
+  "assign_conversation",
+  "run_provider_execution",
+  "run_backend_job",
+  "override_governance",
+  "sync_provider",
+  "delete_record"
+]);
+
+export const AI_TEAM_CANONICAL_ROLES = Object.freeze([
+  {
+    id: "operations",
+    label: "Operations Lead",
+    category: AI_TEAM_ROLE_CATEGORIES.ORCHESTRATION,
+    position: "Execution and Handoff Lead",
+    ownerSummary: "Tasks, workflows, queues, jobs, notifications, approvals, handoffs, and execution safety.",
+    primaryPages: ["home", "ai-command", "workflows", "task-center", "queue-center", "job-monitor", "notification-center", "operations-centers"],
+    supportPages: ["governance", "integrations", "setup", "customer-center"],
+    outputTargets: ["task-center", "workflows", "operations-centers", "governance"],
+    allowedOutputs: ["guidance", "task_preview", "workflow_preview", "handoff", "execution_review"],
+    defaultAuthority: "handoff_only",
+    forbiddenActions: ["publish", "send_customer_reply", "approve", "launch_ads", "mutate_crm", "run_provider_execution", "run_backend_job", "override_governance"],
+    defaultPrompt: "Act as Operations Lead. Convert priorities into safe execution steps, owners, handoffs, and the next workspace. Do not execute anything."
+  },
+  {
+    id: "strategist",
+    label: "Strategist",
+    category: AI_TEAM_ROLE_CATEGORIES.STRATEGY,
+    position: "Campaign and Growth Strategist",
+    ownerSummary: "Campaign planning, positioning, launch priorities, offers, audience, and next best action.",
+    primaryPages: ["campaign-studio", "home", "ai-command"],
+    supportPages: ["workflows", "insights", "research", "ads-manager"],
+    outputTargets: ["campaign-studio", "workflows", "content-studio", "ads-manager"],
+    allowedOutputs: ["guidance", "draft", "workflow_preview", "handoff"],
+    defaultAuthority: "draft_only",
+    forbiddenActions: ["publish", "launch_ads", "approve", "run_backend_job"],
+    defaultPrompt: "Act as Strategist. Review the project state and create the highest-impact campaign or growth direction. Do not execute anything."
+  },
+  {
+    id: "writer",
+    label: "Content Writer",
+    category: AI_TEAM_ROLE_CATEGORIES.CONTENT,
+    position: "Copy and Content Lead",
+    ownerSummary: "Copy, captions, hooks, product text, scripts, emails, landing pages, and content variants.",
+    primaryPages: ["content-studio", "ai-command"],
+    supportPages: ["campaign-studio", "publishing", "media-studio", "library"],
+    outputTargets: ["content-studio", "publishing", "media-studio", "library"],
+    allowedOutputs: ["answer_only", "guidance", "draft", "handoff"],
+    defaultAuthority: "draft_only",
+    forbiddenActions: ["publish", "send_email", "approve", "launch_ads"],
+    defaultPrompt: "Act as Content Writer. Produce review-ready content and explain the recommended destination. Do not publish or send anything."
+  },
+  {
+    id: "media_director",
+    label: "Media Director",
+    category: AI_TEAM_ROLE_CATEGORIES.MEDIA,
+    position: "Visual Direction and Asset Lead",
+    ownerSummary: "Visual direction, brand assets, image quality, creative briefs, and media readiness.",
+    primaryPages: ["media-studio", "library", "ai-command"],
+    supportPages: ["content-studio", "campaign-studio", "publishing", "governance"],
+    outputTargets: ["media-studio", "library", "publishing", "governance"],
+    allowedOutputs: ["guidance", "draft", "handoff", "execution_review"],
+    defaultAuthority: "handoff_only",
+    forbiddenActions: ["publish", "approve", "run_provider_execution", "launch_ads"],
+    defaultPrompt: "Act as Media Director. Review assets and define safe visual direction, source requirements, and media handoff path. Do not execute generation."
+  },
+  {
+    id: "video_lead",
+    label: "Video Lead",
+    category: AI_TEAM_ROLE_CATEGORIES.MEDIA,
+    position: "Video and Motion Lead",
+    ownerSummary: "Short-form video, motion content, scene plans, scripts, start/end frames, and platform formats.",
+    primaryPages: ["media-studio", "ai-command"],
+    supportPages: ["content-studio", "campaign-studio", "publishing"],
+    outputTargets: ["media-studio", "content-studio", "publishing"],
+    allowedOutputs: ["guidance", "draft", "handoff", "execution_review"],
+    defaultAuthority: "handoff_only",
+    forbiddenActions: ["publish", "approve", "run_provider_execution", "launch_ads"],
+    defaultPrompt: "Act as Video Lead. Prepare a safe video brief, scene plan, prompt pack, or motion handoff. Do not execute generation."
+  },
+  {
+    id: "publisher",
+    label: "Publisher",
+    category: AI_TEAM_ROLE_CATEGORIES.PUBLISHING,
+    position: "Publishing Readiness Lead",
+    ownerSummary: "Publishing queue, schedules, manual publish handoffs, channel readiness, and release checks.",
+    primaryPages: ["publishing", "ai-command"],
+    supportPages: ["content-studio", "media-studio", "governance", "campaign-studio"],
+    outputTargets: ["publishing", "governance", "content-studio", "media-studio"],
+    allowedOutputs: ["guidance", "handoff", "approval_request", "execution_review"],
+    defaultAuthority: "approval_required",
+    forbiddenActions: ["publish", "approve", "send_email", "launch_ads", "override_governance"],
+    defaultPrompt: "Act as Publisher. Review publishing readiness, missing assets, approvals, and schedule risks. Do not publish anything."
+  },
+  {
+    id: "ads_operator",
+    label: "Ads Optimizer",
+    category: AI_TEAM_ROLE_CATEGORIES.PAID_MEDIA,
+    position: "Paid Media and Creative Testing Lead",
+    ownerSummary: "Paid media, ad packages, creative testing, campaign budget guidance, tracking, and ROAS improvement.",
+    primaryPages: ["ads-manager", "ai-command"],
+    supportPages: ["campaign-studio", "insights", "publishing", "media-studio"],
+    outputTargets: ["ads-manager", "campaign-studio", "insights"],
+    allowedOutputs: ["guidance", "draft", "handoff", "execution_review"],
+    defaultAuthority: "approval_required",
+    forbiddenActions: ["launch_ads", "change_budget", "publish", "approve", "run_provider_execution"],
+    defaultPrompt: "Act as Ads Optimizer. Prepare safe paid media guidance, creative test ideas, and budget recommendations. Do not launch or change ads."
+  },
+  {
+    id: "analyst",
+    label: "SEO & Insights Analyst",
+    category: AI_TEAM_ROLE_CATEGORIES.INTELLIGENCE,
+    position: "Insights and Performance Analyst",
+    ownerSummary: "Search, performance, weak signals, learning patterns, analytics, SEO, and measurable optimization.",
+    primaryPages: ["insights", "ai-command"],
+    supportPages: ["campaign-studio", "content-studio", "ads-manager", "home"],
+    outputTargets: ["insights", "campaign-studio", "content-studio", "ads-manager"],
+    allowedOutputs: ["answer_only", "guidance", "draft", "handoff", "execution_review"],
+    defaultAuthority: "review_only",
+    forbiddenActions: ["publish", "approve", "launch_ads", "mutate_crm"],
+    defaultPrompt: "Act as SEO & Insights Analyst. Explain what is working, what is weak, and what should happen next. Do not execute anything."
+  },
+  {
+    id: "researcher",
+    label: "Researcher",
+    category: AI_TEAM_ROLE_CATEGORIES.INTELLIGENCE,
+    position: "Market and Evidence Research Lead",
+    ownerSummary: "Market research, competitors, audience intelligence, trend evidence, and positioning proof.",
+    primaryPages: ["research", "ai-command"],
+    supportPages: ["campaign-studio", "insights", "content-studio"],
+    outputTargets: ["research", "campaign-studio", "insights", "content-studio"],
+    allowedOutputs: ["answer_only", "guidance", "draft", "handoff"],
+    defaultAuthority: "review_only",
+    forbiddenActions: ["publish", "approve", "launch_ads", "run_provider_execution"],
+    defaultPrompt: "Act as Researcher. Gather and structure evidence, market angles, and risks for review. Do not execute anything."
+  },
+  {
+    id: "compliance_reviewer",
+    label: "Compliance Reviewer",
+    category: AI_TEAM_ROLE_CATEGORIES.GOVERNANCE,
+    position: "Safety, Claims, and Approval Lead",
+
+===== scripts/audit/validate-ai-team-operating-contract.mjs =====
+import {
+  AI_TEAM_AUTHORITY_LEVELS,
+  AI_TEAM_CANONICAL_ROLES,
+  AI_TEAM_FORBIDDEN_ACTIONS,
+  AI_TEAM_HANDOFF_RULES,
+  AI_TEAM_OUTPUT_TYPES,
+  AI_TEAM_PAGE_OWNER_MATRIX,
+  AI_TEAM_REQUEST_TYPES,
+  AI_TEAM_ROLE_ALIASES,
+  AI_TEAM_SPECIALIST_REQUEST_MAP,
+  getAiTeamPageOwner,
+  getAiTeamRole,
+  normalizeAiTeamRoleId
+} from "../../public/control-center/runtime/ai-team/ai-team-operating-contract.js";
+
+const failures = [];
+
+function pass(label) {
+  console.log(`PASS - ${label}`);
+}
+
+function fail(label, detail = "") {
+  failures.push(`${label}${detail ? `: ${detail}` : ""}`);
+  console.log(`FAIL - ${label}${detail ? `: ${detail}` : ""}`);
+}
+
+function assert(label, condition, detail = "") {
+  if (condition) pass(label);
+  else fail(label, detail);
+}
+
+const roleIds = AI_TEAM_CANONICAL_ROLES.map((role) => role.id);
+const roleIdSet = new Set(roleIds);
+
+assert("roles are defined", AI_TEAM_CANONICAL_ROLES.length >= 10);
+assert("role IDs are unique", roleIdSet.size === roleIds.length);
+assert("operations role exists", roleIdSet.has("operations"));
+assert("strategist role exists", roleIdSet.has("strategist"));
+assert("writer role exists", roleIdSet.has("writer"));
+assert("media_director role exists", roleIdSet.has("media_director"));
+assert("video_lead role exists", roleIdSet.has("video_lead"));
+assert("publisher role exists", roleIdSet.has("publisher"));
+assert("ads_operator role exists", roleIdSet.has("ads_operator"));
+assert("analyst role exists", roleIdSet.has("analyst"));
+assert("researcher role exists", roleIdSet.has("researcher"));
+assert("compliance_reviewer role exists", roleIdSet.has("compliance_reviewer"));
+assert("customer_ops role exists", roleIdSet.has("customer_ops"));
+assert("sales_crm role exists", roleIdSet.has("sales_crm"));
+
+for (const role of AI_TEAM_CANONICAL_ROLES) {
+  assert(`role ${role.id} has label`, Boolean(role.label));
+  assert(`role ${role.id} has category`, Boolean(role.category));
+  assert(`role ${role.id} has primaryPages`, Array.isArray(role.primaryPages) && role.primaryPages.length > 0);
+  assert(`role ${role.id} has outputTargets`, Array.isArray(role.outputTargets) && role.outputTargets.length > 0);
+  assert(`role ${role.id} has allowedOutputs`, Array.isArray(role.allowedOutputs) && role.allowedOutputs.length > 0);
+  assert(`role ${role.id} authority is valid`, AI_TEAM_AUTHORITY_LEVELS.includes(role.defaultAuthority), role.defaultAuthority);
+  for (const output of role.allowedOutputs || []) {
+    assert(`role ${role.id} output ${output} is valid`, AI_TEAM_OUTPUT_TYPES.includes(output), output);
+  }
+}
+
+for (const [alias, target] of Object.entries(AI_TEAM_ROLE_ALIASES)) {
+  assert(`alias ${alias} maps to canonical role`, roleIdSet.has(target), target);
+}
+
+const requiredAliases = {
+  admin: "operations",
+  operations_lead: "operations",
+  executive: "operations",
+  copywriter: "writer",
+  content_writer: "writer",
+  designer: "media_director",
+  ads: "ads_operator",
+  customer_operations: "customer_ops",
+  seo: "analyst",
+  seo_insights_analyst: "analyst",
+  compliance: "compliance_reviewer",
+  governance: "compliance_reviewer",
+  support: "customer_ops",
+  crm: "sales_crm"
+};
+
+for (const [alias, target] of Object.entries(requiredAliases)) {
+  assert(`required alias ${alias} -> ${target}`, normalizeAiTeamRoleId(alias) === target);
+}
+
+assert("request types include execution_request", AI_TEAM_REQUEST_TYPES.includes("execution_request"));
+assert("output types include handoff", AI_TEAM_OUTPUT_TYPES.includes("handoff"));
+assert("authority levels include approval_required", AI_TEAM_AUTHORITY_LEVELS.includes("approval_required"));
+assert("forbidden actions include publish", AI_TEAM_FORBIDDEN_ACTIONS.includes("publish"));
+assert("forbidden actions include run_provider_execution", AI_TEAM_FORBIDDEN_ACTIONS.includes("run_provider_execution"));
+
+const requiredPages = [
+  "home",
+  "ai-command",
+  "setup",
+  "library",
+  "integrations",
+  "campaign-studio",
+  "content-studio",
+  "media-studio",
+  "publishing",
+  "ads-manager",
+  "insights",
+  "research",
+  "workflows",
+  "task-center",
+  "queue-center",
+  "job-monitor",
+  "notification-center",
+  "operations-centers",
+  "customer-center",
+  "governance",
+  "settings"
+];
+
+for (const page of requiredPages) {
+  const owner = getAiTeamPageOwner(page);
+  assert(`page ${page} has owner matrix`, Boolean(owner));
+  if (owner) {
+    assert(`page ${page} owner role is canonical`, roleIdSet.has(owner.ownerRole), owner.ownerRole);
+    assert(`page ${page} authority is valid`, AI_TEAM_AUTHORITY_LEVELS.includes(owner.defaultAuthority), owner.defaultAuthority);
+    for (const output of owner.allowedOutputs || []) {
+      assert(`page ${page} output ${output} is valid`, AI_TEAM_OUTPUT_TYPES.includes(output), output);
+    }
+  }
+}
+
+for (const [source, destinations] of Object.entries(AI_TEAM_HANDOFF_RULES)) {
+  assert(`handoff source ${source} has destinations`, Array.isArray(destinations) && destinations.length > 0);
+  for (const destination of destinations) {
+    assert(`handoff ${source} -> ${destination} destination has page owner or is library`, Boolean(AI_TEAM_PAGE_OWNER_MATRIX[destination]) || destination === "library", destination);
+  }
+}
+
+for (const requestType of AI_TEAM_REQUEST_TYPES) {
+  assert(`request type ${requestType} has default role`, Boolean(AI_TEAM_SPECIALIST_REQUEST_MAP[requestType]), requestType);
+  assert(`request type ${requestType} default role is canonical`, roleIdSet.has(AI_TEAM_SPECIALIST_REQUEST_MAP[requestType]), AI_TEAM_SPECIALIST_REQUEST_MAP[requestType]);
+}
+
+assert("getAiTeamRole resolves admin alias to Operations Lead", getAiTeamRole("admin")?.id === "operations");
+assert("getAiTeamRole resolves copywriter alias to writer", getAiTeamRole("copywriter")?.id === "writer");
+assert("getAiTeamRole resolves ads alias to ads_operator", getAiTeamRole("ads")?.id === "ads_operator");
+
+console.log("");
+if (failures.length) {
+  console.log(`AI Team Operating Contract validation: FAIL (${failures.length} issue(s))`);
+  for (const item of failures) console.log(`- ${item}`);
+  process.exit(1);
+}
+
+console.log("AI Team Operating Contract validation: PASS");
+
+===== scripts/audit/ai-team-contract-conformance-check.mjs =====
+import fs from "fs";
+import path from "path";
+import {
+  AI_TEAM_CANONICAL_ROLES,
+  AI_TEAM_ROLE_ALIASES,
+  AI_TEAM_PAGE_OWNER_MATRIX,
+  AI_TEAM_HANDOFF_RULES,
+  AI_TEAM_REQUEST_TYPES,
+  AI_TEAM_OUTPUT_TYPES,
+  AI_TEAM_AUTHORITY_LEVELS
+} from "../../public/control-center/runtime/ai-team/ai-team-operating-contract.js";
+
+const failures = [];
+const warnings = [];
+const notes = [];
+
+function read(file) {
+  try {
+    return fs.readFileSync(file, "utf8");
+  } catch {
+    return "";
+  }
+}
+
+function listJsFiles(dir) {
+  const out = [];
+  if (!fs.existsSync(dir)) return out;
+
+  for (const name of fs.readdirSync(dir)) {
+    const p = path.join(dir, name);
+    const st = fs.statSync(p);
+
+    if (st.isDirectory()) {
+      out.push(...listJsFiles(p));
+    } else if (p.endsWith(".js")) {
+      out.push(p);
+    }
+  }
+
+  return out;
+}
+
+function pass(label) {
+  console.log(`PASS - ${label}`);
+}
+
+function warn(label, detail = "") {
+  warnings.push(`${label}${detail ? `: ${detail}` : ""}`);
+  console.log(`WARN - ${label}${detail ? `: ${detail}` : ""}`);
+}
+
+function fail(label, detail = "") {
+  failures.push(`${label}${detail ? `: ${detail}` : ""}`);
+  console.log(`FAIL - ${label}${detail ? `: ${detail}` : ""}`);
+}
+
+function note(label, detail = "") {
+  notes.push(`${label}${detail ? `: ${detail}` : ""}`);
+  console.log(`INFO - ${label}${detail ? `: ${detail}` : ""}`);
+}
+
+function assert(label, condition, detail = "") {
+  if (condition) pass(label);
+  else fail(label, detail);
+}
+
+function unique(items) {
+  return [...new Set(items.filter(Boolean))];
+}
+
+function safeRegexEscape(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function hasToken(source, token) {
+  return new RegExp(`\\b${safeRegexEscape(token)}\\b`).test(source);
+}
+
+function extractObjectKeysNear(source, objectName) {
+  const index = source.indexOf(objectName);
+  if (index < 0) return [];
+
+  const start = source.indexOf("{", index);
+  if (start < 0) return [];
+
+  let depth = 0;
+  let end = -1;
+  let inString = null;
+  let escaped = false;
+
+  for (let i = start; i < source.length; i++) {
+    const ch = source[i];
+
+    if (inString) {
+      if (escaped) escaped = false;
+      else if (ch === "\\") escaped = true;
+      else if (ch === inString) inString = null;
+      continue;
+    }
+
+    if (ch === "'" || ch === '"' || ch === "`") {
+      inString = ch;
+      continue;
+    }
+
+    if (ch === "{") depth++;
+    if (ch === "}") {
+      depth--;
+      if (depth === 0) {
+        end = i;
+        break;
+      }
+    }
+  }
+
+  if (end < 0) return [];
+
+  const body = source.slice(start + 1, end);
+  const keys = [];
+
+  for (const match of body.matchAll(/^\s*["']?([a-zA-Z0-9_-]+)["']?\s*:/gm)) {
+    keys.push(match[1]);
+  }
+
+  return unique(keys);
+}
+
+function extractRouterRoutes(routerSource) {
+  const routes = [];
+
+  for (const match of routerSource.matchAll(/["']([a-z0-9_-]+)["']\s*:\s*\{/gi)) {
+    routes.push(match[1]);
+  }
+
+  for (const match of routerSource.matchAll(/case\s+["']([a-z0-9_-]+)["']/gi)) {
+    routes.push(match[1]);
+  }
+
+  for (const match of routerSource.matchAll(/navigateTo\(\s*["']([a-z0-9_-]+)["']/gi)) {
+    routes.push(match[1]);
+  }
+
+  return unique(routes);
+}
+
+function extractExplicitRouteStrings(source) {
+  const routes = [];
+
+  const patterns = [
+    /targetPage:\s*["']([a-z0-9_-]+)["']/gi,
+    /destination_page:\s*["']([a-z0-9_-]+)["']/gi,
+    /destinationPage:\s*["']([a-z0-9_-]+)["']/gi,
+    /route:\s*["']([a-z0-9_-]+)["']/gi,
+    /page:\s*["']([a-z0-9_-]+)["']/gi,
+    /navigateTo\(\s*["']([a-z0-9_-]+)["']/gi
+  ];
+
+  for (const pattern of patterns) {
+    for (const match of source.matchAll(pattern)) {
+      routes.push(match[1]);
+    }
+  }
+
+  return unique(routes);
+}
+
+const contractRoleIds = AI_TEAM_CANONICAL_ROLES.map((role) => role.id);
+const contractRoleSet = new Set(contractRoleIds);
+const contractAliases = Object.keys(AI_TEAM_ROLE_ALIASES);
+const contractPageIds = Object.keys(AI_TEAM_PAGE_OWNER_MATRIX);
+
+const files = {
+  contract: "public/control-center/runtime/ai-team/ai-team-operating-contract.js",
+  aiCommand: "public/control-center/pages/ai-command.js",
+  home: "public/control-center/pages/home.js",
+  routeRoleFallback: "public/control-center/runtime/authority/route-role-fallback.js",
+  authorityProjection: "public/control-center/runtime/authority/authority-projection.js",
+  router: "public/control-center/router.js",
+  sharedContext: "public/control-center/shared-context.js",
+  app: "public/control-center/app.js",
+  automationEngine: "public/control-center/automation-engine.js"
+};
+
+const src = Object.fromEntries(Object.entries(files).map(([key, file]) => [key, read(file)]));
+const pageFiles = listJsFiles("public/control-center/pages");
+const pageSource = pageFiles.map((file) => `\n===== ${file} =====\n${read(file)}`).join("\n");
+const runtimeSource = Object.values(src).join("\n") + "\n" + pageSource;
+
+const knownNonPagePrefixes = [
+  "open-",
+  "draft-",
+  "build-",
+  "prepare-",
+  "map-",
+  "write-",
+  "check-",
+  "create-",
+  "generate-",
+  "fix-",
+  "review-",
+  "summarize-",
+  "route-",
+  "lead-",
+  "follow-",
+  "sales-",
+  "scene-",
+  "setup",
+  "media",
+  "campaign_",
+  "openai_",
+  "higgsfield_",
+  "comfyui_",
+  "wan_",
+  "hunyuan_",
+  "seed_",
+  "nano_",
+  "google-",
+  "meta-",
+  "tiktok-"
+];
+

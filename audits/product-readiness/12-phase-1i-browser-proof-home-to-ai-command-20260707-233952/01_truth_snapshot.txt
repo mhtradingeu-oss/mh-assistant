@@ -1,0 +1,556 @@
+Branch:
+main
+
+Status:
+ M data/projects/hairoticmen/ops/approvals.json
+ M data/projects/hairoticmen/ops/events.json
+ M data/projects/hairoticmen/ops/notifications.json
+ M data/projects/hairoticmen/ops/system.json
+ M public/control-center/pages/ai-command.js
+ M public/control-center/pages/home.js
+ M public/control-center/pages/home/render-sections.js
+ M public/control-center/styles/13-home-executive.css
+ M runtime/orchestrator-service/server.js
+?? audits/product-readiness/
+?? audits/system-truth/cloud-grade-readiness-20260706-171752/
+?? audits/system-truth/content-to-media-studio-truth-20260706-161134/
+?? audits/system-truth/media-engine-upgrade-phase-2a-truth-scan-20260706-122813/
+?? audits/system-truth/media-engine-upgrade-phase-2b-contract-20260706-123139/
+?? audits/system-truth/media-execution-activation-a0-deep-truth-scan-20260706-114055/
+?? audits/system-truth/media-execution-activation-a1-exact-execution-contract-20260706-114301/
+?? audits/system-truth/media-execution-activation-a2-api-media-route-truth-20260706-115001/
+?? audits/system-truth/media-execution-activation-a3-live-image-proof-20260706-115143/
+?? audits/system-truth/media-execution-activation-a3b-live-image-proof-with-control-key-20260706-115319/
+?? audits/system-truth/media-execution-activation-a3d-live-image-proof-correct-write-key-20260706-115622/
+?? audits/system-truth/media-studio-rebase-20260706-165209/
+?? infra/
+?? public/control-center/pages/media-studio.BACKUP.js
+?? public/control-center/pages/media-studio.BACKUP_FINAL_FLOW_LOCK.js
+?? public/control-center/pages/media-studio.BACKUP_FLOW_LOCK.js
+?? public/control-center/pages/media-studio.js
+?? public/control-center/runtime/ai-team/
+?? public/control-center/state/
+?? runtime/orchestrator-service/lib/media/cluster/
+?? runtime/orchestrator-service/lib/media/contracts/
+?? runtime/orchestrator-service/lib/media/events/
+?? runtime/orchestrator-service/lib/media/governance/
+?? runtime/orchestrator-service/lib/media/library-engine.js
+?? runtime/orchestrator-service/lib/media/orchestrator/
+?? runtime/orchestrator-service/lib/media/publishing/
+?? runtime/orchestrator-service/lib/media/queue/
+?? runtime/orchestrator-service/lib/media/realtime/
+?? scripts/audit/ai-team-contract-conformance-check.mjs
+?? scripts/audit/validate-ai-team-operating-contract.mjs
+
+Diff stat:
+ data/projects/hairoticmen/ops/approvals.json       | 127 ++++++++++
+ data/projects/hairoticmen/ops/events.json          |  18 ++
+ data/projects/hairoticmen/ops/notifications.json   |  22 ++
+ data/projects/hairoticmen/ops/system.json          |   2 +-
+ public/control-center/pages/ai-command.js          |  67 +++--
+ public/control-center/pages/home.js                | 120 ++++-----
+ .../control-center/pages/home/render-sections.js   |  71 +++++-
+ public/control-center/styles/13-home-executive.css |  62 +++++
+ runtime/orchestrator-service/server.js             | 281 +++++++++++++++++++++
+ 9 files changed, 686 insertions(+), 84 deletions(-)
+
+AI Command import/helper/detector markers:
+27:import { normalizeAiTeamRoleId } from "../runtime/ai-team/ai-team-operating-contract.js";
+626:function normalizeAiCommandSpecialistId(id, fallback = "operations") {
+628:    return normalizeAiTeamRoleId(localResolved, fallback);
+631:function detectSpecialistFromBridgePrompt(prompt) {
+662:            if (text.includes(keyword)) return normalizeAiCommandSpecialistId(specialistId);
+666:    return normalizeAiCommandSpecialistId(classified?.modeId, "operations");
+
+Home bridge markers:
+244:  return "ai-command";
+580:    primaryActionLabel: nextActionRoute === "ai-command" ? "Prepare AI Guidance" : `Open ${humanizeStatus(nextActionRoute)} Workspace`,
+601:      buttonLabel: nextActionRoute === "ai-command" ? "Prepare AI Guidance" : `Open ${humanizeStatus(nextActionRoute)} Workspace`,
+742:function setGlobalAiPrompt($, prompt) {
+847:              <strong class="mhos-os-brief-value">${escapeHtml(dashboard.nextBestAction.route === "ai-command" ? "AI Guidance" : humanizeStatus(dashboard.nextBestAction.route))}</strong>
+878:                  Ask Head Office AI
+1055:                <button class="quick-action-btn mhos-motion-soft" type="button" data-role-id="${escapeHtml(recommendedSpecialist.id)}">
+1056:                  <span class="home-action-title">Ask Head Office AI</span>
+1101:      setGlobalAiPrompt($, prompt);
+1102:      navigateTo("ai-command");
+1107:    const handleAiRoleClick = (roleId, roleName) => {
+1129:        if (dashboard.nextBestAction.route === "ai-command") {
+1130:          setGlobalAiPrompt($, dashboard.nextBestAction.recommendation);
+1158:    const aiRoleCards = document.querySelectorAll(".quick-action-btn[data-role-id], .home-ai-team-card[data-role-id], .mhos-specialist[data-role-id], .mhos-workflow-step[data-role-id]");
+1160:      const roleId = card.getAttribute("data-role-id");
+1162:      card.onclick = () => handleAiRoleClick(roleId, roleName);
+
+Contract validator:
+PASS - roles are defined
+PASS - role IDs are unique
+PASS - operations role exists
+PASS - strategist role exists
+PASS - writer role exists
+PASS - media_director role exists
+PASS - video_lead role exists
+PASS - publisher role exists
+PASS - ads_operator role exists
+PASS - analyst role exists
+PASS - researcher role exists
+PASS - compliance_reviewer role exists
+PASS - customer_ops role exists
+PASS - sales_crm role exists
+PASS - role operations has label
+PASS - role operations has category
+PASS - role operations has primaryPages
+PASS - role operations has outputTargets
+PASS - role operations has allowedOutputs
+PASS - role operations authority is valid
+PASS - role operations output guidance is valid
+PASS - role operations output task_preview is valid
+PASS - role operations output workflow_preview is valid
+PASS - role operations output handoff is valid
+PASS - role operations output execution_review is valid
+PASS - role strategist has label
+PASS - role strategist has category
+PASS - role strategist has primaryPages
+PASS - role strategist has outputTargets
+PASS - role strategist has allowedOutputs
+PASS - role strategist authority is valid
+PASS - role strategist output guidance is valid
+PASS - role strategist output draft is valid
+PASS - role strategist output workflow_preview is valid
+PASS - role strategist output handoff is valid
+PASS - role writer has label
+PASS - role writer has category
+PASS - role writer has primaryPages
+PASS - role writer has outputTargets
+PASS - role writer has allowedOutputs
+PASS - role writer authority is valid
+PASS - role writer output answer_only is valid
+PASS - role writer output guidance is valid
+PASS - role writer output draft is valid
+PASS - role writer output handoff is valid
+PASS - role media_director has label
+PASS - role media_director has category
+PASS - role media_director has primaryPages
+PASS - role media_director has outputTargets
+PASS - role media_director has allowedOutputs
+PASS - role media_director authority is valid
+PASS - role media_director output guidance is valid
+PASS - role media_director output draft is valid
+PASS - role media_director output handoff is valid
+PASS - role media_director output execution_review is valid
+PASS - role video_lead has label
+PASS - role video_lead has category
+PASS - role video_lead has primaryPages
+PASS - role video_lead has outputTargets
+PASS - role video_lead has allowedOutputs
+PASS - role video_lead authority is valid
+PASS - role video_lead output guidance is valid
+PASS - role video_lead output draft is valid
+PASS - role video_lead output handoff is valid
+PASS - role video_lead output execution_review is valid
+PASS - role publisher has label
+PASS - role publisher has category
+PASS - role publisher has primaryPages
+PASS - role publisher has outputTargets
+PASS - role publisher has allowedOutputs
+PASS - role publisher authority is valid
+PASS - role publisher output guidance is valid
+PASS - role publisher output handoff is valid
+PASS - role publisher output approval_request is valid
+PASS - role publisher output execution_review is valid
+PASS - role ads_operator has label
+PASS - role ads_operator has category
+PASS - role ads_operator has primaryPages
+PASS - role ads_operator has outputTargets
+PASS - role ads_operator has allowedOutputs
+PASS - role ads_operator authority is valid
+PASS - role ads_operator output guidance is valid
+PASS - role ads_operator output draft is valid
+PASS - role ads_operator output handoff is valid
+PASS - role ads_operator output execution_review is valid
+PASS - role analyst has label
+PASS - role analyst has category
+PASS - role analyst has primaryPages
+PASS - role analyst has outputTargets
+PASS - role analyst has allowedOutputs
+PASS - role analyst authority is valid
+PASS - role analyst output answer_only is valid
+PASS - role analyst output guidance is valid
+PASS - role analyst output draft is valid
+PASS - role analyst output handoff is valid
+PASS - role analyst output execution_review is valid
+PASS - role researcher has label
+PASS - role researcher has category
+PASS - role researcher has primaryPages
+PASS - role researcher has outputTargets
+PASS - role researcher has allowedOutputs
+PASS - role researcher authority is valid
+PASS - role researcher output answer_only is valid
+PASS - role researcher output guidance is valid
+PASS - role researcher output draft is valid
+PASS - role researcher output handoff is valid
+PASS - role compliance_reviewer has label
+PASS - role compliance_reviewer has category
+PASS - role compliance_reviewer has primaryPages
+PASS - role compliance_reviewer has outputTargets
+PASS - role compliance_reviewer has allowedOutputs
+PASS - role compliance_reviewer authority is valid
+PASS - role compliance_reviewer output guidance is valid
+PASS - role compliance_reviewer output approval_request is valid
+PASS - role compliance_reviewer output handoff is valid
+PASS - role compliance_reviewer output execution_review is valid
+PASS - role customer_ops has label
+PASS - role customer_ops has category
+PASS - role customer_ops has primaryPages
+PASS - role customer_ops has outputTargets
+PASS - role customer_ops has allowedOutputs
+PASS - role customer_ops authority is valid
+PASS - role customer_ops output guidance is valid
+PASS - role customer_ops output draft is valid
+PASS - role customer_ops output task_preview is valid
+PASS - role customer_ops output handoff is valid
+PASS - role customer_ops output execution_review is valid
+PASS - role sales_crm has label
+PASS - role sales_crm has category
+PASS - role sales_crm has primaryPages
+PASS - role sales_crm has outputTargets
+PASS - role sales_crm has allowedOutputs
+PASS - role sales_crm authority is valid
+PASS - role sales_crm output guidance is valid
+PASS - role sales_crm output draft is valid
+PASS - role sales_crm output task_preview is valid
+PASS - role sales_crm output handoff is valid
+PASS - alias admin maps to canonical role
+PASS - alias operations_lead maps to canonical role
+PASS - alias executive maps to canonical role
+PASS - alias head_office maps to canonical role
+PASS - alias command_center maps to canonical role
+PASS - alias campaign maps to canonical role
+PASS - alias strategy maps to canonical role
+PASS - alias copywriter maps to canonical role
+PASS - alias content_writer maps to canonical role
+PASS - alias content maps to canonical role
+PASS - alias copy maps to canonical role
+PASS - alias designer maps to canonical role
+PASS - alias media maps to canonical role
+PASS - alias creative maps to canonical role
+PASS - alias visual maps to canonical role
+PASS - alias video maps to canonical role
+PASS - alias motion maps to canonical role
+PASS - alias reel maps to canonical role
+PASS - alias storyboard maps to canonical role
+PASS - alias voiceover maps to canonical role
+PASS - alias publish maps to canonical role
+PASS - alias publishing maps to canonical role
+PASS - alias schedule maps to canonical role
+PASS - alias ads maps to canonical role
+PASS - alias paid maps to canonical role
+PASS - alias paid_media maps to canonical role
+PASS - alias roas maps to canonical role
+PASS - alias seo maps to canonical role
+PASS - alias insights maps to canonical role
+PASS - alias insights_analyst maps to canonical role
+PASS - alias seo_insights_analyst maps to canonical role
+PASS - alias research maps to canonical role
+PASS - alias researcher maps to canonical role
+PASS - alias compliance maps to canonical role
+PASS - alias governance maps to canonical role
+PASS - alias safety maps to canonical role
+PASS - alias approval maps to canonical role
+PASS - alias customer_operations maps to canonical role
+PASS - alias customer maps to canonical role
+PASS - alias support maps to canonical role
+PASS - alias inbox maps to canonical role
+PASS - alias ticket maps to canonical role
+PASS - alias sales maps to canonical role
+PASS - alias crm maps to canonical role
+PASS - alias lead maps to canonical role
+PASS - required alias admin -> operations
+PASS - required alias operations_lead -> operations
+PASS - required alias executive -> operations
+PASS - required alias copywriter -> writer
+PASS - required alias content_writer -> writer
+PASS - required alias designer -> media_director
+PASS - required alias ads -> ads_operator
+PASS - required alias customer_operations -> customer_ops
+PASS - required alias seo -> analyst
+PASS - required alias seo_insights_analyst -> analyst
+PASS - required alias compliance -> compliance_reviewer
+PASS - required alias governance -> compliance_reviewer
+PASS - required alias support -> customer_ops
+PASS - required alias crm -> sales_crm
+PASS - request types include execution_request
+PASS - output types include handoff
+PASS - authority levels include approval_required
+PASS - forbidden actions include publish
+PASS - forbidden actions include run_provider_execution
+PASS - page home has owner matrix
+PASS - page home owner role is canonical
+PASS - page home authority is valid
+PASS - page home output answer_only is valid
+PASS - page home output guidance is valid
+PASS - page home output handoff is valid
+PASS - page ai-command has owner matrix
+PASS - page ai-command owner role is canonical
+PASS - page ai-command authority is valid
+PASS - page ai-command output answer_only is valid
+PASS - page ai-command output guidance is valid
+PASS - page ai-command output draft is valid
+PASS - page ai-command output task_preview is valid
+PASS - page ai-command output workflow_preview is valid
+PASS - page ai-command output handoff is valid
+PASS - page ai-command output approval_request is valid
+PASS - page ai-command output execution_review is valid
+PASS - page setup has owner matrix
+PASS - page setup owner role is canonical
+PASS - page setup authority is valid
+PASS - page setup output guidance is valid
+PASS - page setup output handoff is valid
+PASS - page setup output approval_request is valid
+PASS - page library has owner matrix
+PASS - page library owner role is canonical
+PASS - page library authority is valid
+PASS - page library output guidance is valid
+PASS - page library output handoff is valid
+PASS - page library output execution_review is valid
+PASS - page integrations has owner matrix
+PASS - page integrations owner role is canonical
+PASS - page integrations authority is valid
+PASS - page integrations output guidance is valid
+PASS - page integrations output approval_request is valid
+PASS - page integrations output execution_review is valid
+PASS - page campaign-studio has owner matrix
+PASS - page campaign-studio owner role is canonical
+PASS - page campaign-studio authority is valid
+PASS - page campaign-studio output guidance is valid
+PASS - page campaign-studio output draft is valid
+PASS - page campaign-studio output workflow_preview is valid
+PASS - page campaign-studio output handoff is valid
+PASS - page content-studio has owner matrix
+PASS - page content-studio owner role is canonical
+PASS - page content-studio authority is valid
+PASS - page content-studio output guidance is valid
+PASS - page content-studio output draft is valid
+PASS - page content-studio output handoff is valid
+PASS - page content-studio output approval_request is valid
+PASS - page media-studio has owner matrix
+PASS - page media-studio owner role is canonical
+PASS - page media-studio authority is valid
+PASS - page media-studio output guidance is valid
+PASS - page media-studio output draft is valid
+PASS - page media-studio output handoff is valid
+PASS - page media-studio output execution_review is valid
+PASS - page publishing has owner matrix
+PASS - page publishing owner role is canonical
+PASS - page publishing authority is valid
+PASS - page publishing output guidance is valid
+PASS - page publishing output handoff is valid
+PASS - page publishing output approval_request is valid
+PASS - page publishing output execution_review is valid
+PASS - page ads-manager has owner matrix
+PASS - page ads-manager owner role is canonical
+PASS - page ads-manager authority is valid
+PASS - page ads-manager output guidance is valid
+PASS - page ads-manager output draft is valid
+PASS - page ads-manager output handoff is valid
+PASS - page ads-manager output execution_review is valid
+PASS - page insights has owner matrix
+PASS - page insights owner role is canonical
+PASS - page insights authority is valid
+PASS - page insights output answer_only is valid
+PASS - page insights output guidance is valid
+PASS - page insights output handoff is valid
+PASS - page insights output execution_review is valid
+PASS - page research has owner matrix
+PASS - page research owner role is canonical
+PASS - page research authority is valid
+PASS - page research output answer_only is valid
+PASS - page research output guidance is valid
+PASS - page research output draft is valid
+PASS - page research output handoff is valid
+PASS - page workflows has owner matrix
+PASS - page workflows owner role is canonical
+PASS - page workflows authority is valid
+PASS - page workflows output guidance is valid
+PASS - page workflows output task_preview is valid
+PASS - page workflows output workflow_preview is valid
+PASS - page workflows output handoff is valid
+PASS - page workflows output execution_review is valid
+PASS - page task-center has owner matrix
+PASS - page task-center owner role is canonical
+PASS - page task-center authority is valid
+PASS - page task-center output guidance is valid
+PASS - page task-center output task_preview is valid
+PASS - page task-center output handoff is valid
+PASS - page task-center output execution_review is valid
+PASS - page queue-center has owner matrix
+PASS - page queue-center owner role is canonical
+PASS - page queue-center authority is valid
+PASS - page queue-center output guidance is valid
+PASS - page queue-center output execution_review is valid
+PASS - page job-monitor has owner matrix
+PASS - page job-monitor owner role is canonical
+PASS - page job-monitor authority is valid
+PASS - page job-monitor output guidance is valid
+PASS - page job-monitor output execution_review is valid
+PASS - page notification-center has owner matrix
+PASS - page notification-center owner role is canonical
+PASS - page notification-center authority is valid
+PASS - page notification-center output guidance is valid
+PASS - page notification-center output execution_review is valid
+PASS - page operations-centers has owner matrix
+PASS - page operations-centers owner role is canonical
+PASS - page operations-centers authority is valid
+PASS - page operations-centers output guidance is valid
+PASS - page operations-centers output task_preview is valid
+PASS - page operations-centers output workflow_preview is valid
+PASS - page operations-centers output handoff is valid
+PASS - page operations-centers output execution_review is valid
+PASS - page customer-center has owner matrix
+PASS - page customer-center owner role is canonical
+PASS - page customer-center authority is valid
+PASS - page customer-center output guidance is valid
+PASS - page customer-center output draft is valid
+PASS - page customer-center output task_preview is valid
+PASS - page customer-center output handoff is valid
+PASS - page customer-center output approval_request is valid
+PASS - page governance has owner matrix
+PASS - page governance owner role is canonical
+PASS - page governance authority is valid
+PASS - page governance output guidance is valid
+PASS - page governance output approval_request is valid
+PASS - page governance output handoff is valid
+PASS - page governance output execution_review is valid
+PASS - page settings has owner matrix
+PASS - page settings owner role is canonical
+PASS - page settings authority is valid
+PASS - page settings output guidance is valid
+PASS - page settings output approval_request is valid
+PASS - page settings output handoff is valid
+PASS - handoff source automation-engine has destinations
+PASS - handoff automation-engine -> publishing destination has page owner or is library
+PASS - handoff automation-engine -> workflows destination has page owner or is library
+PASS - handoff source ai-command has destinations
+PASS - handoff ai-command -> campaign-studio destination has page owner or is library
+PASS - handoff ai-command -> content-studio destination has page owner or is library
+PASS - handoff ai-command -> media-studio destination has page owner or is library
+PASS - handoff ai-command -> publishing destination has page owner or is library
+PASS - handoff ai-command -> ads-manager destination has page owner or is library
+PASS - handoff ai-command -> workflows destination has page owner or is library
+PASS - handoff ai-command -> task-center destination has page owner or is library
+PASS - handoff ai-command -> governance destination has page owner or is library
+PASS - handoff ai-command -> insights destination has page owner or is library
+PASS - handoff ai-command -> research destination has page owner or is library
+PASS - handoff ai-command -> customer-center destination has page owner or is library
+PASS - handoff ai-command -> operations-centers destination has page owner or is library
+PASS - handoff source campaign-studio has destinations
+PASS - handoff campaign-studio -> ai-command destination has page owner or is library
+PASS - handoff campaign-studio -> content-studio destination has page owner or is library
+PASS - handoff campaign-studio -> media-studio destination has page owner or is library
+PASS - handoff campaign-studio -> publishing destination has page owner or is library
+PASS - handoff campaign-studio -> ads-manager destination has page owner or is library
+PASS - handoff campaign-studio -> workflows destination has page owner or is library
+PASS - handoff source content-studio has destinations
+PASS - handoff content-studio -> ai-command destination has page owner or is library
+PASS - handoff content-studio -> media-studio destination has page owner or is library
+PASS - handoff content-studio -> publishing destination has page owner or is library
+PASS - handoff content-studio -> library destination has page owner or is library
+PASS - handoff content-studio -> governance destination has page owner or is library
+PASS - handoff source media-studio has destinations
+PASS - handoff media-studio -> ai-command destination has page owner or is library
+PASS - handoff media-studio -> library destination has page owner or is library
+PASS - handoff media-studio -> publishing destination has page owner or is library
+PASS - handoff media-studio -> governance destination has page owner or is library
+PASS - handoff media-studio -> content-studio destination has page owner or is library
+PASS - handoff source publishing has destinations
+PASS - handoff publishing -> ai-command destination has page owner or is library
+PASS - handoff publishing -> governance destination has page owner or is library
+PASS - handoff publishing -> content-studio destination has page owner or is library
+PASS - handoff publishing -> media-studio destination has page owner or is library
+PASS - handoff source ads-manager has destinations
+PASS - handoff ads-manager -> ai-command destination has page owner or is library
+PASS - handoff ads-manager -> campaign-studio destination has page owner or is library
+PASS - handoff ads-manager -> insights destination has page owner or is library
+PASS - handoff ads-manager -> governance destination has page owner or is library
+PASS - handoff source workflows has destinations
+PASS - handoff workflows -> ai-command destination has page owner or is library
+PASS - handoff workflows -> task-center destination has page owner or is library
+PASS - handoff workflows -> workflows destination has page owner or is library
+PASS - handoff workflows -> campaign-studio destination has page owner or is library
+PASS - handoff workflows -> content-studio destination has page owner or is library
+PASS - handoff workflows -> media-studio destination has page owner or is library
+PASS - handoff workflows -> publishing destination has page owner or is library
+PASS - handoff workflows -> governance destination has page owner or is library
+PASS - handoff source task-center has destinations
+PASS - handoff task-center -> ai-command destination has page owner or is library
+PASS - handoff task-center -> workflows destination has page owner or is library
+PASS - handoff task-center -> operations-centers destination has page owner or is library
+PASS - handoff task-center -> governance destination has page owner or is library
+PASS - handoff source customer-center has destinations
+PASS - handoff customer-center -> ai-command destination has page owner or is library
+PASS - handoff customer-center -> task-center destination has page owner or is library
+PASS - handoff customer-center -> governance destination has page owner or is library
+PASS - handoff customer-center -> operations-centers destination has page owner or is library
+PASS - handoff source insights has destinations
+PASS - handoff insights -> ai-command destination has page owner or is library
+PASS - handoff insights -> campaign-studio destination has page owner or is library
+PASS - handoff insights -> content-studio destination has page owner or is library
+PASS - handoff insights -> ads-manager destination has page owner or is library
+PASS - handoff insights -> research destination has page owner or is library
+PASS - handoff source research has destinations
+PASS - handoff research -> ai-command destination has page owner or is library
+PASS - handoff research -> campaign-studio destination has page owner or is library
+PASS - handoff research -> insights destination has page owner or is library
+PASS - handoff research -> content-studio destination has page owner or is library
+PASS - handoff source library has destinations
+PASS - handoff library -> ai-command destination has page owner or is library
+PASS - handoff library -> media-studio destination has page owner or is library
+PASS - handoff library -> publishing destination has page owner or is library
+PASS - handoff library -> governance destination has page owner or is library
+PASS - handoff source governance has destinations
+PASS - handoff governance -> ai-command destination has page owner or is library
+PASS - handoff governance -> publishing destination has page owner or is library
+PASS - handoff governance -> content-studio destination has page owner or is library
+PASS - handoff governance -> media-studio destination has page owner or is library
+PASS - handoff governance -> operations-centers destination has page owner or is library
+PASS - handoff source settings has destinations
+PASS - handoff settings -> governance destination has page owner or is library
+PASS - request type general_question has default role
+PASS - request type general_question default role is canonical
+PASS - request type guidance_request has default role
+PASS - request type guidance_request default role is canonical
+PASS - request type single_task has default role
+PASS - request type single_task default role is canonical
+PASS - request type project_setup has default role
+PASS - request type project_setup default role is canonical
+PASS - request type campaign_project has default role
+PASS - request type campaign_project default role is canonical
+PASS - request type content_request has default role
+PASS - request type content_request default role is canonical
+PASS - request type media_request has default role
+PASS - request type media_request default role is canonical
+PASS - request type publishing_request has default role
+PASS - request type publishing_request default role is canonical
+PASS - request type ads_request has default role
+PASS - request type ads_request default role is canonical
+PASS - request type customer_request has default role
+PASS - request type customer_request default role is canonical
+PASS - request type workflow_request has default role
+PASS - request type workflow_request default role is canonical
+PASS - request type task_request has default role
+PASS - request type task_request default role is canonical
+PASS - request type governance_request has default role
+PASS - request type governance_request default role is canonical
+PASS - request type execution_request has default role
+PASS - request type execution_request default role is canonical
+PASS - getAiTeamRole resolves admin alias to Operations Lead
+PASS - getAiTeamRole resolves copywriter alias to writer
+PASS - getAiTeamRole resolves ads alias to ads_operator
+
+AI Team Operating Contract validation: PASS
+
+Conformance summary:
+Failures: 0
+Warnings: 10
+Unknown route candidates: 6
+Alias drift signals: 49
+Handoff drift pairs: 0
+VERDICT: READY FOR NARROW AI COMMAND ALIAS INTEGRATION CANDIDATE

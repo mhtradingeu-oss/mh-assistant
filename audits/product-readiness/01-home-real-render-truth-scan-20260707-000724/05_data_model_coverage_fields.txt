@@ -1,0 +1,567 @@
+Dashboard build data window:
+          : humanizeStatus(statusRaw, "Idle"),
+      summary: latest
+        ? asString(latest.title || latest.summary || latest.action || role.fallback)
+        : role.fallback
+    };
+  });
+}
+
+function buildExecutiveData(state) {
+  const overview = asObject(state.data.overview);
+  const readiness = asObject(state.data.readiness);
+  const integrations = asObject(state.data.integrations);
+  const activity = asObject(state.data.activity);
+  const assets = asObject(state.data.assets);
+  const operations = asObject(selectOperationsSnapshot(state));
+
+  const overviewData = asObject(overview.overview);
+  const readinessData = asObject(readiness.dashboard);
+  const readinessPriorities = asObject(readinessData.priorities || readiness.priorities);
+
+  const scheduledJobs = asArray(activity.scheduled_jobs);
+  const executionResults = asArray(activity.execution_results);
+  const recommendations = asArray(readinessData.next_best_actions).length
+    ? asArray(readinessData.next_best_actions)
+    : asArray(overview.next_best_actions);
+
+  const insights = asObject(activity.insights);
+  const learning = asObject(activity.learning);
+  const notifications = asArray(operations.notifications?.items);
+
+  const sortedExecution = executionResults
+    .slice()
+    .sort((a, b) => parseTimestamp(b) - parseTimestamp(a));
+  const sortedSchedule = scheduledJobs
+    .slice()
+    .sort((a, b) => parseTimestamp(a) - parseTimestamp(b));
+
+  const latestExecution = sortedExecution[0] || null;
+  const nextScheduled = sortedSchedule[0] || null;
+
+  const projectName =
+    asString(selectCurrentProject(state)) ||
+    asString(overviewData.project_name);
+
+  const readinessScore =
+    readinessData.readiness_score ??
+    overviewData.readiness_score ??
+    0;
+
+  const connectorScore =
+    integrations.readiness?.readiness_score ??
+    overviewData.connector_readiness_score ??
+    0;
+
+  const criticalGaps = asArray(readinessPriorities.critical);
+  const failedExecutions = sortedExecution.filter((item) => statusTone(item?.execution_status) === "danger");
+  const unreadNotifications = notifications.filter((item) => !item?.read_at);
+
+  const connectorChecks = asObject(integrations.readiness?.checks);
+  const connectorKeys = Object.keys(connectorChecks);
+  const connectedConnectorCount = connectorKeys.filter((key) => Boolean(connectorChecks[key])).length;
+  const missingIntegrations = asArray(integrations.readiness?.missing).map((item) => humanizeStatus(item)).filter(Boolean);
+
+  const categoryReadiness = asArray(assets.category_readiness?.categories);
+  const missingAssetLabels = [
+    ...asArray(assets.missing_assets?.assets),
+    ...asArray(assets.missing_assets?.missing),
+    ...asArray(assets.missing_assets?.blockers),
+    ...categoryReadiness
+      .filter((item) => item?.required !== false && ["missing", "needs review"].includes(asString(item.status).toLowerCase()))
+      .map((item) => asString(item.display_label || item.label || item.asset_type))
+  ].map((item) => item.trim()).filter(Boolean);
+  const missingAssets = dedupe(missingAssetLabels).map((item) => humanizeStatus(item));
+
+  const assetItems = asArray(assets.assets);
+  const sourceOfTruthCount = assetItems.filter((item) => Boolean(item.source_of_truth || item.use_as_source_of_truth)).length;
+
+  const insightsRecommendations = asArray(insights.recommendations);
+  const learningLessons = asArray(learning.system_lessons);
+  const tasks = asArray(operations.tasks?.items);
+  const approvals = asArray(operations.approvals?.items);
+
+  const automationTone = failedExecutions.length
+    ? "danger"
+    : scheduledJobs.length
+      ? "success"
+      : "warning";
+
+  const intelligenceScore = insightsRecommendations.length + learningLessons.length;
+  const intelligenceTone = intelligenceScore > 0 ? "success" : "warning";
+
+  const fallbackAction =
+    criticalGaps[0]
+      ? `Resolve: ${criticalGaps[0]}`
+      : failedExecutions.length
+        ? "Recover failed execution items"
+        : "Review and confirm next launch move";
+
+  const rawNextAction = asString(recommendations[0]).trim() || fallbackAction;
+  const nextAction = humanizeExecutiveAction(rawNextAction, "Ask AI Command");
+  const nextActionRoute = routeForAction(nextAction || rawNextAction);
+
+  const whyItMatters = criticalGaps.length
+    ? "Removing this blocker increases launch confidence and prevents avoidable delays."
+    : failedExecutions.length
+      ? "Stabilizing this now protects delivery quality and keeps automation reliable."
+      : "Acting now keeps momentum and converts current readiness into measurable output.";
+
+  const activeCampaignName =
+    asString(state.context.activeCampaign) ||
+    asString(latestExecution?.wave_name) ||
+    asString(nextScheduled?.wave_name);
+
+  const activeChannels = dedupe([
+    asString(latestExecution?.channel),
+    asString(nextScheduled?.channel)
+  ]).slice(0, 3);
+
+  const currentStage = humanizeStatus(
+    latestExecution?.execution_status ||
+    nextScheduled?.status ||
+    readinessData.readiness_status ||
+    overviewData.readiness_status,
+    "Not started"
+  );
+
+  const systemScore = Math.round((asNumber(readinessScore) + asNumber(connectorScore)) / 2);
+
+  const pendingTasks = tasks.filter((item) => {
+    const text = asString(item?.status || "").toLowerCase();
+    return text.includes("pending") || text.includes("in_progress") || text.includes("review");
+  });
+
+  const pendingApprovals = approvals.filter((item) => {
+    const text = asString(item?.status || "").toLowerCase();
+    return !text || text.includes("pending") || text.includes("requested");
+  });
+
+  const urgencyLabel = criticalGaps.length
+    ? "Urgent"
+    : failedExecutions.length
+      ? "Attention"
+      : "Normal";
+
+  const workflowImpact = criticalGaps.length
+    ? `Unblocks ${formatCount(criticalGaps.length)} critical path${criticalGaps.length === 1 ? "" : "s"}`
+    : failedExecutions.length
+      ? `Stabilizes ${formatCount(failedExecutions.length)} failed job${failedExecutions.length === 1 ? "" : "s"}`
+      : "Maintains operational flow";
+
+  const continuationSummary = nextScheduled
+    ? `Next: ${humanizeStatus(nextScheduled.status, "Scheduled")} — ${formatRelativeDate(nextScheduled.scheduled_for || nextScheduled.updated_at)}`
+    : "No scheduled action yet";
+
+  const confidenceSummary = intelligenceScore > 0
+    ? `Signals: ${formatCount(intelligenceScore)}`
+    : "Needs input";
+
+  const escalationSummary = pendingApprovals.length
+    ? `${formatCount(pendingApprovals.length)} approval${pendingApprovals.length === 1 ? "" : "s"} required`
+    : "No escalations";
+
+  const mediaJobs = asArray(operations.media_jobs?.items);
+  const mediaReadyCount = mediaJobs.filter((item) => statusTone(item?.status) === "success").length;
+
+  const publishingQueue = asArray(operations.queues?.items).filter((item) =>
+    asString(item.entity_type) === "publishing_job" || asString(item.queue_type) === "publishing"
+  );
+  const publishReadyCount = publishingQueue.filter((item) => {
+    const status = asString(item.status || item.publish_status || item.execution_status).toLowerCase();
+    return ["ready", "manual_publish_ready", "scheduled", "queued"].includes(status);
+  }).length + scheduledJobs.length;
+
+  const emailConnected = Boolean(
+    connectorChecks.email || connectorChecks.mailer || connectorChecks.smtp || connectorChecks.mailchimp
+  );
+
+  const readinessMissing = [
+    ...asArray(readinessData.missing),
+    ...asArray(readiness.missing_fields)
+  ].map((item) => compact(item, "")).filter(Boolean);
+
+  const completedExecutions = sortedExecution.filter((item) => statusTone(item?.execution_status) === "success");
+
+  const readyCount = [
+    asNumber(readinessScore) >= 80 ? 1 : 0,
+    asNumber(connectorScore) >= 70 ? 1 : 0,
+    failedExecutions.length === 0 ? 1 : 0
+  ].reduce((sum, value) => sum + value, 0);
+
+  const recentExecutionSummary = sortedExecution.slice(0, 4).map((item) => {
+    const channel = humanizeStatus(item?.channel, "Channel");
+    const status = humanizeStatus(item?.execution_status, "Unknown");
+    const when = formatRelativeDate(item?.executed_at || item?.updated_at || item?.created_at);
+    return {
+      channel,
+      status,
+      when,
+      tone: statusTone(item?.execution_status)
+    };
+  });
+
+  const schedulerQueue = sortedSchedule.slice(0, 4).map((item) => {
+    const channel = humanizeStatus(item?.channel, "Channel");
+    const status = humanizeStatus(item?.status, "Scheduled");
+    const when = formatRelativeDate(item?.scheduled_for || item?.updated_at || item?.created_at);
+    return {
+      channel,
+      status,
+      when,
+      tone: statusTone(item?.status)
+    };
+  });
+
+  const recentActivity = [
+    ...sortedExecution.slice(0, 8).map((item) => ({
+      kind: "Execution",
+      title: `${humanizeStatus(item?.channel, "Channel")} • ${humanizeStatus(item?.execution_status, "Unknown")}`,
+      detail: compact(item?.wave_name, "Execution result"),
+      when: formatRelativeDate(item?.executed_at || item?.updated_at || item?.created_at),
+      tone: statusTone(item?.execution_status),
+      stamp: parseTimestamp(item)
+    })),
+    ...sortedSchedule.slice(0, 8).map((item) => ({
+      kind: "Schedule",
+      title: `${humanizeStatus(item?.channel, "Channel")} • ${humanizeStatus(item?.status, "Scheduled")}`,
+      detail: compact(item?.wave_name, "Scheduled job"),
+      when: formatRelativeDate(item?.scheduled_for || item?.updated_at || item?.created_at),
+      tone: statusTone(item?.status),
+      stamp: parseTimestamp(item)
+    })),
+    ...notifications.slice(0, 8).map((item) => ({
+      kind: "Alert",
+      title: compact(item?.title || item?.summary || item?.kind, "Notification"),
+      detail: compact(item?.action || item?.status || item?.level, "Review required"),
+      when: formatRelativeDate(item?.updated_at || item?.created_at),
+      tone: statusTone(item?.level || item?.status),
+      stamp: parseTimestamp(item)
+    }))
+  ].sort((a, b) => b.stamp - a.stamp).slice(0, 10);
+
+  const blockers = {
+    integrations: missingIntegrations,
+    assets: missingAssets,
+    failedJobs: failedExecutions.slice(0, 8).map((item) =>
+      `${humanizeStatus(item?.channel, "Channel")}: ${humanizeStatus(item?.execution_status, "Failed")}`
+    ),
+    readinessGaps: dedupe([
+      ...criticalGaps.map((item) => compact(item, "")).filter(Boolean),
+      ...readinessMissing
+    ]).slice(0, 10)
+  };
+
+  const totalBlockers =
+    blockers.integrations.length +
+    blockers.assets.length +
+    blockers.failedJobs.length +
+    blockers.readinessGaps.length;
+
+  const campaignReadinessTone = totalBlockers ? "warning" : "success";
+
+  return {
+        executiveHealthStrip: {
+          statusLabel: campaignReadinessTone === "success" ? "Healthy" : totalBlockers ? "Attention" : "Unknown",
+          confidenceLabel: intelligenceTone === "success" ? `Signals: ${formatCount(intelligenceScore)}` : "Needs Input",
+          escalationLabel: failedExecutions.length ? `Escalations: ${formatCount(failedExecutions.length)}` : "None",
+          approvals: formatCount(pendingApprovals.length),
+          confidence: formatPercent(systemScore),
+          escalations: formatCount(failedExecutions.length),
+          summary: `${formatCount(pendingApprovals.length)} approvals pending, ${formatCount(failedExecutions.length)} escalations, ${formatCount(unreadNotifications.length)} notifications, system score ${formatPercent(systemScore)}.`
+        },
+    projectName,
+    headerStatus: humanizeStatus(
+      readinessData.readiness_status || overviewData.readiness_status || overviewData.status,
+      "Not ready"
+    ),
+    headerTone: statusTone(readinessData.readiness_status || overviewData.readiness_status, readinessScore),
+    oneLineSummary: projectName
+      ? `${projectName}: ${formatPercent(readinessScore)} readiness, ${formatPercent(connectorScore)} connector confidence, ${formatCount(criticalGaps.length)} critical blocker${criticalGaps.length === 1 ? "" : "s"}.`
+      : "Select a project to see readiness, blockers, the next action, and the right AI specialist.",
+    primaryActionLabel: nextActionRoute === "ai-command" ? "Prepare AI Guidance" : `Open ${humanizeStatus(nextActionRoute)} Workspace`,
+    primaryActionRoute: nextActionRoute,
+    secondaryActionLabel: "Review Setup Foundation",
+    secondaryActionRoute: "setup",
+
+    health: {
+      systemScore,
+      projectReadiness: asNumber(readinessScore),
+      connectorReadiness: asNumber(connectorScore),
+      connectorCoverage: `${connectedConnectorCount}/${connectorKeys.length || 0}`,
+      automationStatus: toneLabel(automationTone),
+      automationTone,
+      intelligenceStatus: intelligenceScore > 0 ? "Active" : "Needs input",
+      intelligenceTone,
+      criticalAlerts: criticalGaps.length + failedExecutions.length + unreadNotifications.length
+    },
+
+    nextBestAction: {
+      recommendation: nextAction,
+      whyItMatters,
+      route: nextActionRoute,
+      buttonLabel: nextActionRoute === "ai-command" ? "Prepare AI Guidance" : `Open ${humanizeStatus(nextActionRoute)} Workspace`,
+      urgencyLabel,
+      workflowImpact,
+      continuationSummary,
+      confidenceSummary,
+      escalationSummary
+    },
+
+    capabilities: [
+      {
+        title: "System Health",
+        value: formatPercent(systemScore),
+        detail: dashboardLabelFromScore(systemScore),
+        tone: statusTone("score", systemScore)
+      },
+      {
+        title: "Project Readiness",
+        value: formatPercent(readinessScore),
+        detail: criticalGaps.length ? `${formatCount(criticalGaps.length)} blockers` : "Ready for scale",
+        tone: statusTone("score", readinessScore)
+      },
+      {
+        title: "Automation",
+        value: formatCount(scheduledJobs.length),
+        detail: `${formatCount(failedExecutions.length)} failed jobs`,
+        tone: automationTone
+      },
+      {
+        title: "Intelligence",
+        value: formatCount(intelligenceScore),
+        detail: intelligenceScore ? "Signals captured" : "Needs fresh feedback",
+        tone: intelligenceTone
+      },
+      {
+        title: "Active Campaign",
+        value: activeCampaignName ? "Live" : "Missing",
+        detail: activeCampaignName || "No campaign selected",
+        tone: activeCampaignName ? "success" : "warning"
+      }
+    ],
+
+    statusBoard: [
+      {
+        label: "Ready",
+        value: formatCount(readyCount),
+        hint: "Core pillars healthy",
+        tone: readyCount >= 2 ? "success" : "warning"
+      },
+      {
+        label: "Missing",
+        value: formatCount(criticalGaps.length),
+        hint: "Critical setup or assets",
+        tone: criticalGaps.length ? "danger" : "success"
+      },
+      {
+        label: "Failed",
+        value: formatCount(failedExecutions.length),
+        hint: "Execution failures",
+        tone: failedExecutions.length ? "danger" : "success"
+      },
+      {
+        label: "Needs Attention",
+        value: formatCount(unreadNotifications.length + pendingTasks.length + pendingApprovals.length),
+        hint: "Notifications, tasks, approvals",
+        tone: unreadNotifications.length + pendingTasks.length + pendingApprovals.length ? "warning" : "success"
+      },
+      {
+        label: "Completed",
+        value: formatCount(completedExecutions.length),
+        hint: "Recent successful runs",
+        tone: completedExecutions.length ? "success" : "neutral"
+      },
+      {
+        label: "Next Step",
+        value: humanizeStatus(nextActionRoute),
+        hint: nextAction,
+        tone: "neutral"
+      }
+    ],
+
+    campaign: {
+      name: activeCampaignName,
+      channels: activeChannels,
+      currentStage,
+      executionMode: compact(state.context.executionMode || overviewData.execution_mode, "Not set"),
+      nextScheduledAction: nextScheduled
+        ? `${humanizeStatus(nextScheduled.status, "Scheduled")}: ${formatRelativeDate(nextScheduled.scheduled_for || nextScheduled.updated_at)}`
+        : "No scheduled action yet — open Publishing or Campaign Studio to prepare the next launch step."
+    },
+
+    blockers,
+    totalBlockers,
+    schedulerQueue,
+    recentExecutionSummary,
+    recentActivity,
+
+    launchSnapshot: {
+      publishReadiness: publishReadyCount,
+      mediaReadiness: mediaReadyCount,
+      emailReadiness: emailConnected ? "Connected" : "Missing",
+      scheduledJobs: scheduledJobs.length,
+      campaignReadiness: campaignReadinessTone === "success" ? "Ready" : "At risk"
+    },
+
+    systemHealth: {
+      apiStatus: overviewData.project_name || readinessData.readiness_score != null ? "Operational" : "Partial",
+      sourceOfTruth: sourceOfTruthCount ? `${sourceOfTruthCount} assets marked` : "Not configured",
+      missingRequiredData: totalBlockers,
+      missingDataList: dedupe([
+        ...blockers.integrations.map((item) => `Integration: ${item}`),
+        ...blockers.assets.map((item) => `Asset: ${item}`),
+        ...blockers.readinessGaps.map((item) => `Readiness: ${item}`)
+      ]).slice(0, 6)
+    },
+
+    recent: {
+      execution: latestExecution
+        ? `${humanizeStatus(latestExecution.execution_status, "Completed")} on ${humanizeStatus(latestExecution.channel, "Channel")}`
+        : "No execution recorded yet — start with a campaign or publishing package to create the first signal.",
+      recommendation: asString(recommendations[0]).trim() || asString(insightsRecommendations[0]).trim() || "Ask Executive AI to generate the next best action from readiness, blockers, and recent activity.",
+      feedback: asString(learningLessons[0]).trim() || "Connect insights or run a reviewed campaign so the learning engine can capture feedback."
+    },
+
+    advanced: {
+      projectName: projectName || "Project not selected yet",
+      notifications: unreadNotifications.length,
+      pendingTasks: pendingTasks.length,
+      pendingApprovals: pendingApprovals.length,
+      scheduledJobs: scheduledJobs.length,
+      executionResults: executionResults.length,
+      nextSchedule: nextScheduled ? formatRelativeDate(nextScheduled.scheduled_for || nextScheduled.updated_at) : "Not available",
+      lastExecution: latestExecution ? formatRelativeDate(latestExecution.executed_at || latestExecution.updated_at) : "Not available"
+    }
+  };
+}
+
+function dashboardLabelFromScore(score) {
+  if (score >= 85) return "Strong operating state";
+  if (score >= 65) return "Stable with gaps";
+  return "Recovery needed";
+
+Specific coverage fields:
+154:    "integrations": "Connect required platforms",
+174:  const blockers = asObject(dashboard.blockers);
+176:  const launch = asObject(dashboard.launchSnapshot);
+188:      meta: asArray(blockers.assets).length ? `${formatCount(asArray(blockers.assets).length)} missing asset groups` : "Assets ready for next step",
+189:      tone: asArray(blockers.assets).length ? "is-warning" : "is-live",
+190:      status: asArray(blockers.assets).length ? "Needs assets" : "Ready"
+194:      meta: asArray(blockers.integrations).length ? `${formatCount(asArray(blockers.integrations).length)} integrations missing` : "Core integrations connected",
+195:      tone: asArray(blockers.integrations).length ? "is-warning" : "is-live",
+196:      status: asArray(blockers.integrations).length ? "Needs connection" : "Ready"
+206:      meta: launch.campaignReadiness === "Ready" ? "Execution path looks clear" : "Resolve blockers before publishing",
+207:      tone: launch.campaignReadiness === "Ready" ? "is-live" : "is-warning",
+208:      status: launch.campaignReadiness || "At risk"
+214:  const blockers = asObject(dashboard.blockers);
+215:  const next = asString(dashboard.nextBestAction?.recommendation).toLowerCase();
+217:  if (next.includes("video") || asArray(blockers.assets).length) {
+226:  if (asArray(blockers.integrations).length) {
+227:    return aiTeamCards.find((card) => /operations|integrations|automation|system/i.test(card.name || card.id || "")) || aiTeamCards[0];
+237:  if (/(connector|integration|sync|platform)/.test(text)) return "integrations";
+243:  if (/(job|operation)/.test(text)) return "operations-centers";
+248:  const operations = asObject(selectOperationsSnapshot(state));
+249:  const notifications = asArray(operations.notifications?.items);
+250:  const tasks = asArray(operations.tasks?.items);
+251:  const approvals = asArray(operations.approvals?.items);
+282:    { id: "admin", name: "Operations Lead", fallback: "Clear blockers and keep execution flow healthy." }
+311:  const integrations = asObject(state.data.integrations);
+314:  const operations = asObject(selectOperationsSnapshot(state));
+320:  const scheduledJobs = asArray(activity.scheduled_jobs);
+328:  const notifications = asArray(operations.notifications?.items);
+333:  const sortedSchedule = scheduledJobs
+338:  const nextScheduled = sortedSchedule[0] || null;
+350:    integrations.readiness?.readiness_score ??
+358:  const connectorChecks = asObject(integrations.readiness?.checks);
+361:  const missingIntegrations = asArray(integrations.readiness?.missing).map((item) => humanizeStatus(item)).filter(Boolean);
+367:    ...asArray(assets.missing_assets?.blockers),
+379:  const tasks = asArray(operations.tasks?.items);
+380:  const approvals = asArray(operations.approvals?.items);
+384:    : scheduledJobs.length
+411:    asString(nextScheduled?.wave_name);
+415:    asString(nextScheduled?.channel)
+420:    nextScheduled?.status ||
+450:  const continuationSummary = nextScheduled
+451:    ? `Next: ${humanizeStatus(nextScheduled.status, "Scheduled")} — ${formatRelativeDate(nextScheduled.scheduled_for || nextScheduled.updated_at)}`
+462:  const mediaJobs = asArray(operations.media_jobs?.items);
+465:  const publishingQueue = asArray(operations.queues?.items).filter((item) =>
+468:  const publishReadyCount = publishingQueue.filter((item) => {
+471:  }).length + scheduledJobs.length;
+541:  const blockers = {
+542:    integrations: missingIntegrations,
+554:    blockers.integrations.length +
+555:    blockers.assets.length +
+556:    blockers.failedJobs.length +
+557:    blockers.readinessGaps.length;
+559:  const campaignReadinessTone = totalBlockers ? "warning" : "success";
+563:          statusLabel: campaignReadinessTone === "success" ? "Healthy" : totalBlockers ? "Attention" : "Unknown",
+579:      : "Select a project to see readiness, blockers, the next action, and the right AI specialist.",
+597:    nextBestAction: {
+619:        detail: criticalGaps.length ? `${formatCount(criticalGaps.length)} blockers` : "Ready for scale",
+624:        value: formatCount(scheduledJobs.length),
+681:    campaign: {
+686:      nextScheduledAction: nextScheduled
+687:        ? `${humanizeStatus(nextScheduled.status, "Scheduled")}: ${formatRelativeDate(nextScheduled.scheduled_for || nextScheduled.updated_at)}`
+691:    blockers,
+697:    launchSnapshot: {
+698:      publishReadiness: publishReadyCount,
+701:      scheduledJobs: scheduledJobs.length,
+702:      campaignReadiness: campaignReadinessTone === "success" ? "Ready" : "At risk"
+710:        ...blockers.integrations.map((item) => `Integration: ${item}`),
+711:        ...blockers.assets.map((item) => `Asset: ${item}`),
+712:        ...blockers.readinessGaps.map((item) => `Readiness: ${item}`)
+717:      execution: latestExecution
+720:      recommendation: asString(recommendations[0]).trim() || asString(insightsRecommendations[0]).trim() || "Ask Executive AI to generate the next best action from readiness, blockers, and recent activity.",
+729:      scheduledJobs: scheduledJobs.length,
+731:      nextSchedule: nextScheduled ? formatRelativeDate(nextScheduled.scheduled_for || nextScheduled.updated_at) : "Not available",
+774:      { title: "Integrations", items: dashboard.blockers.integrations, tone: "warning" },
+775:      { title: "Assets", items: dashboard.blockers.assets, tone: "warning" },
+776:      { title: "Failed Jobs", items: dashboard.blockers.failedJobs, tone: "danger" },
+777:      { title: "Readiness Gaps", items: dashboard.blockers.readinessGaps, tone: "warning" }
+784:        detail: dashboard.blockers.assets.length
+785:          ? `${formatCount(dashboard.blockers.assets.length)} missing asset groups need preparation.`
+787:        tone: dashboard.blockers.assets.length ? "is-warning" : "is-live"
+791:        detail: dashboard.blockers.integrations.length
+792:          ? `${formatCount(dashboard.blockers.integrations.length)} platform connections need attention.`
+794:        tone: dashboard.blockers.integrations.length ? "is-warning" : "is-live"
+798:        detail: dashboard.blockers.readinessGaps.length
+799:          ? `${formatCount(dashboard.blockers.readinessGaps.length)} readiness gap${dashboard.blockers.readinessGaps.length === 1 ? "" : "s"} still affect confidence.`
+801:        tone: dashboard.blockers.readinessGaps.length ? "is-warning" : "is-live"
+843:              <span class="mhos-os-brief-hint">${escapeHtml(dashboard.blockers.integrations.length ? "Connections need attention" : "Core platforms connected")}</span>
+847:              <strong class="mhos-os-brief-value">${escapeHtml(dashboard.nextBestAction.route === "ai-command" ? "AI Guidance" : humanizeStatus(dashboard.nextBestAction.route))}</strong>
+848:              <span class="mhos-os-brief-hint">Next handoff: ${escapeHtml(dashboard.nextBestAction.urgencyLabel)}</span>
+858:                <span class="mhos-os-chip ${dashboard.nextBestAction.urgencyLabel === "Urgent" ? "is-danger" : dashboard.nextBestAction.urgencyLabel === "Attention" ? "is-warning" : "is-live"}">${escapeHtml(dashboard.nextBestAction.urgencyLabel)}</span>
+859:                <span class="mhos-os-chip">${escapeHtml(dashboard.nextBestAction.workflowImpact)}</span>
+860:                <span class="mhos-os-chip">${escapeHtml(dashboard.nextBestAction.confidenceSummary)}</span>
+864:                <h2 class="mhos-os-decision-title">${escapeHtml(dashboard.nextBestAction.recommendation)}</h2>
+865:                <p class="mhos-os-decision-copy">${escapeHtml(dashboard.nextBestAction.whyItMatters)}</p>
+868:                <span class="mhos-os-chip">${escapeHtml(dashboard.nextBestAction.continuationSummary)}</span>
+869:                <span class="mhos-os-chip">Opens: ${escapeHtml(humanizeStatus(dashboard.nextBestAction.route))}</span>
+870:                <span class="mhos-os-chip">${escapeHtml(dashboard.nextBestAction.escalationSummary)}</span>
+875:                  ${escapeHtml(dashboard.nextBestAction.buttonLabel)}
+890:                  <h2 class="mhos-os-section-title">${dashboard.totalBlockers ? "Operating blockers" : "No critical blockers"}</h2>
+892:                    ${dashboard.totalBlockers ? "Only the blockers that affect the next handoff are shown here." : "The current path is clear. Continue with the recommended workspace or ask AI for guidance."}
+937:                  <strong>${escapeHtml(formatCount(dashboard.launchSnapshot.publishReadiness))}</strong>
+941:                  <strong>${escapeHtml(formatCount(dashboard.launchSnapshot.mediaReadiness))}</strong>
+945:                  <strong>${escapeHtml(dashboard.launchSnapshot.emailReadiness)}</strong>
+949:                  <strong>${escapeHtml(formatCount(dashboard.launchSnapshot.scheduledJobs))}</strong>
+960:                <p class="mhos-os-panel-copy">No detailed blockers are currently available for this project.</p>
+1047:                <span class="home-prompt-meta">Explain blockers and readiness gaps in simple terms.</span>
+1050:                <span class="home-prompt-title">Summarize launch blockers</span>
+1060:              <p class="mhos-os-kicker">Customer operations</p>
+1063:                ${escapeHtml(compactModuleState(dashboard.health?.customerOpsStatus, "Customer Ops activates when CRM/live channels are connected."))}
+1089:        strategist: `Act as the Strategist for ${projectLabel}. Review readiness, blockers, campaign state, and next best action. Give me the highest-impact strategic moves. Do not execute anything; prepare guidance only.`,
+1093:        publisher: `Act as the Publisher for ${projectLabel}. Review publishing readiness, scheduled jobs, blockers, and what must be checked before publishing. Do not execute anything; prepare guidance only.`,
+1096:        compliance_reviewer: `Act as the Compliance Reviewer for ${projectLabel}. Review launch blockers, claims, approvals, and publishing safety. Tell me what must be checked before release. Do not execute anything; prepare guidance only.`,
+1097:        admin: `Act as the Operations Lead for ${projectLabel}. Review tasks, blockers, failed jobs, and execution health. Give me the next operational steps. Do not execute anything; prepare guidance only.`
+1108:        if (dashboard.nextBestAction.route === "ai-command") {
+1109:          setGlobalAiPrompt($, dashboard.nextBestAction.recommendation);
+1111:        openRoute(dashboard.nextBestAction.route, "Next best action opened.");
+1117:      askNextActionBtn.onclick = () => openAiWithPrompt(`Explain this next best action like an operations director and give me the exact safe steps: ${dashboard.nextBestAction.recommendation}. Include which workspace owns it, what it unlocks for campaign creation, scheduled posts, publishing, ads, and customer operations. Do not execute anything.`);
+1120:    const operationsBtn = $("homeOpenOperationsBtn");
+1121:    if (operationsBtn) operationsBtn.onclick = () => openRoute("operations-centers");
+1139:      quickAiBtn.onclick = () => openAiWithPrompt(dashboard.nextBestAction.recommendation);
+1144:      promptNextBtn.onclick = () => openAiWithPrompt("What is the best next executive action for this project? Prioritize the answer based on readiness, blockers, campaign state, scheduled posts, publishing safety, ads readiness, customer operations, and recent activity. Give one clear recommendation and the reason.");
+1149:      promptReadinessBtn.onclick = () => openAiWithPrompt("Why is readiness low? Explain the missing integrations, assets, failed jobs, campaign gaps, scheduled post risks, publishing blockers, and ad launch risks in simple business language. End with the fastest safe fix path.");
+1154:      promptLaunchBtn.onclick = () => openAiWithPrompt("Summarize the launch blockers and tell me what must be fixed before publishing.");

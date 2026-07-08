@@ -1,0 +1,61 @@
+render-sections import/use map:
+public/control-center/pages/home.js:2:  renderActivityItems,
+public/control-center/pages/home.js:3:  renderAiTeamCards,
+public/control-center/pages/home.js:4:  renderBadge,
+public/control-center/pages/home.js:5:  renderBlockerColumn,
+public/control-center/pages/home.js:6:  renderCompactList,
+public/control-center/pages/home.js:7:  renderHomeExecutiveIntro
+public/control-center/pages/home.js:820:              ${renderBadge(dashboard.headerTone, dashboard.headerStatus, escapeHtml)}
+public/control-center/pages/home.js:938:                ${renderBadge(dashboard.totalBlockers ? "warning" : "success", dashboard.totalBlockers ? `${formatCount(dashboard.totalBlockers)} signals` : "Clear", escapeHtml)}
+public/control-center/pages/home.js:999:                    renderBlockerColumn(column.title, column.items, column.tone, escapeHtml)
+public/control-center/pages/home.js:1019:              ${renderActivityItems(dashboard.recentActivity, escapeHtml)}
+public/control-center/pages/home/render-sections.js:24:export function renderBadge(tone, label, escapeHtml) {
+public/control-center/pages/home/render-sections.js:28:export function renderCompactList(items, escapeHtml, emptyText = "No active blocker detected.") {
+public/control-center/pages/home/render-sections.js:44:export function renderBlockerColumn(title, items, tone, escapeHtml) {
+public/control-center/pages/home/render-sections.js:51:        ${renderBadge(safeItems.length ? tone : "success", safeItems.length ? formatCount(safeItems.length) : "Clear", escapeHtml)}
+public/control-center/pages/home/render-sections.js:53:      ${renderCompactList(safeItems, escapeHtml, "No blocker detected.")}
+public/control-center/pages/home/render-sections.js:58:export function renderActivityItems(items, escapeHtml) {
+public/control-center/pages/home/render-sections.js:75:            ${renderBadge(item.tone || "neutral", item.when || "Not available", escapeHtml)}
+public/control-center/pages/home/render-sections.js:83:export function renderAiTeamCards(cards, escapeHtml) {
+public/control-center/pages/home/render-sections.js:96:            ${renderBadge(agent.tone || "neutral", agent.status || "Idle", escapeHtml)}
+public/control-center/pages/home/render-sections.js:105:export function renderHomeExecutiveIntro({
+public/control-center/pages/home/render-sections.js:166:          ${renderBadge(dashboard.headerTone, dashboard.headerStatus, escapeHtml)}
+public/control-center/pages/home/render-sections.js:211:          ${renderBadge(item.tone, toneLabel(item.tone), escapeHtml)}
+
+Coverage implementations:
+public/control-center/pages/home.js:887:            <section class="mhos-real-head-office-coverage" aria-label="Head Office campaign execution coverage">
+public/control-center/pages/home.js:890:                  <p class="mhos-os-kicker">HEAD OFFICE COVERAGE</p>
+public/control-center/pages/home.js:891:                  <h2 class="mhos-os-section-title">Campaign execution at a glance</h2>
+public/control-center/pages/home/render-sections.js:180:      <div class="home-head-office-strip" aria-label="Head Office live operating brief">
+public/control-center/pages/home/render-sections.js:193:      <div class="home-execution-coverage-grid" aria-label="Campaign execution coverage">
+public/control-center/styles/13-home-executive.css:1249:   HOME SMART HEAD OFFICE POLISH
+public/control-center/styles/13-home-executive.css:1253:.home-head-office-strip {
+public/control-center/styles/13-home-executive.css:1268:.home-head-office-strip strong {
+public/control-center/styles/13-home-executive.css:1276:.home-head-office-strip p {
+public/control-center/styles/13-home-executive.css:1327:  .home-head-office-strip {
+public/control-center/styles/13-home-executive.css:1334:   HOME EXECUTION COVERAGE GRID
+public/control-center/styles/13-home-executive.css:1338:.home-execution-coverage-grid {
+public/control-center/styles/13-home-executive.css:1380:  .home-execution-coverage-grid {
+public/control-center/styles/13-home-executive.css:1386:  .home-execution-coverage-grid {
+public/control-center/styles/13-home-executive.css:1393:   REAL VISIBLE HOME HEAD OFFICE COVERAGE
+public/control-center/styles/13-home-executive.css:1397:.mhos-real-head-office-coverage {
+
+Duplicate function/section candidates:
+public/control-center/pages/home.js:878:                  Ask Head Office AI
+public/control-center/pages/home.js:887:            <section class="mhos-real-head-office-coverage" aria-label="Head Office campaign execution coverage">
+public/control-center/pages/home.js:890:                  <p class="mhos-os-kicker">HEAD OFFICE COVERAGE</p>
+public/control-center/pages/home.js:891:                  <h2 class="mhos-os-section-title">Campaign execution at a glance</h2>
+public/control-center/pages/home.js:1059:                  <span class="home-action-title">Ask Head Office AI</span>
+public/control-center/pages/home/render-sections.js:24:export function renderBadge(tone, label, escapeHtml) {
+public/control-center/pages/home/render-sections.js:28:export function renderCompactList(items, escapeHtml, emptyText = "No active blocker detected.") {
+public/control-center/pages/home/render-sections.js:44:export function renderBlockerColumn(title, items, tone, escapeHtml) {
+public/control-center/pages/home/render-sections.js:58:export function renderActivityItems(items, escapeHtml) {
+public/control-center/pages/home/render-sections.js:83:export function renderAiTeamCards(cards, escapeHtml) {
+public/control-center/pages/home/render-sections.js:105:export function renderHomeExecutiveIntro({
+public/control-center/pages/home/render-sections.js:113:    ? "Head Office live brief"
+public/control-center/pages/home/render-sections.js:114:    : "Head Office is waiting for a reviewed signal";
+public/control-center/pages/home/render-sections.js:180:      <div class="home-head-office-strip" aria-label="Head Office live operating brief">
+public/control-center/pages/home/render-sections.js:182:          <span class="data-label">Head Office</span>
+public/control-center/pages/home/render-sections.js:193:      <div class="home-execution-coverage-grid" aria-label="Campaign execution coverage">
+public/control-center/pages/home/render-sections.js:195:          <article class="home-execution-coverage-card is-${escapeHtml(item.tone)}">
+public/control-center/pages/home/render-sections.js:202:      <p class="home-empty-note">Home is the Head Office view: one status, one next move, and clear ownership. Execution stays inside the owning workspace.</p>

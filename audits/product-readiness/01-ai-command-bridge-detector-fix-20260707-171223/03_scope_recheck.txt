@@ -1,0 +1,86 @@
+Detector definitions:
+623:function detectSpecialistFromBridgePrompt(prompt) {
+669:	function detectSpecialistFromBridgePrompt(prompt) {
+
+Top-level placement check:
+	},
+	{
+		id: "operations",
+		name: "Operations Assistant",
+		purpose: "Translate intent into executable workflows and handoffs.",
+		bestUse: "When actions span multiple pages and teams.",
+		suggestedPrompt: "Act as Operations Assistant and convert priorities into a practical execution sequence."
+	}
+];
+
+const aiSessions = new Map();
+const AI_COMMAND_CHAT_SESSIONS_KEY = "mh_ai_command_chat_sessions_v1";
+const aiInboundHandoffObjectIds = typeof WeakMap !== "undefined" ? new WeakMap() : null;
+let aiInboundHandoffCounter = 0;
+let lastRenderContext = null;
+let aiCommandBridgeRegistered = false;
+let aiAutoModeUnsubscribe = null;
+const aiAutomationState = {
+	progress: "",
+	result: ""
+};
+
+
+function detectSpecialistFromBridgePrompt(prompt) {
+    const text = asString(prompt).toLowerCase();
+
+    const directMap = [
+            ["video", "video_lead"],
+            ["motion", "video_lead"],
+            ["reel", "video_lead"],
+            ["storyboard", "video_lead"],
+            ["shot list", "video_lead"],
+            ["voiceover", "video_lead"],
+            ["media", "video_lead"],
+            ["campaign", "strategist"],
+            ["strategy", "strategist"],
+            ["content", "copywriter"],
+            ["copy", "copywriter"],
+            ["caption", "copywriter"],
+            ["publish", "publisher"],
+            ["schedule", "publisher"],
+            ["ads", "ads_operator"],
+            ["budget", "ads_operator"],
+            ["customer", "customer_ops"],
+            ["crm", "customer_ops"],
+            ["support", "customer_ops"],
+            ["operations", "admin"],
+            ["blocker", "admin"],
+            ["readiness", "admin"],
+            ["setup", "admin"],
+            ["library", "admin"]
+    ];
+
+    for (const [keyword, specialistId] of directMap) {
+            if (text.includes(keyword)) return MODE_ID_ALIASES[specialistId] || specialistId;
+    }
+
+    const classified = classifyIntent(text, null);
+    return MODE_ID_ALIASES[classified?.modeId] || classified?.modeId || "operations";
+}
+
+function buildAutoPlanFromCommand(commandText, session) {
+	function getSpecialistById(id) {
+		const resolvedId = MODE_ID_ALIASES[id] || id;
+		return SPECIALIST_DEFS.find((s) => s.id === resolvedId) ||
+			SPECIALIST_DEFS.find((s) => s.id === "operations") ||
+			SPECIALIST_DEFS[0];
+	}
+
+	function detectSpecialistFromBridgePrompt(prompt) {
+		const text = asString(prompt);
+		if (/act as the strategist/i.test(text)) return "strategist";
+		if (/act as the content writer/i.test(text)) return "writer";
+		if (/act as the media director/i.test(text)) return "media";
+		if (/act as the video lead/i.test(text)) return "video_lead";
+		if (/act as the publisher/i.test(text)) return "publisher";
+
+Render bridge call:
+623:function detectSpecialistFromBridgePrompt(prompt) {
+669:	function detectSpecialistFromBridgePrompt(prompt) {
+5559:			const detectedSpecialist = detectSpecialistFromBridgePrompt(bridgeValue);

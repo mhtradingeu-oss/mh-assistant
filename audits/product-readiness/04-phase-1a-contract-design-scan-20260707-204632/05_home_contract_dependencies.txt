@@ -1,0 +1,301 @@
+Home imports:
+import {
+  renderActivityItems,
+  renderAiTeamCards,
+  renderBadge,
+  renderBlockerColumn,
+  renderCompactList,
+  renderHomeExecutiveIntro
+} from "./home/render-sections.js";
+import {
+  getProjectedActiveRole,
+  getProjectedTeamMembers
+} from "../runtime/authority/authority-projection.js";
+
+import {
+  selectCurrentProject,
+  selectOperationsSnapshot
+} from "../state.js";
+
+function asArray(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+function asObject(value) {
+  return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+}
+
+function asString(value) {
+  if (value == null) return "";
+  return String(value);
+}
+
+function asNumber(value, fallback = 0) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function formatPercent(value) {
+  return `${Math.max(0, Math.round(asNumber(value, 0)))}%`;
+}
+
+function formatCount(value) {
+  return String(Math.max(0, Math.round(asNumber(value, 0))));
+}
+
+function statusTone(input, score) {
+
+Home AI team / Head Office logic:
+213:function pickRecommendedSpecialist(aiTeamCards = [], dashboard = {}) {
+215:  const next = asString(dashboard.nextBestAction?.recommendation).toLowerCase();
+227:    return aiTeamCards.find((card) => /operations|integrations|automation|system/i.test(card.name || card.id || "")) || aiTeamCards[0];
+243:  if (/(job|operation)/.test(text)) return "operations-centers";
+247:function buildAiTeamCards(state) {
+248:  const operations = asObject(selectOperationsSnapshot(state));
+249:  const notifications = asArray(operations.notifications?.items);
+250:  const tasks = asArray(operations.tasks?.items);
+251:  const approvals = asArray(operations.approvals?.items);
+281:    { id: "compliance_reviewer", name: "Compliance Reviewer", fallback: "Review claims, approvals, and publish safety before release." },
+287:    const roleTasks = tasks.filter((item) => asString(item?.owner_role).toLowerCase() === role.id);
+288:    const roleApprovals = approvals.filter((item) => asString(item?.reviewer_role).toLowerCase() === role.id);
+314:  const operations = asObject(selectOperationsSnapshot(state));
+320:  const scheduledJobs = asArray(activity.scheduled_jobs);
+328:  const notifications = asArray(operations.notifications?.items);
+333:  const sortedSchedule = scheduledJobs
+379:  const tasks = asArray(operations.tasks?.items);
+380:  const approvals = asArray(operations.approvals?.items);
+384:    : scheduledJobs.length
+428:  const pendingTasks = tasks.filter((item) => {
+433:  const pendingApprovals = approvals.filter((item) => {
+462:  const mediaJobs = asArray(operations.media_jobs?.items);
+465:  const publishingQueue = asArray(operations.queues?.items).filter((item) =>
+471:  }).length + scheduledJobs.length;
+566:          approvals: formatCount(pendingApprovals.length),
+569:          summary: `${formatCount(pendingApprovals.length)} approvals pending, ${formatCount(failedExecutions.length)} escalations, ${formatCount(unreadNotifications.length)} notifications, system score ${formatPercent(systemScore)}.`
+597:    nextBestAction: {
+624:        value: formatCount(scheduledJobs.length),
+664:        hint: "Notifications, tasks, approvals",
+701:      scheduledJobs: scheduledJobs.length,
+729:      scheduledJobs: scheduledJobs.length,
+742:function setGlobalAiPrompt($, prompt) {
+768:    const aiTeamCards = buildAiTeamCards(state);
+806:    const recommendedSpecialist = pickRecommendedSpecialist(aiTeamCards, dashboard);
+847:              <strong class="mhos-os-brief-value">${escapeHtml(dashboard.nextBestAction.route === "ai-command" ? "AI Guidance" : humanizeStatus(dashboard.nextBestAction.route))}</strong>
+848:              <span class="mhos-os-brief-hint">Next handoff: ${escapeHtml(dashboard.nextBestAction.urgencyLabel)}</span>
+858:                <span class="mhos-os-chip ${dashboard.nextBestAction.urgencyLabel === "Urgent" ? "is-danger" : dashboard.nextBestAction.urgencyLabel === "Attention" ? "is-warning" : "is-live"}">${escapeHtml(dashboard.nextBestAction.urgencyLabel)}</span>
+859:                <span class="mhos-os-chip">${escapeHtml(dashboard.nextBestAction.workflowImpact)}</span>
+860:                <span class="mhos-os-chip">${escapeHtml(dashboard.nextBestAction.confidenceSummary)}</span>
+864:                <h2 class="mhos-os-decision-title">${escapeHtml(dashboard.nextBestAction.recommendation)}</h2>
+865:                <p class="mhos-os-decision-copy">${escapeHtml(dashboard.nextBestAction.whyItMatters)}</p>
+868:                <span class="mhos-os-chip">${escapeHtml(dashboard.nextBestAction.continuationSummary)}</span>
+869:                <span class="mhos-os-chip">Opens: ${escapeHtml(humanizeStatus(dashboard.nextBestAction.route))}</span>
+870:                <span class="mhos-os-chip">${escapeHtml(dashboard.nextBestAction.escalationSummary)}</span>
+875:                  ${escapeHtml(dashboard.nextBestAction.buttonLabel)}
+878:                  Ask Head Office AI
+884:            <section class="mhos-real-head-office-coverage" aria-label="Head Office campaign execution coverage">
+889:                  <p class="mhos-os-panel-copy">One-second view of campaign, schedule, publishing, ads, and operations readiness. Home shows ownership only; execution stays inside the owning workspace.</p>
+903:                  <p>${escapeHtml(dashboard.launchSnapshot?.scheduledJobs ? "Scheduled work exists for review." : "No scheduled post is confirmed yet.")}</p>
+920:                  <strong>${escapeHtml(dashboard.nextBestAction?.recommendation ? "Next action identified" : "Needs reviewed action")}</strong>
+989:                  <strong>${escapeHtml(formatCount(dashboard.launchSnapshot.scheduledJobs))}</strong>
+1047:                <h2 class="mhos-os-panel-title">${escapeHtml(recommendedSpecialist?.name || "Executive AI")}</h2>
+1049:                  ${escapeHtml(recommendedSpecialist?.summary || "Use AI Command to turn the current state into a clear operating plan.")}
+1054:              ${recommendedSpecialist ? `
+1055:                <button class="quick-action-btn mhos-motion-soft" type="button" data-role-id="${escapeHtml(recommendedSpecialist.id)}">
+1056:                  <span class="home-action-title">Ask Head Office AI</span>
+1081:              <p class="mhos-os-kicker">Customer operations</p>
+1101:      setGlobalAiPrompt($, prompt);
+1107:    const handleAiRoleClick = (roleId, roleName) => {
+1109:      const rolePrompts = {
+1117:        compliance_reviewer: `Act as the Compliance Reviewer for ${projectLabel}. Review launch blockers, claims, approvals, and publishing safety. Tell me what must be checked before release. Do not execute anything; prepare guidance only.`,
+1118:        admin: `Act as the Operations Lead for ${projectLabel}. Review tasks, blockers, failed jobs, and execution health. Give me the next operational steps. Do not execute anything; prepare guidance only.`
+1121:      const prompt = rolePrompts[roleId] || `Act as the ${roleName} specialist for ${projectLabel}. Review the current project context and recommend the next best actions. Do not execute anything; prepare guidance only.`;
+1129:        if (dashboard.nextBestAction.route === "ai-command") {
+1130:          setGlobalAiPrompt($, dashboard.nextBestAction.recommendation);
+1132:        openRoute(dashboard.nextBestAction.route, "Next best action opened.");
+1138:      askNextActionBtn.onclick = () => openAiWithPrompt(`Explain this next best action like an operations director and give me the exact safe steps: ${dashboard.nextBestAction.recommendation}. Include which workspace owns it, what it unlocks for campaign creation, scheduled posts, publishing, ads, and customer operations. Do not execute anything.`);
+1151:      promptNextBtn.onclick = () => openAiWithPrompt("What is the best next executive action for this project? Prioritize the answer based on readiness, blockers, campaign state, scheduled posts, publishing safety, ads readiness, customer operations, and recent activity. Give one clear recommendation and the reason.");
+1158:    const aiRoleCards = document.querySelectorAll(".quick-action-btn[data-role-id], .home-ai-team-card[data-role-id], .mhos-specialist[data-role-id], .mhos-workflow-step[data-role-id]");
+1160:      const roleId = card.getAttribute("data-role-id");
+1162:      card.onclick = () => handleAiRoleClick(roleId, roleName);
+
+Home key source windows:
+  return aiTeamCards.find((card) => card.status === "Active role") || aiTeamCards[0] || null;
+}
+
+
+function routeForAction(action) {
+  const text = asString(action).toLowerCase();
+  if (/(video|media|product video|asset|library|upload|brand file)/.test(text)) return "library";
+  if (/(connector|integration|sync|platform)/.test(text)) return "integrations";
+  if (/(setup|foundation)/.test(text)) return "setup";
+  if (/(campaign|launch wave|brief)/.test(text)) return "campaign-studio";
+  if (/(publish|schedule|queue)/.test(text)) return "publishing";
+  if (/(ad|budget|paid)/.test(text)) return "ads-manager";
+  if (/(content|copy)/.test(text)) return "content-studio";
+  if (/(job|operation)/.test(text)) return "operations-centers";
+  return "ai-command";
+}
+
+function buildAiTeamCards(state) {
+  const operations = asObject(selectOperationsSnapshot(state));
+  const notifications = asArray(operations.notifications?.items);
+  const tasks = asArray(operations.tasks?.items);
+  const approvals = asArray(operations.approvals?.items);
+
+  const projectedMembers = getProjectedTeamMembers(state);
+  const projectedActiveRole = asString(
+    getProjectedActiveRole(state)
+  ).toLowerCase();
+
+  const roles = projectedMembers.length
+    ? projectedMembers.map((member) => ({
+        id: asString(member.role || member.id).toLowerCase(),
+        name: asString(
+          member.name ||
+          member.role ||
+          member.id ||
+          "AI Specialist"
+        ),
+        fallback: asString(
+          member.description ||
+          member.summary ||
+          "Ready to support this project."
+        )
+      }))
+    : [
+    { id: "strategist", name: "Strategist", fallback: "Align campaign priorities and launch sequencing." },
+    { id: "writer", name: "Content Writer", fallback: "Prepare high-conversion messaging for active channels." },
+    { id: "designer", name: "Media Director", fallback: "Polish visual direction and creative consistency." },
+    { id: "video_lead", name: "Video Lead", fallback: "Queue the next motion and short-form variants." },
+    { id: "publisher", name: "Publisher", fallback: "Prepare publishing packages, schedules, and manual handoffs." },
+    { id: "ads_operator", name: "Ads Optimizer", fallback: "Optimize paid testing, creative variants, and budget decisions." },
+    { id: "analyst", name: "SEO & Insights Analyst", fallback: "Read weak signals and recommend measurable improvements." },
+    { id: "compliance_reviewer", name: "Compliance Reviewer", fallback: "Review claims, approvals, and publish safety before release." },
+    { id: "admin", name: "Operations Lead", fallback: "Clear blockers and keep execution flow healthy." }
+  ];
+
+  return roles.map((role) => {
+    const roleNotifications = notifications.filter((item) => asString(item?.owner_role).toLowerCase() === role.id);
+    const roleTasks = tasks.filter((item) => asString(item?.owner_role).toLowerCase() === role.id);
+    const roleApprovals = approvals.filter((item) => asString(item?.reviewer_role).toLowerCase() === role.id);
+
+    const latest = roleNotifications[0] || roleTasks[0] || roleApprovals[0] || null;
+    const statusRaw = asString(latest?.status || latest?.level || "idle");
+    const tone = statusTone(statusRaw);
+
+    return {
+      ...role,
+      tone,
+      status:
+        role.id === projectedActiveRole
+          ? "Active role"
+          : humanizeStatus(statusRaw, "Idle"),
+      summary: latest
+        ? asString(latest.title || latest.summary || latest.action || role.fallback)
+        : role.fallback
+    };
+  });
+}
+
+function buildExecutiveData(state) {
+  const overview = asObject(state.data.overview);
+  const readiness = asObject(state.data.readiness);
+  const integrations = asObject(state.data.integrations);
+  const activity = asObject(state.data.activity);
+  const assets = asObject(state.data.assets);
+  const operations = asObject(selectOperationsSnapshot(state));
+
+  const overviewData = asObject(overview.overview);
+  const readinessData = asObject(readiness.dashboard);
+  const readinessPriorities = asObject(readinessData.priorities || readiness.priorities);
+
+  const scheduledJobs = asArray(activity.scheduled_jobs);
+  const executionResults = asArray(activity.execution_results);
+  const recommendations = asArray(readinessData.next_best_actions).length
+    ? asArray(readinessData.next_best_actions)
+    : asArray(overview.next_best_actions);
+
+  const insights = asObject(activity.insights);
+  const learning = asObject(activity.learning);
+  const notifications = asArray(operations.notifications?.items);
+
+  const sortedExecution = executionResults
+
+
+          </aside>
+        </div>
+
+      </div>
+    `;
+    
+    const openRoute = (route, message = "") => {
+      navigateTo(route);
+      if (message) showMessage?.(message);
+    };
+
+    const openAiWithPrompt = (prompt) => {
+      setGlobalAiPrompt($, prompt);
+      navigateTo("ai-command");
+      showMessage?.("Prompt prepared in AI Command.");
+    };
+
+
+    const handleAiRoleClick = (roleId, roleName) => {
+      const projectLabel = dashboard.projectName || "this project";
+      const rolePrompts = {
+        strategist: `Act as the Strategist for ${projectLabel}. Review readiness, blockers, campaign state, and next best action. Give me the highest-impact strategic moves. Do not execute anything; prepare guidance only.`,
+        writer: `Act as the Content Writer for ${projectLabel}. Review the current project context and suggest the next best writing actions, messaging angles, and content priorities. Do not execute anything; prepare guidance only.`,
+        designer: `Act as the Media Director for ${projectLabel}. Review the visual/asset readiness and suggest the next best creative actions. Do not execute anything; prepare guidance only.`,
+        video_lead: `Act as the Video Lead for ${projectLabel}. Review the project context and suggest the next best short-form/video actions. Do not execute anything; prepare guidance only.`,
+        publisher: `Act as the Publisher for ${projectLabel}. Review publishing readiness, scheduled jobs, blockers, and what must be checked before publishing. Do not execute anything; prepare guidance only.`,
+        ads_operator: `Act as the Ads Optimizer for ${projectLabel}. Review campaign readiness, channels, and paid media opportunities. Suggest next ad actions safely. Do not execute anything; prepare guidance only.`,
+        analyst: `Act as the SEO & Insights Analyst for ${projectLabel}. Review readiness, signals, gaps, and recent activity. Tell me what data matters most and what to improve next. Do not execute anything; prepare guidance only.`,
+        compliance_reviewer: `Act as the Compliance Reviewer for ${projectLabel}. Review launch blockers, claims, approvals, and publishing safety. Tell me what must be checked before release. Do not execute anything; prepare guidance only.`,
+        admin: `Act as the Operations Lead for ${projectLabel}. Review tasks, blockers, failed jobs, and execution health. Give me the next operational steps. Do not execute anything; prepare guidance only.`
+      };
+
+      const prompt = rolePrompts[roleId] || `Act as the ${roleName} specialist for ${projectLabel}. Review the current project context and recommend the next best actions. Do not execute anything; prepare guidance only.`;
+      openAiWithPrompt(prompt);
+      showMessage?.(`${roleName} context prepared in AI Command. Review and send when ready.`);
+    };
+
+    const nextBtn = $("homePrimaryActionBtn");
+    if (nextBtn) {
+      nextBtn.onclick = () => {
+        if (dashboard.nextBestAction.route === "ai-command") {
+          setGlobalAiPrompt($, dashboard.nextBestAction.recommendation);
+        }
+        openRoute(dashboard.nextBestAction.route, "Next best action opened.");
+      };
+    }
+
+    const askNextActionBtn = $("homeAskNextActionBtn");
+    if (askNextActionBtn) {
+      askNextActionBtn.onclick = () => openAiWithPrompt(`Explain this next best action like an operations director and give me the exact safe steps: ${dashboard.nextBestAction.recommendation}. Include which workspace owns it, what it unlocks for campaign creation, scheduled posts, publishing, ads, and customer operations. Do not execute anything.`);
+    }
+
+    const quickCampaignBtn = $("homeQuickStartCampaignBtn");
+    if (quickCampaignBtn) quickCampaignBtn.onclick = () => openRoute("campaign-studio");
+
+    const quickAssetBtn = $("homeQuickAssetLibraryBtn") || $("homeQuickUploadAssetBtn");
+    if (quickAssetBtn) quickAssetBtn.onclick = () => openRoute("library");
+
+    const quickReadinessBtn = $("homeQuickReviewReadinessBtn");
+    if (quickReadinessBtn) quickReadinessBtn.onclick = () => openRoute("setup");
+    const promptNextBtn = $("homePromptNextBtn");
+    if (promptNextBtn) {
+      promptNextBtn.onclick = () => openAiWithPrompt("What is the best next executive action for this project? Prioritize the answer based on readiness, blockers, campaign state, scheduled posts, publishing safety, ads readiness, customer operations, and recent activity. Give one clear recommendation and the reason.");
+    }
+
+    const promptReadinessBtn = $("homePromptReadinessBtn");
+    if (promptReadinessBtn) {
+      promptReadinessBtn.onclick = () => openAiWithPrompt("Why is readiness low? Explain the missing integrations, assets, failed jobs, campaign gaps, scheduled post risks, publishing blockers, and ad launch risks in simple business language. End with the fastest safe fix path.");
+    }
+    const aiRoleCards = document.querySelectorAll(".quick-action-btn[data-role-id], .home-ai-team-card[data-role-id], .mhos-specialist[data-role-id], .mhos-workflow-step[data-role-id]");
+    aiRoleCards.forEach((card) => {
+      const roleId = card.getAttribute("data-role-id");
+      const roleName = card.querySelector("strong")?.textContent || "AI Specialist";
+      card.onclick = () => handleAiRoleClick(roleId, roleName);
+    });
+  }
+};

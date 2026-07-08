@@ -1,0 +1,260 @@
+diff --git a/public/control-center/pages/ai-command.js b/public/control-center/pages/ai-command.js
+index c5a9e2e..173ac2d 100644
+--- a/public/control-center/pages/ai-command.js
++++ b/public/control-center/pages/ai-command.js
+@@ -24,6 +24,8 @@ import {
+         getCategoryReadinessList
+ } from "../asset-library.js";
+ 
++import { normalizeAiTeamRoleId } from "../runtime/ai-team/ai-team-operating-contract.js";
++
+ import {
+         executeProjectAiChat,
+         executeProjectAiGuidance,
+@@ -619,6 +621,51 @@ const aiAutomationState = {
+ 	result: ""
+ };
+ 
++
++
++function normalizeAiCommandSpecialistId(id, fallback = "operations") {
++    const localResolved = MODE_ID_ALIASES[id] || id;
++    return normalizeAiTeamRoleId(localResolved, fallback);
++}
++
++function detectSpecialistFromBridgePrompt(prompt) {
++    const text = asString(prompt).toLowerCase();
++
++    const directMap = [
++            ["video", "video_lead"],
++            ["motion", "video_lead"],
++            ["reel", "video_lead"],
++            ["storyboard", "video_lead"],
++            ["shot list", "video_lead"],
++            ["voiceover", "video_lead"],
++            ["media", "video_lead"],
++            ["campaign", "strategist"],
++            ["strategy", "strategist"],
++            ["content", "copywriter"],
++            ["copy", "copywriter"],
++            ["caption", "copywriter"],
++            ["publish", "publisher"],
++            ["schedule", "publisher"],
++            ["ads", "ads_operator"],
++            ["budget", "ads_operator"],
++            ["customer", "customer_ops"],
++            ["crm", "customer_ops"],
++            ["support", "customer_ops"],
++            ["operations", "admin"],
++            ["blocker", "admin"],
++            ["readiness", "admin"],
++            ["setup", "admin"],
++            ["library", "admin"]
++    ];
++
++    for (const [keyword, specialistId] of directMap) {
++            if (text.includes(keyword)) return normalizeAiCommandSpecialistId(specialistId);
++    }
++
++    const classified = classifyIntent(text, null);
++    return normalizeAiCommandSpecialistId(classified?.modeId, "operations");
++}
++
+ function buildAutoPlanFromCommand(commandText, session) {
+ 	function getSpecialistById(id) {
+ 		const resolvedId = MODE_ID_ALIASES[id] || id;
+@@ -627,26 +674,6 @@ function buildAutoPlanFromCommand(commandText, session) {
+ 			SPECIALIST_DEFS[0];
+ 	}
+ 
+-	function detectSpecialistFromBridgePrompt(prompt) {
+-		const text = asString(prompt);
+-		if (/act as the strategist/i.test(text)) return "strategist";
+-		if (/act as the content writer/i.test(text)) return "writer";
+-		if (/act as the media director/i.test(text)) return "media";
+-		if (/act as the video lead/i.test(text)) return "video_lead";
+-		if (/act as the publisher/i.test(text)) return "publisher";
+-		if (/act as the ads optimizer|act as the ads operator/i.test(text)) return "ads";
+-		if (/act as the seo|act as the insights analyst/i.test(text)) return "analyst";
+-		if (/act as the compliance reviewer/i.test(text)) return "compliance_reviewer";
+-		if (/act as the operations lead/i.test(text)) return "operations";
+-		if (/act as the customer operations lead|act as customer ops/i.test(text)) return "customer_ops";
+-		if (/act as the sales|act as the crm|sales \/ crm lead/i.test(text)) return "sales_crm";
+-		// Fallback: use keyword scoring from existing classifyIntent
+-		const classified = classifyIntent(text, null);
+-		if (classified.resolvedModeId && classified.resolvedModeId !== "operations") {
+-			return classified.resolvedModeId;
+-		}
+-		return null;
+-	}
+ 
+ 	const command = humanizeValue(commandText || session?.draftMessage, "Prepare workflow action from AI command.");
+ 	const plan = [
+diff --git a/public/control-center/pages/home.js b/public/control-center/pages/home.js
+index ae79671..af7687d 100644
+--- a/public/control-center/pages/home.js
++++ b/public/control-center/pages/home.js
+@@ -137,6 +137,12 @@ function humanizeExecutiveAction(value, fallback = "Next executive action") {
+     .trim();
+ 
+   const known = {
++    "logo": "Upload or approve the brand logo to unblock launch readiness",
++    "brand guideline": "Add the brand guideline so content, media, ads, and publishing stay consistent",
++    "brand guidelines": "Add the brand guideline so content, media, ads, and publishing stay consistent",
++    "pricing doc": "Add the pricing document so campaigns and offers use approved numbers",
++    "legal doc": "Add the legal document so publishing and ads can pass review",
++    "product video": "Create product videos to unblock media, campaign, and ad readiness",
+     "product videos": "Create product videos to unblock launch readiness",
+     "connector ecommerce": "Connect ecommerce data to improve launch confidence",
+     "ecommerce": "Connect ecommerce data to improve launch confidence",
+@@ -391,7 +397,7 @@ function buildExecutiveData(state) {
+ 
+   const rawNextAction = asString(recommendations[0]).trim() || fallbackAction;
+   const nextAction = humanizeExecutiveAction(rawNextAction, "Ask AI Command");
+-  const nextActionRoute = routeForAction(rawNextAction || nextAction);
++  const nextActionRoute = routeForAction(nextAction || rawNextAction);
+ 
+   const whyItMatters = criticalGaps.length
+     ? "Removing this blocker increases launch confidence and prevents avoidable delays."
+@@ -869,11 +875,51 @@ export const homeRoute = {
+                   ${escapeHtml(dashboard.nextBestAction.buttonLabel)}
+                 </button>
+                 <button id="homeAskNextActionBtn" class="mhos-next-action-btn is-ghost" type="button">
+-                  Prepare AI Explanation
+-                </button>
+-                <button id="homeOpenOperationsBtn" class="btn btn-secondary btn-sm" type="button">
+-                  Open Operations
++                  Ask Head Office AI
+                 </button>
++</div>
++            </section>
++
++
++            <section class="mhos-real-head-office-coverage" aria-label="Head Office campaign execution coverage">
++              <div class="mhos-section-head">
++                <div>
++                  <p class="mhos-os-kicker">HEAD OFFICE COVERAGE</p>
++                  <h2 class="mhos-os-section-title">Campaign execution at a glance</h2>
++                  <p class="mhos-os-panel-copy">One-second view of campaign, schedule, publishing, ads, and operations readiness. Home shows ownership only; execution stays inside the owning workspace.</p>
++                </div>
++              </div>
++
++              <div class="mhos-real-head-office-grid">
++                <article class="mhos-real-head-office-card">
++                  <span class="data-label">Campaign</span>
++                  <strong>${escapeHtml(dashboard.campaign?.name || "No active campaign selected")}</strong>
++                  <p>${escapeHtml(dashboard.campaign?.name ? "Campaign context is available." : "Open Campaign Studio to plan the next campaign wave.")}</p>
++                </article>
++
++                <article class="mhos-real-head-office-card">
++                  <span class="data-label">Scheduled Posts</span>
++                  <strong>${escapeHtml(dashboard.campaign?.nextScheduledAction || "No confirmed schedule")}</strong>
++                  <p>${escapeHtml(dashboard.launchSnapshot?.scheduledJobs ? "Scheduled work exists for review." : "No scheduled post is confirmed yet.")}</p>
++                </article>
++
++                <article class="mhos-real-head-office-card">
++                  <span class="data-label">Publishing</span>
++                  <strong>${escapeHtml(dashboard.launchSnapshot?.campaignReadiness || "At risk")}</strong>
++                  <p>Resolve blockers before publishing or scheduling live content.</p>
++                </article>
++
++                <article class="mhos-real-head-office-card">
++                  <span class="data-label">Ads</span>
++                  <strong>${escapeHtml(dashboard.blockers?.integrations?.length ? "Needs platform connections" : "Ready for strategy review")}</strong>
++                  <p>Ad readiness depends on campaign, assets, integrations, and approval safety.</p>
++                </article>
++
++                <article class="mhos-real-head-office-card">
++                  <span class="data-label">Operations</span>
++                  <strong>${escapeHtml(dashboard.nextBestAction?.recommendation ? "Next action identified" : "Needs reviewed action")}</strong>
++                  <p>Operations owns handoff, review order, and safe execution sequence.</p>
++                </article>
+               </div>
+             </section>
+ 
+@@ -1007,29 +1053,18 @@ export const homeRoute = {
+ 
+               ${recommendedSpecialist ? `
+                 <button class="quick-action-btn mhos-motion-soft" type="button" data-role-id="${escapeHtml(recommendedSpecialist.id)}">
+-                  <span class="home-action-title">Prepare ${escapeHtml(recommendedSpecialist.name)} Guidance</span>
+-                  <span class="home-action-meta">${escapeHtml(recommendedSpecialist.status || "Ready to guide")}. Opens AI Command with context.</span>
++                  <span class="home-action-title">Ask ${escapeHtml(recommendedSpecialist?.name || "Recommended AI")}</span>
++                  <span class="home-action-meta">Uses the recommended specialist context. No execution from Home.</span>
+                 </button>
+               ` : ""}
+ 
+-              <button id="homeQuickOpenAiBtn" class="quick-action-btn" type="button">
+-                <span class="home-action-title">Open AI Workspace</span>
+-                <span class="home-action-meta">Prepare guidance for the next best action.</span>
+-              </button>
+-
+-              <button id="homeOpenAiTeamBtn" class="btn btn-ghost btn-sm" type="button">
+-                Open AI Command
+-              </button>
+-              <button id="homeOpenFullAiTeamBtn" class="btn btn-ghost btn-sm" type="button">
+-                Open Full Team
+-              </button>
+-            </section>
++</section>
+ 
+             <section class="mhos-os-ai-panel">
+               <div>
+                 <p class="mhos-os-kicker">AI guidance</p>
+                 <h2 class="mhos-os-panel-title">Ask safely</h2>
+-                <p class="mhos-os-panel-copy">Prompt buttons fill AI Command with reviewed guidance requests. They do not execute actions.</p>
++                <p class="mhos-os-panel-copy">Use one AI prompt when you need explanation or a safe action plan. Nothing executes from Home.</p>
+               </div>
+ 
+               <button id="homePromptNextBtn" class="home-ai-prompt-card" type="button">
+@@ -1040,15 +1075,7 @@ export const homeRoute = {
+                 <span class="home-prompt-title">Why is readiness low?</span>
+                 <span class="home-prompt-meta">Explain blockers and readiness gaps in simple terms.</span>
+               </button>
+-              <button id="homePromptLaunchBtn" class="home-ai-prompt-card" type="button">
+-                <span class="home-prompt-title">Summarize launch blockers</span>
+-                <span class="home-prompt-meta">Prepare a launch risk summary for review.</span>
+-              </button>
+-              <button id="homePromptPlanBtn" class="home-ai-prompt-card" type="button">
+-                <span class="home-prompt-title">Turn next action into a plan</span>
+-                <span class="home-prompt-meta">Convert the next action into a reviewed plan.</span>
+-              </button>
+-            </section>
++</section>
+ 
+             <section class="mhos-os-evidence-panel">
+               <p class="mhos-os-kicker">Customer operations</p>
+@@ -1093,7 +1120,7 @@ export const homeRoute = {
+ 
+       const prompt = rolePrompts[roleId] || `Act as the ${roleName} specialist for ${projectLabel}. Review the current project context and recommend the next best actions. Do not execute anything; prepare guidance only.`;
+       openAiWithPrompt(prompt);
+-      showMessage?.(`${roleName} context prepared in AI Command.`);
++      showMessage?.(`${roleName} context prepared in AI Command. Review and send when ready.`);
+     };
+ 
+     const nextBtn = $("homePrimaryActionBtn");
+@@ -1108,17 +1135,9 @@ export const homeRoute = {
+ 
+     const askNextActionBtn = $("homeAskNextActionBtn");
+     if (askNextActionBtn) {
+-      askNextActionBtn.onclick = () => openAiWithPrompt(`Explain this next best action and give me the exact steps: ${dashboard.nextBestAction.recommendation}`);
++      askNextActionBtn.onclick = () => openAiWithPrompt(`Explain this next best action like an operations director and give me the exact safe steps: ${dashboard.nextBestAction.recommendation}. Include which workspace owns it, what it unlocks for campaign creation, scheduled posts, publishing, ads, and customer operations. Do not execute anything.`);
+     }
+ 
+-    const operationsBtn = $("homeOpenOperationsBtn");
+-    if (operationsBtn) operationsBtn.onclick = () => openRoute("operations-centers");
+-
+-    const aiTeamBtn = $("homeOpenAiTeamBtn");
+-    if (aiTeamBtn) aiTeamBtn.onclick = () => openRoute("ai-command");
+-    const fullAiTeamBtn = $("homeOpenFullAiTeamBtn");
+-    if (fullAiTeamBtn) fullAiTeamBtn.onclick = () => openRoute("ai-command");
+-
+     const quickCampaignBtn = $("homeQuickStartCampaignBtn");
+     if (quickCampaignBtn) quickCampaignBtn.onclick = () => openRoute("campaign-studio");
+ 
+@@ -1127,33 +1146,16 @@ export const homeRoute = {
+ 
+     const quickReadinessBtn = $("homeQuickReviewReadinessBtn");
+     if (quickReadinessBtn) quickReadinessBtn.onclick = () => openRoute("setup");
+-
+-    const quickAiBtn = $("homeQuickOpenAiBtn");
+-    if (quickAiBtn) {

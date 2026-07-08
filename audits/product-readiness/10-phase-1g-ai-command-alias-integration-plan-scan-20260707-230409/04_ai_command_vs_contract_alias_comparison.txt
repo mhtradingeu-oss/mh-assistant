@@ -1,0 +1,63 @@
+AI Command MODE_ID_ALIASES pairs:
+executive -> operations
+campaign -> strategist
+content -> writer
+designer -> media
+media_director -> media
+media_planner -> media
+seo -> analyst
+research -> researcher
+video_lead -> video_lead
+publisher -> publisher
+compliance_reviewer -> compliance_reviewer
+customer_operations -> customer_ops
+customer_ops -> customer_ops
+support -> customer_ops
+sales -> sales_crm
+crm -> sales_crm
+sales_crm -> sales_crm
+admin -> operations
+
+AI Command SPECIALIST/role id hits:
+ad-angle-generator, ads, ai-command, analysis-plan, analyst, approval-flags, ask, asset, asset-checklist, automation, blocker-review, budget-notes, build-storyboard, campaign, campaign-angle-generator, caption-builder, channel-formatting, chat, check-sla-risk, checklist, claims-check, compliance_reviewer, content, context, copy-variants, create-ticket-draft, creative-brief-builder, crm-profile-summary, cta-refiner, current-project, customer-profile-snapshot, customer_ops, dealer-salon-outreach, designer, draft, draft-customer-reply, draft-script, execute, export, final-packaging, flow, follow-up-sequence, format-mapper, funnel-mapping, handoff, handoff-routing, history, hook-generator, influencer-lead-plan, integration, keyword-intent, launch-plan, lead, lead-qualification, map-video-asset-needs, media, meta-direction, monitor, offer, open-ads-manager, open-governance, open-insights, open-media-studio, open-publishing, open-workflows, operations, opportunity-summary, output, outreach-draft, pipeline-next-step, prepare-escalation, prepare-voiceover, preview, prioritize-next-move, product, publish, publish-readiness, publisher, publisher-package, publishing-checklist, report, research, researcher, review, review-unified-inbox, route, route-support-sales-ops, safety-checklist, sales-handoff-draft, sales_crm, schedule-draft, selected-context, strategist, strategy, summarize-customer-thread, task, team, test-ideas, timeline-draft, tools, video_lead, visual-direction, workflow, write, write-video-hook, writer
+
+AI Command bridge detector directMap:
+video -> video_lead
+motion -> video_lead
+reel -> video_lead
+storyboard -> video_lead
+shot list -> video_lead
+voiceover -> video_lead
+media -> video_lead
+campaign -> strategist
+strategy -> strategist
+content -> copywriter
+copy -> copywriter
+caption -> copywriter
+publish -> publisher
+schedule -> publisher
+ads -> ads_operator
+budget -> ads_operator
+customer -> customer_ops
+crm -> customer_ops
+support -> customer_ops
+operations -> admin
+blocker -> admin
+readiness -> admin
+setup -> admin
+library -> admin
+
+Risk notes:
+WARN detector keyword "content" returns copywriter alias
+WARN detector keyword "copy" returns copywriter alias
+WARN detector keyword "caption" returns copywriter alias
+WARN detector keyword "operations" returns admin alias
+WARN detector keyword "blocker" returns admin alias
+WARN detector keyword "readiness" returns admin alias
+WARN detector keyword "setup" returns admin alias
+WARN detector keyword "library" returns admin alias
+INFO MODE_ID_ALIASES has admin alias
+
+Integration risk decision:
+Do not replace MODE_ID_ALIASES wholesale.
+Preferred narrow integration: add a local wrapper that calls contract normalizeAiTeamRoleId only after existing MODE_ID_ALIASES lookup, then compare output before switching.

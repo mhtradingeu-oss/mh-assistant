@@ -1,0 +1,17 @@
+Recommended specialist button:
+878:                  Ask Head Office AI
+1055:                <button class="quick-action-btn mhos-motion-soft" type="button" data-role-id="${escapeHtml(recommendedSpecialist.id)}">
+1056:                  <span class="home-action-title">Ask Head Office AI</span>
+1158:    const aiRoleCards = document.querySelectorAll(".quick-action-btn[data-role-id], .home-ai-team-card[data-role-id], .mhos-specialist[data-role-id], .mhos-workflow-step[data-role-id]");
+1160:      const roleId = card.getAttribute("data-role-id");
+
+Click binding:
+1100:    const openAiWithPrompt = (prompt) => {
+1102:      navigateTo("ai-command");
+1107:    const handleAiRoleClick = (roleId, roleName) => {
+1122:      openAiWithPrompt(prompt);
+1138:      askNextActionBtn.onclick = () => openAiWithPrompt(`Explain this next best action like an operations director and give me the exact safe steps: ${dashboard.nextBestAction.recommendation}. Include which workspace owns it, what it unlocks for campaign creation, scheduled posts, publishing, ads, and customer operations. Do not execute anything.`);
+1151:      promptNextBtn.onclick = () => openAiWithPrompt("What is the best next executive action for this project? Prioritize the answer based on readiness, blockers, campaign state, scheduled posts, publishing safety, ads readiness, customer operations, and recent activity. Give one clear recommendation and the reason.");
+1156:      promptReadinessBtn.onclick = () => openAiWithPrompt("Why is readiness low? Explain the missing integrations, assets, failed jobs, campaign gaps, scheduled post risks, publishing blockers, and ad launch risks in simple business language. End with the fastest safe fix path.");
+1158:    const aiRoleCards = document.querySelectorAll(".quick-action-btn[data-role-id], .home-ai-team-card[data-role-id], .mhos-specialist[data-role-id], .mhos-workflow-step[data-role-id]");
+1162:      card.onclick = () => handleAiRoleClick(roleId, roleName);

@@ -1,0 +1,550 @@
+Team mode and full-team references:
+public/control-center/pages/ai-command.js:139://  PHASE 1: SPECIALIST DEFINITIONS — AI TEAM COMMAND CENTER
+public/control-center/pages/ai-command.js:142:const SPECIALIST_DEFS = [
+public/control-center/pages/ai-command.js:289:const SPECIALIST_SUGGESTED_PROMPTS = {
+public/control-center/pages/ai-command.js:358:// Full Team mode suggested prompts
+public/control-center/pages/ai-command.js:359:const TEAM_SUGGESTED_PROMPTS = [
+public/control-center/pages/ai-command.js:362:	{ label: "Prepare a full handoff sequence", sub: "Strategy, creative, compliance, publishing, ops" },
+public/control-center/pages/ai-command.js:369:	{ id: "ask", title: "Ask", description: "Choose a specialist or the full team." },
+public/control-center/pages/ai-command.js:385:const AI_ROOM_TEAM_CHAIN = ["Strategist", "Writer", "Media / Video", "Compliance", "Publisher", "Operations"];
+public/control-center/pages/ai-command.js:386:const AI_ROOM_BUSINESS_BRANCH = ["Customer Ops", "Sales / CRM", "Operations"];
+public/control-center/pages/ai-command.js:408:const AI_ROOM_PLANNED_SPECIALISTS = [
+public/control-center/pages/ai-command.js:429:const PHASE35_SPECIALIST_TOOLS = {
+public/control-center/pages/ai-command.js:582:		name: "Ads Specialist",
+public/control-center/pages/ai-command.js:585:		suggestedPrompt: "Act as Ads Specialist and propose paid experiments based on current readiness and data coverage."
+public/control-center/pages/ai-command.js:623:function detectSpecialistFromBridgePrompt(prompt) {
+public/control-center/pages/ai-command.js:653:    for (const [keyword, specialistId] of directMap) {
+public/control-center/pages/ai-command.js:654:            if (text.includes(keyword)) return MODE_ID_ALIASES[specialistId] || specialistId;
+public/control-center/pages/ai-command.js:662:	function getSpecialistById(id) {
+public/control-center/pages/ai-command.js:664:		return SPECIALIST_DEFS.find((s) => s.id === resolvedId) ||
+public/control-center/pages/ai-command.js:665:			SPECIALIST_DEFS.find((s) => s.id === "operations") ||
+public/control-center/pages/ai-command.js:666:			SPECIALIST_DEFS[0];
+public/control-center/pages/ai-command.js:669:	function detectSpecialistFromBridgePrompt(prompt) {
+public/control-center/pages/ai-command.js:787:		specialist: asString(context.specialistLabel || "Specialist") || "Specialist",
+public/control-center/pages/ai-command.js:788:		specialistLabel: asString(context.specialistLabel || "Specialist") || "Specialist",
+public/control-center/pages/ai-command.js:792:	return asString(template).replace(/\{(project|projectName|specialist|specialistLabel|campaign)\}/g, (_, token) => tokenMap[token] || "");
+public/control-center/pages/ai-command.js:817:  // If the composer contains a chain of quick actions, keep only the latest action.
+public/control-center/pages/ai-command.js:952:			teamMode: "solo",
+public/control-center/pages/ai-command.js:1134:function getAiCommandSessionSpecialistLabel(session = {}) {
+public/control-center/pages/ai-command.js:1135:        if (session.teamMode === "team") return "Full AI Team";
+public/control-center/pages/ai-command.js:1136:        const spec = getPhase1SpecialistById(session.modeId);
+public/control-center/pages/ai-command.js:1174:        const specialist = getAiCommandSessionSpecialistLabel(session);
+public/control-center/pages/ai-command.js:1195:        return `${specialist} · ${intent} · ${time}`.slice(0, 80);
+public/control-center/pages/ai-command.js:1215:                teamMode: session.teamMode,
+public/control-center/pages/ai-command.js:1238:        session.teamMode = asString(record.teamMode || "solo");
+public/control-center/pages/ai-command.js:1260:function buildSpecialistChatPrompt({ prompt, specialistLabel, modeLabel, projectName, language, outputLanguage, market }) {
+public/control-center/pages/ai-command.js:1263:	const safeSpecialist = asString(specialistLabel || "Specialist").trim();
+public/control-center/pages/ai-command.js:1264:	const safeMode = asString(modeLabel || "Solo Specialist").trim();
+public/control-center/pages/ai-command.js:1268:	const teamWorkflowLines = safeMode === "Full Team"
+public/control-center/pages/ai-command.js:1270:			"Full Team workflow: Strategist -> Writer -> Media/Video -> Compliance -> Publisher -> Operations.",
+public/control-center/pages/ai-command.js:1272:			"Name the specialist owner for each next action and destination."
+public/control-center/pages/ai-command.js:1277:		`Role: ${safeSpecialist}`,
+public/control-center/pages/ai-command.js:1337:function destinationRouteForSpecialist(specialistId, outputType) {
+public/control-center/pages/ai-command.js:1338:	const rawId = getAiRoomRoleId(specialistId || "operations");
+public/control-center/pages/ai-command.js:1357:        const specialistId = getAiRoomRoleId(session?.modeId || "operations");
+public/control-center/pages/ai-command.js:1428:                        destinationRoute: explicitDestination || (session?.teamMode === "team" ? "workflows" : "campaign-studio")
+public/control-center/pages/ai-command.js:1432:        const destinationRoute = explicitDestination || destinationRouteForSpecialist(session?.modeId || "operations", outputType);
+public/control-center/pages/ai-command.js:1454:function specialistTemplateForOutput({ specialist, outputType, prompt, projectName }) {
+public/control-center/pages/ai-command.js:1457:	const specialistId = asString(specialist?.id || "operations");
+public/control-center/pages/ai-command.js:1458:	const route = destinationRouteForSpecialist(specialistId, outputType);
+public/control-center/pages/ai-command.js:1461:		specialistId,
+public/control-center/pages/ai-command.js:1468:		confirmationRequired: outputType === "handoff" || specialistId === "publisher" || specialistId === "compliance_reviewer",
+public/control-center/pages/ai-command.js:1477:	if (specialistId === "strategist") {
+public/control-center/pages/ai-command.js:1504:	if (specialistId === "writer") {
+public/control-center/pages/ai-command.js:1538:	if (specialistId === "media") {
+public/control-center/pages/ai-command.js:1558:	if (specialistId === "video_lead") {
+public/control-center/pages/ai-command.js:1573:	if (specialistId === "publisher") {
+public/control-center/pages/ai-command.js:1593:	if (specialistId === "ads") {
+public/control-center/pages/ai-command.js:1621:	if (specialistId === "analyst") {
+public/control-center/pages/ai-command.js:1635:	if (specialistId === "compliance_reviewer") {
+public/control-center/pages/ai-command.js:1651:	if (specialistId === "customer_ops") {
+public/control-center/pages/ai-command.js:1682:	if (specialistId === "sales_crm") {
+public/control-center/pages/ai-command.js:1719:	if (specialistId === "operations") {
+public/control-center/pages/ai-command.js:1727:					"Stage 2: Specialist draft production",
+public/control-center/pages/ai-command.js:1752:	const teamMode = session.teamMode === "team";
+public/control-center/pages/ai-command.js:1753:	const specialist = teamMode
+public/control-center/pages/ai-command.js:1754:		? { id: "operations", label: "Full Team" }
+public/control-center/pages/ai-command.js:1755:		: getPhase1SpecialistById(session.modeId);
+public/control-center/pages/ai-command.js:1765:	const base = specialistTemplateForOutput({
+public/control-center/pages/ai-command.js:1766:		specialist,
+public/control-center/pages/ai-command.js:1772:	if (!teamMode) return base;
+public/control-center/pages/ai-command.js:1776:		specialistId: "team",
+public/control-center/pages/ai-command.js:1777:		title: outputType === "workflow" ? "Team Workflow" : `Team ${titleCase(outputType)} Preview`,
+public/control-center/pages/ai-command.js:1778:		summary: `Full team ${outputType.replace("_", " ")} preview prepared for ${projectName || "current project"}.`,
+public/control-center/pages/ai-command.js:1796:		confirmationNote: "No task, workflow, outreach, customer reply, CRM update, approval, or publishing action is executed from Full Team mode.",
+public/control-center/pages/ai-command.js:1797:		safetyLabel: "Full Team output is a coordinated draft preview only."
+public/control-center/pages/ai-command.js:1812:function buildPreviewText(output, specialistLabel) {
+public/control-center/pages/ai-command.js:1816:		`Specialist: ${specialistLabel}`,
+public/control-center/pages/ai-command.js:2439:const AI_INBOUND_SPECIALIST_BY_SOURCE = {
+public/control-center/pages/ai-command.js:2461:const AI_INBOUND_SPECIALIST_ALIASES = {
+public/control-center/pages/ai-command.js:2535:function normalizeAiInboundSpecialistId(value, fallback = "operations") {
+public/control-center/pages/ai-command.js:2538:	const legacy = AI_INBOUND_SPECIALIST_ALIASES[raw] || AI_INBOUND_SPECIALIST_ALIASES[asString(value).trim().toLowerCase()] || raw;
+public/control-center/pages/ai-command.js:2541:	return SPECIALIST_DEFS.some((item) => item.id === finalId) ? finalId : fallbackId;
+public/control-center/pages/ai-command.js:2544:function normalizeAiInboundTeamMode(value) {
+public/control-center/pages/ai-command.js:2546:	return ["team", "full-team", "fullteam", "multi-specialist", "team-mode"].includes(clean) ? "team" : "solo";
+public/control-center/pages/ai-command.js:2581:	const specialistId = normalizeAiInboundSpecialistId(preview.specialistId || preview.specialist_id || normalized.suggestedSpecialist, normalized.suggestedSpecialist);
+public/control-center/pages/ai-command.js:2589:		specialistId,
+public/control-center/pages/ai-command.js:2642:	const explicitSpecialist = firstAiInboundId(payload.specialist, payload.specialist_id);
+public/control-center/pages/ai-command.js:2643:	const suggestedSpecialist = normalizeAiInboundSpecialistId(
+public/control-center/pages/ai-command.js:2644:		explicitSpecialist ||
+public/control-center/pages/ai-command.js:2645:		AI_INBOUND_SPECIALIST_BY_SOURCE[sourcePage] ||
+public/control-center/pages/ai-command.js:2648:		draftContext.specialist ||
+public/control-center/pages/ai-command.js:2649:		draftContext.specialist_id ||
+public/control-center/pages/ai-command.js:2664:	)) || `Review this ${sourceLabel} handoff for ${projectLabel}. Identify the right specialist, summarize the context, produce a review-ready draft, and recommend the next safe route. Do not execute publishing, task creation, CRM updates, customer replies, workflow runs, or backend actions.`;
+public/control-center/pages/ai-command.js:2681:	const teamMode = normalizeAiInboundTeamMode(firstAiInboundId(payload.teamMode, payload.team_mode, draftContext.teamMode, draftContext.team_mode));
+public/control-center/pages/ai-command.js:2694:		suggestedSpecialist,
+public/control-center/pages/ai-command.js:2695:		teamMode,
+public/control-center/pages/ai-command.js:2718:	session.modeId = normalized.suggestedSpecialist;
+public/control-center/pages/ai-command.js:2719:	session.teamMode = normalized.teamMode || "solo";
+public/control-center/pages/ai-command.js:2738:			teamMode: session.teamMode
+public/control-center/pages/ai-command.js:2745:		modeId: normalized.suggestedSpecialist,
+public/control-center/pages/ai-command.js:2746:		teamMode: normalized.teamMode,
+public/control-center/pages/ai-command.js:2879:      name: asString(member.name || fallback.name || member.role || "AI Specialist"),
+public/control-center/pages/ai-command.js:2882:      bestUse: asString(member.bestUse || member.best_use || fallback.bestUse || "Use when this specialist owns the next step."),
+public/control-center/pages/ai-command.js:2959:			<div class="ctrl-room-section-label">Choose your AI specialist</div>
+public/control-center/pages/ai-command.js:3117:				<div class="ctrl-empty-body">Choose a specialist above, pick a suggested prompt, or write your own command and hit Send.</div>
+public/control-center/pages/ai-command.js:3290:        const specialist = session.teamMode === "team"
+public/control-center/pages/ai-command.js:3291:                ? { id: "team", label: "Full Team" }
+public/control-center/pages/ai-command.js:3292:                : getPhase1SpecialistById(session.modeId);
+public/control-center/pages/ai-command.js:3299:                                : asString(message.specialistLabel || specialist.label || "Specialist");
+public/control-center/pages/ai-command.js:3321:                assistantText ? `Latest specialist answer: ${assistantText}` : "",
+public/control-center/pages/ai-command.js:3330:                specialistId: specialist.id || session.modeId,
+public/control-center/pages/ai-command.js:3331:                specialistLabel: specialist.label || "Specialist",
+public/control-center/pages/ai-command.js:3332:                teamMode: session.teamMode,
+public/control-center/pages/ai-command.js:3350:                `Specialist: ${context.specialistLabel}`,
+public/control-center/pages/ai-command.js:3436:			reason: "A clear campaign context helps every specialist agent generate more precise outputs.",
+public/control-center/pages/ai-command.js:3456:function getPhase1SpecialistById(value) {
+public/control-center/pages/ai-command.js:3465:  const rawDefinitions = typeof SPECIALIST_DEFS !== "undefined" ? SPECIALIST_DEFS : [];
+public/control-center/pages/ai-command.js:3491:function getAiRoomInitials(specialist) {
+public/control-center/pages/ai-command.js:3492:	const id = getAiRoomRoleId(specialist?.id);
+public/control-center/pages/ai-command.js:3494:	return asString(specialist?.label || "AI")
+public/control-center/pages/ai-command.js:3555:	if (session?.teamMode === "team") return tool.intent === "task" ? "task-center" : "workflows";
+public/control-center/pages/ai-command.js:3557:	return destinationRouteForSpecialist(session?.modeId || "operations", outputType);
+public/control-center/pages/ai-command.js:3581:	return "Prepare a review-ready output for the selected specialist lane.";
+public/control-center/pages/ai-command.js:3584:function renderAiRoomChainSegment(items, escapeHtml) {
+public/control-center/pages/ai-command.js:3586:		<span class="aicmd-room-chain-step">${escapeHtml(item)}</span>
+public/control-center/pages/ai-command.js:3587:		${index < items.length - 1 ? `<span class="aicmd-room-chain-arrow">-&gt;</span>` : ""}
+public/control-center/pages/ai-command.js:3591:function renderAiRoomTeamChain(escapeHtml) {
+public/control-center/pages/ai-command.js:3593:		<div class="aicmd-room-team-chain" aria-label="Full team orchestration chain">
+public/control-center/pages/ai-command.js:3594:			${renderAiRoomChainSegment(AI_ROOM_TEAM_CHAIN, escapeHtml)}
+public/control-center/pages/ai-command.js:3595:			<span class="aicmd-room-chain-branch-label">Customer / revenue branch</span>
+public/control-center/pages/ai-command.js:3596:			${renderAiRoomChainSegment(AI_ROOM_BUSINESS_BRANCH, escapeHtml)}
+public/control-center/pages/ai-command.js:3603:	const modeLabel = session.teamMode === "team" ? "Full Team" : "Solo Specialist";
+public/control-center/pages/ai-command.js:3604:	const activeSpecialist = session.teamMode === "team" ? "Full AI Team" : getPhase1SpecialistById(session.modeId)?.label || "Specialist";
+public/control-center/pages/ai-command.js:3614:				<p class="aicmd-room-subtitle mhos-context-description">Ask one expert or the full team to prepare strategy, content, analysis, reviews, and destination handoffs. AI prepares and reviews only; sensitive actions stay confirmation-gated in the owning workspace.</p>
+public/control-center/pages/ai-command.js:3639:					<strong>${escapeHtml(activeSpecialist)}</strong>
+public/control-center/pages/ai-command.js:3659:			<div class="aicmd-room-flow mhos-workflow-chain" aria-label="AI operating flow">
+public/control-center/pages/ai-command.js:3674:	const plannedSpecialists = AI_ROOM_PLANNED_SPECIALISTS.map((item) => `
+public/control-center/pages/ai-command.js:3685:	const teamBanner = session.teamMode === "team" ? `
+public/control-center/pages/ai-command.js:3687:			<strong>Full Team Review</strong>
+public/control-center/pages/ai-command.js:3688:			<span>Strategy, writing, creative, compliance, publishing, customer, sales, and operations specialists coordinate one review-ready answer. No workflow, send, publish, approval, or CRM action is executed here.</span>
+public/control-center/pages/ai-command.js:3689:			${renderAiRoomTeamChain(escapeHtml)}
+public/control-center/pages/ai-command.js:3703:				<button class="aicmd-v2-toggle-btn${session.teamMode !== "team" ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="solo">
+public/control-center/pages/ai-command.js:3704:					Ask Specialist
+public/control-center/pages/ai-command.js:3706:				<button class="aicmd-v2-toggle-btn${session.teamMode === "team" ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="team">
+public/control-center/pages/ai-command.js:3707:					Full Team
+public/control-center/pages/ai-command.js:3712:				${SPECIALIST_DEFS.map((spec) => {
+public/control-center/pages/ai-command.js:3714:					const isActive = spec.id === session.modeId && session.teamMode === "solo";
+public/control-center/pages/ai-command.js:3715:					const isTeamActive = session.teamMode === "team";
+public/control-center/pages/ai-command.js:3717:					const roleLine = `${isActive ? "Active now" : (spec.status || "AI ready")} - ${spec.position || spec.label || "Specialist"}`;
+public/control-center/pages/ai-command.js:3722:							data-aicmdv2-specialist="${escapeHtml(spec.id)}"
+public/control-center/pages/ai-command.js:3737:			<div class="aicmd-room-planned-specialists" aria-label="Additional specialists planned">
+public/control-center/pages/ai-command.js:3738:				<span class="aicmd-room-planned-title">Planned lanes, not active specialists</span>
+public/control-center/pages/ai-command.js:3739:				${plannedSpecialists}
+public/control-center/pages/ai-command.js:3746:	if (session.teamMode === "team") {
+public/control-center/pages/ai-command.js:3753:						<h2 class="aicmd-v2-profile-title">Full AI Team</h2>
+public/control-center/pages/ai-command.js:3754:						<p class="aicmd-v2-profile-purpose">Coordinates specialists into one review-ready brief, workflow, or handoff.</p>
+public/control-center/pages/ai-command.js:3764:	const spec = getPhase1SpecialistById(session.modeId);
+public/control-center/pages/ai-command.js:3765:	const specialistTools = getAiToolDockTools({ specialistId: spec.id, teamMode: "solo", limit: 3 });
+public/control-center/pages/ai-command.js:3778:				${specialistTools.slice(0, 3).map((tool) => `<span class="aicmd-v2-strength-chip is-tool">${escapeHtml(tool.label)}</span>`).join("")}
+public/control-center/pages/ai-command.js:3784:function getAiSpecialistWorkingMessage(session = {}) {
+public/control-center/pages/ai-command.js:3785:        const isTeam = session.teamMode === "team";
+public/control-center/pages/ai-command.js:3787:                ? { label: "Full AI Team" }
+public/control-center/pages/ai-command.js:3788:                : getPhase1SpecialistById(session.modeId);
+public/control-center/pages/ai-command.js:3790:        const label = asString(spec?.label || "AI specialist");
+public/control-center/pages/ai-command.js:3806:	const spec = getPhase1SpecialistById(session.modeId);
+public/control-center/pages/ai-command.js:3808:	const isTeam = session.teamMode === "team";
+public/control-center/pages/ai-command.js:3809:	const title = isTeam ? "Full AI Team" : spec.label;
+public/control-center/pages/ai-command.js:3814:	const modeLabel = isTeam ? "Full Team" : "Solo Specialist";
+public/control-center/pages/ai-command.js:3823:				${isTeam ? renderAiRoomTeamChain(escapeHtml) : ""}
+public/control-center/pages/ai-command.js:3848:	return destinationRouteForSpecialist(session?.modeId || "operations", getCanonicalToolIntent(tool));
+public/control-center/pages/ai-command.js:3870:		specialistId: toolModeId,
+public/control-center/pages/ai-command.js:3871:		teamMode: session.teamMode,
+public/control-center/pages/ai-command.js:3905:	const specialistLabel = session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label || "Specialist";
+public/control-center/pages/ai-command.js:3906:	const roleId = session.teamMode === "team" ? "team" : getAiRoomRoleId(session.modeId);
+public/control-center/pages/ai-command.js:3912:					<h3 class="aicmd-v2-tools-title">${escapeHtml(specialistLabel)} Tool Drawer</h3>
+public/control-center/pages/ai-command.js:3993:        const isTeam = session.teamMode === "team";
+public/control-center/pages/ai-command.js:3995:                ? { id: "team", label: "Full AI Team", summary: "Multi-specialist review", position: "AI Team" }
+public/control-center/pages/ai-command.js:3996:                : getPhase1SpecialistById(session.modeId);
+public/control-center/pages/ai-command.js:3999:        const destinationRoute = asString(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, outputType));
+public/control-center/pages/ai-command.js:4012:                .map((id) => SPECIALIST_DEFS.find((item) => item.id === id))
+public/control-center/pages/ai-command.js:4018:                        const route = destinationRouteForSpecialist(spec.id, "guidance");
+public/control-center/pages/ai-command.js:4028:                                        <span class="aicmd-chatfirst-specialist-avatar" aria-hidden="true">${escapeHtml(getAiRoomInitials(spec))}</span>
+public/control-center/pages/ai-command.js:4051:                                        <p>Active specialist, source grounding, destination, risk, and execution lock in one compact command strip.</p>
+public/control-center/pages/ai-command.js:4056:                                <span><strong>Specialist</strong>${escapeHtml(activeSpec?.label || "Specialist")}</span>
+public/control-center/pages/ai-command.js:4057:                                <span><strong>Mode</strong>${escapeHtml(isTeam ? "Full Team" : "Solo Specialist")}</span>
+public/control-center/pages/ai-command.js:4065:                        <div class="aicmd-chatfirst-specialist-grid ${AI_UX_SIMPLE_MODE ? 'aicmd-simple-hide-team' : ''}" aria-label="Live AI team lanes">
+public/control-center/pages/ai-command.js:4074:        const activeLabel = session.teamMode === "team"
+public/control-center/pages/ai-command.js:4075:                ? "Full AI Team"
+public/control-center/pages/ai-command.js:4076:                : getPhase1SpecialistById(session.modeId)?.label || "Specialist";
+public/control-center/pages/ai-command.js:4102:        const isTeam = session.teamMode === "team";
+public/control-center/pages/ai-command.js:4103:        const spec = isTeam ? { label: "Full AI Team" } : getPhase1SpecialistById(session.modeId);
+public/control-center/pages/ai-command.js:4105:        const destinationRoute = asString(session.outputPreview?.destinationRoute || destinationRouteForSpecialist(session.modeId, outputType));
+public/control-center/pages/ai-command.js:4116:                                <strong>${escapeHtml(spec.label || "Specialist")}</strong>
+public/control-center/pages/ai-command.js:4130:	const activeSpecialist = session.teamMode === "team"
+public/control-center/pages/ai-command.js:4131:		? "Full AI Team"
+public/control-center/pages/ai-command.js:4132:		: getPhase1SpecialistById(session.modeId)?.label || "Specialist";
+public/control-center/pages/ai-command.js:4144:				<span class="aicmd-chatfirst-active">${escapeHtml(activeSpecialist)}</span>
+public/control-center/pages/ai-command.js:4175:	const modeLabel = session.teamMode === "team" ? "Full Team" : "Solo Specialist";
+public/control-center/pages/ai-command.js:4180:				${renderAiCommandSpecialistSelect({ session, escapeHtml })}
+public/control-center/pages/ai-command.js:4182:					<button class="aicmd-chatfirst-toggle${session.teamMode !== "team" ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="solo">Solo</button>
+public/control-center/pages/ai-command.js:4183:					<button class="aicmd-chatfirst-toggle${session.teamMode === "team" ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="team">Full Team</button>
+public/control-center/pages/ai-command.js:4197:function renderAiCommandSpecialistSelect({ session, escapeHtml }) {
+public/control-center/pages/ai-command.js:4198:	const isTeam = session.teamMode === "team";
+public/control-center/pages/ai-command.js:4199:	const activeSpec = getPhase1SpecialistById(session.modeId);
+public/control-center/pages/ai-command.js:4202:		<details class="aicmd-chatfirst-specialist-select">
+public/control-center/pages/ai-command.js:4204:				<span>Specialist</span>
+public/control-center/pages/ai-command.js:4205:				<strong>${escapeHtml(isTeam ? "Full AI Team" : activeSpec?.label || "Specialist")}</strong>
+public/control-center/pages/ai-command.js:4207:			<div class="aicmd-chatfirst-specialist-menu" role="list">
+public/control-center/pages/ai-command.js:4208:				${SPECIALIST_DEFS.map((spec) => {
+public/control-center/pages/ai-command.js:4212:							class="aicmd-chatfirst-specialist-option${isActive ? " is-active" : ""}"
+public/control-center/pages/ai-command.js:4214:							data-aicmdv2-specialist="${escapeHtml(spec.id)}"
+public/control-center/pages/ai-command.js:4218:							<span class="aicmd-chatfirst-specialist-avatar" aria-hidden="true">${escapeHtml(getAiRoomInitials(spec))}</span>
+public/control-center/pages/ai-command.js:4221:								<small>${escapeHtml(spec.position || spec.summary || "AI ready specialist")}</small>
+public/control-center/pages/ai-command.js:4226:				<div class="aicmd-chatfirst-planned-list" aria-label="Planned specialists">
+public/control-center/pages/ai-command.js:4227:					${AI_ROOM_PLANNED_SPECIALISTS.map((item) => `
+public/control-center/pages/ai-command.js:4228:						<div class="aicmd-chatfirst-specialist-option is-planned" aria-disabled="true">
+public/control-center/pages/ai-command.js:4229:							<span class="aicmd-chatfirst-specialist-avatar" aria-hidden="true">${escapeHtml(item.initials)}</span>
+public/control-center/pages/ai-command.js:4244:        const isTeam = session.teamMode === "team";
+public/control-center/pages/ai-command.js:4245:        const selectedSpec = isTeam ? { id: "team", label: "Full Team" } : getPhase1SpecialistById(session.modeId);
+public/control-center/pages/ai-command.js:4247:        const selectedLabel = isTeam ? "Full Team" : selectedSpec.label || "Specialist";
+public/control-center/pages/ai-command.js:4251:                const messageRoleId = getAiRoomRoleId(message.specialistId || message.modeId || "");
+public/control-center/pages/ai-command.js:4252:                if (role === "user") return isTeam ? message.teamMode === "team" || messageRoleId === "team" : messageRoleId === selectedRoleId;
+public/control-center/pages/ai-command.js:4257:                const producerId = getAiRoomRoleId(item.specialistId || "");
+public/control-center/pages/ai-command.js:4264:                                specialistId: item.specialistId || selectedRoleId,
+public/control-center/pages/ai-command.js:4265:                                specialistLabel: "You",
+public/control-center/pages/ai-command.js:4271:                                specialistId: item.specialistId || selectedRoleId,
+public/control-center/pages/ai-command.js:4272:                                specialistLabel: item.specialistLabel || selectedLabel,
+public/control-center/pages/ai-command.js:4288:                const destinationRoute = asString(message.destinationRoute || preview.destinationRoute || destinationRouteForSpecialist(session.modeId, outputType));
+public/control-center/pages/ai-command.js:4316:                const label = isUser ? "You" : asString(message.specialistLabel || selectedLabel || "Specialist");
+public/control-center/pages/ai-command.js:4339:                                        <strong>${escapeHtml(getAiSpecialistWorkingMessage(session))}</strong>
+public/control-center/pages/ai-command.js:4376:                { id: "campaign", label: "Campaign", summary: "Build a review-ready campaign with the full AI Team.", enabled: true },
+public/control-center/pages/ai-command.js:4692:        const isTeam = session.teamMode === "team";
+public/control-center/pages/ai-command.js:4698:                                <span>Select the specialist or route the request to the full coordinated business AI team.</span>
+public/control-center/pages/ai-command.js:4708:                                        <strong>Full AI Team</strong>
+public/control-center/pages/ai-command.js:4713:                        <div class="aicmd-final-team-menu-grid" role="list" aria-label="AI specialists">
+public/control-center/pages/ai-command.js:4714:                                ${SPECIALIST_DEFS.map((spec) => {
+public/control-center/pages/ai-command.js:4720:                                                        data-aicmdv2-specialist="${escapeHtml(spec.id)}"
+public/control-center/pages/ai-command.js:4726:                                                                <small>${escapeHtml(spec.position || spec.summary || "AI ready specialist")}</small>
+public/control-center/pages/ai-command.js:4742:        const spec = getPhase1SpecialistById(session.modeId);
+public/control-center/pages/ai-command.js:4743:        const isTeam = session.teamMode === "team";
+public/control-center/pages/ai-command.js:4744:        const specLabel = isTeam ? "Full AI Team" : spec.label;
+public/control-center/pages/ai-command.js:4777:                                        <button class="aicmd-final-pill-btn" type="button" data-aicmd-final-specialist title="Active specialist">
+public/control-center/pages/ai-command.js:4883:	const teamActive = session.teamMode === "team";
+public/control-center/pages/ai-command.js:4890:					<p>Choose an active specialist or keep Full Team review. Planned lanes are visible but not active runtime specialists.</p>
+public/control-center/pages/ai-command.js:4895:				<button class="aicmd-chatfirst-toggle${!teamActive ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="solo">Solo Specialist</button>
+public/control-center/pages/ai-command.js:4896:				<button class="aicmd-chatfirst-toggle${teamActive ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="team">Full Team</button>
+public/control-center/pages/ai-command.js:4898:			<div class="aicmd-chatfirst-specialist-grid ${AI_UX_SIMPLE_MODE ? 'aicmd-simple-hide-team' : ''}">
+public/control-center/pages/ai-command.js:4899:				${SPECIALIST_DEFS.map((spec) => {
+public/control-center/pages/ai-command.js:4905:							data-aicmdv2-specialist="${escapeHtml(spec.id)}"
+public/control-center/pages/ai-command.js:4908:							<span class="aicmd-chatfirst-specialist-avatar" aria-hidden="true">${escapeHtml(getAiRoomInitials(spec))}</span>
+public/control-center/pages/ai-command.js:4917:			<div class="aicmd-chatfirst-planned-grid" aria-label="Planned specialists">
+public/control-center/pages/ai-command.js:4918:				${AI_ROOM_PLANNED_SPECIALISTS.map((item) => `
+public/control-center/pages/ai-command.js:4920:						<span class="aicmd-chatfirst-specialist-avatar" aria-hidden="true">${escapeHtml(item.initials)}</span>
+public/control-center/pages/ai-command.js:4934:	const specialistLabel = session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label || "Specialist";
+public/control-center/pages/ai-command.js:4935:	const roleId = session.teamMode === "team" ? "team" : getAiRoomRoleId(session.modeId);
+public/control-center/pages/ai-command.js:4941:					<h2>${escapeHtml(specialistLabel)} Tools</h2>
+public/control-center/pages/ai-command.js:4976:	const destination = routeLabel(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, preview.outputType || "guidance"));
+public/control-center/pages/ai-command.js:4977:	const specialist = session.teamMode === "team"
+public/control-center/pages/ai-command.js:4978:		? { id: "team", label: "Full Team" }
+public/control-center/pages/ai-command.js:4979:		: getPhase1SpecialistById(preview.specialistId || session.modeId);
+public/control-center/pages/ai-command.js:5015:					<span><strong>Specialist</strong>${escapeHtml(specialist.label || "Specialist")}</span>
+public/control-center/pages/ai-command.js:5082:				<span><strong>Mode</strong>${escapeHtml(session.teamMode === "team" ? "Full Team" : "Solo Specialist")}</span>
+public/control-center/pages/ai-command.js:5130:function renderPhase3SpecialistConversation(session, bridgeStatus, escapeHtml) {
+public/control-center/pages/ai-command.js:5132:        const isTeam = session.teamMode === "team";
+public/control-center/pages/ai-command.js:5133:        const selectedSpec = isTeam ? { id: "team", label: "Full Team", position: "Team workflow" } : getPhase1SpecialistById(session.modeId);
+public/control-center/pages/ai-command.js:5135:        const selectedLabel = isTeam ? "Full Team" : selectedSpec.label || "Specialist";
+public/control-center/pages/ai-command.js:5136:        const selectedModeLabel = isTeam ? "Team workflow" : "Solo specialist";
+public/control-center/pages/ai-command.js:5141:                const messageRoleId = getAiRoomRoleId(message.specialistId || message.modeId || "");
+public/control-center/pages/ai-command.js:5143:                        return isTeam ? message.teamMode === "team" || messageRoleId === "team" : messageRoleId === selectedRoleId;
+public/control-center/pages/ai-command.js:5152:                const producerId = getAiRoomRoleId(item.specialistId || "");
+public/control-center/pages/ai-command.js:5157:                const producerId = getAiRoomRoleId(item.specialistId || "");
+public/control-center/pages/ai-command.js:5167:        const emptyBody = "Ask what to do next, draft a campaign asset, review a source, prepare a handoff, or coordinate the full AI team.";
+public/control-center/pages/ai-command.js:5169:        const bridgeSpecialistId = getAiRoomRoleId(bridgeContext.specialistId || "");
+public/control-center/pages/ai-command.js:5172:                bridgeContext.specialistLabel &&
+public/control-center/pages/ai-command.js:5173:                (isTeam || !bridgeSpecialistId || bridgeSpecialistId === selectedRoleId)
+public/control-center/pages/ai-command.js:5176:                specialistId: session.modeId,
+public/control-center/pages/ai-command.js:5177:                teamMode: session.teamMode,
+public/control-center/pages/ai-command.js:5181:        const nextPrompts = session.teamMode === "team"
+public/control-center/pages/ai-command.js:5182:                ? TEAM_SUGGESTED_PROMPTS
+public/control-center/pages/ai-command.js:5183:                : (SPECIALIST_SUGGESTED_PROMPTS[promptModeId] || SPECIALIST_SUGGESTED_PROMPTS.operations);
+public/control-center/pages/ai-command.js:5194:                const label = isUser ? "You" : asString(message.specialistLabel || selectedLabel || "Specialist");
+public/control-center/pages/ai-command.js:5214:                                specialistId: item.specialistId || selectedRoleId,
+public/control-center/pages/ai-command.js:5215:                                specialistLabel: "You",
+public/control-center/pages/ai-command.js:5221:                                specialistId: item.specialistId || selectedRoleId,
+public/control-center/pages/ai-command.js:5222:                                specialistLabel: item.specialistLabel || selectedLabel,
+public/control-center/pages/ai-command.js:5235:                                        <h3 class="aicmd-v2-chat-title">Specialist Conversation</h3>
+public/control-center/pages/ai-command.js:5236:                                        <p class="aicmd-v2-chat-subtitle">Focused chat with the active AI. Other specialist replies remain available in shared room history.</p>
+public/control-center/pages/ai-command.js:5252:                                                <strong>${escapeHtml("Specialist context loaded from Home: " + bridgeContext.specialistLabel)}</strong>
+public/control-center/pages/ai-command.js:5257:                                        <span>Selected specialist</span>
+public/control-center/pages/ai-command.js:5268:                                        <strong>${escapeHtml(latestSelected?.specialistLabel || selectedLabel)}</strong>
+public/control-center/pages/ai-command.js:5277:                                                                <strong>${escapeHtml(getAiSpecialistWorkingMessage(session))}</strong>
+public/control-center/pages/ai-command.js:5278:                                                                <small>Please wait while the specialist prepares a review-ready response.</small>
+public/control-center/pages/ai-command.js:5290:                                        <strong>Start with the selected specialist</strong>
+public/control-center/pages/ai-command.js:5299:                                                <span><strong>${escapeHtml(latestSelected.specialistLabel || selectedLabel)}</strong></span>
+public/control-center/pages/ai-command.js:5301:                                                <span class="aicmd-room-producer-chip">Selected specialist output</span>
+public/control-center/pages/ai-command.js:5317:                                                <span>${sharedResponses.length} recent specialist repl${sharedResponses.length === 1 ? "y" : "ies"}</span>
+public/control-center/pages/ai-command.js:5321:                                                        const producerId = getAiRoomRoleId(item.specialistId || "");
+public/control-center/pages/ai-command.js:5322:                                                        const producerLabel = item.specialistLabel || "Specialist";
+public/control-center/pages/ai-command.js:5342:	const prompts = session.teamMode === "team"
+public/control-center/pages/ai-command.js:5343:		? TEAM_SUGGESTED_PROMPTS
+public/control-center/pages/ai-command.js:5344:		: (SPECIALIST_SUGGESTED_PROMPTS[promptModeId] || SPECIALIST_SUGGESTED_PROMPTS.operations);
+public/control-center/pages/ai-command.js:5372:	const specialist = session.teamMode === "team" ? { label: "Full Team" } : getPhase1SpecialistById(session.modeId);
+public/control-center/pages/ai-command.js:5373:	const destination = routeLabel(destinationRouteForSpecialist(session.modeId, asObject(session.outputPreview).outputType || "guidance"));
+public/control-center/pages/ai-command.js:5377:		{ label: "Specialist", value: specialist.label || "Specialist", present: true },
+public/control-center/pages/ai-command.js:5381:		{ label: "Mode", value: session.teamMode === "team" ? "Full Team" : "Solo Specialist", present: true },
+public/control-center/pages/ai-command.js:5390:	const scopedContextItems = session.teamMode === "solo" && session.modeId === "customer_ops"
+public/control-center/pages/ai-command.js:5398:		: session.teamMode === "solo" && session.modeId === "sales_crm"
+public/control-center/pages/ai-command.js:5461:			title: item.responseTitle || item.specialistLabel || "Specialist response",
+public/control-center/pages/ai-command.js:5559:			const detectedSpecialist = detectSpecialistFromBridgePrompt(bridgeValue);
+public/control-center/pages/ai-command.js:5560:			if (detectedSpecialist) {
+public/control-center/pages/ai-command.js:5561:				session.modeId = detectedSpecialist;
+public/control-center/pages/ai-command.js:5562:				const bridgeSpecialist = getPhase1SpecialistById(detectedSpecialist);
+public/control-center/pages/ai-command.js:5565:					specialistId: detectedSpecialist,
+public/control-center/pages/ai-command.js:5566:					specialistLabel: bridgeSpecialist?.label || titleCase(detectedSpecialist),
+public/control-center/pages/ai-command.js:5573:			persistSessionDraft(sessionKey, session, detectedSpecialist ? "Specialist context loaded from Home" : "AI prompt loaded from workspace");
+public/control-center/pages/ai-command.js:5628:			session.teamMode = "solo";
+public/control-center/pages/ai-command.js:5665:                                teamMode: session.teamMode
+public/control-center/pages/ai-command.js:5709:                                teamMode: session.teamMode
+public/control-center/pages/ai-command.js:5755:		// ── TEAM RAIL: SPECIALIST SELECTION ─────────────────────────
+public/control-center/pages/ai-command.js:5756:		Array.from(document.querySelectorAll("[data-aicmdv2-specialist]")).forEach((btn) => {
+public/control-center/pages/ai-command.js:5758:                                const specId = btn.getAttribute("data-aicmdv2-specialist") || "operations";
+public/control-center/pages/ai-command.js:5765:                                session.teamMode = "solo";
+public/control-center/pages/ai-command.js:5768:                                const spec = getPhase1SpecialistById(specId);
+public/control-center/pages/ai-command.js:5775:                                persistSessionDraft(sessionKey, session, `${spec?.label || "Specialist"} selected`);
+public/control-center/pages/ai-command.js:5784:				session.teamMode = mode;
+public/control-center/pages/ai-command.js:5786:				persistSessionDraft(sessionKey, session, mode === "team" ? "Full Team mode activated" : "Solo Specialist mode activated");
+public/control-center/pages/ai-command.js:5876:                                                teamMode: session.teamMode,
+public/control-center/pages/ai-command.js:5877:                                                specialistId: session.modeId,
+public/control-center/pages/ai-command.js:5946:                Array.from(document.querySelectorAll("[data-aicmd-final-specialist]")).forEach((btn) => {
+public/control-center/pages/ai-command.js:5959:                                target.closest("[data-aicmd-final-specialist]") ||
+public/control-center/pages/ai-command.js:5986:                                updateStatus("Voice conversation requires the next provider-backed phase: recording, STT, specialist reply, and TTS playback. Voice dictation is ready now.");
+public/control-center/pages/ai-command.js:5997:                        specialistLabel: session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label,
+public/control-center/pages/ai-command.js:6051:                        const teamChain = [
+public/control-center/pages/ai-command.js:6128:                                        ...teamChain
+public/control-center/pages/ai-command.js:6543:		// ── ASK SPECIALIST (P0.3.2C1 chat route) ────────────────
+public/control-center/pages/ai-command.js:6569:		                const specialist = session.teamMode === "team"
+public/control-center/pages/ai-command.js:6570:		                        ? { id: "team", label: "Full Team" }
+public/control-center/pages/ai-command.js:6571:		                        : getPhase1SpecialistById(session.modeId);
+public/control-center/pages/ai-command.js:6576:		                        modeId: specialist.id || session.modeId,
+public/control-center/pages/ai-command.js:6577:		                        specialistId: specialist.id || session.modeId,
+public/control-center/pages/ai-command.js:6578:		                        specialistLabel: "You",
+public/control-center/pages/ai-command.js:6579:		                        teamMode: session.teamMode,
+public/control-center/pages/ai-command.js:6596:		                        teamMode: session.teamMode
+public/control-center/pages/ai-command.js:6605:		                                specialistId: specialist.id || session.modeId,
+public/control-center/pages/ai-command.js:6606:		                                specialistName: specialist.label || "Specialist",
+public/control-center/pages/ai-command.js:6607:		                                mode: session.teamMode === "team" ? "team" : "solo",
+public/control-center/pages/ai-command.js:6622:		                                source: "ai-command-specialist-chat",
+public/control-center/pages/ai-command.js:6642:		                                modeId: specialist.id || session.modeId,
+public/control-center/pages/ai-command.js:6643:		                                specialistId: specialist.id || session.modeId,
+public/control-center/pages/ai-command.js:6644:		                                specialistLabel: specialist.label || "Specialist",
+public/control-center/pages/ai-command.js:6645:		                                teamMode: session.teamMode,
+public/control-center/pages/ai-command.js:6675:		                                specialistId: specialist.id || session.modeId,
+public/control-center/pages/ai-command.js:6676:		                                specialistLabel: specialist.label || "Specialist",
+public/control-center/pages/ai-command.js:6685:		                                teamMode: session.teamMode,
+public/control-center/pages/ai-command.js:6700:		                                teamMode: session.teamMode
+public/control-center/pages/ai-command.js:6706:		                        updateStatus("Specialist reply generated. No workflow/task/handoff was created.");
+public/control-center/pages/ai-command.js:6707:		                        showMessage?.("Specialist reply generated.");
+public/control-center/pages/ai-command.js:6710:		                        session.responseError = asString(error?.message || "Failed to generate specialist chat reply.");
+public/control-center/pages/ai-command.js:6717:		                                teamMode: session.teamMode
+public/control-center/pages/ai-command.js:6740:                                const specLabel = session.teamMode === "team" ? "Team" : getPhase1SpecialistById(session.modeId).label;
+public/control-center/pages/ai-command.js:6753:                                const spec = getPhase1SpecialistById(session.modeId);
+public/control-center/pages/ai-command.js:6776:                                const spec = getPhase1SpecialistById(session.modeId);
+public/control-center/pages/ai-command.js:6800:                                const spec = getPhase1SpecialistById(session.modeId);
+public/control-center/pages/ai-command.js:6828:					specialistLabel: session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label,
+public/control-center/pages/ai-command.js:6892:		                updateStatus("Continue from the Composer. The selected specialist is still active.");
+public/control-center/pages/ai-command.js:6935:					teamMode: session.teamMode
+public/control-center/pages/ai-command.js:6964:		                        teamMode: session.teamMode
+public/control-center/pages/ai-command.js:6978:				const destination = asString(latestResponse.destinationRoute || responseRoute.destinationRoute || destinationRouteForSpecialist(session.modeId, responseRoute.outputType || "guidance"));
+public/control-center/pages/ai-command.js:6981:					modeId: latestResponse.specialistId || session.modeId,
+public/control-center/pages/ai-command.js:6983:					lastResponseTitle: latestResponse.responseTitle || "Generated specialist response",
+public/control-center/pages/ai-command.js:6984:					routeSuggestions: [{ route: destination, label: routeLabel(destination), reason: "Specialist response destination" }],
+public/control-center/pages/ai-command.js:7029:				const specialistLabel = session.teamMode === "team"
+public/control-center/pages/ai-command.js:7030:					? "Full Team"
+public/control-center/pages/ai-command.js:7031:					: getPhase1SpecialistById(output.specialistId || session.modeId).label;
+public/control-center/pages/ai-command.js:7032:				const text = buildPreviewText(output, specialistLabel);
+public/control-center/pages/ai-command.js:7053:				const specialistLabel = session.teamMode === "team"
+public/control-center/pages/ai-command.js:7054:					? "Full Team"
+public/control-center/pages/ai-command.js:7055:					: getPhase1SpecialistById(output.specialistId || session.modeId).label;
+public/control-center/pages/ai-command.js:7056:				const text = buildPreviewText(output, specialistLabel);
+public/control-center/pages/ai-command.js:7087:							modeId: output.specialistId || session.modeId,
+public/control-center/pages/ai-command.js:7111:					teamMode: session.teamMode
+public/control-center/pages/ai-command.js:7167:        if (session.isSelecting) return "selecting_specialist";
+public/control-center/pages/ai-command.js:7181:                case "selecting_specialist":
+public/control-center/pages/ai-command.js:7182:                        return "Selecting specialist";
+public/control-center/pages/home.js:213:function pickRecommendedSpecialist(aiTeamCards = [], dashboard = {}) {
+public/control-center/pages/home.js:265:          "AI Specialist"
+public/control-center/pages/home.js:579:      : "Select a project to see readiness, blockers, the next action, and the right AI specialist.",
+public/control-center/pages/home.js:806:    const recommendedSpecialist = pickRecommendedSpecialist(aiTeamCards, dashboard);
+public/control-center/pages/home.js:1046:                <p class="mhos-os-kicker">Recommended AI Specialist</p>
+public/control-center/pages/home.js:1047:                <h2 class="mhos-os-panel-title">${escapeHtml(recommendedSpecialist?.name || "Executive AI")}</h2>
+public/control-center/pages/home.js:1049:                  ${escapeHtml(recommendedSpecialist?.summary || "Use AI Command to turn the current state into a clear operating plan.")}
+public/control-center/pages/home.js:1054:              ${recommendedSpecialist ? `
+public/control-center/pages/home.js:1055:                <button class="quick-action-btn mhos-motion-soft" type="button" data-role-id="${escapeHtml(recommendedSpecialist.id)}">
+public/control-center/pages/home.js:1057:                  <span class="home-action-meta">Uses the recommended specialist context. No execution from Home.</span>
+public/control-center/pages/home.js:1121:      const prompt = rolePrompts[roleId] || `Act as the ${roleName} specialist for ${projectLabel}. Review the current project context and recommend the next best actions. Do not execute anything; prepare guidance only.`;
+public/control-center/pages/home.js:1158:    const aiRoleCards = document.querySelectorAll(".quick-action-btn[data-role-id], .home-ai-team-card[data-role-id], .mhos-specialist[data-role-id], .mhos-workflow-step[data-role-id]");
+public/control-center/pages/home.js:1161:      const roleName = card.querySelector("strong")?.textContent || "AI Specialist";
+public/control-center/ai-team-model.js:106:export const AI_PAGE_SPECIALIST_MAP = {
+public/control-center/ai-team-model.js:133:  const ids = AI_PAGE_SPECIALIST_MAP[pageId] || [];
+public/control-center/pages/ai-command/tool-dock.js:86:          modeId: returnContext.modeId || returnContext.specialistId || "",
+public/control-center/pages/ai-command/tool-dock.js:87:          teamMode: returnContext.teamMode || "solo"
+public/control-center/pages/ai-command/tool-dock.js:95:      if (returnContext.specialistId) activeDrawer.dataset.specialistId = returnContext.specialistId;
+public/control-center/pages/ai-command/tool-dock.js:97:      if (returnContext.teamMode) activeDrawer.dataset.teamMode = returnContext.teamMode;
+public/control-center/pages/ai-command/tool-dock.js:135:  specialistId = "",
+public/control-center/pages/ai-command/tool-dock.js:138:  teamMode = "solo",
+public/control-center/pages/ai-command/tool-dock.js:148:    specialistId,
+public/control-center/pages/ai-command/tool-dock.js:151:    teamMode,
+public/control-center/pages/ai-command/tool-dock.js:162:  specialistId = "",
+public/control-center/pages/ai-command/tool-dock.js:165:  teamMode = "solo",
+public/control-center/pages/ai-command/tool-dock.js:174:    specialistId,
+public/control-center/pages/ai-command/tool-dock.js:177:    teamMode,
+public/control-center/pages/ai-command/tool-dock.js:189:  teamMode = "solo",
+public/control-center/pages/ai-command/tool-dock.js:190:  specialistId = "",
+public/control-center/pages/ai-command/tool-dock.js:201:    specialistId,
+public/control-center/pages/ai-command/tool-dock.js:204:    teamMode,
+public/control-center/pages/ai-command/tool-dock.js:421:export const TOOL_DOCK_BY_SPECIALIST = {
+public/control-center/pages/ai-command/tool-dock.js:1222:function getSpecialistTools(specialistId = "") {
+public/control-center/pages/ai-command/tool-dock.js:1223:  return TOOL_DOCK_BY_SPECIALIST[specialistId] || TOOL_DOCK_BY_SPECIALIST.operations;
+public/control-center/pages/ai-command/tool-dock.js:1226:export function getAiToolDockTools({ specialistId = "", teamMode = "solo", limit = 9 } = {}) {
+public/control-center/pages/ai-command/tool-dock.js:1227:  const tools = teamMode === "team"
+public/control-center/pages/ai-command/tool-dock.js:1229:      ...TOOL_DOCK_BY_SPECIALIST.strategist.slice(0, 2),
+public/control-center/pages/ai-command/tool-dock.js:1230:      ...TOOL_DOCK_BY_SPECIALIST.writer.slice(0, 2),
+public/control-center/pages/ai-command/tool-dock.js:1231:      ...TOOL_DOCK_BY_SPECIALIST.operations.slice(0, 2)
+public/control-center/pages/ai-command/tool-dock.js:1233:    : getSpecialistTools(specialistId);
+public/control-center/pages/ai-command/tool-dock.js:1238:function getDockTools({ specialistId = "", teamMode = "solo" } = {}) {
+public/control-center/pages/ai-command/tool-dock.js:1239:  if (teamMode === "team") {
+public/control-center/pages/ai-command/tool-dock.js:1241:      ...TOOL_DOCK_BY_SPECIALIST.strategist.slice(0, 2),
+public/control-center/pages/ai-command/tool-dock.js:1242:      ...TOOL_DOCK_BY_SPECIALIST.writer.slice(0, 2),
+public/control-center/pages/ai-command/tool-dock.js:1243:      ...TOOL_DOCK_BY_SPECIALIST.operations.slice(0, 2)
+public/control-center/pages/ai-command/tool-dock.js:1247:  return getSpecialistTools(specialistId).slice(0, 9);
+public/control-center/pages/ai-command/tool-dock.js:1254:    .replace(/\{specialistLabel\}/g, values.specialistLabel || "the active specialist");
+public/control-center/pages/ai-command/tool-dock.js:1270:  return Object.values(TOOL_DOCK_BY_SPECIALIST)
+public/control-center/pages/ai-command/tool-dock.js:1420:export function renderAiToolDock({ projectName = "", specialistId = "", teamMode = "solo", escapeHtml }) {
+public/control-center/pages/ai-command/tool-dock.js:1424:  const tools = getDockTools({ specialistId, teamMode });
+public/control-center/pages/ai-command/tool-dock.js:1425:  const label = teamMode === "team" ? "Team guided tools" : "Specialist guided tools";
+public/control-center/pages/ai-command/tool-dock.js:1672:  drawer.dataset.specialistId = session?.modeId || "";
+public/control-center/pages/ai-command/tool-dock.js:1674:  drawer.dataset.teamMode = session?.teamMode || "solo";
+public/control-center/pages/ai-command/tool-dock.js:1765:  specialistLabel = "",
+public/control-center/pages/ai-command/tool-dock.js:1790:        specialistId: drawer?.dataset?.specialistId || "",
+public/control-center/pages/ai-command/tool-dock.js:1793:        teamMode: session?.teamMode || "solo",
+public/control-center/pages/ai-command/tool-dock.js:1841:          specialistLabel: session.teamMode === "team" ? "Full Team" : specialistLabel || "active specialist"
+public/control-center/pages/ai-command/tool-dock.js:1890:        specialistLabel: session.teamMode === "team" ? "Full Team" : specialistLabel || "active specialist"
+
+AI Command team render/action windows:
+358:// Full Team mode suggested prompts
+952:			teamMode: "solo",
+1135:        if (session.teamMode === "team") return "Full AI Team";
+1215:                teamMode: session.teamMode,
+1238:        session.teamMode = asString(record.teamMode || "solo");
+1264:	const safeMode = asString(modeLabel || "Solo Specialist").trim();
+1268:	const teamWorkflowLines = safeMode === "Full Team"
+1270:			"Full Team workflow: Strategist -> Writer -> Media/Video -> Compliance -> Publisher -> Operations.",
+1428:                        destinationRoute: explicitDestination || (session?.teamMode === "team" ? "workflows" : "campaign-studio")
+1752:	const teamMode = session.teamMode === "team";
+1753:	const specialist = teamMode
+1754:		? { id: "operations", label: "Full Team" }
+1772:	if (!teamMode) return base;
+1796:		confirmationNote: "No task, workflow, outreach, customer reply, CRM update, approval, or publishing action is executed from Full Team mode.",
+1797:		safetyLabel: "Full Team output is a coordinated draft preview only."
+2681:	const teamMode = normalizeAiInboundTeamMode(firstAiInboundId(payload.teamMode, payload.team_mode, draftContext.teamMode, draftContext.team_mode));
+2695:		teamMode,
+2719:	session.teamMode = normalized.teamMode || "solo";
+2738:			teamMode: session.teamMode
+2746:		teamMode: normalized.teamMode,
+3290:        const specialist = session.teamMode === "team"
+3291:                ? { id: "team", label: "Full Team" }
+3332:                teamMode: session.teamMode,
+3555:	if (session?.teamMode === "team") return tool.intent === "task" ? "task-center" : "workflows";
+3591:function renderAiRoomTeamChain(escapeHtml) {
+3603:	const modeLabel = session.teamMode === "team" ? "Full Team" : "Solo Specialist";
+3604:	const activeSpecialist = session.teamMode === "team" ? "Full AI Team" : getPhase1SpecialistById(session.modeId)?.label || "Specialist";
+3672:function renderPhase1TeamRail(session, bridgeStatus, escapeHtml) {
+3685:	const teamBanner = session.teamMode === "team" ? `
+3687:			<strong>Full Team Review</strong>
+3689:			${renderAiRoomTeamChain(escapeHtml)}
+3703:				<button class="aicmd-v2-toggle-btn${session.teamMode !== "team" ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="solo">
+3706:				<button class="aicmd-v2-toggle-btn${session.teamMode === "team" ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="team">
+3707:					Full Team
+3714:					const isActive = spec.id === session.modeId && session.teamMode === "solo";
+3715:					const isTeamActive = session.teamMode === "team";
+3746:	if (session.teamMode === "team") {
+3765:	const specialistTools = getAiToolDockTools({ specialistId: spec.id, teamMode: "solo", limit: 3 });
+3785:        const isTeam = session.teamMode === "team";
+3808:	const isTeam = session.teamMode === "team";
+3814:	const modeLabel = isTeam ? "Full Team" : "Solo Specialist";
+3823:				${isTeam ? renderAiRoomTeamChain(escapeHtml) : ""}
+3871:		teamMode: session.teamMode,
+3905:	const specialistLabel = session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label || "Specialist";
+3906:	const roleId = session.teamMode === "team" ? "team" : getAiRoomRoleId(session.modeId);
+3993:        const isTeam = session.teamMode === "team";
+4057:                                <span><strong>Mode</strong>${escapeHtml(isTeam ? "Full Team" : "Solo Specialist")}</span>
+4074:        const activeLabel = session.teamMode === "team"
+4102:        const isTeam = session.teamMode === "team";
+4130:	const activeSpecialist = session.teamMode === "team"
+4175:	const modeLabel = session.teamMode === "team" ? "Full Team" : "Solo Specialist";
+4182:					<button class="aicmd-chatfirst-toggle${session.teamMode !== "team" ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="solo">Solo</button>
+4183:					<button class="aicmd-chatfirst-toggle${session.teamMode === "team" ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="team">Full Team</button>
+4198:	const isTeam = session.teamMode === "team";
+4244:        const isTeam = session.teamMode === "team";
+4245:        const selectedSpec = isTeam ? { id: "team", label: "Full Team" } : getPhase1SpecialistById(session.modeId);
+4247:        const selectedLabel = isTeam ? "Full Team" : selectedSpec.label || "Specialist";
+4252:                if (role === "user") return isTeam ? message.teamMode === "team" || messageRoleId === "team" : messageRoleId === selectedRoleId;
+4692:        const isTeam = session.teamMode === "team";
+4743:        const isTeam = session.teamMode === "team";
+4883:	const teamActive = session.teamMode === "team";
+4890:					<p>Choose an active specialist or keep Full Team review. Planned lanes are visible but not active runtime specialists.</p>
+4895:				<button class="aicmd-chatfirst-toggle${!teamActive ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="solo">Solo Specialist</button>
+4896:				<button class="aicmd-chatfirst-toggle${teamActive ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="team">Full Team</button>
+4934:	const specialistLabel = session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label || "Specialist";
+4935:	const roleId = session.teamMode === "team" ? "team" : getAiRoomRoleId(session.modeId);
+4977:	const specialist = session.teamMode === "team"
+4978:		? { id: "team", label: "Full Team" }
+5082:				<span><strong>Mode</strong>${escapeHtml(session.teamMode === "team" ? "Full Team" : "Solo Specialist")}</span>
+5132:        const isTeam = session.teamMode === "team";
+5133:        const selectedSpec = isTeam ? { id: "team", label: "Full Team", position: "Team workflow" } : getPhase1SpecialistById(session.modeId);
+5135:        const selectedLabel = isTeam ? "Full Team" : selectedSpec.label || "Specialist";
+5143:                        return isTeam ? message.teamMode === "team" || messageRoleId === "team" : messageRoleId === selectedRoleId;
+5177:                teamMode: session.teamMode,
+5181:        const nextPrompts = session.teamMode === "team"
+5342:	const prompts = session.teamMode === "team"
+5372:	const specialist = session.teamMode === "team" ? { label: "Full Team" } : getPhase1SpecialistById(session.modeId);
+5381:		{ label: "Mode", value: session.teamMode === "team" ? "Full Team" : "Solo Specialist", present: true },
+5390:	const scopedContextItems = session.teamMode === "solo" && session.modeId === "customer_ops"
+5398:		: session.teamMode === "solo" && session.modeId === "sales_crm"
+5628:			session.teamMode = "solo";
+5665:                                teamMode: session.teamMode
+5709:                                teamMode: session.teamMode
+5765:                                session.teamMode = "solo";
+5784:				session.teamMode = mode;
+5786:				persistSessionDraft(sessionKey, session, mode === "team" ? "Full Team mode activated" : "Solo Specialist mode activated");
+5876:                                                teamMode: session.teamMode,
+5997:                        specialistLabel: session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label,
+6569:		                const specialist = session.teamMode === "team"
+6570:		                        ? { id: "team", label: "Full Team" }
+6579:		                        teamMode: session.teamMode,
+6596:		                        teamMode: session.teamMode
+6607:		                                mode: session.teamMode === "team" ? "team" : "solo",
+6645:		                                teamMode: session.teamMode,
+6685:		                                teamMode: session.teamMode,
+6700:		                                teamMode: session.teamMode
+6717:		                                teamMode: session.teamMode
+6740:                                const specLabel = session.teamMode === "team" ? "Team" : getPhase1SpecialistById(session.modeId).label;
+6828:					specialistLabel: session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label,
+6935:					teamMode: session.teamMode
+6964:		                        teamMode: session.teamMode
+7029:				const specialistLabel = session.teamMode === "team"
+7030:					? "Full Team"
+7053:				const specialistLabel = session.teamMode === "team"
+7054:					? "Full Team"
+7111:					teamMode: session.teamMode

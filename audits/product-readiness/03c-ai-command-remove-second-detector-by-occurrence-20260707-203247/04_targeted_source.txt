@@ -1,0 +1,73 @@
+623:function detectSpecialistFromBridgePrompt(prompt) {
+
+};
+
+
+function detectSpecialistFromBridgePrompt(prompt) {
+    const text = asString(prompt).toLowerCase();
+
+    const directMap = [
+            ["video", "video_lead"],
+            ["motion", "video_lead"],
+            ["reel", "video_lead"],
+            ["storyboard", "video_lead"],
+            ["shot list", "video_lead"],
+            ["voiceover", "video_lead"],
+            ["media", "video_lead"],
+            ["campaign", "strategist"],
+            ["strategy", "strategist"],
+            ["content", "copywriter"],
+            ["copy", "copywriter"],
+            ["caption", "copywriter"],
+            ["publish", "publisher"],
+            ["schedule", "publisher"],
+            ["ads", "ads_operator"],
+            ["budget", "ads_operator"],
+            ["customer", "customer_ops"],
+            ["crm", "customer_ops"],
+            ["support", "customer_ops"],
+            ["operations", "admin"],
+            ["blocker", "admin"],
+            ["readiness", "admin"],
+            ["setup", "admin"],
+            ["library", "admin"]
+    ];
+
+    for (const [keyword, specialistId] of directMap) {
+            if (text.includes(keyword)) return MODE_ID_ALIASES[specialistId] || specialistId;
+    }
+
+    const classified = classifyIntent(text, null);
+    return MODE_ID_ALIASES[classified?.modeId] || classified?.modeId || "operations";
+}
+
+function buildAutoPlanFromCommand(commandText, session) {
+	function getSpecialistById(id) {
+		const resolvedId = MODE_ID_ALIASES[id] || id;
+		return SPECIALIST_DEFS.find((s) => s.id === resolvedId) ||
+			SPECIALIST_DEFS.find((s) => s.id === "operations") ||
+			SPECIALIST_DEFS[0];
+	}
+
+
+	const command = humanizeValue(commandText || session?.draftMessage, "Prepare workflow action from AI command.");
+	const plan = [
+		{
+			id: `auto-generate-${Date.now()}`,
+			type: "generate_prompt",
+			targetPage: "ai-command",
+			action: "Generate prompt from AI command",
+			payload: {
+				prompt: command,
+				title: "AI command auto plan"
+			},
+			priority: "recommended"
+		},
+		{
+			id: `auto-workflow-${Date.now()}`,
+			type: "prepare_workflow",
+			targetPage: "workflows",
+			action: "Prepare workflow from AI command",
+			payload: {
+				prompt: command,
+				reason: "AI command prepared for workflow execution."

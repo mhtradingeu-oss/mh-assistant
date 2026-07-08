@@ -1,0 +1,928 @@
+AI Command constants and specialist definitions:
+36:const MODE_DEFS = [
+38:                id: "strategist",
+45:                id: "writer",
+59:                id: "video_lead",
+66:                id: "publisher",
+80:                id: "analyst",
+87:                id: "compliance_reviewer",
+94:                id: "operations",
+101:                id: "customer_ops",
+105:                routeHint: "operations-centers"
+117:const MODE_ID_ALIASES = {
+118:	executive: "operations",
+119:	campaign: "strategist",
+120:	content: "writer",
+124:	seo: "analyst",
+126:	video_lead: "video_lead",
+127:	publisher: "publisher",
+128:	compliance_reviewer: "compliance_reviewer",
+129:	customer_operations: "customer_ops",
+130:	customer_ops: "customer_ops",
+131:	support: "customer_ops",
+135:	admin: "operations"
+142:const SPECIALIST_DEFS = [
+144:		id: "strategist",
+157:		id: "writer",
+163:		canHelp: ["Draft captions and hooks", "Write email copy", "Create landing page text", "Prepare publisher handoff", "Suggest message variants"],
+183:		id: "video_lead",
+196:		id: "publisher",
+222:		id: "analyst",
+235:		id: "compliance_reviewer",
+241:		canHelp: ["Review marketing claims", "Flag approval risks", "Check publishing safety", "Prepare governance notes", "Identify compliance blockers"],
+248:		id: "operations",
+255:		cannotDo: ["Run workflows without confirmation", "Auto-approve tasks", "Override authority gates", "Execute backend operations directly"],
+261:		id: "customer_ops",
+270:		safetyNote: "Customer operations outputs are drafts only. Sending replies, ticket creation, and escalations require confirmation in the owning surface.",
+289:const SPECIALIST_SUGGESTED_PROMPTS = {
+290:	strategist: [
+296:	writer: [
+308:	video_lead: [
+314:	publisher: [
+326:	analyst: [
+332:	compliance_reviewer: [
+335:		{ label: "Prepare governance notes", sub: "Document compliance status" },
+338:	operations: [
+344:	customer_ops: [
+348:		{ label: "Prepare escalation", sub: "Route support, sales, or operations" }
+354:		{ label: "Prepare sales handoff", sub: "Route context to operations" }
+359:const TEAM_SUGGESTED_PROMPTS = [
+362:	{ label: "Prepare a full handoff sequence", sub: "Strategy, creative, compliance, publishing, ops" },
+366:const PHASE35_WORKSPACE_TABS = ["chat", "preview", "tools", "context", "history"];
+368:const AI_ROOM_FLOW_STEPS = [
+369:	{ id: "ask", title: "Ask", description: "Choose a specialist or the full team." },
+377:const AI_ROOM_OUTPUT_TABS = [
+385:const AI_ROOM_TEAM_CHAIN = ["Strategist", "Writer", "Media / Video", "Compliance", "Publisher", "Operations"];
+386:const AI_ROOM_BUSINESS_BRANCH = ["Customer Ops", "Sales / CRM", "Operations"];
+388:const AI_ROOM_ROLE_INITIALS = {
+389:	strategist: "ST",
+390:	writer: "CW",
+392:	video_lead: "VL",
+393:	publisher: "PB",
+395:	analyst: "SI",
+396:	compliance_reviewer: "CR",
+397:	operations: "OL",
+398:	customer_ops: "CO",
+402:const AI_ROOM_BACKEND_ROLE_ALIASES = {
+403:	ads: "ads_operator",
+405:	compliance_reviewer: "compliance_reviewer"
+408:const AI_ROOM_PLANNED_SPECIALISTS = [
+429:const PHASE35_SPECIALIST_TOOLS = {
+430:	strategist: [
+436:	writer: [
+440:		{ id: "publisher-package", label: "Publisher Package", action: "preview", intent: "handoff", template: "Prepare a Publisher handoff for {project}. Include German copy package, CTA, notes, and remaining checks." }
+449:	video_lead: [
+456:	publisher: [
+470:	analyst: [
+477:	compliance_reviewer: [
+484:	operations: [
+491:	customer_ops: [
+524:const COMMAND_TYPES = [
+535:const TARGET_TYPES = [
+551:const AGENT_CARDS = [
+553:		id: "strategist",
+560:		id: "writer",
+588:		id: "analyst",
+602:		id: "operations",
+627:            ["video", "video_lead"],
+628:            ["motion", "video_lead"],
+629:            ["reel", "video_lead"],
+630:            ["storyboard", "video_lead"],
+631:            ["shot list", "video_lead"],
+632:            ["voiceover", "video_lead"],
+633:            ["media", "video_lead"],
+634:            ["campaign", "strategist"],
+635:            ["strategy", "strategist"],
+636:            ["content", "copywriter"],
+637:            ["copy", "copywriter"],
+638:            ["caption", "copywriter"],
+639:            ["publish", "publisher"],
+640:            ["schedule", "publisher"],
+641:            ["ads", "ads_operator"],
+642:            ["budget", "ads_operator"],
+643:            ["customer", "customer_ops"],
+644:            ["crm", "customer_ops"],
+645:            ["support", "customer_ops"],
+646:            ["operations", "admin"],
+647:            ["blocker", "admin"],
+648:            ["readiness", "admin"],
+649:            ["setup", "admin"],
+650:            ["library", "admin"]
+653:    for (const [keyword, specialistId] of directMap) {
+654:            if (text.includes(keyword)) return MODE_ID_ALIASES[specialistId] || specialistId;
+658:    return MODE_ID_ALIASES[classified?.modeId] || classified?.modeId || "operations";
+663:		const resolvedId = MODE_ID_ALIASES[id] || id;
+664:		return SPECIALIST_DEFS.find((s) => s.id === resolvedId) ||
+665:			SPECIALIST_DEFS.find((s) => s.id === "operations") ||
+666:			SPECIALIST_DEFS[0];
+671:		if (/act as the strategist/i.test(text)) return "strategist";
+672:		if (/act as the content writer/i.test(text)) return "writer";
+674:		if (/act as the video lead/i.test(text)) return "video_lead";
+675:		if (/act as the publisher/i.test(text)) return "publisher";
+677:		if (/act as the seo|act as the insights analyst/i.test(text)) return "analyst";
+678:		if (/act as the compliance reviewer/i.test(text)) return "compliance_reviewer";
+679:		if (/act as the operations lead/i.test(text)) return "operations";
+680:		if (/act as the customer operations lead|act as customer ops/i.test(text)) return "customer_ops";
+684:		if (classified.resolvedModeId && classified.resolvedModeId !== "operations") {
+787:		specialist: asString(context.specialistLabel || "Specialist") || "Specialist",
+788:		specialistLabel: asString(context.specialistLabel || "Specialist") || "Specialist",
+792:	return asString(template).replace(/\{(project|projectName|specialist|specialistLabel|campaign)\}/g, (_, token) => tokenMap[token] || "");
+935:	const resolvedId = MODE_ID_ALIASES[id] || id;
+936:	return MODE_DEFS.find((item) => item.id === resolvedId) || MODE_DEFS[0];
+951:			modeId: "operations",
+952:			teamMode: "solo",
+1040:	if (localDraft.modeId) session.modeId = asString(localDraft.modeId);
+1053:		modeId: session.modeId,
+1135:        if (session.teamMode === "team") return "Full AI Team";
+1136:        const spec = getPhase1SpecialistById(session.modeId);
+1174:        const specialist = getAiCommandSessionSpecialistLabel(session);
+1195:        return `${specialist} · ${intent} · ${time}`.slice(0, 80);
+1214:                modeId: session.modeId,
+1215:                teamMode: session.teamMode,
+1237:        session.modeId = asString(record.modeId || session.modeId || "operations");
+1238:        session.teamMode = asString(record.teamMode || "solo");
+1260:function buildSpecialistChatPrompt({ prompt, specialistLabel, modeLabel, projectName, language, outputLanguage, market }) {
+1263:	const safeSpecialist = asString(specialistLabel || "Specialist").trim();
+1272:			"Name the specialist owner for each next action and destination."
+1337:function destinationRouteForSpecialist(specialistId, outputType) {
+1338:	const rawId = getAiRoomRoleId(specialistId || "operations");
+1339:	const id = MODE_ID_ALIASES[rawId] || rawId;
+1341:	if (id === "strategist") return outputType === "task" ? "campaign-studio" : "workflows";
+1342:	if (id === "writer") return "content-studio";
+1344:	if (id === "video_lead") return "media-studio";
+1345:	if (id === "publisher") return "publishing";
+1347:	if (id === "analyst") return "insights";
+1348:	if (id === "compliance_reviewer") return "governance";
+1349:	if (id === "operations") return outputType === "task" ? "task-center" : "workflows";
+1350:	if (id === "customer_ops") return outputType === "task" ? "task-center" : "operations-centers";
+1357:        const specialistId = getAiRoomRoleId(session?.modeId || "operations");
+1385:        const looksGovernanceLike = /\b(compliance|governance|claim|claims|risk|risks|approval|approvals|policy|privacy|legal|safe language|safety review)\b/.test(text);
+1414:        if (/governance|compliance|risk|approval/.test(outputType) || looksGovernanceLike) {
+1428:                        destinationRoute: explicitDestination || (session?.teamMode === "team" ? "workflows" : "campaign-studio")
+1432:        const destinationRoute = explicitDestination || destinationRouteForSpecialist(session?.modeId || "operations", outputType);
+1446:		"operations-centers": "Operations Centers",
+1454:function specialistTemplateForOutput({ specialist, outputType, prompt, projectName }) {
+1457:	const specialistId = asString(specialist?.id || "operations");
+1458:	const route = destinationRouteForSpecialist(specialistId, outputType);
+1461:		specialistId,
+1468:		confirmationRequired: outputType === "handoff" || specialistId === "publisher" || specialistId === "compliance_reviewer",
+1477:	if (specialistId === "strategist") {
+1504:	if (specialistId === "writer") {
+1538:	if (specialistId === "media") {
+1558:	if (specialistId === "video_lead") {
+1573:	if (specialistId === "publisher") {
+1593:	if (specialistId === "ads") {
+1621:	if (specialistId === "analyst") {
+1635:	if (specialistId === "compliance_reviewer") {
+1651:	if (specialistId === "customer_ops") {
+1654:			title: outputType === "task" ? "Ticket Draft: Customer operations follow-up" : "Customer Ops Draft: Thread, reply, and routing",
+1655:			summary: "Customer operations draft prepared with safe reply language, ticket notes, SLA review, and escalation guardrails.",
+1656:			mainOutput: "Review the customer context, confirm missing details, then route the draft through the owning support, sales, or operations surface.",
+1664:				"Owner: support, sales, or operations to be confirmed before creation."
+1668:				"SLA and escalation decisions require confirmation in the owning operations surface."
+1670:			nextStep: "Review the draft, confirm the destination team, then route through support, sales, or operations.",
+1682:	if (specialistId === "sales_crm") {
+1707:			nextStep: "Review the lead fit, confirm owner, then route the handoff to operations or the CRM surface.",
+1719:	if (specialistId === "operations") {
+1752:	const teamMode = session.teamMode === "team";
+1753:	const specialist = teamMode
+1754:		? { id: "operations", label: "Full Team" }
+1755:		: getPhase1SpecialistById(session.modeId);
+1765:	const base = specialistTemplateForOutput({
+1766:		specialist,
+1772:	if (!teamMode) return base;
+1776:		specialistId: "team",
+1812:function buildPreviewText(output, specialistLabel) {
+1816:		`Specialist: ${specialistLabel}`,
+2033:function scoreMode(text, modeId) {
+2036:		strategist: ["campaign", "launch campaign", "campaign plan", "marketing campaign", "market entry", "growth plan", "offer strategy", "launch plan"],
+2037:		writer: ["content", "post", "caption", "blog", "script", "email", "landing page section", "reel script", "copy", "write", "hooks"],
+2041:		analyst: ["seo", "keyword", "keywords", "query", "search", "meta", "blog topic", "search intent", "ranking", "analytics", "performance", "traffic", "insights", "metrics"],
+2043:		operations: ["task plan", "workflow", "handoff", "approval", "timeline", "execution plan", "route", "publish", "status", "priority", "priorities", "blocking", "blocker", "readiness", "next", "do next"],
+2044:		customer_ops: ["customer", "support", "inbox", "ticket", "tickets", "sla", "reply", "thread", "escalation", "complaint", "refund"],
+2047:	return asArray(keywordMap[modeId]).reduce((total, keyword) => {
+2053:	const scores = MODE_DEFS.map((mode) => ({
+2054:		modeId: mode.id,
+2058:	const top = scores[0] || { modeId: selectedModeId || "operations" };
+2063:		resolvedModeId: top.modeId || selectedModeId || "operations",
+2317:		case "writer":
+2321:		case "analyst":
+2327:		case "strategist":
+2329:		case "operations":
+2406:function syncAiWorkflowBridge({ projectName, modeId, command, response }) {
+2409:		modeId: modeId || "",
+2428:	"operations-centers": "Operations Centers",
+2440:	"content-studio": "writer",
+2442:	publishing: "publisher",
+2443:	"campaign-studio": "strategist",
+2444:	workflows: "operations",
+2447:	integrations: "operations",
+2448:	settings: "operations",
+2449:	governance: "compliance_reviewer",
+2450:	"operations-centers": "operations",
+2451:	"task-center": "operations",
+2452:	"queue-center": "operations",
+2453:	"job-monitor": "operations",
+2454:	"notification-center": "operations",
+2457:	setup: "operations",
+2458:	workspace: "operations"
+2464:	compliance: "compliance_reviewer",
+2465:	"customer-ops": "customer_ops",
+2466:	customer_ops: "customer_ops",
+2477:	publisher: "publishing",
+2483:	operation: "operations-centers",
+2484:	operations: "operations-centers",
+2535:function normalizeAiInboundSpecialistId(value, fallback = "operations") {
+2536:	const fallbackId = MODE_ID_ALIASES[getAiRoomRoleId(fallback)] || getAiRoomRoleId(fallback);
+2539:	const resolved = MODE_ID_ALIASES[legacy] || MODE_ID_ALIASES[getAiRoomRoleId(legacy)] || getAiRoomRoleId(legacy);
+2540:	const finalId = MODE_ID_ALIASES[resolved] || resolved;
+2541:	return SPECIALIST_DEFS.some((item) => item.id === finalId) ? finalId : fallbackId;
+2546:	return ["team", "full-team", "fullteam", "multi-specialist", "team-mode"].includes(clean) ? "team" : "solo";
+2581:	const specialistId = normalizeAiInboundSpecialistId(preview.specialistId || preview.specialist_id || normalized.suggestedSpecialist, normalized.suggestedSpecialist);
+2589:		specialistId,
+2642:	const explicitSpecialist = firstAiInboundId(payload.specialist, payload.specialist_id);
+2646:		payload.modeId ||
+2648:		draftContext.specialist ||
+2649:		draftContext.specialist_id ||
+2650:		draftContext.modeId ||
+2652:		"operations",
+2653:		"operations"
+2664:	)) || `Review this ${sourceLabel} handoff for ${projectLabel}. Identify the right specialist, summarize the context, produce a review-ready draft, and recommend the next safe route. Do not execute publishing, task creation, CRM updates, customer replies, workflow runs, or backend actions.`;
+2681:	const teamMode = normalizeAiInboundTeamMode(firstAiInboundId(payload.teamMode, payload.team_mode, draftContext.teamMode, draftContext.team_mode));
+2695:		teamMode,
+2710:function applyDurableAiHandoff(projectName, operations, session, consumeProjectHandoff, showMessage) {
+2711:	const handoff = getSharedHandoff(projectName, "ai-command", operations);
+2718:	session.modeId = normalized.suggestedSpecialist;
+2719:	session.teamMode = normalized.teamMode || "solo";
+2737:			modeId: session.modeId,
+2738:			teamMode: session.teamMode
+2745:		modeId: normalized.suggestedSpecialist,
+2746:		teamMode: normalized.teamMode,
+2771:	modeId,
+2782:	let resolvedModeId = modeId || session.modeId;
+2788:			mode_id: modeId || session.modeId,
+2799:		resolvedModeId = asString(classification.resolvedModeId) || asString(result?.command?.mode_id) || modeId || session.modeId;
+2806:		resolvedModeId = asString(payloadCommand?.mode_id) || modeId || session.modeId;
+2821:	session.modeId = resolvedModeId;
+2826:		modeId: resolvedModeId,
+2835:		modeId: resolvedModeId,
+2843:		modeId: resolvedModeId,
+2853:	syncAiWorkflowBridge({ projectName: aiContext.projectName, modeId: resolvedModeId, command: cleanCommand, response });
+2866:  if (!projectedMembers.length) return AGENT_CARDS;
+2871:      AGENT_CARDS.find((agent) => agent.id === id) ||
+2872:      AGENT_CARDS.find((agent) => agent.id === "operations") ||
+2873:      AGENT_CARDS[0] ||
+2882:      bestUse: asString(member.bestUse || member.best_use || fallback.bestUse || "Use when this specialist owns the next step."),
+2959:			<div class="ctrl-room-section-label">Choose your AI specialist</div>
+2961:				${MODE_DEFS.map((agent) => `
+2963:						class="ctrl-team-card${agent.id === session.modeId ? " is-active" : ""}"
+2970:						${agent.id === session.modeId ? `<span class="ctrl-team-active-dot"></span>` : ""}
+3117:				<div class="ctrl-empty-body">Choose a specialist above, pick a suggested prompt, or write your own command and hit Send.</div>
+3123:		const mode = getModeMeta(message.modeId);
+3179:							const mode = getModeMeta(entry.modeId);
+3290:        const specialist = session.teamMode === "team"
+3292:                : getPhase1SpecialistById(session.modeId);
+3299:                                : asString(message.specialistLabel || specialist.label || "Specialist");
+3321:                assistantText ? `Latest specialist answer: ${assistantText}` : "",
+3330:                specialistId: specialist.id || session.modeId,
+3331:                specialistLabel: specialist.label || "Specialist",
+3332:                teamMode: session.teamMode,
+3350:                `Specialist: ${context.specialistLabel}`,
+3389:	const commandTypeLabel = COMMAND_TYPES.find((item) => item.id === session.commandType)?.label || "Strategy";
+3390:	const targetTypeLabel = TARGET_TYPES.find((item) => item.id === session.targetType)?.label || "Current project";
+3436:			reason: "A clear campaign context helps every specialist agent generate more precise outputs.",
+3463:  const rawId = normalize(value || "strategist");
+3464:  const requestedId = normalize(MODE_ID_ALIASES[rawId] || rawId);
+3465:  const rawDefinitions = typeof SPECIALIST_DEFS !== "undefined" ? SPECIALIST_DEFS : [];
+3478:    definitions.find((item) => normalize(item?.id || item?.role || item?.key) === "strategist") ||
+3485:	return asString(value || "operations")
+3488:		.replace(/[^a-z0-9_]+/g, "_") || "operations";
+3491:function getAiRoomInitials(specialist) {
+3492:	const id = getAiRoomRoleId(specialist?.id);
+3493:	if (AI_ROOM_ROLE_INITIALS[id]) return AI_ROOM_ROLE_INITIALS[id];
+3494:	return asString(specialist?.label || "AI")
+3536:	if (AI_ROOM_OUTPUT_TABS.some((tab) => tab.id === requested)) return requested;
+3555:	if (session?.teamMode === "team") return tool.intent === "task" ? "task-center" : "workflows";
+3557:	return destinationRouteForSpecialist(session?.modeId || "operations", outputType);
+3570:	if (/review|check|compliance|readiness|governance/i.test(asString(tool.label))) return "Review";
+3581:	return "Prepare a review-ready output for the selected specialist lane.";
+3594:			${renderAiRoomChainSegment(AI_ROOM_TEAM_CHAIN, escapeHtml)}
+3596:			${renderAiRoomChainSegment(AI_ROOM_BUSINESS_BRANCH, escapeHtml)}
+3603:	const modeLabel = session.teamMode === "team" ? "Full Team" : "Solo Specialist";
+3604:	const activeSpecialist = session.teamMode === "team" ? "Full AI Team" : getPhase1SpecialistById(session.modeId)?.label || "Specialist";
+3660:				${AI_ROOM_FLOW_STEPS.map((step, index) => `
+3674:	const plannedSpecialists = AI_ROOM_PLANNED_SPECIALISTS.map((item) => `
+3685:	const teamBanner = session.teamMode === "team" ? `
+3688:			<span>Strategy, writing, creative, compliance, publishing, customer, sales, and operations specialists coordinate one review-ready answer. No workflow, send, publish, approval, or CRM action is executed here.</span>
+3703:				<button class="aicmd-v2-toggle-btn${session.teamMode !== "team" ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="solo">
+3706:				<button class="aicmd-v2-toggle-btn${session.teamMode === "team" ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="team">
+3712:				${SPECIALIST_DEFS.map((spec) => {
+3714:					const isActive = spec.id === session.modeId && session.teamMode === "solo";
+3715:					const isTeamActive = session.teamMode === "team";
+3722:							data-aicmdv2-specialist="${escapeHtml(spec.id)}"
+3737:			<div class="aicmd-room-planned-specialists" aria-label="Additional specialists planned">
+3738:				<span class="aicmd-room-planned-title">Planned lanes, not active specialists</span>
+3746:	if (session.teamMode === "team") {
+3754:						<p class="aicmd-v2-profile-purpose">Coordinates specialists into one review-ready brief, workflow, or handoff.</p>
+3764:	const spec = getPhase1SpecialistById(session.modeId);
+3765:	const specialistTools = getAiToolDockTools({ specialistId: spec.id, teamMode: "solo", limit: 3 });
+3778:				${specialistTools.slice(0, 3).map((tool) => `<span class="aicmd-v2-strength-chip is-tool">${escapeHtml(tool.label)}</span>`).join("")}
+3785:        const isTeam = session.teamMode === "team";
+3788:                : getPhase1SpecialistById(session.modeId);
+3790:        const label = asString(spec?.label || "AI specialist");
+3794:        const roleId = getAiRoomRoleId(session.modeId);
+3795:        if (roleId === "content_writer") return `${label} is drafting your content...`;
+3796:        if (roleId === "media_director" || roleId === "video_lead") return `${label} is preparing creative direction...`;
+3797:        if (roleId === "operations" || roleId === "customer_ops") return `${label} is preparing your task handoff...`;
+3798:        if (roleId === "compliance") return `${label} is checking safety and compliance...`;
+3800:        if (roleId === "publisher") return `${label} is preparing publishing guidance...`;
+3806:	const spec = getPhase1SpecialistById(session.modeId);
+3808:	const isTeam = session.teamMode === "team";
+3811:		? "Team orchestration across strategy, writing, media/video, compliance, publishing, customer operations, sales/CRM, and operations"
+3848:	return destinationRouteForSpecialist(session?.modeId || "operations", getCanonicalToolIntent(tool));
+3868:	const toolModeId = MODE_ID_ALIASES[getAiRoomRoleId(session.modeId)] || getAiRoomRoleId(session.modeId);
+3870:		specialistId: toolModeId,
+3871:		teamMode: session.teamMode,
+3905:	const specialistLabel = session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label || "Specialist";
+3906:	const roleId = session.teamMode === "team" ? "team" : getAiRoomRoleId(session.modeId);
+3912:					<h3 class="aicmd-v2-tools-title">${escapeHtml(specialistLabel)} Tool Drawer</h3>
+3993:        const isTeam = session.teamMode === "team";
+3995:                ? { id: "team", label: "Full AI Team", summary: "Multi-specialist review", position: "AI Team" }
+3996:                : getPhase1SpecialistById(session.modeId);
+3999:        const destinationRoute = asString(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, outputType));
+4005:        const governanceRequired = destinationRoute === "governance" || /approval|claim|compliance|risk|gdpr|review/i.test(`${outputType} ${asString(preview.title)} ${asString(preview.summary)}`);
+4010:        const teamIds = ["strategist", "writer", "media", "video_lead", "compliance_reviewer", "operations"];
+4012:                .map((id) => SPECIALIST_DEFS.find((item) => item.id === id))
+4015:                        const active = !isTeam && spec.id === session.modeId;
+4016:                        const complianceWatching = spec.id === "compliance_reviewer" && governanceRequired;
+4021:                                : complianceWatching
+4028:                                        <span class="aicmd-chatfirst-specialist-avatar" aria-hidden="true">${escapeHtml(getAiRoomInitials(spec))}</span>
+4051:                                        <p>Active specialist, source grounding, destination, risk, and execution lock in one compact command strip.</p>
+4065:                        <div class="aicmd-chatfirst-specialist-grid ${AI_UX_SIMPLE_MODE ? 'aicmd-simple-hide-team' : ''}" aria-label="Live AI team lanes">
+4074:        const activeLabel = session.teamMode === "team"
+4076:                : getPhase1SpecialistById(session.modeId)?.label || "Specialist";
+4102:        const isTeam = session.teamMode === "team";
+4103:        const spec = isTeam ? { label: "Full AI Team" } : getPhase1SpecialistById(session.modeId);
+4105:        const destinationRoute = asString(session.outputPreview?.destinationRoute || destinationRouteForSpecialist(session.modeId, outputType));
+4130:	const activeSpecialist = session.teamMode === "team"
+4132:		: getPhase1SpecialistById(session.modeId)?.label || "Specialist";
+4175:	const modeLabel = session.teamMode === "team" ? "Full Team" : "Solo Specialist";
+4182:					<button class="aicmd-chatfirst-toggle${session.teamMode !== "team" ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="solo">Solo</button>
+4183:					<button class="aicmd-chatfirst-toggle${session.teamMode === "team" ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="team">Full Team</button>
+4198:	const isTeam = session.teamMode === "team";
+4199:	const activeSpec = getPhase1SpecialistById(session.modeId);
+4202:		<details class="aicmd-chatfirst-specialist-select">
+4207:			<div class="aicmd-chatfirst-specialist-menu" role="list">
+4208:				${SPECIALIST_DEFS.map((spec) => {
+4209:					const isActive = !isTeam && spec.id === session.modeId;
+4212:							class="aicmd-chatfirst-specialist-option${isActive ? " is-active" : ""}"
+4214:							data-aicmdv2-specialist="${escapeHtml(spec.id)}"
+4218:							<span class="aicmd-chatfirst-specialist-avatar" aria-hidden="true">${escapeHtml(getAiRoomInitials(spec))}</span>
+4221:								<small>${escapeHtml(spec.position || spec.summary || "AI ready specialist")}</small>
+4226:				<div class="aicmd-chatfirst-planned-list" aria-label="Planned specialists">
+4227:					${AI_ROOM_PLANNED_SPECIALISTS.map((item) => `
+4228:						<div class="aicmd-chatfirst-specialist-option is-planned" aria-disabled="true">
+4229:							<span class="aicmd-chatfirst-specialist-avatar" aria-hidden="true">${escapeHtml(item.initials)}</span>
+4244:        const isTeam = session.teamMode === "team";
+4245:        const selectedSpec = isTeam ? { id: "team", label: "Full Team" } : getPhase1SpecialistById(session.modeId);
+4251:                const messageRoleId = getAiRoomRoleId(message.specialistId || message.modeId || "");
+4252:                if (role === "user") return isTeam ? message.teamMode === "team" || messageRoleId === "team" : messageRoleId === selectedRoleId;
+4257:                const producerId = getAiRoomRoleId(item.specialistId || "");
+4264:                                specialistId: item.specialistId || selectedRoleId,
+4265:                                specialistLabel: "You",
+4271:                                specialistId: item.specialistId || selectedRoleId,
+4272:                                specialistLabel: item.specialistLabel || selectedLabel,
+4288:                const destinationRoute = asString(message.destinationRoute || preview.destinationRoute || destinationRouteForSpecialist(session.modeId, outputType));
+4294:                        { label: "Ask Compliance", attr: "data-aicmd-smart-compliance" }
+4316:                const label = isUser ? "You" : asString(message.specialistLabel || selectedLabel || "Specialist");
+4470:        const complianceSensitivity = asString(wizard.complianceSensitivity || "standard-review");
+4483:        const complianceOptions = [["standard-review", "Standard review"], ["claims-sensitive", "Claims sensitive"], ["pricing-sensitive", "Pricing sensitive"], ["regulated", "Regulated"], ["low-risk", "Low risk"]];
+4562:                                                        ${complianceOptions.map(([value, label]) => optionButton("complianceSensitivity", value, label, complianceSensitivity)).join("")}
+4600:                                                                <button type="button" data-aicmd-smart-campaign-action="operations">Create Operations Follow-up</button>
+4692:        const isTeam = session.teamMode === "team";
+4698:                                <span>Select the specialist or route the request to the full coordinated business AI team.</span>
+4709:                                        <small>Strategy, content, media, operations, compliance, customer, campaign and provider-readiness planning.</small>
+4713:                        <div class="aicmd-final-team-menu-grid" role="list" aria-label="AI specialists">
+4714:                                ${SPECIALIST_DEFS.map((spec) => {
+4715:                                        const isActive = !isTeam && spec.id === session.modeId;
+4720:                                                        data-aicmdv2-specialist="${escapeHtml(spec.id)}"
+4726:                                                                <small>${escapeHtml(spec.position || spec.summary || "AI ready specialist")}</small>
+4742:        const spec = getPhase1SpecialistById(session.modeId);
+4743:        const isTeam = session.teamMode === "team";
+4777:                                        <button class="aicmd-final-pill-btn" type="button" data-aicmd-final-specialist title="Active specialist">
+4883:	const teamActive = session.teamMode === "team";
+4890:					<p>Choose an active specialist or keep Full Team review. Planned lanes are visible but not active runtime specialists.</p>
+4898:			<div class="aicmd-chatfirst-specialist-grid ${AI_UX_SIMPLE_MODE ? 'aicmd-simple-hide-team' : ''}">
+4899:				${SPECIALIST_DEFS.map((spec) => {
+4900:					const isActive = !teamActive && spec.id === session.modeId;
+4905:							data-aicmdv2-specialist="${escapeHtml(spec.id)}"
+4908:							<span class="aicmd-chatfirst-specialist-avatar" aria-hidden="true">${escapeHtml(getAiRoomInitials(spec))}</span>
+4917:			<div class="aicmd-chatfirst-planned-grid" aria-label="Planned specialists">
+4918:				${AI_ROOM_PLANNED_SPECIALISTS.map((item) => `
+4920:						<span class="aicmd-chatfirst-specialist-avatar" aria-hidden="true">${escapeHtml(item.initials)}</span>
+4934:	const specialistLabel = session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label || "Specialist";
+4935:	const roleId = session.teamMode === "team" ? "team" : getAiRoomRoleId(session.modeId);
+4941:					<h2>${escapeHtml(specialistLabel)} Tools</h2>
+4976:	const destination = routeLabel(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, preview.outputType || "guidance"));
+4977:	const specialist = session.teamMode === "team"
+4979:		: getPhase1SpecialistById(preview.specialistId || session.modeId);
+4998:					${AI_ROOM_OUTPUT_TABS.map((tab) => `
+5015:					<span><strong>Specialist</strong>${escapeHtml(specialist.label || "Specialist")}</span>
+5071:				${AI_ROOM_FLOW_STEPS.map((step, index) => `
+5082:				<span><strong>Mode</strong>${escapeHtml(session.teamMode === "team" ? "Full Team" : "Solo Specialist")}</span>
+5132:        const isTeam = session.teamMode === "team";
+5133:        const selectedSpec = isTeam ? { id: "team", label: "Full Team", position: "Team workflow" } : getPhase1SpecialistById(session.modeId);
+5136:        const selectedModeLabel = isTeam ? "Team workflow" : "Solo specialist";
+5141:                const messageRoleId = getAiRoomRoleId(message.specialistId || message.modeId || "");
+5143:                        return isTeam ? message.teamMode === "team" || messageRoleId === "team" : messageRoleId === selectedRoleId;
+5152:                const producerId = getAiRoomRoleId(item.specialistId || "");
+5157:                const producerId = getAiRoomRoleId(item.specialistId || "");
+5169:        const bridgeSpecialistId = getAiRoomRoleId(bridgeContext.specialistId || "");
+5172:                bridgeContext.specialistLabel &&
+5176:                specialistId: session.modeId,
+5177:                teamMode: session.teamMode,
+5180:        const promptModeId = MODE_ID_ALIASES[getAiRoomRoleId(session.modeId)] || getAiRoomRoleId(session.modeId);
+5181:        const nextPrompts = session.teamMode === "team"
+5182:                ? TEAM_SUGGESTED_PROMPTS
+5183:                : (SPECIALIST_SUGGESTED_PROMPTS[promptModeId] || SPECIALIST_SUGGESTED_PROMPTS.operations);
+5194:                const label = isUser ? "You" : asString(message.specialistLabel || selectedLabel || "Specialist");
+5214:                                specialistId: item.specialistId || selectedRoleId,
+5215:                                specialistLabel: "You",
+5221:                                specialistId: item.specialistId || selectedRoleId,
+5222:                                specialistLabel: item.specialistLabel || selectedLabel,
+5236:                                        <p class="aicmd-v2-chat-subtitle">Focused chat with the active AI. Other specialist replies remain available in shared room history.</p>
+5252:                                                <strong>${escapeHtml("Specialist context loaded from Home: " + bridgeContext.specialistLabel)}</strong>
+5257:                                        <span>Selected specialist</span>
+5268:                                        <strong>${escapeHtml(latestSelected?.specialistLabel || selectedLabel)}</strong>
+5278:                                                                <small>Please wait while the specialist prepares a review-ready response.</small>
+5290:                                        <strong>Start with the selected specialist</strong>
+5299:                                                <span><strong>${escapeHtml(latestSelected.specialistLabel || selectedLabel)}</strong></span>
+5301:                                                <span class="aicmd-room-producer-chip">Selected specialist output</span>
+5317:                                                <span>${sharedResponses.length} recent specialist repl${sharedResponses.length === 1 ? "y" : "ies"}</span>
+5321:                                                        const producerId = getAiRoomRoleId(item.specialistId || "");
+5322:                                                        const producerLabel = item.specialistLabel || "Specialist";
+5341:	const promptModeId = MODE_ID_ALIASES[getAiRoomRoleId(session.modeId)] || getAiRoomRoleId(session.modeId);
+5342:	const prompts = session.teamMode === "team"
+5343:		? TEAM_SUGGESTED_PROMPTS
+5344:		: (SPECIALIST_SUGGESTED_PROMPTS[promptModeId] || SPECIALIST_SUGGESTED_PROMPTS.operations);
+5372:	const specialist = session.teamMode === "team" ? { label: "Full Team" } : getPhase1SpecialistById(session.modeId);
+5373:	const destination = routeLabel(destinationRouteForSpecialist(session.modeId, asObject(session.outputPreview).outputType || "guidance"));
+5377:		{ label: "Specialist", value: specialist.label || "Specialist", present: true },
+5381:		{ label: "Mode", value: session.teamMode === "team" ? "Full Team" : "Solo Specialist", present: true },
+5388:		{ label: "Operations", value: state.data.operations ? "Snapshot available" : "No operations snapshot", present: Boolean(state.data.operations) }
+5390:	const scopedContextItems = session.teamMode === "solo" && session.modeId === "customer_ops"
+5398:		: session.teamMode === "solo" && session.modeId === "sales_crm"
+5461:			title: item.responseTitle || item.specialistLabel || "Specialist response",
+5530:		const normalizedSessionModeId = MODE_ID_ALIASES[getAiRoomRoleId(session.modeId)] || getAiRoomRoleId(session.modeId);
+5531:		if (normalizedSessionModeId && normalizedSessionModeId !== session.modeId) session.modeId = normalizedSessionModeId;
+5561:				session.modeId = detectedSpecialist;
+5565:					specialistId: detectedSpecialist,
+5566:					specialistLabel: bridgeSpecialist?.label || titleCase(detectedSpecialist),
+5581:		const operations = asObject(selectOperationsSnapshot(state));
+5582:		applyDurableAiHandoff(sessionKey, operations, session, consumeProjectHandoff, showMessage);
+5592:		if (!PHASE35_WORKSPACE_TABS.includes(session.workspaceTab)) {
+5627:			session.modeId = normalizedSessionModeId;
+5628:			session.teamMode = "solo";
+5638:			if (PHASE35_WORKSPACE_TABS.includes(options.switchTab)) {
+5664:                                modeId: session.modeId,
+5665:                                teamMode: session.teamMode
+5708:                                modeId: session.modeId,
+5709:                                teamMode: session.teamMode
+5748:				if (!AI_ROOM_OUTPUT_TABS.some((tab) => tab.id === nextTab)) return;
+5756:		Array.from(document.querySelectorAll("[data-aicmdv2-specialist]")).forEach((btn) => {
+5758:                                const specId = btn.getAttribute("data-aicmdv2-specialist") || "operations";
+5764:                                session.modeId = specId;
+5765:                                session.teamMode = "solo";
+5784:				session.teamMode = mode;
+5876:                                                teamMode: session.teamMode,
+5877:                                                specialistId: session.modeId,
+5878:                                                modeId: session.modeId,
+5946:                Array.from(document.querySelectorAll("[data-aicmd-final-specialist]")).forEach((btn) => {
+5959:                                target.closest("[data-aicmd-final-specialist]") ||
+5986:                                updateStatus("Voice conversation requires the next provider-backed phase: recording, STT, specialist reply, and TTS playback. Voice dictation is ready now.");
+5997:                        specialistLabel: session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label,
+6091:                                complianceSensitivity: asString(wizard.complianceSensitivity || "standard-review"),
+6198:                                complianceSensitivity: asString(body.compliance_sensitivity || body.complianceSensitivity || fallbackPreview.complianceSensitivity || ""),
+6227:                                        compliance_sensitivity: asString(wizard.complianceSensitivity || localPreview.complianceSensitivity || "")
+6278:                                        complianceSensitivity: asString(preview.complianceSensitivity || ""),
+6330:                                compliance_sensitivity: asString(preview.complianceSensitivity || ""),
+6366:                                operations: "Create Operations Follow-up"
+6569:		                const specialist = session.teamMode === "team"
+6571:		                        : getPhase1SpecialistById(session.modeId);
+6576:		                        modeId: specialist.id || session.modeId,
+6577:		                        specialistId: specialist.id || session.modeId,
+6578:		                        specialistLabel: "You",
+6579:		                        teamMode: session.teamMode,
+6595:		                        modeId: session.modeId,
+6596:		                        teamMode: session.teamMode
+6605:		                                specialistId: specialist.id || session.modeId,
+6606:		                                specialistName: specialist.label || "Specialist",
+6607:		                                mode: session.teamMode === "team" ? "team" : "solo",
+6622:		                                source: "ai-command-specialist-chat",
+6642:		                                modeId: specialist.id || session.modeId,
+6643:		                                specialistId: specialist.id || session.modeId,
+6644:		                                specialistLabel: specialist.label || "Specialist",
+6645:		                                teamMode: session.teamMode,
+6675:		                                specialistId: specialist.id || session.modeId,
+6676:		                                specialistLabel: specialist.label || "Specialist",
+6685:		                                teamMode: session.teamMode,
+6699:		                                modeId: session.modeId,
+6700:		                                teamMode: session.teamMode
+6710:		                        session.responseError = asString(error?.message || "Failed to generate specialist chat reply.");
+6716:		                                modeId: session.modeId,
+6717:		                                teamMode: session.teamMode
+6740:                                const specLabel = session.teamMode === "team" ? "Team" : getPhase1SpecialistById(session.modeId).label;
+6753:                                const spec = getPhase1SpecialistById(session.modeId);
+6776:                                const spec = getPhase1SpecialistById(session.modeId);
+6800:                                const spec = getPhase1SpecialistById(session.modeId);
+6828:					specialistLabel: session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label,
+6892:		                updateStatus("Continue from the Composer. The selected specialist is still active.");
+6934:					modeId: session.modeId,
+6935:					teamMode: session.teamMode
+6963:		                        modeId: session.modeId,
+6964:		                        teamMode: session.teamMode
+6978:				const destination = asString(latestResponse.destinationRoute || responseRoute.destinationRoute || destinationRouteForSpecialist(session.modeId, responseRoute.outputType || "guidance"));
+6981:					modeId: latestResponse.specialistId || session.modeId,
+6983:					lastResponseTitle: latestResponse.responseTitle || "Generated specialist response",
+7029:				const specialistLabel = session.teamMode === "team"
+7031:					: getPhase1SpecialistById(output.specialistId || session.modeId).label;
+7032:				const text = buildPreviewText(output, specialistLabel);
+7053:				const specialistLabel = session.teamMode === "team"
+7055:					: getPhase1SpecialistById(output.specialistId || session.modeId).label;
+7056:				const text = buildPreviewText(output, specialistLabel);
+7087:							modeId: output.specialistId || session.modeId,
+7110:					modeId: session.modeId,
+7111:					teamMode: session.teamMode
+7167:        if (session.isSelecting) return "selecting_specialist";
+7181:                case "selecting_specialist":
+7182:                        return "Selecting specialist";
+7240:        { id: "strategist", label: "Strategist" },
+7241:        { id: "writer", label: "Writer" },
+7243:        { id: "operations", label: "Operations" }
+7249:        if (state === "thinking" && member.id === "strategist") status = "active";
+7250:        if (state === "composing" && member.id === "writer") status = "active";
+7720:    // StateKernel is the ONLY direct writer to draftMessage.
+
+AI Command role helpers and routing functions:
+13:        selectOperationsSnapshot,
+95:                label: "Operations Lead",
+102:                label: "Customer Operations Lead",
+249:		label: "Operations Lead",
+253:		placeholder: "Ask the Operations Lead to turn this into tasks, workflow steps, or handoffs…",
+256:		destinations: ["Workflows", "Operations Centers", "AI Command"],
+262:		label: "Customer Operations Lead",
+263:		position: "Customer Experience Operations Lead",
+266:		placeholder: "Ask the Customer Operations Lead to summarize a customer thread, draft a safe reply, prepare a ticket draft, check SLA risk, or route an escalation for review…",
+269:		destinations: ["Unified Inbox", "Operations Centers", "Integrations"],
+276:		position: "Revenue and CRM Operations Lead",
+282:		destinations: ["CRM", "Workflows", "Operations Centers"],
+358:// Full Team mode suggested prompts
+361:	{ label: "Map the next launch wave", sub: "Strategist to Publisher to Operations" },
+363:	{ label: "Review customer and sales impact", sub: "Customer Ops, Sales / CRM, Operations" }
+385:const AI_ROOM_TEAM_CHAIN = ["Strategist", "Writer", "Media / Video", "Compliance", "Publisher", "Operations"];
+386:const AI_ROOM_BUSINESS_BRANCH = ["Customer Ops", "Sales / CRM", "Operations"];
+489:		{ id: "open-workflows", label: "Open Workflows / Operations", action: "route", route: "workflows" }
+499:		{ id: "route-support-sales-ops", label: "Route to Support / Sales / Operations", action: "preview", intent: "handoff", template: "Prepare routing guidance for {project}. Decide whether the customer item belongs with Support, Sales, or Operations, and explain the review gate." }
+603:		name: "Operations Assistant",
+606:		suggestedPrompt: "Act as Operations Assistant and convert priorities into a practical execution sequence."
+623:function detectSpecialistFromBridgePrompt(prompt) {
+657:    const classified = classifyIntent(text, null);
+669:	function detectSpecialistFromBridgePrompt(prompt) {
+682:		// Fallback: use keyword scoring from existing classifyIntent
+683:		const classified = classifyIntent(text, null);
+1136:        const spec = getPhase1SpecialistById(session.modeId);
+1264:	const safeMode = asString(modeLabel || "Solo Specialist").trim();
+1268:	const teamWorkflowLines = safeMode === "Full Team"
+1270:			"Full Team workflow: Strategist -> Writer -> Media/Video -> Compliance -> Publisher -> Operations.",
+1271:			"When the request touches inbox, tickets, leads, outreach, or CRM, include Customer Ops -> Sales/CRM -> Operations.",
+1337:function destinationRouteForSpecialist(specialistId, outputType) {
+1338:	const rawId = getAiRoomRoleId(specialistId || "operations");
+1355:function resolveAiResponseOutputRoute(session, response = {}) {
+1357:        const specialistId = getAiRoomRoleId(session?.modeId || "operations");
+1432:        const destinationRoute = explicitDestination || destinationRouteForSpecialist(session?.modeId || "operations", outputType);
+1436:function routeLabel(route) {
+1446:		"operations-centers": "Operations Centers",
+1454:function specialistTemplateForOutput({ specialist, outputType, prompt, projectName }) {
+1458:	const route = destinationRouteForSpecialist(specialistId, outputType);
+1473:		nextSafeAction: `Review in ${routeLabel(route)}`,
+1736:			title: outputType === "handoff" ? "Handoff Preview: Operations package" : "Operations Draft: Task and handoff plan",
+1751:function buildPhase2OutputPreview({ intent, session, prompt, projectName }) {
+1754:		? { id: "operations", label: "Full Team" }
+1755:		: getPhase1SpecialistById(session.modeId);
+1765:	const base = specialistTemplateForOutput({
+1792:			"Operations: convert the reviewed output into safe tasks, workflow draft, or handoff context"
+1796:		confirmationNote: "No task, workflow, outreach, customer reply, CRM update, approval, or publishing action is executed from Full Team mode.",
+1797:		safetyLabel: "Full Team output is a coordinated draft preview only."
+1829:	lines.push(`Destination: ${routeLabel(output.destinationRoute)}`);
+2033:function scoreMode(text, modeId) {
+2052:function classifyIntent(message, selectedModeId) {
+2055:		score: scoreMode(message, mode.id) + (mode.id === selectedModeId ? 0.75 : 0)
+2099:function buildExecutiveResponse(aiContext) {
+2130:function buildContentResponse(aiContext) {
+2165:function buildSeoResponse(aiContext) {
+2201:function buildAdsResponse(aiContext) {
+2236:function buildResearchResponse(aiContext) {
+2268:function buildOperationsTaskBlock(aiContext, message) {
+2285:function buildOperationsResponse(aiContext, message) {
+2287:	const taskBlock = buildOperationsTaskBlock(aiContext, message);
+2298:		title: "Operations routing brief",
+2315:function buildResponseForMode(aiContext, classified, message) {
+2320:			return buildContentResponse(aiContext);
+2322:			return buildSeoResponse(aiContext);
+2324:			return buildAdsResponse(aiContext);
+2326:			return buildResearchResponse(aiContext);
+2328:			return buildOperationsResponse(aiContext, message);
+2332:				? buildOperationsResponse(aiContext, message)
+2333:				: buildExecutiveResponse(aiContext);
+2428:	"operations-centers": "Operations Centers",
+2536:	const fallbackId = MODE_ID_ALIASES[getAiRoomRoleId(fallback)] || getAiRoomRoleId(fallback);
+2537:	const raw = getAiRoomRoleId(value || fallbackId);
+2539:	const resolved = MODE_ID_ALIASES[legacy] || MODE_ID_ALIASES[getAiRoomRoleId(legacy)] || getAiRoomRoleId(legacy);
+2551:	const fallbackLabel = sourceLabel || routeLabel(fallbackRoute);
+2557:		const label = firstAiInboundText(record.label, record.title, record.name) || routeLabel(route) || fallbackLabel;
+2641:	const sourceLabel = AI_INBOUND_SOURCE_LABELS[sourcePage] || routeLabel(sourcePage) || "Workspace";
+3291:                ? { id: "team", label: "Full Team" }
+3292:                : getPhase1SpecialistById(session.modeId);
+3360:        const preview = buildPhase2OutputPreview({
+3456:function getPhase1SpecialistById(value) {
+3484:function getAiRoomRoleId(value) {
+3492:	const id = getAiRoomRoleId(specialist?.id);
+3557:	return destinationRouteForSpecialist(session?.modeId || "operations", outputType);
+3603:	const modeLabel = session.teamMode === "team" ? "Full Team" : "Solo Specialist";
+3604:	const activeSpecialist = session.teamMode === "team" ? "Full AI Team" : getPhase1SpecialistById(session.modeId)?.label || "Specialist";
+3687:			<strong>Full Team Review</strong>
+3707:					Full Team
+3713:					const roleId = getAiRoomRoleId(spec.id);
+3747:		const lanes = ["Strategy", "Content", "Media", "Customer Ops", "Sales / CRM", "Compliance", "Publishing", "Operations"];
+3764:	const spec = getPhase1SpecialistById(session.modeId);
+3788:                : getPhase1SpecialistById(session.modeId);
+3794:        const roleId = getAiRoomRoleId(session.modeId);
+3806:	const spec = getPhase1SpecialistById(session.modeId);
+3814:	const modeLabel = isTeam ? "Full Team" : "Solo Specialist";
+3817:		<div class="aicmd-room-conversation-head" data-role="${escapeHtml(isTeam ? "team" : getAiRoomRoleId(spec.id))}">
+3848:	return destinationRouteForSpecialist(session?.modeId || "operations", getCanonicalToolIntent(tool));
+3868:	const toolModeId = MODE_ID_ALIASES[getAiRoomRoleId(session.modeId)] || getAiRoomRoleId(session.modeId);
+3905:	const specialistLabel = session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label || "Specialist";
+3906:	const roleId = session.teamMode === "team" ? "team" : getAiRoomRoleId(session.modeId);
+3922:					const destination = routeLabel(getToolDestinationRoute(tool, session));
+3996:                : getPhase1SpecialistById(session.modeId);
+3999:        const destinationRoute = asString(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, outputType));
+4000:        const destinationLabel = routeLabel(destinationRoute);
+4018:                        const route = destinationRouteForSpecialist(spec.id, "guidance");
+4027:                                <div class="aicmd-chatfirst-team-card${active ? " is-active" : ""}${teamActive ? " is-team-active" : ""}" data-role="${escapeHtml(getAiRoomRoleId(spec.id))}">
+4031:                                                <small>${escapeHtml(stateLabel)} · ${escapeHtml(routeLabel(route))}</small>
+4057:                                <span><strong>Mode</strong>${escapeHtml(isTeam ? "Full Team" : "Solo Specialist")}</span>
+4076:                : getPhase1SpecialistById(session.modeId)?.label || "Specialist";
+4103:        const spec = isTeam ? { label: "Full AI Team" } : getPhase1SpecialistById(session.modeId);
+4105:        const destinationRoute = asString(session.outputPreview?.destinationRoute || destinationRouteForSpecialist(session.modeId, outputType));
+4117:                                <span>${escapeHtml(statusLabel)} · ${escapeHtml(routeLabel(destinationRoute))} · ${escapeHtml(outputType)}</span>
+4132:		: getPhase1SpecialistById(session.modeId)?.label || "Specialist";
+4175:	const modeLabel = session.teamMode === "team" ? "Full Team" : "Solo Specialist";
+4183:					<button class="aicmd-chatfirst-toggle${session.teamMode === "team" ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="team">Full Team</button>
+4199:	const activeSpec = getPhase1SpecialistById(session.modeId);
+4215:							data-role="${escapeHtml(getAiRoomRoleId(spec.id))}"
+4245:        const selectedSpec = isTeam ? { id: "team", label: "Full Team" } : getPhase1SpecialistById(session.modeId);
+4246:        const selectedRoleId = isTeam ? "team" : getAiRoomRoleId(selectedSpec.id);
+4247:        const selectedLabel = isTeam ? "Full Team" : selectedSpec.label || "Specialist";
+4251:                const messageRoleId = getAiRoomRoleId(message.specialistId || message.modeId || "");
+4257:                const producerId = getAiRoomRoleId(item.specialistId || "");
+4288:                const destinationRoute = asString(message.destinationRoute || preview.destinationRoute || destinationRouteForSpecialist(session.modeId, outputType));
+4289:                const destination = routeLabel(destinationRoute);
+4600:                                                                <button type="button" data-aicmd-smart-campaign-action="operations">Create Operations Follow-up</button>
+4721:                                                        data-role="${escapeHtml(getAiRoomRoleId(spec.id))}"
+4742:        const spec = getPhase1SpecialistById(session.modeId);
+4745:        const roleId = isTeam ? "team" : getAiRoomRoleId(spec.id);
+4890:					<p>Choose an active specialist or keep Full Team review. Planned lanes are visible but not active runtime specialists.</p>
+4895:				<button class="aicmd-chatfirst-toggle${!teamActive ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="solo">Solo Specialist</button>
+4896:				<button class="aicmd-chatfirst-toggle${teamActive ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="team">Full Team</button>
+4906:							data-role="${escapeHtml(getAiRoomRoleId(spec.id))}"
+4934:	const specialistLabel = session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label || "Specialist";
+4935:	const roleId = session.teamMode === "team" ? "team" : getAiRoomRoleId(session.modeId);
+4950:					const destination = routeLabel(getToolDestinationRoute(tool, session));
+4976:	const destination = routeLabel(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, preview.outputType || "guidance"));
+4978:		? { id: "team", label: "Full Team" }
+4979:		: getPhase1SpecialistById(preview.specialistId || session.modeId);
+5082:				<span><strong>Mode</strong>${escapeHtml(session.teamMode === "team" ? "Full Team" : "Solo Specialist")}</span>
+5133:        const selectedSpec = isTeam ? { id: "team", label: "Full Team", position: "Team workflow" } : getPhase1SpecialistById(session.modeId);
+5134:        const selectedRoleId = isTeam ? "team" : getAiRoomRoleId(selectedSpec.id);
+5135:        const selectedLabel = isTeam ? "Full Team" : selectedSpec.label || "Specialist";
+5141:                const messageRoleId = getAiRoomRoleId(message.specialistId || message.modeId || "");
+5152:                const producerId = getAiRoomRoleId(item.specialistId || "");
+5157:                const producerId = getAiRoomRoleId(item.specialistId || "");
+5169:        const bridgeSpecialistId = getAiRoomRoleId(bridgeContext.specialistId || "");
+5180:        const promptModeId = MODE_ID_ALIASES[getAiRoomRoleId(session.modeId)] || getAiRoomRoleId(session.modeId);
+5321:                                                        const producerId = getAiRoomRoleId(item.specialistId || "");
+5341:	const promptModeId = MODE_ID_ALIASES[getAiRoomRoleId(session.modeId)] || getAiRoomRoleId(session.modeId);
+5372:	const specialist = session.teamMode === "team" ? { label: "Full Team" } : getPhase1SpecialistById(session.modeId);
+5373:	const destination = routeLabel(destinationRouteForSpecialist(session.modeId, asObject(session.outputPreview).outputType || "guidance"));
+5381:		{ label: "Mode", value: session.teamMode === "team" ? "Full Team" : "Solo Specialist", present: true },
+5388:		{ label: "Operations", value: state.data.operations ? "Snapshot available" : "No operations snapshot", present: Boolean(state.data.operations) }
+5393:			{ label: "Tickets", value: "Draft / monitored in Operations", present: true, scoped: true },
+5404:				{ label: "Pipeline", value: "Operations handoff", present: true, scoped: true }
+5448:					<span>Backend owns authority — AI Command prepares guidance, previews, and handoff context. It does not override execution controls or mutate Operations records.</span>
+5530:		const normalizedSessionModeId = MODE_ID_ALIASES[getAiRoomRoleId(session.modeId)] || getAiRoomRoleId(session.modeId);
+5559:			const detectedSpecialist = detectSpecialistFromBridgePrompt(bridgeValue);
+5562:				const bridgeSpecialist = getPhase1SpecialistById(detectedSpecialist);
+5581:		const operations = asObject(selectOperationsSnapshot(state));
+5632:			session.outputPreview = buildPhase2OutputPreview({
+5768:                                const spec = getPhase1SpecialistById(specId);
+5786:				persistSessionDraft(sessionKey, session, mode === "team" ? "Full Team mode activated" : "Solo Specialist mode activated");
+5997:                        specialistLabel: session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label,
+6073:                                        label: "Operations",
+6125:                                                label: "Operations follow-up",
+6366:                                operations: "Create Operations Follow-up"
+6570:		                        ? { id: "team", label: "Full Team" }
+6571:		                        : getPhase1SpecialistById(session.modeId);
+6664:                                        const responseRoute = resolveAiResponseOutputRoute(session, {
+6740:                                const specLabel = session.teamMode === "team" ? "Team" : getPhase1SpecialistById(session.modeId).label;
+6753:                                const spec = getPhase1SpecialistById(session.modeId);
+6776:                                const spec = getPhase1SpecialistById(session.modeId);
+6800:                                const spec = getPhase1SpecialistById(session.modeId);
+6828:					specialistLabel: session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label,
+6977:				const responseRoute = resolveAiResponseOutputRoute(session, latestResponse);
+6978:				const destination = asString(latestResponse.destinationRoute || responseRoute.destinationRoute || destinationRouteForSpecialist(session.modeId, responseRoute.outputType || "guidance"));
+6984:					routeSuggestions: [{ route: destination, label: routeLabel(destination), reason: "Specialist response destination" }],
+7030:					? "Full Team"
+7031:					: getPhase1SpecialistById(output.specialistId || session.modeId).label;
+7054:					? "Full Team"
+7055:					: getPhase1SpecialistById(output.specialistId || session.modeId).label;
+7090:							routeSuggestions: [{ route: destination, label: routeLabel(destination), reason: "Phase 2 preview destination" }],
+7243:        { id: "operations", label: "Operations" }
+
+AI Command render/team/chat functions:
+983:			bridgeContext: null,
+1040:	if (localDraft.modeId) session.modeId = asString(localDraft.modeId);
+1053:		modeId: session.modeId,
+1135:        if (session.teamMode === "team") return "Full AI Team";
+1136:        const spec = getPhase1SpecialistById(session.modeId);
+1214:                modeId: session.modeId,
+1215:                teamMode: session.teamMode,
+1237:        session.modeId = asString(record.modeId || session.modeId || "operations");
+1238:        session.teamMode = asString(record.teamMode || "solo");
+1250:        session.bridgeContext = null;
+1752:	const teamMode = session.teamMode === "team";
+1755:		: getPhase1SpecialistById(session.modeId);
+2718:	session.modeId = normalized.suggestedSpecialist;
+2719:	session.teamMode = normalized.teamMode || "solo";
+2728:	session.bridgeContext = null;
+2737:			modeId: session.modeId,
+2738:			teamMode: session.teamMode
+2782:	let resolvedModeId = modeId || session.modeId;
+2788:			mode_id: modeId || session.modeId,
+2799:		resolvedModeId = asString(classification.resolvedModeId) || asString(result?.command?.mode_id) || modeId || session.modeId;
+2806:		resolvedModeId = asString(payloadCommand?.mode_id) || modeId || session.modeId;
+2821:	session.modeId = resolvedModeId;
+2888:function renderControlRoomHeader(aiContext, session, intelligenceStatus, escapeHtml) {
+2956:function renderTeamSelector(session, escapeHtml) {
+2963:						class="ctrl-team-card${agent.id === session.modeId ? " is-active" : ""}"
+2970:						${agent.id === session.modeId ? `<span class="ctrl-team-active-dot"></span>` : ""}
+3290:        const specialist = session.teamMode === "team"
+3292:                : getPhase1SpecialistById(session.modeId);
+3330:                specialistId: specialist.id || session.modeId,
+3332:                teamMode: session.teamMode,
+3601:function renderPhase1Header(session, projectName, aiContext, bridgeStatus, escapeHtml) {
+3603:	const modeLabel = session.teamMode === "team" ? "Full Team" : "Solo Specialist";
+3604:	const activeSpecialist = session.teamMode === "team" ? "Full AI Team" : getPhase1SpecialistById(session.modeId)?.label || "Specialist";
+3672:function renderPhase1TeamRail(session, bridgeStatus, escapeHtml) {
+3685:	const teamBanner = session.teamMode === "team" ? `
+3703:				<button class="aicmd-v2-toggle-btn${session.teamMode !== "team" ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="solo">
+3706:				<button class="aicmd-v2-toggle-btn${session.teamMode === "team" ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="team">
+3714:					const isActive = spec.id === session.modeId && session.teamMode === "solo";
+3715:					const isTeamActive = session.teamMode === "team";
+3745:function renderPhase1Profile(session, escapeHtml) {
+3746:	if (session.teamMode === "team") {
+3764:	const spec = getPhase1SpecialistById(session.modeId);
+3785:        const isTeam = session.teamMode === "team";
+3788:                : getPhase1SpecialistById(session.modeId);
+3794:        const roleId = getAiRoomRoleId(session.modeId);
+3805:function renderAiRoomConversationHeader(session, bridgeStatus, escapeHtml) {
+3806:	const spec = getPhase1SpecialistById(session.modeId);
+3808:	const isTeam = session.teamMode === "team";
+3868:	const toolModeId = MODE_ID_ALIASES[getAiRoomRoleId(session.modeId)] || getAiRoomRoleId(session.modeId);
+3871:		teamMode: session.teamMode,
+3903:function renderPhase35ToolsPanel(session, projectName, aiContext, escapeHtml) {
+3905:	const specialistLabel = session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label || "Specialist";
+3906:	const roleId = session.teamMode === "team" ? "team" : getAiRoomRoleId(session.modeId);
+3993:        const isTeam = session.teamMode === "team";
+3996:                : getPhase1SpecialistById(session.modeId);
+3999:        const destinationRoute = asString(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, outputType));
+4015:                        const active = !isTeam && spec.id === session.modeId;
+4073:function renderAiCommandChatFirstShell({ session, projectName, aiContext, bridgeStatus, escapeHtml }) {
+4074:        const activeLabel = session.teamMode === "team"
+4076:                : getPhase1SpecialistById(session.modeId)?.label || "Specialist";
+4080:                        ${renderAiCommandCompactHeader({ session, projectName, bridgeStatus, escapeHtml })}
+4102:        const isTeam = session.teamMode === "team";
+4103:        const spec = isTeam ? { label: "Full AI Team" } : getPhase1SpecialistById(session.modeId);
+4105:        const destinationRoute = asString(session.outputPreview?.destinationRoute || destinationRouteForSpecialist(session.modeId, outputType));
+4128:function renderAiCommandCompactHeader({ session, projectName, bridgeStatus, escapeHtml }) {
+4130:	const activeSpecialist = session.teamMode === "team"
+4132:		: getPhase1SpecialistById(session.modeId)?.label || "Specialist";
+4175:	const modeLabel = session.teamMode === "team" ? "Full Team" : "Solo Specialist";
+4180:				${renderAiCommandSpecialistSelect({ session, escapeHtml })}
+4182:					<button class="aicmd-chatfirst-toggle${session.teamMode !== "team" ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="solo">Solo</button>
+4183:					<button class="aicmd-chatfirst-toggle${session.teamMode === "team" ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="team">Full Team</button>
+4197:function renderAiCommandSpecialistSelect({ session, escapeHtml }) {
+4198:	const isTeam = session.teamMode === "team";
+4199:	const activeSpec = getPhase1SpecialistById(session.modeId);
+4209:					const isActive = !isTeam && spec.id === session.modeId;
+4244:        const isTeam = session.teamMode === "team";
+4245:        const selectedSpec = isTeam ? { id: "team", label: "Full Team" } : getPhase1SpecialistById(session.modeId);
+4288:                const destinationRoute = asString(message.destinationRoute || preview.destinationRoute || destinationRouteForSpecialist(session.modeId, outputType));
+4692:        const isTeam = session.teamMode === "team";
+4715:                                        const isActive = !isTeam && spec.id === session.modeId;
+4742:        const spec = getPhase1SpecialistById(session.modeId);
+4743:        const isTeam = session.teamMode === "team";
+4869:		? renderAiCommandToolsTab({ session, projectName, aiContext, escapeHtml })
+4871:			? renderAiCommandOutputTab({ session, aiContext, escapeHtml })
+4883:	const teamActive = session.teamMode === "team";
+4900:					const isActive = !teamActive && spec.id === session.modeId;
+4932:function renderAiCommandToolsTab({ session, projectName, aiContext, escapeHtml }) {
+4934:	const specialistLabel = session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label || "Specialist";
+4935:	const roleId = session.teamMode === "team" ? "team" : getAiRoomRoleId(session.modeId);
+4970:function renderAiCommandOutputTab({ session, aiContext, escapeHtml }) {
+4976:	const destination = routeLabel(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, preview.outputType || "guidance"));
+4977:	const specialist = session.teamMode === "team"
+4979:		: getPhase1SpecialistById(preview.specialistId || session.modeId);
+5082:				<span><strong>Mode</strong>${escapeHtml(session.teamMode === "team" ? "Full Team" : "Solo Specialist")}</span>
+5130:function renderPhase3SpecialistConversation(session, bridgeStatus, escapeHtml) {
+5132:        const isTeam = session.teamMode === "team";
+5133:        const selectedSpec = isTeam ? { id: "team", label: "Full Team", position: "Team workflow" } : getPhase1SpecialistById(session.modeId);
+5168:        const bridgeContext = asObject(session.bridgeContext);
+5169:        const bridgeSpecialistId = getAiRoomRoleId(bridgeContext.specialistId || "");
+5171:                bridgeContext.source &&
+5172:                bridgeContext.specialistLabel &&
+5176:                specialistId: session.modeId,
+5177:                teamMode: session.teamMode,
+5180:        const promptModeId = MODE_ID_ALIASES[getAiRoomRoleId(session.modeId)] || getAiRoomRoleId(session.modeId);
+5181:        const nextPrompts = session.teamMode === "team"
+5252:                                                <strong>${escapeHtml("Specialist context loaded from Home: " + bridgeContext.specialistLabel)}</strong>
+5340:function renderPhase1SuggestedPrompts(session, escapeHtml) {
+5341:	const promptModeId = MODE_ID_ALIASES[getAiRoomRoleId(session.modeId)] || getAiRoomRoleId(session.modeId);
+5342:	const prompts = session.teamMode === "team"
+5368:function renderPhase1ContextPanel(state, session, aiContext, escapeHtml) {
+5372:	const specialist = session.teamMode === "team" ? { label: "Full Team" } : getPhase1SpecialistById(session.modeId);
+5373:	const destination = routeLabel(destinationRouteForSpecialist(session.modeId, asObject(session.outputPreview).outputType || "guidance"));
+5381:		{ label: "Mode", value: session.teamMode === "team" ? "Full Team" : "Solo Specialist", present: true },
+5390:	const scopedContextItems = session.teamMode === "solo" && session.modeId === "customer_ops"
+5398:		: session.teamMode === "solo" && session.modeId === "sales_crm"
+5426:function renderPhase1SafetyPanel(escapeHtml) {
+5530:		const normalizedSessionModeId = MODE_ID_ALIASES[getAiRoomRoleId(session.modeId)] || getAiRoomRoleId(session.modeId);
+5531:		if (normalizedSessionModeId && normalizedSessionModeId !== session.modeId) session.modeId = normalizedSessionModeId;
+5561:				session.modeId = detectedSpecialist;
+5563:				session.bridgeContext = {
+5570:				session.bridgeContext = null;
+5602:		root.innerHTML = renderAiCommandChatFirstShell({
+5627:			session.modeId = normalizedSessionModeId;
+5628:			session.teamMode = "solo";
+5664:                                modeId: session.modeId,
+5665:                                teamMode: session.teamMode
+5688:                        session.bridgeContext = null;
+5708:                                modeId: session.modeId,
+5709:                                teamMode: session.teamMode
+5759:                                const previousBridgeContext = asObject(session.bridgeContext);
+5764:                                session.modeId = specId;
+5765:                                session.teamMode = "solo";
+5766:                                session.bridgeContext = null;
+5784:				session.teamMode = mode;
+5785:				session.bridgeContext = null;
+5876:                                                teamMode: session.teamMode,
+5877:                                                specialistId: session.modeId,
+5878:                                                modeId: session.modeId,
+5997:                        specialistLabel: session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label,
+6569:		                const specialist = session.teamMode === "team"
+6571:		                        : getPhase1SpecialistById(session.modeId);
+6576:		                        modeId: specialist.id || session.modeId,
+6577:		                        specialistId: specialist.id || session.modeId,
+6579:		                        teamMode: session.teamMode,
+6595:		                        modeId: session.modeId,
+6596:		                        teamMode: session.teamMode
+6605:		                                specialistId: specialist.id || session.modeId,
+6607:		                                mode: session.teamMode === "team" ? "team" : "solo",
+6642:		                                modeId: specialist.id || session.modeId,
+6643:		                                specialistId: specialist.id || session.modeId,
+6645:		                                teamMode: session.teamMode,
+6675:		                                specialistId: specialist.id || session.modeId,
+6685:		                                teamMode: session.teamMode,
+6699:		                                modeId: session.modeId,
+6700:		                                teamMode: session.teamMode
+6716:		                                modeId: session.modeId,
+6717:		                                teamMode: session.teamMode
+6740:                                const specLabel = session.teamMode === "team" ? "Team" : getPhase1SpecialistById(session.modeId).label;
+6753:                                const spec = getPhase1SpecialistById(session.modeId);
+6776:                                const spec = getPhase1SpecialistById(session.modeId);
+6800:                                const spec = getPhase1SpecialistById(session.modeId);
+6828:					specialistLabel: session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label,
+6877:				session.bridgeContext = null;
+6934:					modeId: session.modeId,
+6935:					teamMode: session.teamMode
+6963:		                        modeId: session.modeId,
+6964:		                        teamMode: session.teamMode
+6978:				const destination = asString(latestResponse.destinationRoute || responseRoute.destinationRoute || destinationRouteForSpecialist(session.modeId, responseRoute.outputType || "guidance"));
+6981:					modeId: latestResponse.specialistId || session.modeId,
+7029:				const specialistLabel = session.teamMode === "team"
+7031:					: getPhase1SpecialistById(output.specialistId || session.modeId).label;
+7053:				const specialistLabel = session.teamMode === "team"
+7055:					: getPhase1SpecialistById(output.specialistId || session.modeId).label;
+7087:							modeId: output.specialistId || session.modeId,
+7110:					modeId: session.modeId,
+7111:					teamMode: session.teamMode

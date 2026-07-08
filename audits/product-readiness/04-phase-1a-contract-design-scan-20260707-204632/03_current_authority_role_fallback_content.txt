@@ -1,0 +1,186 @@
+===== route-role-fallback.js =====
+const DEFAULT_ROLE = "admin";
+
+const ACTIVE_ROUTE_ROLES = [
+  "strategist",
+  "writer",
+  "designer",
+  "video_lead",
+  "publisher",
+  "ads_operator",
+  "analyst",
+  "compliance_reviewer",
+  "admin"
+];
+
+const DEFAULT_ROUTE_ROLE_ACCESS = {
+  home: ["strategist", "analyst", "admin"],
+  "ai-command": ACTIVE_ROUTE_ROLES,
+  "campaign-studio": ["strategist", "ads_operator", "admin"],
+  "content-studio": ["writer", "strategist", "compliance_reviewer", "admin"],
+  "media-studio": ["designer", "video_lead", "compliance_reviewer", "admin"],
+  publishing: ["publisher", "compliance_reviewer", "admin"],
+  research: ["strategist", "analyst", "writer", "admin"],
+  setup: ACTIVE_ROUTE_ROLES,
+  "task-center": ACTIVE_ROUTE_ROLES,
+  "queue-center": ACTIVE_ROUTE_ROLES,
+  "job-monitor": ACTIVE_ROUTE_ROLES,
+  "notification-center": ACTIVE_ROUTE_ROLES,
+  governance: ["compliance_reviewer", "admin", "analyst"],
+  "ads-manager": ["ads_operator", "strategist", "analyst", "admin"],
+  insights: ["analyst", "strategist", "ads_operator", "admin"],
+  integrations: ["admin"],
+  workflows: ACTIVE_ROUTE_ROLES,
+  library: ["designer", "video_lead", "publisher", "admin"],
+  settings: ["admin"]
+};
+
+function buildBlockedReason(route, allowedRoles, activeRole, useDefaultRoleMessage = false) {
+  const rolesStr = allowedRoles.join(", ");
+  if (useDefaultRoleMessage) {
+    return (
+      `Route "${route}" requires one of: [${rolesStr}]. ` +
+      `Default role is "${activeRole}". Use the Role selector in the top bar to switch.`
+    );
+  }
+
+  return (
+    `Route "${route}" requires one of: [${rolesStr}]. ` +
+    `Your current role is "${activeRole}". ` +
+    `Use the Role selector in the top bar to switch roles for internal testing.`
+  );
+}
+
+function getFallbackRouteAccess(route, activeRole = DEFAULT_ROLE, options = {}) {
+  const allowedRoles = DEFAULT_ROUTE_ROLE_ACCESS[route];
+  if (!Array.isArray(allowedRoles)) {
+    return { allowed: true, reason: "" };
+  }
+
+  const normalizedRole = String(activeRole || "").trim().toLowerCase() || DEFAULT_ROLE;
+  const allowed = allowedRoles.includes(normalizedRole);
+  return {
+    allowed,
+    reason: allowed
+      ? ""
+      : buildBlockedReason(route, allowedRoles, normalizedRole, options.useDefaultRoleMessage === true)
+  };
+}
+
+export {
+  ACTIVE_ROUTE_ROLES,
+  DEFAULT_ROLE,
+  DEFAULT_ROUTE_ROLE_ACCESS,
+  getFallbackRouteAccess
+};
+===== authority-projection.js =====
+/**
+ * MH-OS Authority Projection Helper
+ *
+ * IMPORTANT:
+ * This file is projection-only.
+ *
+ * Backend owns operational authority.
+ * Frontend projects operational authority.
+ *
+ * This helper MUST NEVER:
+ * - enforce permissions
+ * - mutate governance
+ * - become source of truth
+ * - generate authority
+ * - own approvals
+ * - own workflows
+ */
+
+function safeArray(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+function safeObject(value) {
+  return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+}
+
+function readOperationsProjection(state = {}) {
+  return safeObject(state.operations);
+}
+
+export function getProjectedTeamServiceModel(state = {}) {
+  const operations = readOperationsProjection(state);
+  return safeObject(operations.team_service_model);
+}
+
+export function getProjectedGovernance(state = {}) {
+  const operations = readOperationsProjection(state);
+  return safeObject(operations.governance);
+}
+
+export function getProjectedApprovals(state = {}) {
+  const operations = readOperationsProjection(state);
+  return safeObject(operations.approvals);
+}
+
+export function getProjectedWorkflowRuns(state = {}) {
+  const operations = readOperationsProjection(state);
+  return safeObject(operations.workflow_runs);
+}
+
+export function getProjectedHandoffs(state = {}) {
+  const operations = readOperationsProjection(state);
+  return safeObject(operations.handoffs);
+}
+
+export function getProjectedAiRecommendations(state = {}) {
+  const operations = readOperationsProjection(state);
+  return safeObject(operations.ai_recommendations);
+}
+
+export function getProjectedAiMemory(state = {}) {
+  const operations = readOperationsProjection(state);
+  return safeObject(operations.ai_memory);
+}
+
+export function getProjectedRoutePermissions(state = {}) {
+  const model = getProjectedTeamServiceModel(state);
+  return safeArray(model.route_permissions);
+}
+
+export function getProjectedTeamMembers(state = {}) {
+  const model = getProjectedTeamServiceModel(state);
+  return safeArray(model.members);
+}
+
+export function getProjectedServiceDomains(state = {}) {
+  const model = getProjectedTeamServiceModel(state);
+  return safeArray(model.domains);
+}
+
+export function getProjectedActiveRole(state = {}) {
+  const model = getProjectedTeamServiceModel(state);
+
+  return (
+    model.active_role ||
+    state.activeRole ||
+    "admin"
+  );
+}
+
+Imports of authority role files:
+public/control-center/runtime/authority/authority-projection.js:51:export function getProjectedHandoffs(state = {}) {
+public/control-center/runtime/authority/authority-projection.js:66:export function getProjectedRoutePermissions(state = {}) {
+public/control-center/runtime/authority/authority-projection.js:71:export function getProjectedTeamMembers(state = {}) {
+public/control-center/runtime/authority/authority-projection.js:81:export function getProjectedActiveRole(state = {}) {
+public/control-center/router.js:29:} from "./runtime/authority/route-role-fallback.js";
+public/control-center/pages/ai-command.js:9:import { getProjectedActiveRole, getProjectedTeamMembers } from "../runtime/authority/authority-projection.js";
+public/control-center/pages/ai-command.js:2843:  const projectedMembers = getProjectedTeamMembers(state);
+public/control-center/pages/ai-command.js:2844:  const activeRole = asString(getProjectedActiveRole(state)).toLowerCase();
+public/control-center/pages/home.js:10:  getProjectedActiveRole,
+public/control-center/pages/home.js:11:  getProjectedTeamMembers
+public/control-center/pages/home.js:12:} from "../runtime/authority/authority-projection.js";
+public/control-center/pages/home.js:253:  const projectedMembers = getProjectedTeamMembers(state);
+public/control-center/pages/home.js:255:    getProjectedActiveRole(state)
+public/control-center/app.js:4:  getProjectedActiveRole,
+public/control-center/app.js:5:  getProjectedRoutePermissions
+public/control-center/app.js:6:} from "./runtime/authority/authority-projection.js";
+public/control-center/app.js:10:} from "./runtime/authority/route-role-fallback.js";
+public/control-center/app.js:182:  const stateRole = getProjectedActiveRole({ operations, activeRole: state.activeRole });
+public/control-center/app.js:254:  const routePermissions = getProjectedRoutePermissions({ operations });

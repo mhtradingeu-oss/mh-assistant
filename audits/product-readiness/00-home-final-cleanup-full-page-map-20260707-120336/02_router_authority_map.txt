@@ -1,0 +1,854 @@
+Router imports and route references:
+public/control-center/router.js:1:// public/control-center/router.js
+public/control-center/router.js:3:import { homeRoute } from "./pages/home.js";
+public/control-center/router.js:4:import { aiCommandRoute } from "./pages/ai-command.js";
+public/control-center/router.js:5:import { campaignStudioRoute } from "./pages/campaign-studio.js";
+public/control-center/router.js:6:import { contentStudioRoute } from "./pages/content-studio-workspace.js";
+public/control-center/router.js:7:import { mediaStudioRoute } from "./pages/media-studio-workspace.js";
+public/control-center/router.js:8:import { publishingRoute } from "./pages/publishing.js";
+public/control-center/router.js:9:import { adsManagerRoute } from "./pages/ads-manager.js";
+public/control-center/router.js:10:import { insightsRoute } from "./pages/insights.js";
+public/control-center/router.js:11:import { researchRoute } from "./pages/research.js";
+public/control-center/router.js:12:import { workflowsRoute } from "./pages/workflows.js";
+public/control-center/router.js:14:  taskCenterRoute,
+public/control-center/router.js:15:  queueCenterRoute,
+public/control-center/router.js:16:  jobMonitorRoute,
+public/control-center/router.js:17:  notificationCenterRoute,
+public/control-center/router.js:18:  operationsCentersRoute
+public/control-center/router.js:19:} from "./pages/operations-centers.js";
+public/control-center/router.js:20:import { setupRoute } from "./pages/setup.js";
+public/control-center/router.js:21:import { libraryRoute } from "./pages/library.js";
+public/control-center/router.js:22:import { integrationsRoute } from "./pages/integrations.js";
+public/control-center/router.js:23:import { customerCenterRoute } from "./pages/customer-center.js";
+public/control-center/router.js:24:import { settingsRoute } from "./pages/settings.js";
+public/control-center/router.js:25:import { governanceRoute } from "./pages/governance.js";
+public/control-center/router.js:28:  getFallbackRouteAccess
+public/control-center/router.js:29:} from "./runtime/authority/route-role-fallback.js";
+public/control-center/router.js:31:const routeRegistry = {
+public/control-center/router.js:32:  [homeRoute.id]: homeRoute,
+public/control-center/router.js:33:  [aiCommandRoute.id]: aiCommandRoute,
+public/control-center/router.js:34:  [workflowsRoute.id]: workflowsRoute,
+public/control-center/router.js:35:  [operationsCentersRoute.id]: operationsCentersRoute,
+public/control-center/router.js:36:  [taskCenterRoute.id]: taskCenterRoute,
+public/control-center/router.js:37:  [queueCenterRoute.id]: queueCenterRoute,
+public/control-center/router.js:38:  [jobMonitorRoute.id]: jobMonitorRoute,
+public/control-center/router.js:39:  [notificationCenterRoute.id]: notificationCenterRoute,
+public/control-center/router.js:40:  [campaignStudioRoute.id]: campaignStudioRoute,
+public/control-center/router.js:41:  [contentStudioRoute.id]: contentStudioRoute,
+public/control-center/router.js:42:  [mediaStudioRoute.id]: mediaStudioRoute,
+public/control-center/router.js:43:  [publishingRoute.id]: publishingRoute,
+public/control-center/router.js:44:  [adsManagerRoute.id]: adsManagerRoute,
+public/control-center/router.js:45:  [insightsRoute.id]: insightsRoute,
+public/control-center/router.js:46:  [researchRoute.id]: researchRoute,
+public/control-center/router.js:47:  [setupRoute.id]: setupRoute,
+public/control-center/router.js:48:  [libraryRoute.id]: libraryRoute,
+public/control-center/router.js:49:  [customerCenterRoute.id]: customerCenterRoute,
+public/control-center/router.js:50:  [integrationsRoute.id]: integrationsRoute,
+public/control-center/router.js:51:  [settingsRoute.id]: settingsRoute,
+public/control-center/router.js:52:  [governanceRoute.id]: governanceRoute
+public/control-center/router.js:55:let routeAccessResolver = null;
+public/control-center/router.js:57:const routeChangeSubscribers = new Set();
+public/control-center/router.js:59:export function subscribeRouteChange(handler) {
+public/control-center/router.js:61:  routeChangeSubscribers.add(handler);
+public/control-center/router.js:62:  return () => routeChangeSubscribers.delete(handler);
+public/control-center/router.js:65:function notifyRouteChange(route) {
+public/control-center/router.js:66:  routeChangeSubscribers.forEach((handler) => {
+public/control-center/router.js:68:      handler(route);
+public/control-center/router.js:70:      console.warn("Route change subscriber failed:", error?.message || error);
+public/control-center/router.js:80:function getFallbackRoute(route) {
+public/control-center/router.js:82:    id: route,
+public/control-center/router.js:92:            <div class="empty-box">Unknown route: ${route}</div>
+public/control-center/router.js:108:function getAccessDeniedRoute(route, reason = "") {
+public/control-center/router.js:109:  const detail = reason || `Route "${route}" is not available for the current role.`;
+public/control-center/router.js:111:    id: "__access-denied__",
+public/control-center/router.js:114:      title: "Route Blocked",
+public/control-center/router.js:115:      description: "This workspace route is blocked by role access rules."
+public/control-center/router.js:123:              <h3 class="access-denied-title">Route blocked: ${escapeHtmlMin(route)}</h3>
+public/control-center/router.js:137:function normalizeRouteAccessResult(result, route) {
+public/control-center/router.js:141:      reason: result ? "" : `Access to ${route} is restricted.`
+public/control-center/router.js:158:function getDefaultRouteAccess(route) {
+public/control-center/router.js:159:  return getFallbackRouteAccess(route, DEFAULT_ROLE, { useDefaultRoleMessage: true });
+public/control-center/router.js:162:function getRouteAccess(route) {
+public/control-center/router.js:163:  if (typeof routeAccessResolver !== "function") {
+public/control-center/router.js:164:    return getDefaultRouteAccess(route);
+public/control-center/router.js:168:    return normalizeRouteAccessResult(routeAccessResolver(route), route);
+public/control-center/router.js:170:    return getDefaultRouteAccess(route);
+public/control-center/router.js:174:function updatePageHeader(route) {
+public/control-center/router.js:175:  const routeDef = getRouteDefinition(route);
+public/control-center/router.js:176:  const meta = routeDef.meta;
+public/control-center/router.js:187:function updateActiveNav(route) {
+public/control-center/router.js:188:  const navItems = Array.from(document.querySelectorAll(".nav-item[data-route]"));
+public/control-center/router.js:191:    const itemRoute = item.getAttribute("data-route");
+public/control-center/router.js:192:    item.classList.toggle("is-active", itemRoute === route);
+public/control-center/router.js:196:export function getRouteDefinition(route) {
+public/control-center/router.js:197:  const access = getRouteAccess(route);
+public/control-center/router.js:199:    return getAccessDeniedRoute(route, access.reason);
+public/control-center/router.js:202:  return routeRegistry[route] || getFallbackRoute(route);
+public/control-center/router.js:205:export function setRouteAccessResolver(resolver) {
+public/control-center/router.js:206:  routeAccessResolver = typeof resolver === "function" ? resolver : null;
+public/control-center/router.js:209:export function renderRouteTemplate(route) {
+public/control-center/router.js:213:  const routeDef = getRouteDefinition(route);
+public/control-center/router.js:214:  root.innerHTML = routeDef.template;
+public/control-center/router.js:216:  updatePageHeader(route);
+public/control-center/router.js:217:  updateActiveNav(route);
+public/control-center/router.js:220:export function navigateTo(route, emit = true) {
+public/control-center/router.js:221:  renderRouteTemplate(route);
+public/control-center/router.js:222:  notifyRouteChange(route);
+public/control-center/router.js:225:  const newHash = `#${route}`;
+public/control-center/router.js:232:      new CustomEvent("mh:route-change", {
+public/control-center/router.js:233:        detail: { route }
+public/control-center/router.js:239:export function initRouter() {
+public/control-center/router.js:240:  renderRouteTemplate("home");
+public/control-center/app.js:5:  getProjectedRoutePermissions
+public/control-center/app.js:9:  getFallbackRouteAccess
+public/control-center/app.js:10:} from "./runtime/authority/route-role-fallback.js";
+public/control-center/app.js:13:  initRouter,
+public/control-center/app.js:15:  renderRouteTemplate,
+public/control-center/app.js:16:  getRouteDefinition,
+public/control-center/app.js:17:  setRouteAccessResolver
+public/control-center/app.js:18:} from "./router.js";
+public/control-center/app.js:19:import { applyStandardPageLayout } from "./ui/page-standard.js";
+public/control-center/app.js:24:  setCurrentRoute,
+public/control-center/app.js:79:import { getOverlaySnapshot } from "./runtime/overlay/overlay-runtime.js";
+public/control-center/app.js:80:import { createLifecycleRegistry } from "./runtime/lifecycle/lifecycle-registry.js";
+public/control-center/app.js:81:import { installMhRuntimeGlobals } from "./runtime/mh-runtime-globals.js";
+public/control-center/app.js:94:// Manages global listeners (resize, orientation, route change, navigation)
+public/control-center/app.js:95:// Cleaned up on route changes to prevent listener accumulation
+public/control-center/app.js:181:  const operations = state.data.operations;
+public/control-center/app.js:182:  const stateRole = getProjectedActiveRole({ operations, activeRole: state.activeRole });
+public/control-center/app.js:207:    return /^\/(?:public\/)?media-manager\//.test(url.pathname);
+public/control-center/app.js:252:function resolveRouteAccess(route) {
+public/control-center/app.js:253:  const operations = getState().data.operations;
+public/control-center/app.js:254:  const routePermissions = getProjectedRoutePermissions({ operations });
+public/control-center/app.js:257:  const explicitRule = routePermissions.find((item) => item?.route === route);
+public/control-center/app.js:260:    return getFallbackRouteAccess(route, activeRole);
+public/control-center/app.js:272:      : `Route "${route}" requires one of: [${allowedRoles.join(", ")}]. ` +
+public/control-center/app.js:279:setRouteAccessResolver(resolveRouteAccess);
+public/control-center/app.js:296:        Enter the Control Center access key to unlock protected reads and writes.
+public/control-center/app.js:298:        static routes or logged to the console.
+public/control-center/app.js:422:      `probe /media-manager/projects: status=${requestResult.status || "request-failed"} auth=${requestResult.authMode}`
+public/control-center/app.js:454:    const response = await fetch("/media-manager/projects", {
+public/control-center/app.js:496:  navigateTo("home");
+public/control-center/app.js:540:        navigateTo("home");
+public/control-center/app.js:576:        const response = await fetch("/media-manager/projects", {
+public/control-center/app.js:618:      setAccessKeyStatus("Key cleared. Reads will now fail with missing-key errors.", "warn");
+public/control-center/app.js:732:function ensureRouteDom(route) {
+public/control-center/app.js:736:  const page = pageRoot.querySelector(`.page[data-page="${route}"]`);
+public/control-center/app.js:738:    renderRouteTemplate(route);
+public/control-center/app.js:800:  text = "Please wait while the system loads the workspace.",
+public/control-center/app.js:1186:    payload.dataRoute ? `route=${payload.dataRoute}` : "",
+public/control-center/app.js:1202:      ? event.target.closest("button, a, [data-route], [data-page], [data-action], input, select, textarea") || event.target
+public/control-center/app.js:1212:      id: String(element.id || ""),
+public/control-center/app.js:1215:      dataRoute: String(element.getAttribute("data-route") || ""),
+public/control-center/app.js:1931:  const operations = state.data.operations || {};
+public/control-center/app.js:1932:  const notifications = Array.isArray(operations?.notifications?.items)
+public/control-center/app.js:1933:    ? operations.notifications.items
+public/control-center/app.js:1941:  setText("ctxRoute", state.currentRoute || "home");
+public/control-center/app.js:2002:    ["workflowsCatalog", "No data is available yet."],
+public/control-center/app.js:2004:    ["campaignBuilder", "No data is available yet."],
+public/control-center/app.js:2005:    ["campaignWaves", "No data is available yet."],
+public/control-center/app.js:2006:    ["campaignAssets", "Open the related setup page to complete this section."],
+public/control-center/app.js:2008:    ["contentQueue", "No data is available yet."],
+public/control-center/app.js:2009:    ["contentPreview", "This section is currently unavailable."],
+public/control-center/app.js:2011:    ["mediaImages", "This section is currently unavailable."],
+public/control-center/app.js:2012:    ["mediaVideoAudio", "This section is currently unavailable."],
+public/control-center/app.js:2013:    ["mediaOutputs", "No data is available yet."],
+public/control-center/app.js:2015:    ["publishingCalendar", "No data is available yet."],
+public/control-center/app.js:2016:    ["publishingQueue", "Open the related setup page to complete this section."],
+public/control-center/app.js:2017:    ["publishingChannels", "Open the related setup page to complete this section."],
+public/control-center/app.js:2019:    ["adsBudget", "This section is currently unavailable."],
+public/control-center/app.js:2020:    ["adsPerformance", "This section is currently unavailable."],
+public/control-center/app.js:2022:    ["insightsOverview", "This section is currently unavailable."],
+public/control-center/app.js:2023:    ["insightsReports", "No data is available yet."],
+public/control-center/app.js:2025:    ["settingsProject", "Open the related setup page to complete this section."],
+public/control-center/app.js:2026:    ["settingsSystem", "No data is available yet."]
+public/control-center/app.js:2041:let activeRouteCleanup = null;
+public/control-center/app.js:2042:let activeRouteCleanupRoute = "";
+public/control-center/app.js:2044:function disposeActiveRouteCleanup(nextRoute = "") {
+public/control-center/app.js:2045:  if (!activeRouteCleanup) {
+public/control-center/app.js:2046:    activeRouteCleanupRoute = nextRoute || "";
+public/control-center/app.js:2050:  if (activeRouteCleanupRoute && nextRoute && activeRouteCleanupRoute === nextRoute) {
+public/control-center/app.js:2054:  const cleanup = activeRouteCleanup;
+public/control-center/app.js:2055:  activeRouteCleanup = null;
+public/control-center/app.js:2056:  activeRouteCleanupRoute = "";
+public/control-center/app.js:2061:    console.warn("[Route] cleanup failed", error);
+public/control-center/app.js:2066:  const { currentRoute } = getState();
+public/control-center/app.js:2067:  disposeActiveRouteCleanup(currentRoute);
+public/control-center/app.js:2068:  ensureRouteDom(currentRoute);
+public/control-center/app.js:2069:  const routeDef = getRouteDefinition(currentRoute);
+public/control-center/app.js:2071:  if (typeof routeDef.render === "function") {
+public/control-center/app.js:2072:    const renderResult = routeDef.render({
+public/control-center/app.js:2120:      activeRouteCleanup = renderResult;
+public/control-center/app.js:2121:      activeRouteCleanupRoute = currentRoute;
+public/control-center/app.js:2124:    if (!routeDef.disableStandardLayout) {
+public/control-center/app.js:2126:        route: currentRoute,
+public/control-center/app.js:2139:    route: currentRoute,
+public/control-center/app.js:2421:    integrations: payload.connectors,
+public/control-center/app.js:2423:    operations: payload.operations || null,
+public/control-center/app.js:2441:    campaign: inferredCampaign
+public/control-center/app.js:2490:        endpoint: "/media-manager/projects",
+public/control-center/app.js:2498:        endpoint: "/media-manager/projects",
+public/control-center/app.js:2519:    campaign: "Not selected yet"
+public/control-center/app.js:2622:      integrations: patch.connectors,
+public/control-center/app.js:2623:      operations: patch.operations,
+public/control-center/app.js:2972:        campaign: "Not selected yet"
+public/control-center/app.js:3018:   * can be restored later with route-level lazy loading to avoid startup
+public/control-center/app.js:3037:  const fallbackLabelRoutes = {
+public/control-center/app.js:3038:    Home: "home",
+public/control-center/app.js:3039:    Setup: "setup",
+public/control-center/app.js:3040:    Library: "library",
+public/control-center/app.js:3041:    Integrations: "integrations",
+public/control-center/app.js:3042:    "AI Command": "ai-command",
+public/control-center/app.js:3043:    Workflows: "workflows",
+public/control-center/app.js:3044:    Publishing: "publishing"
+public/control-center/app.js:3049:    const labeledRoute = fallbackLabelRoutes[String(item.textContent || "").trim()] || "";
+public/control-center/app.js:3050:    const route = item.getAttribute("data-route") || labeledRoute;
+public/control-center/app.js:3051:    if (!route) return;
+public/control-center/app.js:3052:    item.setAttribute("data-route", route);
+public/control-center/app.js:3053:    item.setAttribute("data-page", route);
+public/control-center/app.js:3064:  const actionRouteMap = {
+public/control-center/app.js:3065:    "open-ai-command": "ai-command",
+public/control-center/app.js:3066:    "open-campaign-studio": "campaign-studio",
+public/control-center/app.js:3067:    "open-publishing": "publishing",
+public/control-center/app.js:3068:    "send-ai-command": "ai-command"
+public/control-center/app.js:3091:      navigateTo("home");
+public/control-center/app.js:3095:    if (actionName === "send-ai-command") {
+public/control-center/app.js:3099:        navigateTo("ai-command");
+public/control-center/app.js:3100:        showMessage("AI Command opened.");
+public/control-center/app.js:3105:    const targetRoute = actionRouteMap[actionName];
+public/control-center/app.js:3106:    if (targetRoute) {
+public/control-center/app.js:3107:      navigateTo(targetRoute);
+public/control-center/app.js:3116:      ? event.target.closest("button, a, [data-route], [data-page], [data-action]")
+public/control-center/app.js:3122:    const routeAttr = String(candidate.getAttribute("data-route") || "").trim();
+public/control-center/app.js:3124:    const clickedNavItem = Boolean(candidate.closest(".nav-item[data-route], [data-shell-route], [data-global-route]"));
+public/control-center/app.js:3125:    const routeAttrAllowed = clickedNavItem ? (routeAttr || pageAttr) : routeAttr;
+public/control-center/app.js:3127:    if (routeAttrAllowed) {
+public/control-center/app.js:3129:      navigateTo(routeAttrAllowed);
+public/control-center/app.js:3136:      (candidate.closest("#openAiBtn") ? "open-ai-command" : "") ||
+public/control-center/app.js:3138:      (candidate.closest("#runQuickCommandBtn") ? "send-ai-command" : "") ||
+public/control-center/app.js:3139:      (candidate.closest("#newCampaignBtn") ? "open-campaign-studio" : "") ||
+public/control-center/app.js:3140:      (candidate.closest("#scheduleBtn") ? "open-publishing" : "");
+public/control-center/app.js:3156:function bindRouteListener() {
+public/control-center/app.js:3157:  if (window.__mhRouteListenerBound) return;
+public/control-center/app.js:3158:  window.__mhRouteListenerBound = true;
+public/control-center/app.js:3176:  // Register route change listener with lifecycle registry
+public/control-center/app.js:3177:  // Handles shell-level route change (different from page content)
+public/control-center/app.js:3178:  addAppShellListener(window, "mh:route-change", (event) => {
+public/control-center/app.js:3179:    const route = event?.detail?.route || "home";
+public/control-center/app.js:3180:    setCurrentRoute(route);
+public/control-center/app.js:3186:  // Register with lifecycle registry for proper cleanup on route changes
+public/control-center/app.js:3188:    const route = (location.hash.slice(1) || "home").trim();
+public/control-center/app.js:3189:    if (route && route !== getState().currentRoute) {
+public/control-center/app.js:3190:      navigateTo(route);
+public/control-center/app.js:3376:    const clickedNavItem = event.target.closest(".nav-item[data-route]");
+public/control-center/app.js:3402:  // These ensure proper cleanup on route changes
+public/control-center/app.js:3528:    showError("Enter a route, page name, or keyword to search.");
+public/control-center/app.js:3532:  const navItems = Array.from(document.querySelectorAll(".nav-item[data-route]"));
+public/control-center/app.js:3534:    const route = item.getAttribute("data-route") || "";
+public/control-center/app.js:3537:      route,
+public/control-center/app.js:3539:      haystack: `${route} ${label}`.toLowerCase()
+public/control-center/app.js:3548:    showError(`No route matches "${query}".`);
+public/control-center/app.js:3553:    navigateTo(matches[0].route);
+public/control-center/app.js:3560:  navigateTo(top[0].route);
+public/control-center/app.js:3603:  navigateTo("ai-command");
+public/control-center/app.js:3605:  window.dispatchEvent(new CustomEvent("mh:submit-ai-command", {
+public/control-center/app.js:3653:    const clickedAiButton = event.target.closest("#execAskAiBtn, #openAiBtn, [data-action='open-ai-command']");
+public/control-center/app.js:3709:    runBtn.setAttribute("data-action", "send-ai-command");
+public/control-center/app.js:3780:  Array.from(document.querySelectorAll("[data-ai-route]")).forEach((button) => {
+public/control-center/app.js:3782:      const route = button.getAttribute("data-ai-route");
+public/control-center/app.js:3783:      if (!route) return;
+public/control-center/app.js:3784:      navigateTo(route);
+public/control-center/app.js:3792:    const route = window.location.hash.replace(/^#/, "") || "home";
+public/control-center/app.js:3795:      context.textContent = `Current workspace: ${route}`;
+public/control-center/app.js:3801:  // Updates dock to reflect current route context
+public/control-center/app.js:3825:            Start with a project, campaign, content, media, publishing, approval, or a custom AI workflow.
+public/control-center/app.js:3886:          data-new-route="setup"
+public/control-center/app.js:3888:          data-new-prompt="Create a new project from zero. Guide me through project name, business type, market, language, channels, brand tone, goals, and required setup."
+public/control-center/app.js:3892:          <span>Create a project from scratch: brand, market, language, channels, and setup.</span>
+public/control-center/app.js:3895:        <button class="executive-new-option" type="button" data-new-route="campaign-studio" data-new-prompt="Create a campaign plan for the current project. Ask me the required questions step by step.">
+public/control-center/app.js:3898:          <span>Launch plan, audience, channels, budget, content map.</span>
+public/control-center/app.js:3901:        <button class="executive-new-option" type="button" data-new-route="content-studio" data-new-prompt="Create a blog post workflow for the current project. Ask for topic, audience, language, SEO goal, and call to action.">
+public/control-center/app.js:3904:          <span>Blog, captions, landing copy, SEO content.</span>
+public/control-center/app.js:3907:        <button class="executive-new-option" type="button" data-new-route="media-studio" data-new-prompt="Create a media generation workflow. Ask for format, platform, product, style, language, and assets needed.">
+public/control-center/app.js:3913:        <button class="executive-new-option" type="button" data-new-route="publishing" data-new-prompt="Prepare a publishing workflow. Ask what content should be reviewed, approved, scheduled, or published.">
+public/control-center/app.js:3919:        <button class="executive-new-option" type="button" data-new-route="governance" data-new-prompt="Create an approval request. Ask what needs approval, risk level, reviewer, and decision deadline.">
+public/control-center/app.js:3925:        <button class="executive-new-option" type="button" data-new-route="workflows" data-new-prompt="Build a custom workflow for the current project. Ask what outcome I want and what inputs are available.">
+public/control-center/app.js:4002:        navigateTo("setup");
+public/control-center/app.js:4010:    Array.from(modal.querySelectorAll("[data-new-route]")).forEach((button) => {
+public/control-center/app.js:4023:        const route = button.getAttribute("data-new-route") || "ai-command";
+public/control-center/app.js:4028:        navigateTo(route);
+public/control-center/app.js:4070:      navigateTo("ai-command");
+public/control-center/app.js:4080:    openAiBtn.setAttribute("data-action", "open-ai-command");
+public/control-center/app.js:4085:    newCampaignBtn.setAttribute("data-action", "open-campaign-studio");
+public/control-center/app.js:4090:    scheduleBtn.setAttribute("data-action", "open-publishing");
+public/control-center/app.js:4113:    initRouter();
+public/control-center/app.js:4114:    // Restore the route from the URL hash on refresh or deep-link
+public/control-center/app.js:4115:    const startRoute = (location.hash.slice(1) || "home").trim();
+public/control-center/app.js:4116:    setCurrentRoute(startRoute || "home");
+public/control-center/app.js:4120:    bindRouteListener();
+public/control-center/app.js:4184:  const route = String(state.currentRoute || "home");
+public/control-center/app.js:4191:      "input, select, textarea, [contenteditable=''], [contenteditable='true'], [contenteditable]:not([contenteditable='false'])"
+public/control-center/app.js:4196:    route !== window.__mhLastGlobalUiRoute ||
+public/control-center/app.js:4204:  window.__mhLastGlobalUiRoute = route;
+
+All page files:
+public/control-center/pages/ads-manager.js
+public/control-center/pages/ai-command.js
+public/control-center/pages/ai-command/tool-dock.js
+public/control-center/pages/business/dashboard.js
+public/control-center/pages/campaign-studio.js
+public/control-center/pages/content-studio-workspace.js
+public/control-center/pages/customer-center.js
+public/control-center/pages/governance.js
+public/control-center/pages/governance/dashboard.js
+public/control-center/pages/home.js
+public/control-center/pages/home/render-sections.js
+public/control-center/pages/insights.js
+public/control-center/pages/integrations.js
+public/control-center/pages/integrations/builders.js
+public/control-center/pages/integrations/cards.js
+public/control-center/pages/integrations/diagnostics.js
+public/control-center/pages/integrations/drawer.js
+public/control-center/pages/integrations/render.js
+public/control-center/pages/integrations/utils.js
+public/control-center/pages/library.js
+public/control-center/pages/library/action-panel.js
+public/control-center/pages/library/ai-panel.js
+public/control-center/pages/library/command-router.js
+public/control-center/pages/library/listener-lifecycle.js
+public/control-center/pages/library/projection-adapter.js
+public/control-center/pages/library/session-store.js
+public/control-center/pages/media-studio-workspace.js
+public/control-center/pages/media-studio.BACKUP.js
+public/control-center/pages/media-studio.BACKUP_FINAL_FLOW_LOCK.js
+public/control-center/pages/media-studio.BACKUP_FLOW_LOCK.js
+public/control-center/pages/media-studio.js
+public/control-center/pages/operations-centers.js
+public/control-center/pages/publishing.js
+public/control-center/pages/publishing/publishing-payloads.js
+public/control-center/pages/research.js
+public/control-center/pages/settings.js
+public/control-center/pages/setup.js
+public/control-center/pages/workflows.js
+
+Route exports in pages:
+public/control-center/pages/ai-command/tool-dock.js:203:    toolId: "",
+public/control-center/pages/ai-command/tool-dock.js:399:    id: "rewrite",
+public/control-center/pages/ai-command/tool-dock.js:406:    id: "translate",
+public/control-center/pages/ai-command/tool-dock.js:413:    id: "improve",
+public/control-center/pages/ai-command/tool-dock.js:424:      id: "campaign-plan",
+public/control-center/pages/ai-command/tool-dock.js:437:      id: "launch-plan",
+public/control-center/pages/ai-command/tool-dock.js:450:      id: "audience",
+public/control-center/pages/ai-command/tool-dock.js:463:      id: "offer",
+public/control-center/pages/ai-command/tool-dock.js:476:      id: "funnel",
+public/control-center/pages/ai-command/tool-dock.js:489:      id: "priority",
+public/control-center/pages/ai-command/tool-dock.js:505:      id: "write",
+public/control-center/pages/ai-command/tool-dock.js:518:      id: "rewrite",
+public/control-center/pages/ai-command/tool-dock.js:531:      id: "translate",
+public/control-center/pages/ai-command/tool-dock.js:544:      id: "improve",
+public/control-center/pages/ai-command/tool-dock.js:557:      id: "check",
+public/control-center/pages/ai-command/tool-dock.js:570:      id: "sources",
+public/control-center/pages/ai-command/tool-dock.js:583:      id: "seo",
+public/control-center/pages/ai-command/tool-dock.js:596:      id: "repurpose",
+public/control-center/pages/ai-command/tool-dock.js:609:      id: "send",
+public/control-center/pages/ai-command/tool-dock.js:624:      id: "visual-brief",
+public/control-center/pages/ai-command/tool-dock.js:637:      id: "moodboard",
+public/control-center/pages/ai-command/tool-dock.js:650:      id: "image-prompt",
+public/control-center/pages/ai-command/tool-dock.js:663:      id: "asset-list",
+public/control-center/pages/ai-command/tool-dock.js:676:      id: "layout",
+public/control-center/pages/ai-command/tool-dock.js:689:      id: "brand-check",
+public/control-center/pages/ai-command/tool-dock.js:705:      id: "reel-script",
+public/control-center/pages/ai-command/tool-dock.js:718:      id: "storyboard",
+public/control-center/pages/ai-command/tool-dock.js:731:      id: "shot-list",
+public/control-center/pages/ai-command/tool-dock.js:744:      id: "voiceover",
+public/control-center/pages/ai-command/tool-dock.js:757:      id: "video-cta",
+public/control-center/pages/ai-command/tool-dock.js:773:      id: "publish-check",
+public/control-center/pages/ai-command/tool-dock.js:786:      id: "channel-pack",
+public/control-center/pages/ai-command/tool-dock.js:799:      id: "schedule",
+public/control-center/pages/ai-command/tool-dock.js:812:      id: "hashtags",
+public/control-center/pages/ai-command/tool-dock.js:825:      id: "approval-pack",
+public/control-center/pages/ai-command/tool-dock.js:841:      id: "ad-angle",
+public/control-center/pages/ai-command/tool-dock.js:854:      id: "ad-copy",
+public/control-center/pages/ai-command/tool-dock.js:867:      id: "targeting",
+public/control-center/pages/ai-command/tool-dock.js:880:      id: "creative-test",
+public/control-center/pages/ai-command/tool-dock.js:893:      id: "landing-match",
+public/control-center/pages/ai-command/tool-dock.js:909:      id: "seo-brief",
+public/control-center/pages/ai-command/tool-dock.js:922:      id: "insights",
+public/control-center/pages/ai-command/tool-dock.js:935:      id: "keywords",
+public/control-center/pages/ai-command/tool-dock.js:948:      id: "performance",
+public/control-center/pages/ai-command/tool-dock.js:961:      id: "content-gap",
+public/control-center/pages/ai-command/tool-dock.js:977:      id: "claims-check",
+public/control-center/pages/ai-command/tool-dock.js:990:      id: "safe-rewrite",
+public/control-center/pages/ai-command/tool-dock.js:1003:      id: "evidence",
+public/control-center/pages/ai-command/tool-dock.js:1016:      id: "gdpr",
+public/control-center/pages/ai-command/tool-dock.js:1029:      id: "approval-notes",
+public/control-center/pages/ai-command/tool-dock.js:1045:      id: "task-plan",
+public/control-center/pages/ai-command/tool-dock.js:1058:      id: "workflow",
+public/control-center/pages/ai-command/tool-dock.js:1071:      id: "handoff",
+public/control-center/pages/ai-command/tool-dock.js:1084:      id: "timeline",
+public/control-center/pages/ai-command/tool-dock.js:1097:      id: "checklist",
+public/control-center/pages/ai-command/tool-dock.js:1113:      id: "reply-draft",
+public/control-center/pages/ai-command/tool-dock.js:1126:      id: "ticket",
+public/control-center/pages/ai-command/tool-dock.js:1139:      id: "sla",
+public/control-center/pages/ai-command/tool-dock.js:1152:      id: "summary",
+public/control-center/pages/ai-command/tool-dock.js:1168:      id: "sales-pitch",
+public/control-center/pages/ai-command/tool-dock.js:1181:      id: "follow-up",
+public/control-center/pages/ai-command/tool-dock.js:1194:      id: "objections",
+public/control-center/pages/ai-command/tool-dock.js:1207:      id: "lead-brief",
+public/control-center/pages/campaign-studio.js:263:      recordId: "",
+public/control-center/pages/campaign-studio.js:271:      lastAiHandoffId: ""
+public/control-center/pages/campaign-studio.js:1496:export const campaignStudioRoute = {
+public/control-center/pages/campaign-studio.js:1497:  id: "campaign-studio",
+public/control-center/pages/media-studio-workspace.js:47:    id: "visual-director",
+public/control-center/pages/media-studio-workspace.js:54:    id: "video-strategist",
+public/control-center/pages/media-studio-workspace.js:61:    id: "voice-director",
+public/control-center/pages/media-studio-workspace.js:68:    id: "brand-guardian",
+public/control-center/pages/media-studio-workspace.js:75:    id: "prompt-engineer",
+public/control-center/pages/media-studio-workspace.js:82:    id: "publishing-assistant",
+public/control-center/pages/media-studio-workspace.js:349:    id: "v1",
+public/control-center/pages/media-studio-workspace.js:474:      selectedId: "",
+public/control-center/pages/media-studio-workspace.js:477:      formSourceId: "",
+public/control-center/pages/media-studio-workspace.js:482:      loadedHandoffId: "",
+public/control-center/pages/media-studio-workspace.js:4783:          ${renderField({ id: "mediaProjectInput", name: "project", label: "Project", value: form.project }, session, escapeHtml)}
+public/control-center/pages/media-studio-workspace.js:4784:          ${renderField({ id: "mediaCampaignInput", name: "campaign", label: "Campaign", value: form.campaign }, session, escapeHtml)}
+public/control-center/pages/media-studio-workspace.js:4787:          ${renderField({ id: "mediaProductInput", name: "product", label: "Product", value: form.product }, session, escapeHtml)}
+public/control-center/pages/media-studio-workspace.js:4788:          ${renderField({ id: "mediaChannelInput", name: "channel", label: "Channel", value: form.channel, options: CHANNELS }, session, escapeHtml)}
+public/control-center/pages/media-studio-workspace.js:4791:          ${renderField({ id: "mediaFormatInput", name: "format", label: "Format", value: form.format, helper: "Examples: 1:1 product image, 9:16 reel, voiceover script, marketplace hero." }, session, escapeHtml)}
+public/control-center/pages/media-studio-workspace.js:4792:          ${renderField({ id: "mediaPurposeInput", name: "outputPurpose", label: "Output purpose", value: form.outputPurpose, options: OUTPUT_PURPOSES }, session, escapeHtml)}
+public/control-center/pages/media-studio-workspace.js:4794:        ${renderField({ id: "mediaObjectiveInput", name: "objective", label: "Objective", value: form.objective, multiline: true, rows: 3 }, session, escapeHtml)}
+public/control-center/pages/media-studio-workspace.js:4795:        ${renderField({ id: "mediaBrandStyleInput", name: "brandStyle", label: "Brand style", value: form.brandStyle, multiline: true, rows: 3 }, session, escapeHtml)}
+public/control-center/pages/media-studio-workspace.js:4796:        ${renderField({ id: "mediaPromptInput", name: "prompt", label: "Prompt / brief", value: form.prompt, multiline: true, rows: 7, helper: "Use this as the creative brief. If no generation provider is connected, Media Studio keeps it as a prompt/job-ready draft for review, Library save, AI review, or provider handoff." }, session, escapeHtml)}
+public/control-center/pages/media-studio-workspace.js:4798:          ${renderField({ id: "mediaReferenceInput", name: "referenceAsset", label: "Reference asset if available", value: form.referenceAsset, helper: "Use an asset id, filename, or source note already known to the project." }, session, escapeHtml)}
+public/control-center/pages/media-studio-workspace.js:4799:          ${renderField({ id: "mediaTitleInput", name: "title", label: "Job title", value: form.title, helper: "Optional operator-facing queue title." }, session, escapeHtml)}
+public/control-center/pages/media-studio-workspace.js:4801:        ${renderField({ id: "mediaReviewNotesInput", name: "reviewNotes", label: "Review notes", value: form.reviewNotes, multiline: true, rows: 3, errorKey: "reviewNotes" }, session, escapeHtml)}
+public/control-center/pages/media-studio-workspace.js:6412:        modeId: "media",
+public/control-center/pages/media-studio-workspace.js:6619:          modeId: "media",
+public/control-center/pages/media-studio-workspace.js:7411:      id: "scene-1-hook-problem",
+public/control-center/pages/media-studio-workspace.js:7423:      id: "scene-2-product-reveal",
+public/control-center/pages/media-studio-workspace.js:7435:      id: "scene-3-texture-or-feature",
+public/control-center/pages/media-studio-workspace.js:7447:      id: "scene-4-action-use",
+public/control-center/pages/media-studio-workspace.js:7459:      id: "scene-5-result-confidence",
+public/control-center/pages/media-studio-workspace.js:7471:      id: "scene-6-hero-cta",
+public/control-center/pages/media-studio-workspace.js:8047:      id: "prompt_only",
+public/control-center/pages/media-studio-workspace.js:8062:      id: "openai_gpt_image",
+public/control-center/pages/media-studio-workspace.js:8073:      id: "higgsfield_soul",
+public/control-center/pages/media-studio-workspace.js:8085:      id: "nano_banana",
+public/control-center/pages/media-studio-workspace.js:8096:      id: "seedream",
+public/control-center/pages/media-studio-workspace.js:8107:      id: "recraft",
+public/control-center/pages/media-studio-workspace.js:8118:      id: "comfyui_flux",
+public/control-center/pages/media-studio-workspace.js:8130:      id: "comfyui_sdxl",
+public/control-center/pages/media-studio-workspace.js:8144:      id: "higgsfield_video",
+public/control-center/pages/media-studio-workspace.js:8156:      id: "kling",
+public/control-center/pages/media-studio-workspace.js:8167:      id: "runway",
+public/control-center/pages/media-studio-workspace.js:8178:      id: "luma",
+public/control-center/pages/media-studio-workspace.js:8189:      id: "sora",
+public/control-center/pages/media-studio-workspace.js:8200:      id: "veo",
+public/control-center/pages/media-studio-workspace.js:8211:      id: "wan_video",
+public/control-center/pages/media-studio-workspace.js:8223:      id: "hunyuan_video",
+public/control-center/pages/media-studio-workspace.js:8234:      id: "cogvideox",
+public/control-center/pages/media-studio-workspace.js:8245:      id: "animatediff",
+public/control-center/pages/media-studio-workspace.js:8259:      id: "openai_audio",
+public/control-center/pages/media-studio-workspace.js:8271:      id: "elevenlabs",
+public/control-center/pages/media-studio-workspace.js:8283:      id: "seed_audio",
+public/control-center/pages/media-studio-workspace.js:8294:      id: "minimax_speech",
+public/control-center/pages/media-studio-workspace.js:8305:      id: "coqui_tts",
+public/control-center/pages/media-studio-workspace.js:8316:      id: "bark",
+public/control-center/pages/media-studio-workspace.js:8327:      id: "musicgen",
+public/control-center/pages/media-studio-workspace.js:8341:      id: "campaign_auto_route",
+public/control-center/pages/media-studio-workspace.js:8353:      id: "campaign_paid_cloud",
+public/control-center/pages/media-studio-workspace.js:8364:      id: "campaign_local_open",
+public/control-center/pages/media-studio-workspace.js:8375:      id: "campaign_hybrid",
+public/control-center/pages/media-studio-workspace.js:8411:    { id: "prompt_only", label: "Prompt-only", model: "Prompt draft", status: "draft", action: "Use draft mode" }
+public/control-center/pages/media-studio-workspace.js:8415:    { id: "openai_gpt_image", label: "OpenAI Image", model: "gpt-image", status: "connect", action: "Connect" },
+public/control-center/pages/media-studio-workspace.js:8416:    { id: "higgsfield_soul", label: "Higgsfield Soul", model: "Soul / Soul Cinema", status: "connect", action: "Connect" },
+public/control-center/pages/media-studio-workspace.js:8417:    { id: "nano_banana", label: "Nano Banana", model: "Nano Banana Pro", status: "connect", action: "Connect" },
+public/control-center/pages/media-studio-workspace.js:8418:    { id: "seedream", label: "Seedream", model: "Seedream image", status: "connect", action: "Connect" },
+public/control-center/pages/media-studio-workspace.js:8419:    { id: "recraft", label: "Recraft", model: "Recraft image", status: "connect", action: "Connect" },
+public/control-center/pages/media-studio-workspace.js:8420:    { id: "comfyui_flux", label: "ComfyUI", model: "FLUX workflow", status: "setup", action: "Set up" },
+public/control-center/pages/media-studio-workspace.js:8421:    { id: "comfyui_sdxl", label: "ComfyUI", model: "SDXL workflow", status: "setup", action: "Set up" }
+public/control-center/pages/media-studio-workspace.js:8425:    { id: "higgsfield_video", label: "Higgsfield Video", model: "Motion workflow", status: "connect", action: "Connect" },
+public/control-center/pages/media-studio-workspace.js:8426:    { id: "kling", label: "Kling", model: "Video model", status: "connect", action: "Connect" },
+public/control-center/pages/media-studio-workspace.js:8427:    { id: "runway", label: "Runway", model: "Video model", status: "connect", action: "Connect" },
+public/control-center/pages/media-studio-workspace.js:8428:    { id: "luma", label: "Luma", model: "Video model", status: "connect", action: "Connect" },
+public/control-center/pages/media-studio-workspace.js:8429:    { id: "sora", label: "Sora", model: "Video model", status: "connect", action: "Connect" },
+public/control-center/pages/media-studio-workspace.js:8430:    { id: "veo", label: "Google Veo", model: "Video model", status: "connect", action: "Connect" },
+public/control-center/pages/media-studio-workspace.js:8431:    { id: "wan_video", label: "Wan", model: "Video workflow", status: "setup", action: "Set up" },
+public/control-center/pages/media-studio-workspace.js:8432:    { id: "hunyuan_video", label: "HunyuanVideo", model: "Video workflow", status: "setup", action: "Set up" },
+public/control-center/pages/media-studio-workspace.js:8433:    { id: "cogvideox", label: "CogVideoX", model: "Video workflow", status: "setup", action: "Set up" },
+public/control-center/pages/media-studio-workspace.js:8434:    { id: "animatediff", label: "AnimateDiff", model: "Motion workflow", status: "setup", action: "Set up" }
+public/control-center/pages/media-studio-workspace.js:8438:    { id: "openai_audio", label: "OpenAI Audio", model: "Speech / audio", status: "connect", action: "Connect" },
+public/control-center/pages/media-studio-workspace.js:8439:    { id: "elevenlabs", label: "ElevenLabs", model: "Voice model", status: "connect", action: "Connect" },
+public/control-center/pages/media-studio-workspace.js:8440:    { id: "seed_audio", label: "Seed Audio", model: "Audio model", status: "connect", action: "Connect" },
+public/control-center/pages/media-studio-workspace.js:8441:    { id: "minimax_speech", label: "MiniMax Speech", model: "Speech model", status: "connect", action: "Connect" },
+public/control-center/pages/media-studio-workspace.js:8442:    { id: "coqui_tts", label: "Coqui", model: "TTS workflow", status: "setup", action: "Set up" },
+public/control-center/pages/media-studio-workspace.js:8443:    { id: "bark", label: "Bark", model: "Audio workflow", status: "setup", action: "Set up" },
+public/control-center/pages/media-studio-workspace.js:8444:    { id: "musicgen", label: "MusicGen", model: "Music workflow", status: "setup", action: "Set up" }
+public/control-center/pages/media-studio-workspace.js:8448:    { id: "campaign_auto_route", label: "Auto route", model: "Campaign router", status: "draft", action: "Use route" },
+public/control-center/pages/media-studio-workspace.js:8449:    { id: "campaign_paid_route", label: "Connected providers", model: "Image + video + voice", status: "connect", action: "Connect" },
+public/control-center/pages/media-studio-workspace.js:8450:    { id: "campaign_local_route", label: "Studio workflow", model: "Custom workflow", status: "setup", action: "Set up" },
+public/control-center/pages/media-studio-workspace.js:8451:    { id: "campaign_hybrid_route", label: "Hybrid route", model: "Connected + studio workflow", status: "connect", action: "Connect" }
+public/control-center/pages/media-studio-workspace.js:9038:          ${renderMediaStudioProviderPickerR3({ mode, selectedProviderId: "prompt_only", escapeHtml })}
+public/control-center/pages/media-studio-workspace.js:9299:export const mediaStudioRoute = {
+public/control-center/pages/media-studio-workspace.js:9300:  id: "media-studio",
+public/control-center/pages/customer-center.js:481:export const customerCenterRoute = {
+public/control-center/pages/customer-center.js:482:  id: "customer-center",
+public/control-center/pages/operations-centers.js:1947:export const taskCenterRoute = {
+public/control-center/pages/operations-centers.js:1948:  id: "task-center",
+public/control-center/pages/operations-centers.js:1982:export const queueCenterRoute = {
+public/control-center/pages/operations-centers.js:1983:  id: "queue-center",
+public/control-center/pages/operations-centers.js:2030:export const jobMonitorRoute = {
+public/control-center/pages/operations-centers.js:2031:  id: "job-monitor",
+public/control-center/pages/operations-centers.js:2078:export const notificationCenterRoute = {
+public/control-center/pages/operations-centers.js:2079:  id: "notification-center",
+public/control-center/pages/operations-centers.js:2267:export const operationsCentersRoute = {
+public/control-center/pages/operations-centers.js:2268:  id: "operations-centers",
+public/control-center/pages/research.js:722:      modeId: "research",
+public/control-center/pages/research.js:728:      modeId: "research",
+public/control-center/pages/research.js:734:      modeId: "research",
+public/control-center/pages/research.js:740:      modeId: "seo",
+public/control-center/pages/research.js:746:      modeId: "content",
+public/control-center/pages/research.js:752:      modeId: "ads",
+public/control-center/pages/research.js:758:      modeId: "executive",
+public/control-center/pages/research.js:1130:export const researchRoute = {
+public/control-center/pages/research.js:1131:  id: "research",
+public/control-center/pages/library/session-store.js:2:  selectedAssetId: "",
+public/control-center/pages/ai-command.js:38:                id: "strategist",
+public/control-center/pages/ai-command.js:45:                id: "writer",
+public/control-center/pages/ai-command.js:52:                id: "media",
+public/control-center/pages/ai-command.js:59:                id: "video_lead",
+public/control-center/pages/ai-command.js:66:                id: "publisher",
+public/control-center/pages/ai-command.js:73:                id: "ads",
+public/control-center/pages/ai-command.js:80:                id: "analyst",
+public/control-center/pages/ai-command.js:87:                id: "compliance_reviewer",
+public/control-center/pages/ai-command.js:94:                id: "operations",
+public/control-center/pages/ai-command.js:101:                id: "customer_ops",
+public/control-center/pages/ai-command.js:108:                id: "sales_crm",
+public/control-center/pages/ai-command.js:144:		id: "strategist",
+public/control-center/pages/ai-command.js:157:		id: "writer",
+public/control-center/pages/ai-command.js:170:		id: "media",
+public/control-center/pages/ai-command.js:183:		id: "video_lead",
+public/control-center/pages/ai-command.js:196:		id: "publisher",
+public/control-center/pages/ai-command.js:209:		id: "ads",
+public/control-center/pages/ai-command.js:222:		id: "analyst",
+public/control-center/pages/ai-command.js:235:		id: "compliance_reviewer",
+public/control-center/pages/ai-command.js:248:		id: "operations",
+public/control-center/pages/ai-command.js:261:		id: "customer_ops",
+public/control-center/pages/ai-command.js:274:		id: "sales_crm",
+public/control-center/pages/ai-command.js:369:	{ id: "ask", title: "Ask", description: "Choose a specialist or the full team." },
+public/control-center/pages/ai-command.js:370:	{ id: "draft", title: "Prepare", description: "Create guidance, copy, task, or handoff context." },
+public/control-center/pages/ai-command.js:371:	{ id: "review", title: "Review", description: "Check safety, scope, language, and source." },
+public/control-center/pages/ai-command.js:372:	{ id: "route", title: "Handoff", description: "Open the owning workspace with draft context." },
+public/control-center/pages/ai-command.js:373:	{ id: "execute", title: "Confirm", description: "Execution stays gated in backend-owned surfaces." },
+public/control-center/pages/ai-command.js:374:	{ id: "monitor", title: "Monitor", description: "Track readiness, integrations, and recent activity." }
+public/control-center/pages/ai-command.js:378:	{ id: "draft", label: "Draft", helper: "Latest draft or guidance preview" },
+public/control-center/pages/ai-command.js:379:	{ id: "task", label: "Task", helper: "Task-shaped output" },
+public/control-center/pages/ai-command.js:380:	{ id: "workflow", label: "Workflow Preview", helper: "Operating sequence" },
+public/control-center/pages/ai-command.js:381:	{ id: "handoff", label: "Handoff Preview", helper: "Destination package" },
+public/control-center/pages/ai-command.js:382:	{ id: "export", label: "Export", helper: "File-ready package" }
+public/control-center/pages/ai-command.js:431:		{ id: "campaign-angle-generator", label: "Campaign Angle Generator", action: "preview", intent: "guidance", template: "Generate campaign angles for {project}. Include audience tension, promise, channel fit, and strongest first test." },
+public/control-center/pages/ai-command.js:432:		{ id: "launch-plan", label: "Launch Plan", action: "preview", intent: "workflow", template: "Build a launch plan for {project}. Include phases, channels, owners, blockers, and next move." },
+public/control-center/pages/ai-command.js:433:		{ id: "funnel-mapping", label: "Funnel Mapping", action: "preview", intent: "guidance", template: "Map the funnel for {project}. Include awareness, consideration, conversion, retention, and handoff points." },
+public/control-center/pages/ai-command.js:434:		{ id: "prioritize-next-move", label: "Priority Sort", action: "preview", intent: "task", template: "Prioritize the next moves for {project}. Rank by impact, urgency, dependencies, and safest first action." }
+public/control-center/pages/ai-command.js:437:		{ id: "hook-generator", label: "Hook Generator", action: "preview", intent: "guidance", template: "Write 5 German hook variants for {project}. Keep them concise, testable, and suitable for the Germany market." },
+public/control-center/pages/ai-command.js:438:		{ id: "caption-builder", label: "Caption Builder", action: "preview", intent: "guidance", template: "Draft German captions for {project}. Include angle, body, CTA, and platform adaptation notes." },
+public/control-center/pages/ai-command.js:439:		{ id: "cta-refiner", label: "CTA Refiner", action: "preview", intent: "task", template: "Refine CTA options for {project}. Provide German variants for awareness, consideration, and action stages." },
+public/control-center/pages/ai-command.js:440:		{ id: "publisher-package", label: "Publisher Package", action: "preview", intent: "handoff", template: "Prepare a Publisher handoff for {project}. Include German copy package, CTA, notes, and remaining checks." }
+public/control-center/pages/ai-command.js:443:		{ id: "creative-brief-builder", label: "Creative Brief Builder", action: "preview", intent: "media", template: "Prepare a creative brief for {project}. Include concept, visual rules, subject, brand constraints, and production notes." },
+public/control-center/pages/ai-command.js:444:		{ id: "format-mapper", label: "Format Mapper", action: "preview", intent: "guidance", template: "Map required creative formats for {project}. Include platform, aspect ratio, asset type, and usage context." },
+public/control-center/pages/ai-command.js:445:		{ id: "asset-checklist", label: "Asset Checklist", action: "preview", intent: "task", template: "Create an asset checklist for {project}. List must-have files, missing references, usage context, and priority." },
+public/control-center/pages/ai-command.js:446:		{ id: "visual-direction", label: "Visual Direction", action: "preview", intent: "guidance", template: "Review visual direction for {project}. Identify mismatches, improvements, and required references." },
+public/control-center/pages/ai-command.js:447:		{ id: "open-media-studio", label: "Send prompt to Media Studio", action: "route", route: "media-studio" }
+public/control-center/pages/ai-command.js:450:		{ id: "write-video-hook", label: "Write video hook", action: "preview", intent: "guidance", template: "Write short-form video hooks for {project}. Include 3 opening variants and audience fit." },
+public/control-center/pages/ai-command.js:451:		{ id: "draft-script", label: "Draft script", action: "preview", intent: "guidance", template: "Draft a short-form video script for {project}. Include hook, body, CTA, and visual cues." },
+public/control-center/pages/ai-command.js:452:		{ id: "build-storyboard", label: "Build storyboard", action: "preview", intent: "workflow", template: "Build storyboard beats for {project}. Sequence shots and key transitions." },
+public/control-center/pages/ai-command.js:453:		{ id: "prepare-voiceover", label: "Prepare voiceover", action: "preview", intent: "guidance", template: "Prepare voiceover script options for {project}. Keep clean timing and emphasis notes." },
+public/control-center/pages/ai-command.js:454:		{ id: "map-video-asset-needs", label: "Map video asset needs", action: "preview", intent: "task", template: "Map video asset needs for {project}. Include format, source, and production owner." }
+public/control-center/pages/ai-command.js:457:		{ id: "publishing-checklist", label: "Publishing Checklist", action: "preview", intent: "handoff", template: "Build a publishing checklist for {project}. Include German copy, assets, claims checks, and channel readiness." },
+public/control-center/pages/ai-command.js:458:		{ id: "final-packaging", label: "Final Packaging", action: "preview", intent: "handoff", template: "Prepare a final publishing package for {project}. Include copy, CTA, asset notes, approvals, and destination channel." },
+public/control-center/pages/ai-command.js:459:		{ id: "channel-formatting", label: "Channel Formatting", action: "preview", intent: "guidance", template: "Format the next output for {project} by channel. Include German copy, limits, CTA, and scheduling notes." },
+public/control-center/pages/ai-command.js:460:		{ id: "schedule-draft", label: "Schedule Draft", action: "preview", intent: "workflow", template: "Prepare a publishing schedule draft for {project}. Include channel cadence, dependencies, and review gates." },
+public/control-center/pages/ai-command.js:461:		{ id: "open-publishing", label: "Open Publishing", action: "route", route: "publishing" }
+public/control-center/pages/ai-command.js:464:		{ id: "ad-angle-generator", label: "Ad Angle Generator", action: "preview", intent: "guidance", template: "Draft ad angles for {project}. Include audience problem, value promise, German hook direction, and platform fit." },
+public/control-center/pages/ai-command.js:465:		{ id: "copy-variants", label: "Copy Variants", action: "preview", intent: "guidance", template: "Prepare German ad copy variants for {project}. Include hooks, primary text, CTA, and creative notes." },
+public/control-center/pages/ai-command.js:466:		{ id: "test-ideas", label: "Test Ideas", action: "preview", intent: "task", template: "Suggest paid test ideas for {project}. Provide hypotheses, segments, creative variables, and measurement notes." },
+public/control-center/pages/ai-command.js:467:		{ id: "budget-notes", label: "Budget Notes", action: "preview", intent: "guidance", template: "Review budget notes for {project}. Summarize constraints and safe test allocation guidance." },
+public/control-center/pages/ai-command.js:468:		{ id: "open-ads-manager", label: "Open Ads Manager", action: "route", route: "ads-manager" }
+public/control-center/pages/ai-command.js:471:		{ id: "keyword-intent", label: "Keyword Intent", action: "preview", intent: "guidance", template: "Suggest keyword intent opportunities for {project}. Include Germany-market intent, content mapping, and priority." },
+public/control-center/pages/ai-command.js:472:		{ id: "meta-direction", label: "Meta Direction", action: "preview", intent: "guidance", template: "Prepare meta direction for {project}. Include page angle, title direction, description direction, and CTA intent." },
+public/control-center/pages/ai-command.js:473:		{ id: "opportunity-summary", label: "Opportunity Summary", action: "preview", intent: "task", template: "Summarize SEO and insight opportunities for {project}. Focus on conversion, traffic quality, and content fit." },
+public/control-center/pages/ai-command.js:474:		{ id: "analysis-plan", label: "Analysis Plan", action: "preview", intent: "workflow", template: "Draft an analysis plan for {project}. Define questions, datasets, cadence, and owners." },
+public/control-center/pages/ai-command.js:475:		{ id: "open-insights", label: "Open Insights", action: "route", route: "insights" }
+public/control-center/pages/ai-command.js:478:		{ id: "claims-check", label: "Claims Check", action: "preview", intent: "guidance", template: "Review marketing claims for {project}. Flag unsupported, high-risk, or evidence-dependent wording." },
+public/control-center/pages/ai-command.js:479:		{ id: "approval-flags", label: "Approval Flags", action: "preview", intent: "task", template: "Check approval risks for {project}. List risk, impact, mitigation, and required owner." },
+public/control-center/pages/ai-command.js:480:		{ id: "safety-checklist", label: "Safety Checklist", action: "preview", intent: "handoff", template: "Prepare a safety checklist for {project}. Include policy checks, evidence required, and approval notes." },
+public/control-center/pages/ai-command.js:481:		{ id: "publish-readiness", label: "Publish Readiness", action: "preview", intent: "handoff", template: "Review publish readiness for {project}. Confirm what needs human approval before release." },
+public/control-center/pages/ai-command.js:482:		{ id: "open-governance", label: "Open Governance", action: "route", route: "governance" }
+public/control-center/pages/ai-command.js:485:		{ id: "timeline-draft", label: "Timeline Draft", action: "preview", intent: "workflow", template: "Draft an execution timeline for {project}. Include milestones, owners, dependencies, and review gates." },
+public/control-center/pages/ai-command.js:486:		{ id: "handoff-routing", label: "Handoff Routing", action: "preview", intent: "handoff", template: "Prepare handoff routing for {project}. Include source, destination, decision gates, and required confirmations." },
+public/control-center/pages/ai-command.js:487:		{ id: "checklist", label: "Checklist", action: "preview", intent: "task", template: "Draft an operational checklist for {project}. Include owners, dependencies, priority, and first action." },
+public/control-center/pages/ai-command.js:488:		{ id: "blocker-review", label: "Blocker Review", action: "preview", intent: "guidance", template: "Review operational blockers for {project}. Prioritize by risk and impact." },
+public/control-center/pages/ai-command.js:489:		{ id: "open-workflows", label: "Open Workflows / Operations", action: "route", route: "workflows" }
+public/control-center/pages/ai-command.js:492:		{ id: "review-unified-inbox", label: "Review Unified Inbox", action: "preview", intent: "guidance", template: "Review the Unified Inbox readiness for {project}. Summarize visible customer-operation signals, open gaps, and safe next review steps. Do not claim inbox actions happened." },
+public/control-center/pages/ai-command.js:493:		{ id: "summarize-customer-thread", label: "Summarize Customer Thread", action: "preview", intent: "guidance", template: "Summarize this customer thread for {project}. Include customer issue, sentiment, reply goal, missing details, and safe next step." },
+public/control-center/pages/ai-command.js:494:		{ id: "draft-customer-reply", label: "Draft Customer Reply", action: "preview", intent: "guidance", template: "Draft a customer reply for {project}. Keep it helpful, calm, review-ready, and do not claim any operational action has been completed." },
+public/control-center/pages/ai-command.js:495:		{ id: "create-ticket-draft", label: "Create Ticket Draft", action: "preview", intent: "task", template: "Create a ticket draft for {project}. Include issue, priority, owner suggestion, evidence needed, and next safe action." },
+public/control-center/pages/ai-command.js:496:		{ id: "check-sla-risk", label: "Check SLA Risk", action: "preview", intent: "guidance", template: "Check SLA risk for {project}. Flag urgency, risk level, missing runtime data, and escalation recommendation for review." },
+public/control-center/pages/ai-command.js:497:		{ id: "prepare-escalation", label: "Prepare Escalation", action: "preview", intent: "handoff", template: "Prepare an escalation draft for {project}. Include reason, customer impact, owner, confirmation needed, and destination team." },
+public/control-center/pages/ai-command.js:498:		{ id: "customer-profile-snapshot", label: "Customer Profile Snapshot", action: "preview", intent: "guidance", template: "Prepare a customer profile snapshot for {project}. Include known context, purchase/support signals, missing fields, and safe follow-up questions." },
+public/control-center/pages/ai-command.js:499:		{ id: "route-support-sales-ops", label: "Route to Support / Sales / Operations", action: "preview", intent: "handoff", template: "Prepare routing guidance for {project}. Decide whether the customer item belongs with Support, Sales, or Operations, and explain the review gate." }
+public/control-center/pages/ai-command.js:502:		{ id: "lead-qualification", label: "Lead Qualification", action: "preview", intent: "guidance", template: "Qualify the lead for {project}. Include fit, intent, urgency, missing CRM fields, and the safest next step." },
+public/control-center/pages/ai-command.js:503:		{ id: "outreach-draft", label: "Outreach Draft", action: "preview", intent: "guidance", template: "Draft outreach for {project}. Include subject or opener, personalized message, CTA, and review notes before sending." },
+public/control-center/pages/ai-command.js:504:		{ id: "follow-up-sequence", label: "Follow-up Sequence", action: "preview", intent: "workflow", template: "Build a follow-up sequence for {project}. Include timing, message angle, CTA, stop condition, and confirmation requirements." },
+public/control-center/pages/ai-command.js:505:		{ id: "crm-profile-summary", label: "CRM Profile Summary", action: "preview", intent: "guidance", template: "Summarize the CRM profile context for {project}. Include fit, history, open questions, and next sales action without mutating CRM data." },
+public/control-center/pages/ai-command.js:506:		{ id: "pipeline-next-step", label: "Pipeline Next Step", action: "preview", intent: "task", template: "Recommend the pipeline next step for {project}. Include stage, rationale, owner, risk, and required confirmation." },
+public/control-center/pages/ai-command.js:507:		{ id: "dealer-salon-outreach", label: "Dealer / Salon Outreach", action: "preview", intent: "guidance", template: "Draft dealer or salon outreach for {project}. Include positioning, proof needs, offer angle, CTA, and follow-up note." },
+public/control-center/pages/ai-command.js:508:		{ id: "influencer-lead-plan", label: "Influencer Lead Plan", action: "preview", intent: "workflow", template: "Prepare an influencer lead plan for {project}. Include target profile, outreach angle, qualification criteria, and handoff path." },
+public/control-center/pages/ai-command.js:509:		{ id: "sales-handoff-draft", label: "Sales Handoff", action: "preview", intent: "handoff", template: "Prepare a sales handoff draft for {project}. Include lead context, recommended next action, owner, and confirmation needed." }
+public/control-center/pages/ai-command.js:525:	{ id: "strategy", label: "Strategy" },
+public/control-center/pages/ai-command.js:526:	{ id: "content", label: "Content" },
+public/control-center/pages/ai-command.js:527:	{ id: "campaign", label: "Campaign" },
+public/control-center/pages/ai-command.js:528:	{ id: "integration", label: "Integration" },
+public/control-center/pages/ai-command.js:529:	{ id: "asset", label: "Asset" },
+public/control-center/pages/ai-command.js:530:	{ id: "research", label: "Research" },
+public/control-center/pages/ai-command.js:531:	{ id: "report", label: "Report" },
+public/control-center/pages/ai-command.js:532:	{ id: "automation", label: "Automation" }
+public/control-center/pages/ai-command.js:536:	{ id: "current-project", label: "Current project" },
+public/control-center/pages/ai-command.js:537:	{ id: "selected-context", label: "Selected page/context" },
+public/control-center/pages/ai-command.js:538:	{ id: "campaign", label: "Campaign" },
+public/control-center/pages/ai-command.js:539:	{ id: "product", label: "Product" }
+public/control-center/pages/ai-command.js:553:		id: "strategist",
+public/control-center/pages/ai-command.js:560:		id: "writer",
+public/control-center/pages/ai-command.js:567:		id: "designer",
+public/control-center/pages/ai-command.js:574:		id: "media",
+public/control-center/pages/ai-command.js:581:		id: "ads",
+public/control-center/pages/ai-command.js:588:		id: "analyst",
+public/control-center/pages/ai-command.js:595:		id: "researcher",
+public/control-center/pages/ai-command.js:602:		id: "operations",
+public/control-center/pages/ai-command.js:912:			modeId: "operations",
+public/control-center/pages/ai-command.js:940:			lastAppliedHandoffId: "",
+public/control-center/pages/ai-command.js:952:                        activeChatSessionId: "",
+public/control-center/pages/ai-command.js:1715:		? { id: "operations", label: "Full Team" }
+public/control-center/pages/ai-command.js:1737:		specialistId: "team",
+public/control-center/pages/ai-command.js:3252:                ? { id: "team", label: "Full Team" }
+public/control-center/pages/ai-command.js:3839:		{ id: "chat", label: "Chat", hint: bridgeStatus.available ? "Connected" : "Guarded" },
+public/control-center/pages/ai-command.js:3840:		{ id: "preview", label: "Preview", hint: "Draft output" },
+public/control-center/pages/ai-command.js:3841:		{ id: "tools", label: "Tools", hint: "Role actions" },
+public/control-center/pages/ai-command.js:3842:		{ id: "context", label: "Context", hint: "Live state" },
+public/control-center/pages/ai-command.js:3843:		{ id: "history", label: "History", hint: "Saved outputs" }
+public/control-center/pages/ai-command.js:3956:                ? { id: "team", label: "Full AI Team", summary: "Multi-specialist review", position: "AI Team" }
+public/control-center/pages/ai-command.js:4206:        const selectedSpec = isTeam ? { id: "team", label: "Full Team" } : getPhase1SpecialistById(session.modeId);
+public/control-center/pages/ai-command.js:4337:                { id: "campaign", label: "Campaign", summary: "Build a review-ready campaign with the full AI Team.", enabled: true },
+public/control-center/pages/ai-command.js:4338:                { id: "write", label: "Write", summary: "Prepare documents, copy, agreements, or presentation drafts.", enabled: false },
+public/control-center/pages/ai-command.js:4339:                { id: "offer", label: "Offer", summary: "Shape a product offer from pricing, market, and audience context.", enabled: false },
+public/control-center/pages/ai-command.js:4340:                { id: "lead", label: "Lead", summary: "Prepare lead discovery and outreach workflow drafts.", enabled: false },
+public/control-center/pages/ai-command.js:4341:                { id: "media", label: "Media", summary: "Create a media brief, storyboard, and production direction.", enabled: false },
+public/control-center/pages/ai-command.js:4342:                { id: "publish", label: "Publish", summary: "Prepare publishing checklist and handoff readiness.", enabled: false }
+public/control-center/pages/ai-command.js:4801:		{ id: "tools", label: "Tools" },
+public/control-center/pages/ai-command.js:4802:		{ id: "output", label: "Output" },
+public/control-center/pages/ai-command.js:4803:		{ id: "flow", label: "Flow" }
+public/control-center/pages/ai-command.js:4939:		? { id: "team", label: "Full Team" }
+public/control-center/pages/ai-command.js:5094:        const selectedSpec = isTeam ? { id: "team", label: "Full Team", position: "Team workflow" } : getPhase1SpecialistById(session.modeId);
+public/control-center/pages/ai-command.js:5459:export const aiCommandRoute = {
+public/control-center/pages/ai-command.js:5460:	id: "ai-command",
+public/control-center/pages/ai-command.js:6531:		                        ? { id: "team", label: "Full Team" }
+public/control-center/pages/ai-command.js:7201:        { id: "strategist", label: "Strategist" },
+public/control-center/pages/ai-command.js:7202:        { id: "writer", label: "Writer" },
+public/control-center/pages/ai-command.js:7203:        { id: "media", label: "Media" },
+public/control-center/pages/ai-command.js:7204:        { id: "operations", label: "Operations" }
+public/control-center/pages/library.js:573:      selectedAssetId: "",
+public/control-center/pages/library.js:3302:export const libraryRoute = {
+public/control-center/pages/library.js:3303:  id: "library",
+public/control-center/pages/library.js:3341:            { id: "back-to-ai-command", label: "Back to Drawer" },
+public/control-center/pages/library.js:3342:            { id: "dismiss-guide", label: "Dismiss" }
+public/control-center/pages/home.js:274:    { id: "strategist", name: "Strategist", fallback: "Align campaign priorities and launch sequencing." },
+public/control-center/pages/home.js:275:    { id: "writer", name: "Content Writer", fallback: "Prepare high-conversion messaging for active channels." },
+public/control-center/pages/home.js:276:    { id: "designer", name: "Media Director", fallback: "Polish visual direction and creative consistency." },
+public/control-center/pages/home.js:277:    { id: "video_lead", name: "Video Lead", fallback: "Queue the next motion and short-form variants." },
+public/control-center/pages/home.js:278:    { id: "publisher", name: "Publisher", fallback: "Prepare publishing packages, schedules, and manual handoffs." },
+public/control-center/pages/home.js:279:    { id: "ads_operator", name: "Ads Optimizer", fallback: "Optimize paid testing, creative variants, and budget decisions." },
+public/control-center/pages/home.js:280:    { id: "analyst", name: "SEO & Insights Analyst", fallback: "Read weak signals and recommend measurable improvements." },
+public/control-center/pages/home.js:281:    { id: "compliance_reviewer", name: "Compliance Reviewer", fallback: "Review claims, approvals, and publish safety before release." },
+public/control-center/pages/home.js:282:    { id: "admin", name: "Operations Lead", fallback: "Clear blockers and keep execution flow healthy." }
+public/control-center/pages/home.js:750:export const homeRoute = {
+public/control-center/pages/home.js:751:  id: "home",
+public/control-center/pages/insights.js:5:    id: "facebook",
+public/control-center/pages/insights.js:12:    id: "instagram",
+public/control-center/pages/insights.js:19:    id: "tiktok",
+public/control-center/pages/insights.js:26:    id: "youtube",
+public/control-center/pages/insights.js:33:    id: "website",
+public/control-center/pages/insights.js:40:    id: "seo",
+public/control-center/pages/insights.js:47:    id: "paid",
+public/control-center/pages/insights.js:1054:export const insightsRoute = {
+public/control-center/pages/insights.js:1055:  id: "insights",
+public/control-center/pages/content-studio-workspace.js:63:    id: "content-strategist",
+public/control-center/pages/content-studio-workspace.js:70:    id: "copywriter",
+public/control-center/pages/content-studio-workspace.js:77:    id: "seo-writer",
+public/control-center/pages/content-studio-workspace.js:84:    id: "social-writer",
+public/control-center/pages/content-studio-workspace.js:91:    id: "email-writer",
+public/control-center/pages/content-studio-workspace.js:98:    id: "script-writer",
+public/control-center/pages/content-studio-workspace.js:105:    id: "marketplace-copywriter",
+public/control-center/pages/content-studio-workspace.js:112:    id: "brand-guardian",
+public/control-center/pages/content-studio-workspace.js:377:    id: "v1",
+public/control-center/pages/content-studio-workspace.js:559:      selectedId: "",
+public/control-center/pages/content-studio-workspace.js:560:      formSourceId: "",
+public/control-center/pages/content-studio-workspace.js:565:      loadedHandoffId: "",
+public/control-center/pages/content-studio-workspace.js:1752:        handoff_id: "",
+public/control-center/pages/content-studio-workspace.js:1766:      handoff_id: "",
+public/control-center/pages/content-studio-workspace.js:2520:        modeId: "content",
+public/control-center/pages/content-studio-workspace.js:2740:          modeId: "content",
+public/control-center/pages/content-studio-workspace.js:2784:    id: "content-strategist",
+public/control-center/pages/content-studio-workspace.js:5090:export const contentStudioRoute = {
+public/control-center/pages/content-studio-workspace.js:5091:  id: "content-studio",
+public/control-center/pages/integrations/builders.js:463:      id: "sales-channels",
+public/control-center/pages/integrations/builders.js:469:      id: "social-channels",
+public/control-center/pages/integrations/builders.js:475:      id: "marketing-tracking-tools",
+public/control-center/pages/integrations/builders.js:481:      id: "email-crm",
+public/control-center/pages/integrations/builders.js:487:      id: "ai-automation-tools",
+public/control-center/pages/governance.js:1490:export const governanceRoute = {
+public/control-center/pages/governance.js:1491:  id: "governance",
+public/control-center/pages/integrations.js:41:    id: "website-commerce",
+public/control-center/pages/integrations.js:46:        id: "website",
+public/control-center/pages/integrations.js:64:        id: "woocommerce",
+public/control-center/pages/integrations.js:82:        id: "shopify",
+public/control-center/pages/integrations.js:99:        id: "amazon",
+public/control-center/pages/integrations.js:118:        id: "ebay",
+public/control-center/pages/integrations.js:137:    id: "social",
+public/control-center/pages/integrations.js:142:        id: "facebook",
+public/control-center/pages/integrations.js:160:        id: "instagram",
+public/control-center/pages/integrations.js:178:        id: "tiktok",
+public/control-center/pages/integrations.js:196:        id: "youtube",
+public/control-center/pages/integrations.js:214:        id: "linkedin",
+public/control-center/pages/integrations.js:233:    id: "analytics",
+public/control-center/pages/integrations.js:238:        id: "ga4",
+public/control-center/pages/integrations.js:256:        id: "gtm",
+public/control-center/pages/integrations.js:273:        id: "meta-pixel",
+public/control-center/pages/integrations.js:290:        id: "tiktok-pixel",
+public/control-center/pages/integrations.js:307:        id: "search-console",
+public/control-center/pages/integrations.js:325:        id: "custom-analytics",
+public/control-center/pages/integrations.js:344:    id: "email-crm",
+public/control-center/pages/integrations.js:349:        id: "smtp",
+public/control-center/pages/integrations.js:369:        id: "mailer",
+public/control-center/pages/integrations.js:388:        id: "mailchimp",
+public/control-center/pages/integrations.js:405:        id: "crm",
+public/control-center/pages/integrations.js:426:    id: "ads",
+public/control-center/pages/integrations.js:431:        id: "meta-ads",
+public/control-center/pages/integrations.js:449:        id: "google-ads",
+public/control-center/pages/integrations.js:467:        id: "tiktok-ads",
+public/control-center/pages/integrations.js:486:    id: "ops",
+public/control-center/pages/integrations.js:491:        id: "google-drive",
+public/control-center/pages/integrations.js:508:        id: "slack",
+public/control-center/pages/integrations.js:525:        id: "telegram",
+public/control-center/pages/integrations.js:542:        id: "notion",
+public/control-center/pages/integrations.js:559:        id: "zapier-make",
+public/control-center/pages/integrations.js:576:        id: "webhook",
+public/control-center/pages/integrations.js:596:    id: "ai-media",
+public/control-center/pages/integrations.js:601:        id: "openai",
+public/control-center/pages/integrations.js:618:        id: "higgsfield",
+public/control-center/pages/integrations.js:633:        id: "kling",
+public/control-center/pages/integrations.js:648:        id: "runway",
+public/control-center/pages/integrations.js:663:        id: "luma",
+public/control-center/pages/integrations.js:678:        id: "google-ai",
+public/control-center/pages/integrations.js:693:        id: "bytedance",
+public/control-center/pages/integrations.js:708:        id: "recraft",
+public/control-center/pages/integrations.js:723:        id: "elevenlabs",
+public/control-center/pages/integrations.js:738:        id: "minimax",
+public/control-center/pages/integrations.js:753:        id: "comfyui",
+public/control-center/pages/integrations.js:769:        id: "coqui",
+public/control-center/pages/integrations.js:785:        id: "bark",
+public/control-center/pages/integrations.js:801:        id: "musicgen",
+public/control-center/pages/integrations.js:1014:  return { ...intent, resolvedIntegrationId: "" };
+public/control-center/pages/integrations.js:1026:      selectedIntegrationId: "",
+public/control-center/pages/integrations.js:1030:      activeDrawerIntegrationId: "",
+public/control-center/pages/integrations.js:1032:      drawerOriginIntegrationId: "",
+public/control-center/pages/integrations.js:1034:      restoreFocusIntegrationId: "",
+public/control-center/pages/integrations.js:1036:      validationIntegrationId: "",
+public/control-center/pages/integrations.js:2067:export const integrationsRoute = {
+public/control-center/pages/integrations.js:2068:  id: "integrations",
+public/control-center/pages/setup.js:21:    id: "business-basics",
+public/control-center/pages/setup.js:27:    id: "brand-identity",
+public/control-center/pages/setup.js:33:    id: "market-language",
+public/control-center/pages/setup.js:39:    id: "audience",
+public/control-center/pages/setup.js:45:    id: "goals",
+public/control-center/pages/setup.js:51:    id: "competitors",
+public/control-center/pages/setup.js:57:    id: "channels",
+public/control-center/pages/setup.js:715:    { id: "setupBusinessIdentityStatus", value: businessIdentityStatus },
+public/control-center/pages/setup.js:716:    { id: "setupBrandStatus", value: brandStatus },
+public/control-center/pages/setup.js:717:    { id: "setupLocalizationStatus", value: localizationStatus },
+public/control-center/pages/setup.js:718:    { id: "setupChannelsStatus", value: channelsStatus },
+public/control-center/pages/setup.js:719:    { id: "setupContentTruthStatus", value: contentTruthStatus },
+public/control-center/pages/setup.js:720:    { id: "setupAiGuidanceStatus", value: aiGuidanceStatus }
+public/control-center/pages/setup.js:1367:export const setupRoute = {
+public/control-center/pages/setup.js:1368:  id: "setup",
+public/control-center/pages/publishing.js:367:      selectedId: "",
+public/control-center/pages/publishing.js:370:      formSourceId: "",
+public/control-center/pages/publishing.js:373:      loadedHandoffId: "",
+public/control-center/pages/publishing.js:1064:      focusId: "",
+public/control-center/pages/publishing.js:1081:    focusId: "",
+public/control-center/pages/publishing.js:1919:        modeId: "operations",
+public/control-center/pages/publishing.js:2034:export const publishingRoute = {
+public/control-center/pages/publishing.js:2035:  id: "publishing",
+public/control-center/pages/workflows.js:31:    id: "launch-campaign",
+public/control-center/pages/workflows.js:35:    aiModeId: "strategist",
+public/control-center/pages/workflows.js:39:    id: "create-content-plan",
+public/control-center/pages/workflows.js:43:    aiModeId: "writer",
+public/control-center/pages/workflows.js:47:    id: "build-media-job",
+public/control-center/pages/workflows.js:51:    aiModeId: "media",
+public/control-center/pages/workflows.js:55:    id: "prepare-publishing-package",
+public/control-center/pages/workflows.js:59:    aiModeId: "operations",
+public/control-center/pages/workflows.js:63:    id: "generate-report",
+public/control-center/pages/workflows.js:67:    aiModeId: "analyst",
+public/control-center/pages/workflows.js:71:    id: "research-competitors",
+public/control-center/pages/workflows.js:75:    aiModeId: "researcher",
+public/control-center/pages/workflows.js:79:    id: "fix-integrations",
+public/control-center/pages/workflows.js:83:    aiModeId: "operations",
+public/control-center/pages/workflows.js:214:    runId: "",
+public/control-center/pages/workflows.js:325:      lastAppliedHandoffId: "",
+public/control-center/pages/workflows.js:577:      workflowId: "fix-integrations",
+public/control-center/pages/workflows.js:587:      workflowId: "prepare-publishing-package",
+public/control-center/pages/workflows.js:597:      workflowId: "launch-campaign",
+public/control-center/pages/workflows.js:1601:        modeId: "operations",
+public/control-center/pages/workflows.js:1612:            modeId: "operations",
+public/control-center/pages/workflows.js:1637:        modeId: "operations",
+public/control-center/pages/workflows.js:1648:            modeId: "operations",
+public/control-center/pages/workflows.js:1810:export const workflowsRoute = {
+public/control-center/pages/workflows.js:1811:  id: "workflows",
+public/control-center/pages/settings.js:67:    id: "strategist",
+public/control-center/pages/settings.js:73:    id: "writer",
+public/control-center/pages/settings.js:79:    id: "designer",
+public/control-center/pages/settings.js:85:    id: "videoLead",
+public/control-center/pages/settings.js:91:    id: "publisher",
+public/control-center/pages/settings.js:97:    id: "adsOperator",
+public/control-center/pages/settings.js:103:    id: "analyst",
+public/control-center/pages/settings.js:109:    id: "complianceReviewer",
+public/control-center/pages/settings.js:115:    id: "admin",
+public/control-center/pages/settings.js:124:    id: "project",
+public/control-center/pages/settings.js:176:    id: "operating",
+public/control-center/pages/settings.js:210:    id: "ai",
+public/control-center/pages/settings.js:270:    id: "automation",
+public/control-center/pages/settings.js:303:    id: "publishing",
+public/control-center/pages/settings.js:347:    id: "approval",
+public/control-center/pages/settings.js:395:    id: "team",
+public/control-center/pages/settings.js:449:    id: "presets",
+public/control-center/pages/settings.js:499:    id: "sync",
+public/control-center/pages/settings.js:538:    id: "alerts",
+public/control-center/pages/settings.js:578:    id: "safety",
+public/control-center/pages/settings.js:622:    id: "project-config",
+public/control-center/pages/settings.js:628:    id: "ai-automation",
+public/control-center/pages/settings.js:634:    id: "team-permissions",
+public/control-center/pages/settings.js:640:    id: "integration-sync",
+public/control-center/pages/settings.js:1875:              entity_id: "default",
+public/control-center/pages/settings.js:2017:export const settingsRoute = {
+public/control-center/pages/settings.js:2018:  id: "settings",
+public/control-center/pages/ads-manager.js:5:    id: "meta",
+public/control-center/pages/ads-manager.js:12:    id: "google",
+public/control-center/pages/ads-manager.js:19:    id: "tiktok",
+public/control-center/pages/ads-manager.js:26:    id: "amazon",
+public/control-center/pages/ads-manager.js:286:export const adsManagerRoute = {
+public/control-center/pages/ads-manager.js:287:  id: "ads-manager",
+public/control-center/pages/ads-manager.js:388:                  id: "adsTotalBudgetInput",
+public/control-center/pages/ads-manager.js:397:                  id: "adsDailyBudgetInput",
+public/control-center/pages/ads-manager.js:406:                  id: "adsSpendInput",
+public/control-center/pages/ads-manager.js:526:                  id: "adsCtrInput",
+public/control-center/pages/ads-manager.js:535:                  id: "adsCpcInput",
+public/control-center/pages/ads-manager.js:544:                  id: "adsCpaInput",
+public/control-center/pages/ads-manager.js:553:                  id: "adsRoasInput",

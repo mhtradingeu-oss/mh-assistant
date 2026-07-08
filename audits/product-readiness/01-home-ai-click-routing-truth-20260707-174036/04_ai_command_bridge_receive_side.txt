@@ -1,0 +1,156 @@
+Home -> AI Command bridge receive block:
+623:function detectSpecialistFromBridgePrompt(prompt) {
+669:	function detectSpecialistFromBridgePrompt(prompt) {
+840:  /* INPUT_WRITE */ StateKernel.write(session, cleanValue, "input");
+983:			bridgeContext: null,
+1037:		StateKernel.write(session, asString(localDraft.prompt), "input");
+1050:function persistSessionDraft(projectName, session, hint) {
+1244:        /* SYSTEM_RESET */ StateKernel.write(session, "", "system");
+1250:        session.bridgeContext = null;
+2716:	/* AI_WRITE */ StateKernel.write(session, normalized.prompt, "ai");
+2728:	session.bridgeContext = null;
+2755:	persistSessionDraft(projectName, session, `Inbound handoff loaded from ${normalized.sourceLabel}`);
+2851:	/* SYSTEM_RESET */ StateKernel.write(session, "", "system");
+5168:        const bridgeContext = asObject(session.bridgeContext);
+5169:        const bridgeSpecialistId = getAiRoomRoleId(bridgeContext.specialistId || "");
+5171:                bridgeContext.source &&
+5172:                bridgeContext.specialistLabel &&
+5252:                                                <strong>${escapeHtml("Specialist context loaded from Home: " + bridgeContext.specialistLabel)}</strong>
+5554:		// Consume prompt set by home.js handleAiRoleClick via quickCommandInput.
+5556:		const globalInput = $("quickCommandInput");
+5557:		const bridgeValue = asString(globalInput?.value || "").trim();
+5558:		if (bridgeValue) {
+5559:			const detectedSpecialist = detectSpecialistFromBridgePrompt(bridgeValue);
+5563:				session.bridgeContext = {
+5570:				session.bridgeContext = null;
+5572:			StateKernel.write(session, normalizeAiComposerPrompt(bridgeValue), "ai");
+5573:			persistSessionDraft(sessionKey, session, detectedSpecialist ? "Specialist context loaded from Home" : "AI prompt loaded from workspace");
+5574:			if (globalInput) globalInput.value = "";
+5625:			StateKernel.write(session, value, "input");
+5642:			persistSessionDraft(sessionKey, session, "Draft saved locally");
+5668:                        persistSessionDraft(sessionKey, session, `Loaded chat: ${loaded.title || "AI Team session"}`);
+5684:                        /* SYSTEM_RESET */ StateKernel.write(session, "", "system");
+5688:                        session.bridgeContext = null;
+5712:                        persistSessionDraft(sessionKey, session, "New session started");
+5738:				persistSessionDraft(sessionKey, session, "AI Command tab: " + titleCase(nextTab));
+5750:				persistSessionDraft(sessionKey, session, `Output view: ${titleCase(nextTab)}`);
+5759:                                const previousBridgeContext = asObject(session.bridgeContext);
+5766:                                session.bridgeContext = null;
+5770:                                        StateKernel.write(session, `Act as the ${spec?.label || titleCase(specId)} for ${projectName}. Review the project context and suggest the next best actions. Do not execute anything; prepare guidance only.`, "ai");
+5772:                                        /* SYSTEM_RESET */ StateKernel.write(session, "", "system");
+5775:                                persistSessionDraft(sessionKey, session, `${spec?.label || "Specialist"} selected`);
+5785:				session.bridgeContext = null;
+5786:				persistSessionDraft(sessionKey, session, mode === "team" ? "Full Team mode activated" : "Solo Specialist mode activated");
+5796:				/* AI_TEXT_WRITE */ StateKernel.write(session, text, "ai");
+5798:				persistSessionDraft(sessionKey, session, "Suggested prompt loaded — review and send when ready");
+5808:				/* AI_TEXT_WRITE */ StateKernel.write(session, text, "ai");
+5810:				persistSessionDraft(sessionKey, session, "Quick action loaded");
+5905:                        persistSessionDraft(sessionKey, session, `${label} attached`);
+5998:                        persistSessionDraft,
+6020:                        persistSessionDraft(sessionKey, session, "Campaign Builder wizard opened");
+6030:                        persistSessionDraft(sessionKey, session, "Smart Action wizard closed");
+6162:                                persistSessionDraft(sessionKey, session, `Campaign Builder ${group} selected`);
+6291:                                persistSessionDraft(sessionKey, session, preview.backendPreview ? "Campaign Builder backend preview prepared" : "Campaign Builder local fallback preview prepared");
+6383:                                persistSessionDraft(sessionKey, session, `${label} prepared from Campaign Builder`);
+6408:                        persistSessionDraft(sessionKey, session, `${label} staged from Campaign Builder`);
+6425:				persistSessionDraft(sessionKey, session, "Draft auto-saved locally");
+6457:				persistSessionDraft(sessionKey, session, `Voice language set to ${next.toUpperCase()}`);
+6522:						persistSessionDraft(sessionKey, session, "Voice input captured");
+6587:		                /* SYSTEM_RESET */ StateKernel.write(session, "", "system");
+6739:                                persistSessionDraft(sessionKey, session, "Guidance preview prepared from conversation");
+6764:                                persistSessionDraft(sessionKey, session, "Task preview prepared from conversation");
+6787:                                persistSessionDraft(sessionKey, session, "Workflow preview prepared from conversation");
+6811:                                persistSessionDraft(sessionKey, session, "Handoff preview prepared from conversation");
+6847:					persistSessionDraft,
+6862:				/* INPUT_FALLBACK */ StateKernel.write(session, input?.value, "input");
+6863:				persistSessionDraft(sessionKey, session, "Draft saved locally");
+6873:				/* SYSTEM_RESET */ StateKernel.write(session, "", "system");
+6877:				session.bridgeContext = null;
+6879:				persistSessionDraft(sessionKey, session, "Draft cleared");
+6922:				persistSessionDraft(sessionKey, session, "Generated response inserted into composer");
+7057:				/* AI_TEXT_WRITE */ StateKernel.write(session, text, "ai");
+7062:				persistSessionDraft(sessionKey, session, "Preview inserted into composer");
+7689:    StateKernel.write(session, clean, "input");
+7699:    /* SYSTEM_RESET */ StateKernel.write(session, "", "system");
+
+AI Command source around bridge render:
+				<div class="aicmd-v2-history-list">
+					${items.map((item) => `
+						<article class="aicmd-v2-history-item">
+							<span class="aicmd-v2-history-type">${escapeHtml(item.type)} - ${escapeHtml(formatTime(item.time))}</span>
+							<strong>${escapeHtml(humanizeValue(item.title, "AI output"))}</strong>
+							<p>${escapeHtml(humanizeValue(item.body, "No prompt recorded."))}</p>
+						</article>
+					`).join("")}
+				</div>
+			` : `
+				<div class="aicmd-v2-chat-empty">Saved responses and previews appear here during this session.</div>
+			`}
+		</section>
+	`;
+}
+
+// ============================================================
+
+export const aiCommandRoute = {
+	id: "ai-command",
+   disableStandardLayout: true,
+	meta: {
+		eyebrow: "AI & Build",
+		title: "AI Workspace",
+		description: "Talk to your AI team, run structured tasks, and turn intelligence into review-ready plans and routed handoffs."
+	},
+	template: `
+		<section class="page is-active" data-page="ai-command">
+			<div id="ctrlRoomRoot"></div>
+		</section>
+	`,
+	render(context) {
+		const {
+			getState,
+			$,
+			escapeHtml,
+			navigateTo,
+			showMessage,
+			consumeProjectHandoff,
+			executeProjectAiCommand,
+			fetchProjectInsights,
+			fetchProjectLearning,
+			reloadProjectData
+		} = context;
+
+		const state = getState();
+		const projectName = asString(selectCurrentProject(state) || "");
+		const sessionKey = projectName || "__default__";
+		const session = ensureSession(sessionKey);
+		hydrateSessionDraft(sessionKey, session);
+		const normalizedSessionModeId = MODE_ID_ALIASES[getAiRoomRoleId(session.modeId)] || getAiRoomRoleId(session.modeId);
+		if (normalizedSessionModeId && normalizedSessionModeId !== session.modeId) session.modeId = normalizedSessionModeId;
+		refreshAiChatSessions(sessionKey, session);
+           const savedOutput = asObject(loadLocalOutput(sessionKey));
+           if (
+                   asArray(savedOutput.messages).length &&
+                   !asArray(session.messages).length &&
+                   !session.isFreshAiChatSession
+           ) {
+                   session.messages = asArray(savedOutput.messages).slice(-40);
+           }
+		if (!session.outputPreview && !session.isFreshAiChatSession) {
+                        const preview = asObject(savedOutput.preview);
+			if (preview.outputType) {
+				session.outputPreview = preview;
+				session.outputWorkspaceTab = outputTabFromPreview(preview);
+			}
+		}
+		if (!session.responseHistoryLoaded && !session.isFreshAiChatSession) {
+                        session.responseHistory = asArray(savedOutput.responses).slice(0, 12);
+                        session.responseHistoryLoaded = true;
+                }
+
+		// ── HOME → AI COMMAND BRIDGE ────────────────────────────────
+		// Consume prompt set by home.js handleAiRoleClick via quickCommandInput.
+		// Once consumed we clear the global input so re-renders are idempotent.
+
+AI Command detector definitions:
+623:function detectSpecialistFromBridgePrompt(prompt) {
+669:	function detectSpecialistFromBridgePrompt(prompt) {

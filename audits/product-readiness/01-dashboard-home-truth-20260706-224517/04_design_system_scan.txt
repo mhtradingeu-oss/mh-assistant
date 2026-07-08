@@ -1,0 +1,398 @@
+CSS / design system files:
+public/control-center/design-system/DESIGN_SYSTEM_ROADMAP.md
+public/control-center/legacy/06-topbar.legacy.css
+public/control-center/legacy/09-command-legacy-isolation.legacy.css
+public/control-center/legacy/11-runtime-safety-overrides.legacy.css
+public/control-center/legacy/99-legacy-compat.legacy.css
+public/control-center/legacy/styles.legacy-20260508.css
+public/control-center/legacy/styles.legacy-full.css
+public/control-center/styles/00-tokens.css
+public/control-center/styles/01-reset.css
+public/control-center/styles/02-layer-system.css
+public/control-center/styles/03-app-shell.css
+public/control-center/styles/04-command-layer.css
+public/control-center/styles/05-ai-layer.css
+public/control-center/styles/07-sidebar.css
+public/control-center/styles/08-components-foundation.css
+public/control-center/styles/09-governance.css
+public/control-center/styles/09-operations-centers.css
+public/control-center/styles/10-topbar-canonical.css
+public/control-center/styles/12-pages.css
+public/control-center/styles/13-home-executive.css
+public/control-center/styles/14-page-standard.css
+public/control-center/styles/15-clean-operating-layer.css
+public/control-center/styles/16-mhos-theme-v2.css
+public/control-center/styles/integrations/cards.css
+public/control-center/styles/integrations/drawer.css
+public/control-center/styles/integrations/forms.css
+public/control-center/styles/integrations/grid.css
+public/control-center/styles/integrations/layout.css
+public/control-center/styles/integrations/responsive.css
+public/control-center/styles/mhos-action-primitives.css
+public/control-center/styles/mhos-context-primitives.css
+public/control-center/styles/mhos-executive-surface-primitives.css
+public/control-center/styles/mhos-workflow-primitives.css
+
+Design tokens / variables:
+
+Dashboard/Home UI class usage:
+public/control-center/pages/ai-command/tool-dock.js:111:    const msg = activeDrawer.querySelector("[data-aicmd-tool-drawer-status]") || document.querySelector("[data-aicmd-tool-drawer-status]");
+public/control-center/pages/ai-command/tool-dock.js:193:  updateStatus
+public/control-center/pages/ai-command/tool-dock.js:215:    targetSection: "asset-workspace",
+public/control-center/pages/ai-command/tool-dock.js:226:  updateStatus?.("Library opened. Select an asset, click Use as Source in AI Command, then return to AI Command.");
+public/control-center/pages/ai-command/tool-dock.js:334:      selectedNode.innerHTML = `<span class=\"mhos-tool-drawer-selected-source-empty\">No trusted Library source selected yet.</span>`;
+public/control-center/pages/ai-command/tool-dock.js:343:  // Render compact selected source card
+public/control-center/pages/ai-command/tool-dock.js:347:      <div class=\"mhos-tool-drawer-source-card\">
+public/control-center/pages/ai-command/tool-dock.js:348:        <div class=\"mhos-tool-drawer-source-eyebrow\">Trusted AI context only</div>
+public/control-center/pages/ai-command/tool-dock.js:349:        <div class=\"mhos-tool-drawer-source-main\">${escapeHtml(name)}</div>
+public/control-center/pages/ai-command/tool-dock.js:350:        <div class=\"mhos-tool-drawer-source-meta\">${escapeHtml(type)} · Added from Library · Not approval or publish readiness</div>
+public/control-center/pages/ai-command/tool-dock.js:351:        ${path && path !== name ? `<div class=\"mhos-tool-drawer-source-path\" title=\"${escapeHtml(path)}\">${escapeHtml(path)}</div>` : ""}
+public/control-center/pages/ai-command/tool-dock.js:352:        <div class=\"mhos-tool-drawer-source-actions\">
+public/control-center/pages/ai-command/tool-dock.js:353:          <button type=\"button\" class=\"btn btn-xs\" data-aicmd-tool-drawer-change-source>Change source</button>
+public/control-center/pages/ai-command/tool-dock.js:354:          <button type=\"button\" class=\"btn btn-xs\" data-aicmd-tool-drawer-remove-source>Remove source</button>
+public/control-center/pages/ai-command/tool-dock.js:360:  // Set placeholder for Source Details if empty
+public/control-center/pages/ai-command/tool-dock.js:387:        if (selectedNode) selectedNode.innerHTML = `<span class=\"mhos-tool-drawer-selected-source-empty\">No trusted Library source selected yet.</span>`;
+public/control-center/pages/ai-command/tool-dock.js:402:    badge: "Text",
+public/control-center/pages/ai-command/tool-dock.js:409:    badge: "Market",
+public/control-center/pages/ai-command/tool-dock.js:416:    badge: "AI",
+public/control-center/pages/ai-command/tool-dock.js:417:    template: "Improve this draft for clarity, stronger value, better structure, and a cleaner CTA. Keep it safe and review-ready."
+public/control-center/pages/ai-command/tool-dock.js:427:      badge: "Plan",
+public/control-center/pages/ai-command/tool-dock.js:433:      outputTypes: ["campaign_plan", "campaign_brief", "channel_plan", "next_best_actions"],
+public/control-center/pages/ai-command/tool-dock.js:434:      template: "Build a Campaign Brief for {projectName}. Include objective, audience segments, positioning, offer angles, message pillars, channel mix, launch phases, risks, and next best actions. Keep it preview-only and ready for review."
+public/control-center/pages/ai-command/tool-dock.js:440:      badge: "Plan",
+public/control-center/pages/ai-command/tool-dock.js:447:      template: "Plan launch waves for {projectName}. Include timeline, channels, dependencies, required assets, readiness gaps, and safe next actions. Keep it review-ready."
+public/control-center/pages/ai-command/tool-dock.js:453:      badge: "Map",
+public/control-center/pages/ai-command/tool-dock.js:466:      badge: "Value",
+public/control-center/pages/ai-command/tool-dock.js:472:      outputTypes: ["offer_brief", "value_proposition", "proof_points", "cta_options"],
+public/control-center/pages/ai-command/tool-dock.js:473:      template: "Create offer angles for {projectName}. Include positioning, value proposition, proof points, CTA options, and risk notes. Keep it preview-only."
+public/control-center/pages/ai-command/tool-dock.js:479:      badge: "Flow",
+public/control-center/pages/ai-command/tool-dock.js:491:      label: "Next Move",
+public/control-center/pages/ai-command/tool-dock.js:492:      badge: "Next",
+public/control-center/pages/ai-command/tool-dock.js:498:      outputTypes: ["next_best_action", "priority_list", "blocker_map", "action_sequence"],
+public/control-center/pages/ai-command/tool-dock.js:499:      template: "Recommend the next best move for {projectName}. Separate urgent, important, blocked, and later actions with clear rationale."
+public/control-center/pages/ai-command/tool-dock.js:508:      badge: "Create",
+public/control-center/pages/ai-command/tool-dock.js:521:      badge: "Edit",
+public/control-center/pages/ai-command/tool-dock.js:534:      badge: "Localize",
+public/control-center/pages/ai-command/tool-dock.js:540:      outputTypes: ["translation", "localization", "market_adaptation", "cta_localization"],
+public/control-center/pages/ai-command/tool-dock.js:541:      template: "Translate and localize the current text for {projectName}. Ask for target language and market if missing. Preserve brand tone, adapt CTA and wording for the target audience, and keep the result review-ready."
+public/control-center/pages/ai-command/tool-dock.js:547:      badge: "Quality",
+public/control-center/pages/ai-command/tool-dock.js:553:      outputTypes: ["clarity_improvement", "structure_improvement", "cta_improvement", "readability_improvement", "conversion_improvement"],
+public/control-center/pages/ai-command/tool-dock.js:554:      template: "Improve this content for {projectName}. Focus on clarity, flow, value proposition, CTA strength, trust signals, readability, and conversion. Return practical improvements and a better draft."
+public/control-center/pages/ai-command/tool-dock.js:560:      badge: "Review",
+public/control-center/pages/ai-command/tool-dock.js:566:      outputTypes: ["grammar_check", "spelling_check", "tone_check", "readability_check", "cta_check", "claim_risk_check", "seo_check", "compliance_notes"],
+public/control-center/pages/ai-command/tool-dock.js:567:      template: "Check this content for {projectName}. Review grammar, spelling, tone, readability, CTA strength, claim risk, missing proof, SEO weakness, and compliance notes. Return issues, severity, and suggested fixes."
+public/control-center/pages/ai-command/tool-dock.js:573:      badge: "Context",
+public/control-center/pages/ai-command/tool-dock.js:580:      template: "Prepare source context for the next Content Writer task for {projectName}. Ask which source should be used: current chat, Library folder, brand profile, product data, legal/pricing documents, research/proof documents, source-of-truth assets, or manual input."
+public/control-center/pages/ai-command/tool-dock.js:586:      badge: "Search",
+public/control-center/pages/ai-command/tool-dock.js:599:      badge: "Adapt",
+public/control-center/pages/ai-command/tool-dock.js:612:      badge: "Route",
+public/control-center/pages/ai-command/tool-dock.js:627:      badge: "Design",
+public/control-center/pages/ai-command/tool-dock.js:634:      template: "Prepare a visual brief for {projectName}. Include concept, format, composition, colors, typography, visual mood, required assets, and CTA."
+public/control-center/pages/ai-command/tool-dock.js:640:      badge: "Style",
+public/control-center/pages/ai-command/tool-dock.js:653:      badge: "Prompt",
+public/control-center/pages/ai-command/tool-dock.js:666:      badge: "List",
+public/control-center/pages/ai-command/tool-dock.js:679:      badge: "Plan",
+public/control-center/pages/ai-command/tool-dock.js:685:      outputTypes: ["layout_plan", "section_hierarchy", "responsive_notes", "cta_placement"],
+public/control-center/pages/ai-command/tool-dock.js:686:      template: "Create a layout plan for {projectName}. Include sections, hierarchy, visual blocks, CTA placement, and responsive notes."
+public/control-center/pages/ai-command/tool-dock.js:692:      badge: "Review",
+public/control-center/pages/ai-command/tool-dock.js:708:      badge: "Script",
+public/control-center/pages/ai-command/tool-dock.js:715:      template: "Write a short-form reel script for {projectName}. Include hook, scene sequence, voiceover, text overlays, CTA, and shot notes."
+public/control-center/pages/ai-command/tool-dock.js:721:      badge: "Video",
+public/control-center/pages/ai-command/tool-dock.js:728:      template: "Create a storyboard for {projectName}. Include scenes, camera direction, motion, captions, assets needed, and CTA."
+public/control-center/pages/ai-command/tool-dock.js:734:      badge: "Plan",
+public/control-center/pages/ai-command/tool-dock.js:747:      badge: "Audio",
+public/control-center/pages/ai-command/tool-dock.js:754:      template: "Draft a voiceover script for {projectName}. Include tone, pacing, hook, proof points, and CTA."
+public/control-center/pages/ai-command/tool-dock.js:757:      id: "video-cta",
+public/control-center/pages/ai-command/tool-dock.js:759:      label: "Video CTA",
+public/control-center/pages/ai-command/tool-dock.js:760:      badge: "Action",
+public/control-center/pages/ai-command/tool-dock.js:766:      outputTypes: ["video_cta_options", "soft_cta", "direct_cta", "urgency_cta", "brand_cta"],
+public/control-center/pages/ai-command/tool-dock.js:767:      template: "Create CTA options for a video campaign for {projectName}. Include soft, direct, urgency, and brand-led versions."
+public/control-center/pages/ai-command/tool-dock.js:776:      badge: "Ready",
+public/control-center/pages/ai-command/tool-dock.js:789:      badge: "Prep",
+public/control-center/pages/ai-command/tool-dock.js:802:      badge: "Plan",
+public/control-center/pages/ai-command/tool-dock.js:809:      template: "Draft a publishing schedule for {projectName}. Include channels, timing, dependencies, review gates, and next actions."
+public/control-center/pages/ai-command/tool-dock.js:815:      badge: "SEO",
+public/control-center/pages/ai-command/tool-dock.js:828:      badge: "Pack",
+public/control-center/pages/ai-command/tool-dock.js:844:      badge: "Paid",
+public/control-center/pages/ai-command/tool-dock.js:851:      template: "Create paid ad angles for {projectName}. Include hook, audience pain, benefit, proof, CTA, and compliance risks."
+public/control-center/pages/ai-command/tool-dock.js:857:      badge: "Draft",
+public/control-center/pages/ai-command/tool-dock.js:863:      outputTypes: ["ad_copy", "headline_variants", "primary_text_variants", "cta_variants"],
+public/control-center/pages/ai-command/tool-dock.js:864:      template: "Draft paid ad copy variants for {projectName}. Include primary text, headline, CTA, and angle notes."
+public/control-center/pages/ai-command/tool-dock.js:870:      badge: "Map",
+public/control-center/pages/ai-command/tool-dock.js:883:      badge: "Test",
+public/control-center/pages/ai-command/tool-dock.js:890:      template: "Create a creative testing plan for {projectName}. Include hypotheses, variants, success signals, and next actions."
+public/control-center/pages/ai-command/tool-dock.js:896:      badge: "Match",
+public/control-center/pages/ai-command/tool-dock.js:902:      outputTypes: ["landing_match_review", "message_gap_report", "cta_improvements", "trust_signal_notes"],
+public/control-center/pages/ai-command/tool-dock.js:903:      template: "Review ad-to-landing-page message match for {projectName}. Identify gaps, stronger claims, CTA improvements, and trust signals."
+public/control-center/pages/ai-command/tool-dock.js:912:      badge: "Search",
+public/control-center/pages/ai-command/tool-dock.js:925:      badge: "Data",
+public/control-center/pages/ai-command/tool-dock.js:932:      template: "Summarize insights for {projectName}. Include what is working, what is weak, missing data, and next optimization actions."
+public/control-center/pages/ai-command/tool-dock.js:938:      badge: "SEO",
+public/control-center/pages/ai-command/tool-dock.js:951:      badge: "Review",
+public/control-center/pages/ai-command/tool-dock.js:958:      template: "Review performance signals for {projectName}. Identify wins, risks, gaps, and recommended next experiments."
+public/control-center/pages/ai-command/tool-dock.js:964:      badge: "Plan",
+public/control-center/pages/ai-command/tool-dock.js:980:      badge: "Check",
+public/control-center/pages/ai-command/tool-dock.js:993:      badge: "Copy",
+public/control-center/pages/ai-command/tool-dock.js:1006:      badge: "Need",
+public/control-center/pages/ai-command/tool-dock.js:1019:      badge: "Review",
+public/control-center/pages/ai-command/tool-dock.js:1032:      badge: "Notes",
+public/control-center/pages/ai-command/tool-dock.js:1039:      template: "Prepare approval notes for {projectName}. Include risks, required reviewer, unresolved issues, and safe next actions."
+public/control-center/pages/ai-command/tool-dock.js:1048:      badge: "Ops",
+public/control-center/pages/ai-command/tool-dock.js:1055:      template: "Turn this into a task plan for {projectName}. Include owners, priorities, dependencies, risks, and next steps."
+public/control-center/pages/ai-command/tool-dock.js:1061:      badge: "Draft",
+public/control-center/pages/ai-command/tool-dock.js:1074:      badge: "Route",
+public/control-center/pages/ai-command/tool-dock.js:1087:      badge: "Plan",
+public/control-center/pages/ai-command/tool-dock.js:1100:      badge: "Ops",
+public/control-center/pages/ai-command/tool-dock.js:1116:      badge: "Draft",
+public/control-center/pages/ai-command/tool-dock.js:1122:      outputTypes: ["reply_draft", "empathetic_response", "next_step_note", "escalation_note"],
+public/control-center/pages/ai-command/tool-dock.js:1123:      template: "Draft a safe customer reply for {projectName}. Do not send it. Include empathy, answer, next step, and escalation note if needed."
+public/control-center/pages/ai-command/tool-dock.js:1129:      badge: "Draft",
+public/control-center/pages/ai-command/tool-dock.js:1142:      badge: "Risk",
+public/control-center/pages/ai-command/tool-dock.js:1148:      outputTypes: ["sla_risk_review", "urgency_flags", "escalation_needs", "safe_next_actions"],
+public/control-center/pages/ai-command/tool-dock.js:1149:      template: "Review SLA or response risk for this customer context. Flag urgency, escalation needs, and safe next actions."
+public/control-center/pages/ai-command/tool-dock.js:1155:      badge: "CX",
+public/control-center/pages/ai-command/tool-dock.js:1162:      template: "Summarize the customer context for {projectName}. Include issue, sentiment, open questions, risk, and next response."
+public/control-center/pages/ai-command/tool-dock.js:1171:      badge: "Sales",
+public/control-center/pages/ai-command/tool-dock.js:1177:      outputTypes: ["sales_pitch", "value_proposition", "pain_solution_map", "cta_note"],
+public/control-center/pages/ai-command/tool-dock.js:1178:      template: "Create a sales pitch for {projectName}. Include value proposition, customer pain, proof, offer, CTA, and follow-up note."
+public/control-center/pages/ai-command/tool-dock.js:1184:      badge: "Email",
+public/control-center/pages/ai-command/tool-dock.js:1190:      outputTypes: ["follow_up_email", "follow_up_sequence", "value_reminder", "next_step_prompt"],
+public/control-center/pages/ai-command/tool-dock.js:1191:      template: "Draft a sales follow-up for {projectName}. Include context, value reminder, question, CTA, and next step."
+public/control-center/pages/ai-command/tool-dock.js:1197:      badge: "Sales",
+public/control-center/pages/ai-command/tool-dock.js:1203:      outputTypes: ["objection_handling", "proof_needed", "safe_answers", "next_action"],
+public/control-center/pages/ai-command/tool-dock.js:1204:      template: "Prepare objection handling for {projectName}. Include likely objections, safe answers, proof needed, and next action."
+public/control-center/pages/ai-command/tool-dock.js:1210:      badge: "CRM",
+public/control-center/pages/ai-command/tool-dock.js:1288:    "data-aicmd-tool-dock-badge": tool.badge || "",
+public/control-center/pages/ai-command/tool-dock.js:1306:    <aside class="mhos-tool-drawer" data-aicmd-tool-drawer hidden aria-hidden="true">
+public/control-center/pages/ai-command/tool-dock.js:1307:      <div class="mhos-tool-drawer-backdrop" data-aicmd-tool-drawer-close></div>
+public/control-center/pages/ai-command/tool-dock.js:1308:      <section class="mhos-tool-drawer-card" role="dialog" aria-modal="true" aria-label="AI prompt tool setup">
+public/control-center/pages/ai-command/tool-dock.js:1309:        <div class="mhos-tool-drawer-head">
+public/control-center/pages/ai-command/tool-dock.js:1310:          <div class="mhos-tool-drawer-title-block">
+public/control-center/pages/ai-command/tool-dock.js:1311:            <span class="mhos-tool-drawer-icon" data-aicmd-tool-drawer-icon>✦</span>
+public/control-center/pages/ai-command/tool-dock.js:1313:              <p class="mhos-tool-drawer-kicker" data-aicmd-tool-drawer-action>Quick AI tool</p>
+public/control-center/pages/ai-command/tool-dock.js:1317:          <button class="mhos-tool-drawer-close" type="button" data-aicmd-tool-drawer-close aria-label="Close tool drawer">×</button>
+public/control-center/pages/ai-command/tool-dock.js:1320:        <p class="mhos-tool-drawer-description" data-aicmd-tool-drawer-description>
+public/control-center/pages/ai-command/tool-dock.js:1321:          Configure a review-only AI prompt with the right output, trusted source context, and destination handoff before loading it into the composer.
+public/control-center/pages/ai-command/tool-dock.js:1324:        <div class="mhos-tool-drawer-grid">
+public/control-center/pages/ai-command/tool-dock.js:1325:          <div class="mhos-tool-drawer-section">
+public/control-center/pages/ai-command/tool-dock.js:1326:            <span class="mhos-tool-drawer-section-label">1. Output type</span>
+public/control-center/pages/ai-command/tool-dock.js:1327:            <select class="mhos-tool-drawer-select" data-aicmd-tool-drawer-output-select></select>
+public/control-center/pages/ai-command/tool-dock.js:1330:          <div class="mhos-tool-drawer-section">
+public/control-center/pages/ai-command/tool-dock.js:1331:            <span class="mhos-tool-drawer-section-label">2. Trusted source / input</span>
+public/control-center/pages/ai-command/tool-dock.js:1332:            <select class="mhos-tool-drawer-select" data-aicmd-tool-drawer-source-select></select>
+public/control-center/pages/ai-command/tool-dock.js:1333:            <div class="mhos-tool-drawer-selected-source" data-aicmd-tool-drawer-selected-source></div>
+public/control-center/pages/ai-command/tool-dock.js:1334:            <div class="mhos-tool-drawer-warning" data-aicmd-tool-drawer-source-warning role="alert" hidden></div>
+public/control-center/pages/ai-command/tool-dock.js:1337:          <div class="mhos-tool-drawer-section">
+public/control-center/pages/ai-command/tool-dock.js:1338:            <span class="mhos-tool-drawer-section-label">3. Destination handoff</span>
+public/control-center/pages/ai-command/tool-dock.js:1339:            <select class="mhos-tool-drawer-select" data-aicmd-tool-drawer-destination-select></select>
+public/control-center/pages/ai-command/tool-dock.js:1342:          <div class="mhos-tool-drawer-section">
+public/control-center/pages/ai-command/tool-dock.js:1343:            <span class="mhos-tool-drawer-section-label">4. Options</span>
+public/control-center/pages/ai-command/tool-dock.js:1344:            <div class="mhos-tool-drawer-two-col">
+public/control-center/pages/ai-command/tool-dock.js:1347:                <select class="mhos-tool-drawer-select" data-aicmd-tool-drawer-language>
+public/control-center/pages/ai-command/tool-dock.js:1356:                <select class="mhos-tool-drawer-select" data-aicmd-tool-drawer-tone>
+public/control-center/pages/ai-command/tool-dock.js:1367:            <label class="mhos-tool-drawer-field">
+public/control-center/pages/ai-command/tool-dock.js:1370:                class="mhos-tool-drawer-input"
+public/control-center/pages/ai-command/tool-dock.js:1377:            <label class="mhos-tool-drawer-field">
+public/control-center/pages/ai-command/tool-dock.js:1380:                class="mhos-tool-drawer-textarea"
+public/control-center/pages/ai-command/tool-dock.js:1388:          <div class="mhos-tool-drawer-section">
+public/control-center/pages/ai-command/tool-dock.js:1389:            <span class="mhos-tool-drawer-section-label">Safety</span>
+public/control-center/pages/ai-command/tool-dock.js:1390:            <div class="mhos-tool-drawer-safety" data-aicmd-tool-drawer-safety>Review only</div>
+public/control-center/pages/ai-command/tool-dock.js:1394:        <div class="mhos-tool-drawer-summary">
+public/control-center/pages/ai-command/tool-dock.js:1399:        <div class="mhos-tool-drawer-note">
+public/control-center/pages/ai-command/tool-dock.js:1403:        <div class="mhos-tool-drawer-actions">
+public/control-center/pages/ai-command/tool-dock.js:1404:          <button class="btn btn-secondary" type="button" data-aicmd-tool-drawer-open-library>Choose Library Source</button>
+public/control-center/pages/ai-command/tool-dock.js:1405:          <button class="btn btn-primary" type="button" data-aicmd-tool-drawer-use>Prepare Prompt</button>
+public/control-center/pages/ai-command/tool-dock.js:1406:          <button class="btn btn-secondary" type="button" data-aicmd-tool-drawer-close>Cancel</button>
+public/control-center/pages/ai-command/tool-dock.js:1408:      </section>
+public/control-center/pages/ai-command/tool-dock.js:1428:    <section class="mhos-tool-dock aicmd-tool-dock" aria-label="${safe(label)}">
+public/control-center/pages/ai-command/tool-dock.js:1429:      <div class="mhos-tool-dock-head">
+public/control-center/pages/ai-command/tool-dock.js:1430:        <span class="mhos-tool-dock-kicker">${safe(label)}</span>
+public/control-center/pages/ai-command/tool-dock.js:1431:        <span class="mhos-tool-dock-copy">Review-only setup · source, output, destination, then load into composer</span>
+public/control-center/pages/ai-command/tool-dock.js:1433:      <div class="mhos-tool-dock-list">
+public/control-center/pages/ai-command/tool-dock.js:1437:            class="mhos-tool-dock-item"
+public/control-center/pages/ai-command/tool-dock.js:1441:            data-aicmd-tool-dock-badge="${safe(tool.badge)}"
+public/control-center/pages/ai-command/tool-dock.js:1451:            <span class="mhos-tool-dock-icon" aria-hidden="true">${safe(tool.icon)}</span>
+public/control-center/pages/ai-command/tool-dock.js:1452:            <span class="mhos-tool-dock-label">${safe(tool.label)}</span>
+public/control-center/pages/ai-command/tool-dock.js:1453:            <span class="mhos-tool-dock-badge">${safe(tool.badge)}</span>
+public/control-center/pages/ai-command/tool-dock.js:1457:    </section>
+public/control-center/pages/ai-command/tool-dock.js:1470:    cta: "CTA",
+public/control-center/pages/ai-command/tool-dock.js:1485:    .replace(/\bCta\b/g, "CTA")
+public/control-center/pages/ai-command/tool-dock.js:1546:    "- Suggest a primary keyword and 3-6 secondary keyword ideas if not provided.",
+public/control-center/pages/ai-command/tool-dock.js:1666:function openToolDrawer({ drawer, btn, tool: explicitTool = null, text, input, session, projectName, persistSessionDraft, sessionKey, updateStatus }) {
+public/control-center/pages/ai-command/tool-dock.js:1682:    `Prepare a review-only AI prompt for ${btn.getAttribute("data-aicmd-tool-dock-label") || "this tool"}. Choose output, trusted source context, destination handoff, language, and tone before loading it into the composer.`
+public/control-center/pages/ai-command/tool-dock.js:1727:  updateStatus?.(`${btn.getAttribute("data-aicmd-tool-dock-label") || "Quick AI tool"} setup opened. Review source and handoff requirements, then prepare the prompt.`);
+public/control-center/pages/ai-command/tool-dock.js:1740:  updateStatus
+public/control-center/pages/ai-command/tool-dock.js:1755:    updateStatus
+public/control-center/pages/ai-command/tool-dock.js:1768:  updateStatus
+public/control-center/pages/ai-command/tool-dock.js:1804:        targetSection: "asset-workspace",
+public/control-center/pages/ai-command/tool-dock.js:1813:      updateStatus?.("Library guide opened. Select an asset, click Use as Source in AI Command, then return to AI Command.");
+public/control-center/pages/ai-command/tool-dock.js:1832:        updateStatus?.("This prompt tool needs a trusted Library source first. Choose one from Library before continuing.");
+public/control-center/pages/ai-command/tool-dock.js:1853:      if (typeof updateStatus === "function") {
+public/control-center/pages/ai-command/tool-dock.js:1854:        updateStatus(`${label} prompt prepared in the composer. Review it, then ask or create a preview.`);
+public/control-center/pages/ai-command/tool-dock.js:1882:          updateStatus
+public/control-center/pages/ai-command/tool-dock.js:1901:      if (typeof updateStatus === "function") {
+public/control-center/pages/ai-command/tool-dock.js:1902:        updateStatus(`${label} loaded into composer. Review it, then ask or preview.`);
+public/control-center/pages/home/render-sections.js:2:  Home Executive Runtime Render Sections
+public/control-center/pages/home/render-sections.js:24:export function renderBadge(tone, label, escapeHtml) {
+public/control-center/pages/home/render-sections.js:25:  return `<span class="card-badge ${escapeHtml(tone || "neutral")}">${escapeHtml(label || "Unknown")}</span>`;
+public/control-center/pages/home/render-sections.js:28:export function renderCompactList(items, escapeHtml, emptyText = "No active blocker detected.") {
+public/control-center/pages/home/render-sections.js:32:    return `<p class="home-empty-note">${escapeHtml(emptyText)}</p>`;
+public/control-center/pages/home/render-sections.js:36:    <ul class="home-compact-list">
+public/control-center/pages/home/render-sections.js:48:    <article class="home-blocker-card">
+public/control-center/pages/home/render-sections.js:49:      <div class="home-blocker-head">
+public/control-center/pages/home/render-sections.js:50:        <span class="data-label">${escapeHtml(title)}</span>
+public/control-center/pages/home/render-sections.js:51:        ${renderBadge(safeItems.length ? tone : "success", safeItems.length ? formatCount(safeItems.length) : "Clear", escapeHtml)}
+public/control-center/pages/home/render-sections.js:62:    return `<p class="home-empty-note">No recent activity is recorded yet. Open the owning workspace to create the next reviewed signal.</p>`;
+public/control-center/pages/home/render-sections.js:66:    <div class="home-activity-list">
+public/control-center/pages/home/render-sections.js:68:        <article class="home-activity-item">
+public/control-center/pages/home/render-sections.js:70:            <span class="data-label">${escapeHtml(item.kind || "Activity")}</span>
+public/control-center/pages/home/render-sections.js:74:          <div class="home-activity-meta">
+public/control-center/pages/home/render-sections.js:75:            ${renderBadge(item.tone || "neutral", item.when || "Not available", escapeHtml)}
+public/control-center/pages/home/render-sections.js:83:export function renderAiTeamCards(cards, escapeHtml) {
+public/control-center/pages/home/render-sections.js:84:  const safeCards = asArray(cards).slice(0, 7);
+public/control-center/pages/home/render-sections.js:86:  if (!safeCards.length) {
+public/control-center/pages/home/render-sections.js:87:    return `<p class="home-empty-note">AI team status is not available yet. AI Command can still prepare guidance for the next action.</p>`;
+public/control-center/pages/home/render-sections.js:91:    <div class="home-ai-team-grid">
+public/control-center/pages/home/render-sections.js:92:      ${safeCards.map((agent) => `
+public/control-center/pages/home/render-sections.js:93:          <button class="home-ai-team-card" type="button" data-role-id="${escapeHtml(agent.id || "")}" title="Prepare ${escapeHtml(agent.name)} guidance in AI Command">
+public/control-center/pages/home/render-sections.js:94:          <div class="home-ai-team-card-head">
+public/control-center/pages/home/render-sections.js:96:            ${renderBadge(agent.tone || "neutral", agent.status || "Idle", escapeHtml)}
+public/control-center/pages/home/render-sections.js:107:  capabilityCards = [],
+public/control-center/pages/home/render-sections.js:113:    <section class="card home-exec-hero">
+public/control-center/pages/home/render-sections.js:114:      <div class="home-exec-hero-main">
+public/control-center/pages/home/render-sections.js:116:          <p class="card-label">Executive Command Center</p>
+public/control-center/pages/home/render-sections.js:118:          <p class="home-decision-copy">${escapeHtml(dashboard.oneLineSummary)}</p>
+public/control-center/pages/home/render-sections.js:121:        <div class="home-exec-hero-status">
+public/control-center/pages/home/render-sections.js:122:          ${renderBadge(dashboard.headerTone, dashboard.headerStatus, escapeHtml)}
+public/control-center/pages/home/render-sections.js:124:          <span class="data-label">System Health</span>
+public/control-center/pages/home/render-sections.js:128:      <div class="home-exec-hero-actions">
+public/control-center/pages/home/render-sections.js:129:        <button id="homeExecutivePrimaryActionBtn" class="btn btn-primary" type="button">
+public/control-center/pages/home/render-sections.js:130:          ${escapeHtml(dashboard.primaryActionLabel)}
+public/control-center/pages/home/render-sections.js:132:        <button id="homeSecondaryActionBtn" class="btn btn-secondary" type="button">
+public/control-center/pages/home/render-sections.js:133:          ${escapeHtml(dashboard.secondaryActionLabel)}
+public/control-center/pages/home/render-sections.js:135:        <button id="homeAskExecutiveAiBtn" class="btn btn-ghost" type="button">
+public/control-center/pages/home/render-sections.js:139:      <p class="home-empty-note">Home opens workspaces or prepares AI guidance only. It does not approve, publish, send, upload, delete, archive, or execute.</p>
+public/control-center/pages/home/render-sections.js:140:    </section>
+public/control-center/pages/home/render-sections.js:142:    <section class="home-kpi-grid">
+public/control-center/pages/home/render-sections.js:143:      ${capabilityCards.map((item) => `
+public/control-center/pages/home/render-sections.js:144:        <article class="card home-kpi-card">
+public/control-center/pages/home/render-sections.js:145:          <span class="data-label">${escapeHtml(item.title)}</span>
+public/control-center/pages/home/render-sections.js:148:          ${renderBadge(item.tone, toneLabel(item.tone), escapeHtml)}
+public/control-center/pages/home/render-sections.js:151:    </section>
+public/control-center/pages/campaign-studio.js:3:  getAssetNextAction,
+public/control-center/pages/campaign-studio.js:149:function firstNonEmpty(...values) {
+public/control-center/pages/campaign-studio.js:163:  return firstNonEmpty(
+public/control-center/pages/campaign-studio.js:177:function isMissingIntelligenceError(error) {
+public/control-center/pages/campaign-studio.js:178:  const status = Number(error?.status);
+public/control-center/pages/campaign-studio.js:180:  const message = asString(error?.message).toLowerCase();
+public/control-center/pages/campaign-studio.js:228:    campaignGoal: overviewData.primary_goal || "Launch",
+public/control-center/pages/campaign-studio.js:233:    productAngle: overviewData.offer_positioning || overviewData.brand_promise || "",
+public/control-center/pages/campaign-studio.js:234:    audiencePrimary: overviewData.audience_primary || overviewData.target_audience || "",
+public/control-center/pages/campaign-studio.js:253:    executionNotes: asArray(readiness.next_best_actions).join("; ")
+public/control-center/pages/campaign-studio.js:268:        error: ""
+public/control-center/pages/campaign-studio.js:281:      error: asString(session.intelligence?.error)
+public/control-center/pages/campaign-studio.js:366:    return firstNonEmpty(record.name, record.title, record.label, record.channel, record.product, record.summary, record.action);
+public/control-center/pages/campaign-studio.js:373:  if (key === "name") return firstNonEmpty(phase.name, phase.title, `Wave ${index + 1}`);
+public/control-center/pages/campaign-studio.js:374:  if (key === "focus") return firstNonEmpty(phase.goal, phase.objective, phase.focus, phase.summary, joinPackageList(phase.actions || phase.steps));
+public/control-center/pages/campaign-studio.js:393:    campaignName: firstNonEmpty(pkg.concept, pkg.campaignConcept, response.title, session.values.campaignName),
+public/control-center/pages/campaign-studio.js:394:    campaignGoal: firstNonEmpty(response.summary, pkg.goal, pkg.objective, session.values.campaignGoal),
+public/control-center/pages/campaign-studio.js:395:    productFocus: firstNonEmpty(joinPackageList(pkg.products), session.values.productFocus),
+public/control-center/pages/campaign-studio.js:396:    productAngle: firstNonEmpty(joinPackageList(pkg.contentAngles || pkg.content_angles), pkg.concept, session.values.productAngle),
+public/control-center/pages/campaign-studio.js:397:    audiencePrimary: firstNonEmpty(pkg.targetAudience, pkg.target_audience, pkg.audience, session.values.audiencePrimary),
+public/control-center/pages/campaign-studio.js:398:    audienceNeed: firstNonEmpty(pkg.audienceNeed, pkg.audience_need, session.values.audienceNeed),
+public/control-center/pages/campaign-studio.js:399:    channelPlan: firstNonEmpty(joinPackageList(pkg.channels), session.values.channelPlan),
+public/control-center/pages/campaign-studio.js:400:    offerHeadline: firstNonEmpty(pkg.offer, pkg.offerStrategy, pkg.offer_strategy, session.values.offerHeadline),
+public/control-center/pages/campaign-studio.js:401:    offerDetail: firstNonEmpty(joinPackageList(pkg.adAngles || pkg.ad_angles), session.values.offerDetail),
+public/control-center/pages/campaign-studio.js:402:    wave1Name: firstNonEmpty(phaseValue(phases, 0, "name"), session.values.wave1Name),
+public/control-center/pages/campaign-studio.js:403:    wave1Focus: firstNonEmpty(phaseValue(phases, 0, "focus"), session.values.wave1Focus),
+public/control-center/pages/campaign-studio.js:404:    wave1Channels: firstNonEmpty(phaseValue(phases, 0, "channels"), session.values.wave1Channels),
+public/control-center/pages/campaign-studio.js:405:    wave2Name: firstNonEmpty(phaseValue(phases, 1, "name"), session.values.wave2Name),
+public/control-center/pages/campaign-studio.js:406:    wave2Focus: firstNonEmpty(phaseValue(phases, 1, "focus"), session.values.wave2Focus),
+public/control-center/pages/campaign-studio.js:407:    wave2Channels: firstNonEmpty(phaseValue(phases, 1, "channels"), session.values.wave2Channels),
+public/control-center/pages/campaign-studio.js:408:    wave3Name: firstNonEmpty(phaseValue(phases, 2, "name"), session.values.wave3Name),
+public/control-center/pages/campaign-studio.js:409:    wave3Focus: firstNonEmpty(phaseValue(phases, 2, "focus"), session.values.wave3Focus),
+public/control-center/pages/campaign-studio.js:410:    wave3Channels: firstNonEmpty(phaseValue(phases, 2, "channels"), session.values.wave3Channels),
+public/control-center/pages/campaign-studio.js:411:    assetChecklist: firstNonEmpty(joinPackageList(pkg.requiredAssets || pkg.required_assets), session.values.assetChecklist),
+public/control-center/pages/campaign-studio.js:412:    executionNotes: firstNonEmpty(
+public/control-center/pages/campaign-studio.js:415:        ...asArray(pkg.nextActions || pkg.next_actions)
+public/control-center/pages/campaign-studio.js:515:  createProjectHandoff?.(projectName, handoff).catch((error) => {
+public/control-center/pages/campaign-studio.js:516:    console.warn("Failed to persist campaign route handoff:", error.message);
+public/control-center/pages/campaign-studio.js:545:function renderEmptyState(title, description, escapeHtml) {
+public/control-center/pages/campaign-studio.js:547:    <div class="campaign-studio-empty-state">
+public/control-center/pages/campaign-studio.js:556:    return renderEmptyState(title, description, escapeHtml);
+public/control-center/pages/campaign-studio.js:599:    const format = firstNonEmpty(record.format, record.content_type, record.type);
+public/control-center/pages/campaign-studio.js:600:    const topic = firstNonEmpty(record.topic, record.angle, record.hook, record.headline);
+public/control-center/pages/campaign-studio.js:601:    const why = firstNonEmpty(
+public/control-center/pages/campaign-studio.js:606:      record.improve_next,
+public/control-center/pages/campaign-studio.js:609:    const label = format ? `${titleCase(format)} pattern` : firstNonEmpty(record.title, record.label, "Content pattern");
+public/control-center/pages/campaign-studio.js:653:      title: firstNonEmpty(record.query, record.page, record.title, record.label, "SEO opportunity"),
+public/control-center/pages/campaign-studio.js:654:      body: firstNonEmpty(record.opportunity, record.recommendation, record.reason, record.summary, "Improve visibility or click-through rate.")
+public/control-center/pages/campaign-studio.js:674:      title: firstNonEmpty(record.campaign_name, record.title, record.label, "Top paid signal"),
+public/control-center/pages/campaign-studio.js:675:      body: firstNonEmpty(record.reason, record.insight, record.summary, record.recommendation, "This campaign is outperforming peers.")
+public/control-center/pages/campaign-studio.js:682:      title: firstNonEmpty(record.campaign_name, record.title, record.label, "Paid risk"),
+public/control-center/pages/campaign-studio.js:683:      body: firstNonEmpty(record.reason, record.insight, record.summary, record.recommendation, "Performance or setup risk detected.")
+public/control-center/pages/campaign-studio.js:900:  if (!values.productAngle) approvalBlockers.push("Product angle needs to be explicit so operators do not improvise.");
+public/control-center/pages/campaign-studio.js:943:  const topRecommendation = recommendations[0] || normalizeRecommendation(asArray(readiness.next_best_actions)[0] || "");
+public/control-center/pages/campaign-studio.js:948:    angle: firstNonEmpty(
+public/control-center/pages/campaign-studio.js:952:      values.productAngle,
+public/control-center/pages/campaign-studio.js:957:    offer: firstNonEmpty(
+public/control-center/pages/campaign-studio.js:964:    audience: firstNonEmpty(
+public/control-center/pages/campaign-studio.js:974:    nextAction: firstNonEmpty(
+public/control-center/pages/campaign-studio.js:976:      asArray(readiness.next_best_actions)[0],
+public/control-center/pages/campaign-studio.js:978:      "Use the current blockers and recommendations to choose the next highest-impact execution step."
+public/control-center/pages/campaign-studio.js:1008:      ? "Hero visual, launch copy, offer banner"
+public/control-center/pages/campaign-studio.js:1011:        : "Retargeting creative, urgency variants, CTA refresh";
+public/control-center/pages/campaign-studio.js:1036:    asArray(learning.recommendations || insights.recommendations || overviewBlock.next_best_actions || readiness.next_best_actions)
+public/control-center/pages/campaign-studio.js:1073:        body: firstNonEmpty(record.status, "missing")
+public/control-center/pages/campaign-studio.js:1090:    if (!["error", "token_expired", "partial"].includes(status)) return;
+public/control-center/pages/campaign-studio.js:1093:      body: firstNonEmpty(record.health_summary, record.last_error, record.status_label, "Connection health needs attention.")
+public/control-center/pages/campaign-studio.js:1138:    readinessStatus: readiness.readiness_status || overviewData.readiness_status
+public/control-center/pages/campaign-studio.js:1153:    assetNextAction: getAssetNextAction(assets, campaignAssetKeys),
+public/control-center/pages/campaign-studio.js:1167:    intelligenceError: asString(session.intelligence?.error || ""),
+public/control-center/pages/campaign-studio.js:1172:function renderChannelRecommendationCards(items, escapeHtml) {
+public/control-center/pages/campaign-studio.js:1174:    return renderEmptyState(
+public/control-center/pages/campaign-studio.js:1182:    <div class="campaign-channel-card-list">
+public/control-center/pages/campaign-studio.js:1184:        <div class="campaign-channel-card">
+public/control-center/pages/campaign-studio.js:1187:            <span class="card-badge ${item.confidence === "High" ? "success" : item.confidence === "Medium" ? "warning" : "neutral"}">${escapeHtml(item.confidence)}</span>
+public/control-center/pages/campaign-studio.js:1196:function renderBlockerGroup(title, items, escapeHtml, emptyBody) {
+public/control-center/pages/campaign-studio.js:1201:        <span class="card-badge ${items.length ? "danger" : "success"}">${escapeHtml(items.length ? `${items.length} open` : "Clear")}</span>
+public/control-center/pages/campaign-studio.js:1206:          : `<div class="setup-helper">${escapeHtml(emptyBody)}</div>`
+public/control-center/pages/campaign-studio.js:1218:  showError
+public/control-center/pages/campaign-studio.js:1221:  if (session.intelligence.status === "loading" || session.intelligence.status === "loaded") return;
+public/control-center/pages/campaign-studio.js:1224:  session.intelligence.status = "loading";
+public/control-center/pages/campaign-studio.js:1225:  session.intelligence.error = "";
+public/control-center/pages/campaign-studio.js:1232:      const insightsMissing = insightsResult?.status === "rejected" && isMissingIntelligenceError(insightsResult.reason);
+public/control-center/pages/campaign-studio.js:1233:      const learningMissing = learningResult?.status === "rejected" && isMissingIntelligenceError(learningResult.reason);
+public/control-center/pages/campaign-studio.js:1240:      const errors = [
+public/control-center/pages/campaign-studio.js:1245:      session.intelligence.status = (insights || learning) ? "loaded" : "error";
+public/control-center/pages/campaign-studio.js:1248:      session.intelligence.error = errors.join(" • ");
+public/control-center/pages/campaign-studio.js:1250:      if (session.intelligence.status === "error" && session.intelligence.error) {
+public/control-center/pages/campaign-studio.js:1251:        showError?.(`Campaign intelligence could not be refreshed: ${session.intelligence.error}`);
+public/control-center/pages/campaign-studio.js:1256:    .catch((error) => {
+public/control-center/pages/campaign-studio.js:1257:      session.intelligence.status = "error";
+public/control-center/pages/campaign-studio.js:1258:      session.intelligence.error = error?.message || "Failed to load campaign intelligence";
+public/control-center/pages/campaign-studio.js:1259:      showError?.(session.intelligence.error);
+public/control-center/pages/campaign-studio.js:1269:  showError,
+public/control-center/pages/campaign-studio.js:1324:      } catch (error) {
+public/control-center/pages/campaign-studio.js:1325:        showError?.(error.message || "Failed to save campaign plan.");
+public/control-center/pages/campaign-studio.js:1353:      } catch (error) {
+public/control-center/pages/campaign-studio.js:1354:        showError?.(error.message || "Failed to structure the campaign plan.");
+public/control-center/pages/campaign-studio.js:1407:      }).catch((error) => {
+public/control-center/pages/campaign-studio.js:1408:        console.warn("Failed to persist campaign handoff:", error.message);
+public/control-center/pages/campaign-studio.js:1456:      showMessage?.("Campaign package drafted in this session. Backend export wiring can be connected next.");
+public/control-center/pages/campaign-studio.js:1481:      session.intelligence.error = "";
+public/control-center/pages/campaign-studio.js:1488:        showError
+public/control-center/pages/campaign-studio.js:1516:    showError,
+public/control-center/pages/campaign-studio.js:1537:      showError,
+public/control-center/pages/campaign-studio.js:1550:      showError
+public/control-center/pages/campaign-studio.js:1561:      assetNextAction,
+public/control-center/pages/campaign-studio.js:1576:      intelligenceError,
+public/control-center/pages/campaign-studio.js:1579:    const activeCampaignLabel = safeText(firstNonEmpty(state.context.activeCampaign, values.campaignName), projectName || "Campaign Studio");
+public/control-center/pages/campaign-studio.js:1580:    const intelligenceLabel = intelligenceStatus === "loading" ? "Refreshing" : hasLiveIntelligence ? "Live intelligence" : "Draft-assisted";
+public/control-center/pages/campaign-studio.js:1581:    const intelligenceTone = intelligenceStatus === "loading" ? "warning" : hasLiveIntelligence ? "success" : "neutral";
+public/control-center/pages/campaign-studio.js:1594:    const marketLabel = safeText(firstNonEmpty(values.market, overviewData.market), "Market pending");
+public/control-center/pages/campaign-studio.js:1595:    const productLabel = safeText(firstNonEmpty(values.productFocus, overviewData.project_name, projectName), "Product pending");
+public/control-center/pages/campaign-studio.js:1597:    const strategistNextAction = safeText(strategyGuidance.nextAction, "Review campaign plan");
+public/control-center/pages/campaign-studio.js:1601:    const hasAudience = Boolean(firstNonEmpty(values.audiencePrimary, values.audienceNeed).trim());
+public/control-center/pages/campaign-studio.js:1602:    const hasOffer = Boolean(firstNonEmpty(values.offerHeadline, values.offerDetail).trim());
+public/control-center/pages/campaign-studio.js:1621:      "Next Best Move",

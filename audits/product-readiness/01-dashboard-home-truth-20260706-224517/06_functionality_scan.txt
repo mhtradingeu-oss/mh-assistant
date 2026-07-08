@@ -1,0 +1,1164 @@
+Buttons and click handlers in likely dashboard/home files:
+
+----- public/control-center/index.html -----
+8:  <link rel="stylesheet" href="./styles/00-tokens.css?v=20260508-tokens-1">
+9:  <link rel="stylesheet" href="./styles/01-reset.css?v=20260508-reset-1">
+10:  <link rel="stylesheet" href="./styles/02-layer-system.css?v=20260510-loading-overlay-1">
+11:  <link rel="stylesheet" href="./styles/03-app-shell.css?v=20260508-shell-1">
+12:  <link rel="stylesheet" href="./styles/07-sidebar.css?v=20260508-sidebar-2">
+13:  <link rel="stylesheet" href="./styles/10-topbar-canonical.css?v=20260508-topbar-canonical-2">
+14:  <link rel="stylesheet" href="./styles/04-command-layer.css?v=20260508-command-1">
+15:  <link rel="stylesheet" href="./styles/05-ai-layer.css?v=20260508-ai-layer-1">
+16:  <link rel="stylesheet" href="./styles/08-components-foundation.css?v=20260508-components-1">
+17:  <link rel="stylesheet" href="./styles/mhos-action-primitives.css?v=20260523-action-primitives-1">
+18:  <link rel="stylesheet" href="./styles/09-operations-centers.css?v=20260511-task-center-layout-1">
+19:  <link rel="stylesheet" href="./styles/09-governance.css?v=20260623-governance-owner-1">
+20:  <link rel="stylesheet" href="./styles/12-pages.css?v=20260508-pages-1">
+21:  <link rel="stylesheet" href="./styles/13-home-executive.css?v=20260508-home-executive-1">
+22:  <link rel="stylesheet" href="./styles/14-page-standard.css?v=20260510-library-polish-1">
+23:  <link rel="stylesheet" href="./styles/15-clean-operating-layer.css?v=20260514-clean-layer-1">
+24:  <link rel="stylesheet" href="./styles/mhos-workflow-primitives.css?v=20260523-workflow-primitives-1">
+25:  <link rel="stylesheet" href="./styles/mhos-context-primitives.css?v=20260523-context-primitives-1">
+26:  <link rel="stylesheet" href="./styles/mhos-executive-surface-primitives.css?v=20260523-executive-surface-primitives-1">
+27:  <link rel="stylesheet" href="./styles/16-mhos-theme-v2.css?v=20260703-theme-v2-1">
+40:    <div id="startupStepBanner" class="startup-step-banner" role="status" aria-live="polite" hidden>
+45:      id="startupUnlockBar"
+46:      class="startup-unlock-bar"
+52:      <span id="startupUnlockText">Startup is taking longer than expected.</span>
+53:      <button id="startupUnlockBtn" class="btn btn-warning" type="button">Unlock UI</button>
+57:      id="startupTracePanel"
+58:      class="startup-trace-panel"
+63:      <div class="startup-trace-head">
+65:        <button id="startupTraceUnlockBtn" class="btn btn-warning" type="button">Unlock UI</button>
+67:      <div id="startupTraceMeta" class="startup-trace-meta">Startup trace is idle.</div>
+68:      <div id="startupTraceBody" class="startup-trace-body">No startup events recorded yet.</div>
+79:      <h3 id="fatalErrorTitle">Control Center startup failed</h3>
+82:      <div id="fatalStartupSteps" class="fatal-startup-steps">No startup steps recorded yet.</div>
+84:        <button id="fatalRetryBtn" class="btn btn-primary" type="button">Retry</button>
+85:        <button id="fatalAccessKeyBtn" class="btn btn-secondary" type="button">Set Access Key</button>
+117:            <button class="nav-item is-active" data-route="home" data-page="home" type="button">Home</button>
+118:            <button class="nav-item" data-route="ai-command" data-page="ai-command" type="button">AI Command</button>
+123:            <button class="nav-item" data-route="setup" data-page="setup" type="button">Setup</button>
+124:            <button class="nav-item" data-route="library" data-page="library" type="button">Library</button>
+125:            <button class="nav-item" data-route="integrations" data-page="integrations" type="button">Integrations</button>
+130:            <button class="nav-item" data-route="workflows" data-page="workflows" type="button">Workflows</button>
+131:            <button class="nav-item" data-route="campaign-studio" data-page="campaign-studio" type="button">Campaign Studio</button>
+132:            <button class="nav-item" data-route="content-studio" data-page="content-studio" type="button">Content Studio</button>
+133:            <button class="nav-item" data-route="media-studio" data-page="media-studio" type="button">Media Studio</button>
+138:            <button class="nav-item" data-route="publishing" data-page="publishing" type="button">Publishing</button>
+139:            <button class="nav-item" data-route="ads-manager" data-page="ads-manager" type="button">Ads Manager</button>
+140:            <button class="nav-item" data-route="insights" data-page="insights" type="button">Insights</button>
+141:            <button class="nav-item" data-route="research" data-page="research" type="button">Research</button>
+146:            <button class="nav-item" data-route="customer-center" data-page="customer-center" type="button">Customer Center</button>
+151:            <button class="nav-item" data-route="operations-centers" data-page="operations-centers" type="button">Operations Overview</button>
+152:            <button class="nav-item" data-route="task-center" data-page="task-center" type="button">Task Center</button>
+153:            <button class="nav-item" data-route="queue-center" data-page="queue-center" type="button">Queue Center</button>
+154:            <button class="nav-item" data-route="job-monitor" data-page="job-monitor" type="button">Job Monitor</button>
+155:            <button class="nav-item" data-route="notification-center" data-page="notification-center" type="button">Notifications</button>
+160:            <button class="nav-item" data-route="governance" data-page="governance" type="button">Governance</button>
+161:            <button class="nav-item" data-route="settings" data-page="settings" type="button">Settings</button>
+166:          <button id="refreshAllBtn" class="btn btn-primary" data-action="refresh-project" type="button">
+168:          </button>
+169:          <button id="openAiBtn" class="btn btn-secondary" data-action="open-ai-command" type="button">
+171:          </button>
+179:          <button
+182:            type="button"
+188:          </button>
+204:              <button
+207:                type="button"
+213:              </button>
+214:              <button
+217:                type="button"
+220:              </button>
+221:              <button
+224:                type="button"
+227:              </button>
+262:            <button id="runSearchBtn" class="btn btn-secondary" data-action="search" type="button">Search</button>
+263:            <button id="runQuickCommandBtn" class="btn btn-primary" data-action="send-ai-command" type="button">Run</button>
+264:            <button id="newCampaignBtn" class="btn btn-secondary" data-action="open-campaign-studio" type="button">New Campaign</button>
+265:            <button id="scheduleBtn" class="btn btn-secondary" data-action="open-publishing" type="button">Schedule</button>
+319:        retryBtn.addEventListener("click", function () {
+326:        accessKeyBtn.addEventListener("click", function () {
+339:      window.addEventListener("error", function (event) {
+357:      window.addEventListener("unhandledrejection", function (event) {
+363:          : String(reason || "Unhandled startup rejection");
+365:        showFatalStartupError("Control Center startup promise failed.", message);
+374:      <button
+377:        type="button"
+384:      </button>
+397:          <button
+400:            type="button"
+404:          </button>
+411:            <button
+413:              type="button"
+417:            </button>
+419:            <button
+421:              type="button"
+425:            </button>
+427:            <button
+429:              type="button"
+433:            </button>
+440:              <button class="ai-dock-chip" data-ai-route="campaign-studio">
+442:              </button>
+444:              <button class="ai-dock-chip" data-ai-route="content-studio">
+446:              </button>
+448:              <button class="ai-dock-chip" data-ai-route="media-studio">
+450:              </button>
+452:              <button class="ai-dock-chip" data-ai-route="publishing">
+454:              </button>
+
+----- public/control-center/runtime/command-runtime.js -----
+14:  No production runtime integration has started yet.
+32:  - openGlobalCommandBar()
+74:      open: Boolean(aiDock?.classList?.contains("is-open")),
+75:      dataOpen: String(aiDock?.getAttribute?.("data-open") || ""),
+113:  openCommandRuntime()
+
+----- public/control-center/legacy/09-command-legacy-isolation.legacy.css -----
+38:/* Explicit open state only */
+39:.app-shell.is-command-open .command-backdrop,
+40:.app-shell.is-mobile-command-open .command-backdrop,
+53:  .app-shell.is-mobile-shell:not(.is-mobile-command-open) .command-bar {
+57:  .app-shell.is-mobile-shell.is-mobile-command-open .command-bar {
+
+----- public/control-center/styles/04-command-layer.css -----
+59:.app-shell.is-command-open .command-bar,
+60:.app-shell.is-mobile-command-open .command-bar {
+69:.app-shell.is-command-open .command-backdrop,
+70:.app-shell.is-mobile-command-open .command-backdrop {
+78:.app-shell:not(.is-command-open):not(.is-mobile-command-open) .command-backdrop {
+117:  .app-shell.is-mobile-command-open .command-toggle:not([hidden])::after {
+141:  .app-shell.is-mobile-shell:not(.is-mobile-command-open) .command-backdrop {
+
+----- public/control-center/styles/13-home-executive.css -----
+26:  align-items: flex-start;
+184:  align-items: flex-start;
+211:.home-action-buttons {
+249:  align-items: flex-start;
+416:  align-items: flex-start;
+535:  align-content: flex-start;
+570:  align-items: flex-start;
+596:  align-content: flex-start;
+668:  align-items: flex-start;
+894:    align-items: flex-start;
+928:    align-items: flex-start;
+983:  justify-self: start;
+1021:  justify-self: start;
+1108:  justify-self: start;
+
+----- public/control-center/pages/ai-command/tool-dock.js -----
+74:    activeDrawer.classList.contains("is-open")
+80:      drawerIsOpen = openToolDrawer({
+82:        btn: createToolButtonAdapter(fallbackTool),
+101:      activeDrawer.classList.add("is-open");
+141:  created_at = null,
+154:    created_at: created_at || new Date().toISOString(),
+186:export function openLibrarySourcePickerFromAiCommand({
+217:    created_at: new Date().toISOString()
+226:  updateStatus?.("Library opened. Select an asset, click Use as Source in AI Command, then return to AI Command.");
+270:  const preview = truncatePromptText(source.text_preview || source.preview || source.notes || "");
+284:  if (preview) lines.push(`- Text preview: ${preview}`);
+350:        <div class=\"mhos-tool-drawer-source-meta\">${escapeHtml(type)} · Added from Library · Not approval or publish readiness</div>
+353:          <button type=\"button\" class=\"btn btn-xs\" data-aicmd-tool-drawer-change-source>Change source</button>
+354:          <button type=\"button\" class=\"btn btn-xs\" data-aicmd-tool-drawer-remove-source>Remove source</button>
+378:      changeBtn.onclick = () => {
+379:        drawer.querySelector('[data-aicmd-tool-drawer-open-library]')?.click();
+384:      removeBtn.onclick = () => {
+403:    template: "Rewrite the latest response or selected text for {projectName}. Make it clearer, more professional, and easier to use. Do not publish or execute anything."
+410:    template: "Translate or adapt the selected text for the project target market. Keep the explanation in the user's chat language and prepare only review-ready copy."
+417:    template: "Improve this draft for clarity, stronger value, better structure, and a cleaner CTA. Keep it safe and review-ready."
+429:      safetyLevel: "review_only",
+431:      destinations: ["chat-preview", "campaign-studio", "content-studio", "workflows"],
+434:      template: "Build a Campaign Brief for {projectName}. Include objective, audience segments, positioning, offer angles, message pillars, channel mix, launch phases, risks, and next best actions. Keep it preview-only and ready for review."
+442:      safetyLevel: "review_only",
+444:      destinations: ["chat-preview", "campaign-studio", "workflows", "publishing"],
+447:      template: "Plan launch waves for {projectName}. Include timeline, channels, dependencies, required assets, readiness gaps, and safe next actions. Keep it review-ready."
+455:      safetyLevel: "review_only",
+457:      destinations: ["chat-preview", "campaign-studio", "content-studio", "insights"],
+468:      safetyLevel: "review_only",
+470:      destinations: ["chat-preview", "campaign-studio", "content-studio", "ads-manager"],
+473:      template: "Create offer angles for {projectName}. Include positioning, value proposition, proof points, CTA options, and risk notes. Keep it preview-only."
+481:      safetyLevel: "review_only",
+483:      destinations: ["chat-preview", "campaign-studio", "content-studio", "workflows", "publishing"],
+486:      template: "Map the funnel for {projectName}. Include awareness, consideration, conversion, retention, content needs, and handoff points for review."
+493:      actionType: "preview",
+494:      safetyLevel: "review_only",
+496:      destinations: ["chat-preview", "workflows", "task", "campaign-studio"],
+510:      safetyLevel: "review_only",
+512:      destinations: ["chat-preview", "content-studio", "library", "media-studio", "publishing", "compliance"],
+515:      template: "Use the Content Writer to create a new written output for {projectName}. First ask or infer the output type: company profile, product copy, email, blog article, landing page, contract draft, presentation outline, speech, FAQ, proposal, social post, or ad copy. Ask for sources if needed. Keep it review-ready and do not publish or send anything."
+523:      safetyLevel: "review_only",
+528:      template: "Rewrite the current text for {projectName}. Keep the meaning, improve clarity, structure, and tone. Offer variants such as professional, shorter, simpler, more persuasive, premium, or platform-specific. Do not publish anything."
+536:      safetyLevel: "review_only",
+541:      template: "Translate and localize the current text for {projectName}. Ask for target language and market if missing. Preserve brand tone, adapt CTA and wording for the target audience, and keep the result review-ready."
+549:      safetyLevel: "review_only",
+561:      actionType: "preview",
+562:      safetyLevel: "review_only",
+564:      destinations: ["preview", "content-studio", "compliance"],
+588:      safetyLevel: "review_only",
+601:      safetyLevel: "review_only",
+603:      destinations: ["chat-preview", "content-studio", "publishing"],
+616:      destinations: ["content-studio", "library", "media-studio", "publishing", "compliance", "task", "handoff"],
+617:      sourceTypes: ["current_draft", "preview", "current_chat"],
+618:      outputTypes: ["content_studio_draft", "library_save", "media_brief", "publishing_package", "compliance_review", "task_preview", "handoff_preview"],
+619:      template: "Prepare safe routing for this Content Writer output for {projectName}. Ask the destination: Content Studio, Save to Library, Prepare Media Brief, Publishing package, Compliance review, Task, or Handoff. Do not route or execute before review."
+629:      safetyLevel: "review_only",
+631:      destinations: ["chat-preview", "media-studio", "library", "content-studio", "publishing"],
+642:      safetyLevel: "review_only",
+644:      destinations: ["chat-preview", "media-studio", "library"],
+655:      safetyLevel: "review_only",
+657:      destinations: ["chat-preview", "media-studio", "library"],
+668:      safetyLevel: "review_only",
+670:      destinations: ["chat-preview", "media-studio", "library", "workflows"],
+681:      safetyLevel: "review_only",
+683:      destinations: ["chat-preview", "media-studio", "content-studio", "publishing"],
+694:      safetyLevel: "review_only",
+696:      destinations: ["chat-preview", "media-studio", "governance", "library"],
+710:      safetyLevel: "review_only",
+712:      destinations: ["chat-preview", "media-studio", "content-studio", "publishing"],
+723:      safetyLevel: "review_only",
+725:      destinations: ["chat-preview", "media-studio", "library", "publishing"],
+736:      safetyLevel: "review_only",
+738:      destinations: ["chat-preview", "media-studio", "workflows", "library"],
+749:      safetyLevel: "review_only",
+751:      destinations: ["chat-preview", "media-studio", "content-studio"],
+762:      safetyLevel: "review_only",
+764:      destinations: ["chat-preview", "media-studio", "publishing", "ads-manager"],
+771:  publisher: [
+773:      id: "publish-check",
+777:      actionType: "preview",
+778:      safetyLevel: "review_only",
+779:      frontendOwnerPage: "publishing",
+780:      destinations: ["chat-preview", "publishing", "governance", "content-studio", "media-studio"],
+781:      sourceTypes: ["content_draft", "media_asset", "publishing_package", "approval_notes", "current_chat", "manual_input"],
+782:      outputTypes: ["publishing_readiness_check", "missing_items", "channel_fit_review", "risk_notes"],
+783:      template: "Review publishing readiness for {projectName}. Check copy, assets, channel fit, schedule, approvals, and missing items. Do not publish."
+791:      safetyLevel: "review_only",
+792:      frontendOwnerPage: "publishing",
+793:      destinations: ["chat-preview", "publishing", "content-studio", "media-studio"],
+805:      frontendOwnerPage: "publishing",
+806:      destinations: ["chat-preview", "publishing", "workflows"],
+807:      sourceTypes: ["publishing_package", "campaign_timeline", "channel_notes", "approval_notes", "manual_input"],
+808:      outputTypes: ["schedule_builder", "calendar_slot_options", "dependency_notes", "review_gates"],
+809:      template: "Draft a publishing schedule for {projectName}. Include channels, timing, dependencies, review gates, and next actions."
+817:      safetyLevel: "review_only",
+818:      frontendOwnerPage: "publishing",
+819:      destinations: ["chat-preview", "publishing", "content-studio", "insights"],
+832:      destinations: ["chat-preview", "governance", "publishing", "workflows"],
+833:      sourceTypes: ["final_copy", "media_asset", "approval_notes", "claim_review", "publishing_package", "manual_input"],
+846:      safetyLevel: "review_only",
+848:      destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],
+859:      safetyLevel: "review_only",
+861:      destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],
+872:      safetyLevel: "review_only",
+874:      destinations: ["chat-preview", "ads-manager", "insights", "campaign-studio"],
+885:      safetyLevel: "review_only",
+887:      destinations: ["chat-preview", "ads-manager", "media-studio", "insights", "workflows"],
+898:      safetyLevel: "review_only",
+900:      destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],
+902:      outputTypes: ["landing_match_review", "message_gap_report", "cta_improvements", "trust_signal_notes"],
+914:      safetyLevel: "review_only",
+916:      destinations: ["chat-preview", "insights", "content-studio", "library"],
+927:      safetyLevel: "review_only",
+929:      destinations: ["chat-preview", "insights", "campaign-studio", "workflows"],
+940:      safetyLevel: "review_only",
+942:      destinations: ["chat-preview", "insights", "content-studio", "library"],
+953:      safetyLevel: "review_only",
+955:      destinations: ["chat-preview", "insights", "campaign-studio", "workflows"],
+957:      outputTypes: ["performance_review", "wins", "risks", "experiment_recommendations"],
+966:      safetyLevel: "review_only",
+968:      destinations: ["chat-preview", "insights", "content-studio", "campaign-studio"],
+975:  compliance_reviewer: [
+982:      safetyLevel: "review_only",
+984:      destinations: ["chat-preview", "governance", "content-studio", "publishing"],
+995:      safetyLevel: "review_only",
+997:      destinations: ["chat-preview", "governance", "content-studio"],
+999:      outputTypes: ["safe_rewrite", "risk_reduced_copy", "claim_softening", "review_notes"],
+1008:      safetyLevel: "review_only",
+1010:      destinations: ["chat-preview", "governance", "library", "workflows"],
+1013:      template: "List the evidence needed before this content can be approved or published. Separate required, recommended, and optional proof."
+1021:      safetyLevel: "review_only",
+1023:      destinations: ["chat-preview", "governance", "workflows", "publishing"],
+1025:      outputTypes: ["gdpr_review", "consent_risks", "tracking_notes", "disclosure_requirements"],
+1036:      destinations: ["chat-preview", "governance", "publishing", "workflows"],
+1038:      outputTypes: ["approval_notes", "risk_summary", "reviewer_requirements", "unresolved_issues"],
+1039:      template: "Prepare approval notes for {projectName}. Include risks, required reviewer, unresolved issues, and safe next actions."
+1050:      safetyLevel: "review_only",
+1052:      destinations: ["chat-preview", "workflows", "task", "content-studio", "media-studio"],
+1053:      sourceTypes: ["current_chat", "ai_preview", "content_draft", "media_job", "manual_input"],
+1065:      destinations: ["chat-preview", "workflows", "task", "handoff"],
+1067:      outputTypes: ["workflow_draft", "step_sequence", "trigger_notes", "review_gates", "execution_risks"],
+1068:      template: "Draft a workflow for {projectName}. Include steps, triggers, inputs, outputs, owners, review gates, and execution risks."
+1078:      destinations: ["chat-preview", "handoff", "workflows", "content-studio", "media-studio", "publishing", "governance"],
+1079:      sourceTypes: ["current_chat", "ai_preview", "content_draft", "media_job", "publishing_package", "manual_input"],
+1080:      outputTypes: ["handoff_summary", "destination_brief", "required_inputs", "review_notes"],
+1081:      template: "Prepare a handoff summary for {projectName}. Include context, destination workspace, owner, required inputs, and review notes."
+1089:      safetyLevel: "review_only",
+1091:      destinations: ["chat-preview", "workflows", "campaign-studio", "publishing"],
+1102:      safetyLevel: "review_only",
+1104:      destinations: ["chat-preview", "workflows", "governance", "publishing"],
+1120:      destinations: ["chat-preview", "operations-centers", "task", "governance"],
+1133:      destinations: ["chat-preview", "operations-centers", "task", "workflows"],
+1143:      actionType: "preview",
+1144:      safetyLevel: "review_only",
+1146:      destinations: ["chat-preview", "operations-centers", "task", "workflows"],
+1148:      outputTypes: ["sla_risk_review", "urgency_flags", "escalation_needs", "safe_next_actions"],
+1157:      safetyLevel: "review_only",
+1159:      destinations: ["chat-preview", "operations-centers", "workflows", "sales-crm-draft"],
+1161:      outputTypes: ["thread_summary", "sentiment_review", "open_questions", "response_context"],
+1162:      template: "Summarize the customer context for {projectName}. Include issue, sentiment, open questions, risk, and next response."
+1173:      safetyLevel: "review_only",
+1175:      destinations: ["chat-preview", "workflows", "content-studio", "sales-crm-draft"],
+1188:      destinations: ["chat-preview", "content-studio", "workflows", "sales-crm-draft"],
+1199:      safetyLevel: "review_only",
+1201:      destinations: ["chat-preview", "workflows", "content-studio", "governance"],
+1214:      destinations: ["chat-preview", "workflows", "operations-centers", "sales-crm-draft"],
+1281:function createToolButtonAdapter(tool = {}) {
+1290:    "data-aicmd-tool-dock-safety": tool.safetyLevel || "review_only",
+1292:    "data-aicmd-tool-dock-destinations": joinMetaList(getToolMetaList(tool, "destinations", tool.route ? [tool.route] : ["chat-preview"])),
+1294:    "data-aicmd-tool-dock-outputs": joinMetaList(getToolMetaList(tool, "outputTypes", [tool.id || "tool_output", "draft", "review_notes"]))
+1317:          <button class="mhos-tool-drawer-close" type="button" data-aicmd-tool-drawer-close aria-label="Close tool drawer">×</button>
+1321:          Configure a review-only AI prompt with the right output, trusted source context, and destination handoff before loading it into the composer.
+1400:          Review-only setup: this drawer creates a composer-ready instruction. Destination choices only frame safe handoff context; they do not publish, send, approve, route externally, create CRM records, run workflows, or mutate backend data.
+1404:          <button class="btn btn-secondary" type="button" data-aicmd-tool-drawer-open-library>Choose Library Source</button>
+1405:          <button class="btn btn-primary" type="button" data-aicmd-tool-drawer-use>Prepare Prompt</button>
+1406:          <button class="btn btn-secondary" type="button" data-aicmd-tool-drawer-close>Cancel</button>
+1435:          <button
+1436:            type="button"
+1443:            data-aicmd-tool-dock-safety="${safe(tool.safetyLevel || "review_only")}"
+1445:            data-aicmd-tool-dock-destinations="${safe(joinMetaList(getToolMetaList(tool, "destinations", ["chat-preview"])))}"
+1454:          </button>
+1560:  const destination = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-destination-select]", "Chat preview");
+1568:    : `${source}. If the selected source is not available in the current context, ask me to choose, paste, upload, or open the relevant source before producing final content.`;
+1598:    `Create the requested ${output.toLowerCase()} as review-ready content.`,
+1605:    "- If the conversation language differs from the publishable output language, keep any short explanation in the conversation language and put only the publishable content in the selected output language.",
+1606:    "- Do not mix languages inside the publishable content unless the user asks for bilingual output."
+1617:    `Prepare the output for ${destination}, but do not send, save, route, publish, or create records automatically.`,
+1620:    "- Prepare review-ready output only.",
+1621:    "- Do not publish, send, route, save, overwrite, create CRM records, or run workflows.",
+1635:  const destination = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-destination-select]", "Chat preview");
+1663:  drawer.classList.remove("is-open");
+1666:function openToolDrawer({ drawer, btn, tool: explicitTool = null, text, input, session, projectName, persistSessionDraft, sessionKey, updateStatus }) {
+1682:    `Prepare a review-only AI prompt for ${btn.getAttribute("data-aicmd-tool-dock-label") || "this tool"}. Choose output, trusted source context, destination handoff, language, and tone before loading it into the composer.`
+1684:  setDrawerText(drawer, "[data-aicmd-tool-drawer-safety]", humanizeMeta(btn.getAttribute("data-aicmd-tool-dock-safety") || "review_only"));
+1691:  const hardOutputDefaults = [toolId || "tool_output", "draft", "review_notes"];
+1693:  const hardDestinationDefaults = ["chat-preview", "campaign-studio", "content-studio", "composer"];
+1726:  drawer.classList.add("is-open");
+1727:  updateStatus?.(`${btn.getAttribute("data-aicmd-tool-dock-label") || "Quick AI tool"} setup opened. Review source and handoff requirements, then prepare the prompt.`);
+1731:export function openAiToolDrawerFromMetadata({
+1743:  const btn = createToolButtonAdapter(tool);
+1745:  return openToolDrawer({
+1775:    btn.onclick = () => closeToolDrawer(drawer);
+1778:  const openLibraryBtn = root.querySelector("[data-aicmd-tool-drawer-open-library]");
+1779:  if (openLibraryBtn) {
+1780:    openLibraryBtn.onclick = () => {
+1806:        created_at: new Date().toISOString()
+1813:      updateStatus?.("Library guide opened. Select an asset, click Use as Source in AI Command, then return to AI Command.");
+1827:    useBtn.onclick = () => {
+1854:        updateStatus(`${label} prompt prepared in the composer. Review it, then ask or create a preview.`);
+1864:    btn.onclick = () => {
+1872:        const opened = openToolDrawer({
+1884:        if (opened) return;
+1902:        updateStatus(`${label} loaded into composer. Review it, then ask or preview.`);
+
+----- public/control-center/pages/home/render-sections.js -----
+62:    return `<p class="home-empty-note">No recent activity is recorded yet. Open the owning workspace to create the next reviewed signal.</p>`;
+93:          <button class="home-ai-team-card" type="button" data-role-id="${escapeHtml(agent.id || "")}" title="Prepare ${escapeHtml(agent.name)} guidance in AI Command">
+99:          </button>
+129:        <button id="homeExecutivePrimaryActionBtn" class="btn btn-primary" type="button">
+131:        </button>
+132:        <button id="homeSecondaryActionBtn" class="btn btn-secondary" type="button">
+134:        </button>
+135:        <button id="homeAskExecutiveAiBtn" class="btn btn-ghost" type="button">
+137:        </button>
+139:      <p class="home-empty-note">Home opens workspaces or prepares AI guidance only. It does not approve, publish, send, upload, delete, archive, or execute.</p>
+
+----- public/control-center/pages/business/dashboard.js -----
+5: * It is not registered by the Control Center router and must not call removed
+6: * /api/governance/* or /api/ai-control/* endpoints if opened directly.
+8: * Active runtime authority lives in router-registered pages and canonical api.js
+
+----- public/control-center/pages/library/command-router.js -----
+7:  OPEN_UPLOAD: "open-upload",
+9:  OPEN_PREVIEW: "open-preview",
+22:export function createLibraryCommand(command, payload = {}) {
+26:    createdAt: new Date().toISOString()
+
+----- public/control-center/pages/ai-command.js -----
+5:        openAiToolDrawerFromMetadata,
+6:        openLibrarySourcePickerFromAiCommand,
+30:        generateAiCommandCampaignPreview
+66:                id: "publisher",
+69:                summary: "Publishing readiness, schedule review, and handoff preparation.",
+70:                routeHint: "publishing"
+87:                id: "compliance_reviewer",
+90:                summary: "Claims review, approvals, safety language, and governance checks.",
+104:                summary: "Inbox review, reply drafts, ticket drafts, SLA risk, and escalation routing.",
+127:	publisher: "publisher",
+128:	compliance_reviewer: "compliance_reviewer",
+149:		placeholder: "Ask the Strategist to build a campaign brief, define audience segments, create offer angles, compare launch directions, or prepare a team handoff…",
+163:		canHelp: ["Draft captions and hooks", "Write email copy", "Create landing page text", "Prepare publisher handoff", "Suggest message variants"],
+166:		safetyNote: "Drafts require review before publishing. Cannot approve or publish without confirmation.",
+175:		placeholder: "Ask the Media Director to define visual direction, prepare a creative brief, or review brand consistency…",
+177:		cannotDo: ["Generate images directly", "Upload assets without review", "Approve without confirmation", "Execute media jobs"],
+190:		cannotDo: ["Generate video directly", "Upload footage without review", "Approve without confirmation", "Run media jobs automatically"],
+196:		id: "publisher",
+200:		summary: "Publishing readiness, schedule review, and handoff preparation.",
+201:		placeholder: "Ask the Publisher to review publishing readiness, check scheduling, or prepare a handoff package…",
+202:		canHelp: ["Review publishing readiness", "Check scheduled jobs", "Prepare handoff packages", "Map publishing dependencies", "Flag pre-publish risks"],
+205:		safetyNote: "Publishing always requires explicit approval. No live publishing from AI guidance alone.",
+214:		placeholder: "Ask the Ads Optimizer to draft ad copy, review targeting angles, or plan a paid campaign structure…",
+216:		cannotDo: ["Launch ads directly", "Set live budgets without review", "Approve spend", "Access ad accounts directly"],
+227:		placeholder: "Ask the SEO & Insights Analyst to review performance, suggest SEO improvements, or identify top content patterns…",
+235:		id: "compliance_reviewer",
+239:		summary: "Claims review, approval safety, publishing risk, and governance notes.",
+240:		placeholder: "Ask the Compliance Reviewer to check claims, approval risks, publishing safety, and governance notes…",
+241:		canHelp: ["Review marketing claims", "Flag approval risks", "Check publishing safety", "Prepare governance notes", "Identify compliance blockers"],
+242:		cannotDo: ["Grant approvals directly", "Override governance gates", "Publish on behalf of approvers", "Remove flags without review"],
+244:		safetyNote: "Compliance review is advisory. Approvals always require human confirmation before execution.",
+265:		summary: "Inbox review, reply drafts, ticket drafts, SLA risk, customer profile context, and escalation routing.",
+266:		placeholder: "Ask the Customer Operations Lead to summarize a customer thread, draft a safe reply, prepare a ticket draft, check SLA risk, or route an escalation for review…",
+279:		placeholder: "Ask the Sales / CRM Lead to qualify a lead, draft outreach, plan follow-ups, summarize CRM context, or prepare a sales handoff for review…",
+281:		cannotDo: ["Send outreach", "Mutate CRM records", "Advance pipeline stages", "Confirm follow-ups without review"],
+299:		{ label: "Prepare a Publisher handoff", sub: "Package ready content for review" },
+314:	publisher: [
+315:		{ label: "Review publishing readiness", sub: "Check what is ready to publish" },
+316:		{ label: "Flag pre-publish risks", sub: "Identify what needs review first" },
+318:		{ label: "Prepare a handoff package", sub: "For the approver review" }
+332:	compliance_reviewer: [
+334:		{ label: "Flag publishing risks", sub: "Identify blockers before release" },
+346:		{ label: "Draft customer reply", sub: "Safe response for review" },
+352:		{ label: "Draft outreach", sub: "Personalized message for review" },
+360:	{ label: "What should the executive AI team focus on?", sub: "Strategy, execution, and risk review" },
+362:	{ label: "Prepare a full handoff sequence", sub: "Strategy, creative, compliance, publishing, ops" },
+366:const PHASE35_WORKSPACE_TABS = ["chat", "preview", "tools", "context", "history"];
+371:	{ id: "review", title: "Review", description: "Check safety, scope, language, and source." },
+378:	{ id: "draft", label: "Draft", helper: "Latest draft or guidance preview" },
+380:	{ id: "workflow", label: "Workflow Preview", helper: "Operating sequence" },
+381:	{ id: "handoff", label: "Handoff Preview", helper: "Destination package" },
+393:	publisher: "PB",
+396:	compliance_reviewer: "CR",
+405:	compliance_reviewer: "compliance_reviewer"
+431:		{ id: "campaign-angle-generator", label: "Campaign Angle Generator", action: "preview", intent: "guidance", template: "Generate campaign angles for {project}. Include audience tension, promise, channel fit, and strongest first test." },
+432:		{ id: "launch-plan", label: "Launch Plan", action: "preview", intent: "workflow", template: "Build a launch plan for {project}. Include phases, channels, owners, blockers, and next move." },
+433:		{ id: "funnel-mapping", label: "Funnel Mapping", action: "preview", intent: "guidance", template: "Map the funnel for {project}. Include awareness, consideration, conversion, retention, and handoff points." },
+434:		{ id: "prioritize-next-move", label: "Priority Sort", action: "preview", intent: "task", template: "Prioritize the next moves for {project}. Rank by impact, urgency, dependencies, and safest first action." }
+437:		{ id: "hook-generator", label: "Hook Generator", action: "preview", intent: "guidance", template: "Write 5 German hook variants for {project}. Keep them concise, testable, and suitable for the Germany market." },
+438:		{ id: "caption-builder", label: "Caption Builder", action: "preview", intent: "guidance", template: "Draft German captions for {project}. Include angle, body, CTA, and platform adaptation notes." },
+439:		{ id: "cta-refiner", label: "CTA Refiner", action: "preview", intent: "task", template: "Refine CTA options for {project}. Provide German variants for awareness, consideration, and action stages." },
+440:		{ id: "publisher-package", label: "Publisher Package", action: "preview", intent: "handoff", template: "Prepare a Publisher handoff for {project}. Include German copy package, CTA, notes, and remaining checks." }
+443:		{ id: "creative-brief-builder", label: "Creative Brief Builder", action: "preview", intent: "media", template: "Prepare a creative brief for {project}. Include concept, visual rules, subject, brand constraints, and production notes." },
+444:		{ id: "format-mapper", label: "Format Mapper", action: "preview", intent: "guidance", template: "Map required creative formats for {project}. Include platform, aspect ratio, asset type, and usage context." },
+445:		{ id: "asset-checklist", label: "Asset Checklist", action: "preview", intent: "task", template: "Create an asset checklist for {project}. List must-have files, missing references, usage context, and priority." },
+446:		{ id: "visual-direction", label: "Visual Direction", action: "preview", intent: "guidance", template: "Review visual direction for {project}. Identify mismatches, improvements, and required references." },
+447:		{ id: "open-media-studio", label: "Send prompt to Media Studio", action: "route", route: "media-studio" }
+450:		{ id: "write-video-hook", label: "Write video hook", action: "preview", intent: "guidance", template: "Write short-form video hooks for {project}. Include 3 opening variants and audience fit." },
+451:		{ id: "draft-script", label: "Draft script", action: "preview", intent: "guidance", template: "Draft a short-form video script for {project}. Include hook, body, CTA, and visual cues." },
+452:		{ id: "build-storyboard", label: "Build storyboard", action: "preview", intent: "workflow", template: "Build storyboard beats for {project}. Sequence shots and key transitions." },
+453:		{ id: "prepare-voiceover", label: "Prepare voiceover", action: "preview", intent: "guidance", template: "Prepare voiceover script options for {project}. Keep clean timing and emphasis notes." },
+454:		{ id: "map-video-asset-needs", label: "Map video asset needs", action: "preview", intent: "task", template: "Map video asset needs for {project}. Include format, source, and production owner." }
+456:	publisher: [
+457:		{ id: "publishing-checklist", label: "Publishing Checklist", action: "preview", intent: "handoff", template: "Build a publishing checklist for {project}. Include German copy, assets, claims checks, and channel readiness." },
+458:		{ id: "final-packaging", label: "Final Packaging", action: "preview", intent: "handoff", template: "Prepare a final publishing package for {project}. Include copy, CTA, asset notes, approvals, and destination channel." },
+459:		{ id: "channel-formatting", label: "Channel Formatting", action: "preview", intent: "guidance", template: "Format the next output for {project} by channel. Include German copy, limits, CTA, and scheduling notes." },
+460:		{ id: "schedule-draft", label: "Schedule Draft", action: "preview", intent: "workflow", template: "Prepare a publishing schedule draft for {project}. Include channel cadence, dependencies, and review gates." },
+461:		{ id: "open-publishing", label: "Open Publishing", action: "route", route: "publishing" }
+464:		{ id: "ad-angle-generator", label: "Ad Angle Generator", action: "preview", intent: "guidance", template: "Draft ad angles for {project}. Include audience problem, value promise, German hook direction, and platform fit." },
+465:		{ id: "copy-variants", label: "Copy Variants", action: "preview", intent: "guidance", template: "Prepare German ad copy variants for {project}. Include hooks, primary text, CTA, and creative notes." },
+466:		{ id: "test-ideas", label: "Test Ideas", action: "preview", intent: "task", template: "Suggest paid test ideas for {project}. Provide hypotheses, segments, creative variables, and measurement notes." },
+467:		{ id: "budget-notes", label: "Budget Notes", action: "preview", intent: "guidance", template: "Review budget notes for {project}. Summarize constraints and safe test allocation guidance." },
+468:		{ id: "open-ads-manager", label: "Open Ads Manager", action: "route", route: "ads-manager" }
+471:		{ id: "keyword-intent", label: "Keyword Intent", action: "preview", intent: "guidance", template: "Suggest keyword intent opportunities for {project}. Include Germany-market intent, content mapping, and priority." },
+472:		{ id: "meta-direction", label: "Meta Direction", action: "preview", intent: "guidance", template: "Prepare meta direction for {project}. Include page angle, title direction, description direction, and CTA intent." },
+473:		{ id: "opportunity-summary", label: "Opportunity Summary", action: "preview", intent: "task", template: "Summarize SEO and insight opportunities for {project}. Focus on conversion, traffic quality, and content fit." },
+474:		{ id: "analysis-plan", label: "Analysis Plan", action: "preview", intent: "workflow", template: "Draft an analysis plan for {project}. Define questions, datasets, cadence, and owners." },
+475:		{ id: "open-insights", label: "Open Insights", action: "route", route: "insights" }
+477:	compliance_reviewer: [
+478:		{ id: "claims-check", label: "Claims Check", action: "preview", intent: "guidance", template: "Review marketing claims for {project}. Flag unsupported, high-risk, or evidence-dependent wording." },
+479:		{ id: "approval-flags", label: "Approval Flags", action: "preview", intent: "task", template: "Check approval risks for {project}. List risk, impact, mitigation, and required owner." },
+480:		{ id: "safety-checklist", label: "Safety Checklist", action: "preview", intent: "handoff", template: "Prepare a safety checklist for {project}. Include policy checks, evidence required, and approval notes." },
+481:		{ id: "publish-readiness", label: "Publish Readiness", action: "preview", intent: "handoff", template: "Review publish readiness for {project}. Confirm what needs human approval before release." },
+482:		{ id: "open-governance", label: "Open Governance", action: "route", route: "governance" }
+485:		{ id: "timeline-draft", label: "Timeline Draft", action: "preview", intent: "workflow", template: "Draft an execution timeline for {project}. Include milestones, owners, dependencies, and review gates." },
+486:		{ id: "handoff-routing", label: "Handoff Routing", action: "preview", intent: "handoff", template: "Prepare handoff routing for {project}. Include source, destination, decision gates, and required confirmations." },
+487:		{ id: "checklist", label: "Checklist", action: "preview", intent: "task", template: "Draft an operational checklist for {project}. Include owners, dependencies, priority, and first action." },
+488:		{ id: "blocker-review", label: "Blocker Review", action: "preview", intent: "guidance", template: "Review operational blockers for {project}. Prioritize by risk and impact." },
+489:		{ id: "open-workflows", label: "Open Workflows / Operations", action: "route", route: "workflows" }
+492:		{ id: "review-unified-inbox", label: "Review Unified Inbox", action: "preview", intent: "guidance", template: "Review the Unified Inbox readiness for {project}. Summarize visible customer-operation signals, open gaps, and safe next review steps. Do not claim inbox actions happened." },
+493:		{ id: "summarize-customer-thread", label: "Summarize Customer Thread", action: "preview", intent: "guidance", template: "Summarize this customer thread for {project}. Include customer issue, sentiment, reply goal, missing details, and safe next step." },
+494:		{ id: "draft-customer-reply", label: "Draft Customer Reply", action: "preview", intent: "guidance", template: "Draft a customer reply for {project}. Keep it helpful, calm, review-ready, and do not claim any operational action has been completed." },
+495:		{ id: "create-ticket-draft", label: "Create Ticket Draft", action: "preview", intent: "task", template: "Create a ticket draft for {project}. Include issue, priority, owner suggestion, evidence needed, and next safe action." },
+496:		{ id: "check-sla-risk", label: "Check SLA Risk", action: "preview", intent: "guidance", template: "Check SLA risk for {project}. Flag urgency, risk level, missing runtime data, and escalation recommendation for review." },
+497:		{ id: "prepare-escalation", label: "Prepare Escalation", action: "preview", intent: "handoff", template: "Prepare an escalation draft for {project}. Include reason, customer impact, owner, confirmation needed, and destination team." },
+498:		{ id: "customer-profile-snapshot", label: "Customer Profile Snapshot", action: "preview", intent: "guidance", template: "Prepare a customer profile snapshot for {project}. Include known context, purchase/support signals, missing fields, and safe follow-up questions." },
+499:		{ id: "route-support-sales-ops", label: "Route to Support / Sales / Operations", action: "preview", intent: "handoff", template: "Prepare routing guidance for {project}. Decide whether the customer item belongs with Support, Sales, or Operations, and explain the review gate." }
+502:		{ id: "lead-qualification", label: "Lead Qualification", action: "preview", intent: "guidance", template: "Qualify the lead for {project}. Include fit, intent, urgency, missing CRM fields, and the safest next step." },
+503:		{ id: "outreach-draft", label: "Outreach Draft", action: "preview", intent: "guidance", template: "Draft outreach for {project}. Include subject or opener, personalized message, CTA, and review notes before sending." },
+504:		{ id: "follow-up-sequence", label: "Follow-up Sequence", action: "preview", intent: "workflow", template: "Build a follow-up sequence for {project}. Include timing, message angle, CTA, stop condition, and confirmation requirements." },
+505:		{ id: "crm-profile-summary", label: "CRM Profile Summary", action: "preview", intent: "guidance", template: "Summarize the CRM profile context for {project}. Include fit, history, open questions, and next sales action without mutating CRM data." },
+506:		{ id: "pipeline-next-step", label: "Pipeline Next Step", action: "preview", intent: "task", template: "Recommend the pipeline next step for {project}. Include stage, rationale, owner, risk, and required confirmation." },
+507:		{ id: "dealer-salon-outreach", label: "Dealer / Salon Outreach", action: "preview", intent: "guidance", template: "Draft dealer or salon outreach for {project}. Include positioning, proof needs, offer angle, CTA, and follow-up note." },
+508:		{ id: "influencer-lead-plan", label: "Influencer Lead Plan", action: "preview", intent: "workflow", template: "Prepare an influencer lead plan for {project}. Include target profile, outreach angle, qualification criteria, and handoff path." },
+509:		{ id: "sales-handoff-draft", label: "Sales Handoff", action: "preview", intent: "handoff", template: "Prepare a sales handoff draft for {project}. Include lead context, recommended next action, owner, and confirmation needed." }
+564:		suggestedPrompt: "Act as Writer and generate content angles for the current project and active campaign."
+636:		if (/act as the publisher/i.test(text)) return "publisher";
+639:		if (/act as the compliance reviewer/i.test(text)) return "compliance_reviewer";
+654:			id: `auto-generate-${Date.now()}`,
+655:			type: "generate_prompt",
+677:	if (/publish\s*now|send\s*external|paid\s*ads|final\s*approval/i.test(command)) {
+680:			type: "publish_now",
+681:			targetPage: "publishing",
+685:				reason: "Requires approval gate before external publishing actions."
+845:		overview.publishing_language ||
+846:		overview.publish_language ||
+851:	const publishLanguage = configuredPublishLanguage || "German";
+861:		publishLanguage,
+914:			workspaceTab: "preview",
+945:			outputPreview: null,
+1111:                .replace(/\b(public|private|review-only|preview-only)\b/gi, "")
+1140:        const preview = asObject(session.outputPreview);
+1145:                preview.title ||
+1152:                preview.outputType ? `${formatOutputTypeLabel(preview.outputType)} preview` : "Session"
+1164:        const hasContent = messages.length || responses.length || asObject(session.outputPreview).title;
+1179:                preview: session.outputPreview || null,
+1180:                createdAt: asString(options.createdAt || session.activeChatSessionCreatedAt || now),
+1189:        session.activeChatSessionCreatedAt = record.createdAt;
+1202:        session.outputPreview = asObject(record.preview);
+1203:        session.outputWorkspaceTab = outputTabFromPreview(session.outputPreview);
+1210:        session.activeChatSessionCreatedAt = asString(record.createdAt || record.updatedAt || nowIso());
+1246:                `Use ${safeOutputLanguage} only for customer-facing or publishable copy such as captions, ads, emails, landing pages, final campaign text, or publishing packages.`,
+1247:                "When you include publishable copy, label it clearly as publishable content and keep the explanation in the user chat language.",
+1250:		`When drafting publishable copy, write it in ${safeOutputLanguage}.`,
+1252:		"Never claim publish, approval, deletion, archival, sync, or operational runs happened.",
+1253:		"Deliver a structured, review-ready answer.",
+1306:	if (id === "publisher") return "publishing";
+1309:	if (id === "compliance_reviewer") return "governance";
+1342:        const looksWorkflowLike = /\b(workflow|workflows|process|sequence|phase|phases|approval flow|automation|operating loop|step-by-step|steps|dependencies|trigger|review gate|execution flow)\b/.test(text);
+1345:        const looksPublishingLike = /\b(publish|publishing|schedule|channel package|channel payload|approval-ready post|final post|ready to publish|publishing package)\b/.test(text);
+1346:        const looksGovernanceLike = /\b(compliance|governance|claim|claims|risk|risks|approval|approvals|policy|privacy|legal|safe language|safety review)\b/.test(text);
+1370:        if (/publishing|publish|schedule/.test(outputType) || looksPublishingLike) {
+1371:                outputType = "publishing";
+1372:                return { outputType, destinationRoute: explicitDestination || "publishing" };
+1402:		publishing: "Publishing",
+1425:		summary: "Guidance prepared for review.",
+1429:		confirmationRequired: outputType === "handoff" || specialistId === "publisher" || specialistId === "compliance_reviewer",
+1430:		generatedAt: nowIso(),
+1432:		status: "draft_preview",
+1435:		confirmationNote: "Execution, approvals, and publishing require explicit confirmation in the owning workspace."
+1469:			summary: "Content draft prepared with hooks, captions, CTA flow, and review checkpoint.",
+1472:				"Outcome-led hook direction for a German publishing draft",
+1473:				"Proof-led hook direction with claims marked for review"
+1476:				"Caption opens with the audience problem, then moves into the practical value promise.",
+1485:				"Use Arabic freely in the conversation; publishable copy should be reviewed in German.",
+1486:				"Claims, health, or performance promises need evidence before publishing."
+1488:			nextStep: "Send this package to Content Studio or Publisher after review.",
+1492:				"Prepare review notes and claims check",
+1495:			safetyLabel: "Claims require review before publishing. No direct publish action."
+1515:			nextSafeAction: "Open Media Studio to review and refine the brief"
+1525:				"Draft opening hook and audience angle",
+1530:			safetyLabel: "Video generation requires configured provider or GPU worker; no execution started."
+1534:	if (specialistId === "publisher") {
+1537:			title: outputType === "handoff" ? "Handoff Preview: Publishing package" : "Publishing Draft: Readiness checklist",
+1545:				"Draft publish schedule by channel",
+1547:				"Prepare handoff for publishing review"
+1550:			safetyLabel: "Confirmation required before publish. No publish action performed."
+1558:			summary: "Ad angle and audience testing draft prepared for review.",
+1585:			title: outputType === "task" ? "Task: Analysis plan" : "Insights Guidance: Signal review",
+1596:	if (specialistId === "compliance_reviewer") {
+1599:			title: "Compliance Draft: Risk review checklist",
+1600:			summary: "Risk review checklist prepared with claims and safety review points.",
+1605:				"Route to Governance for formal review"
+1608:			safetyLabel: "Compliance review is advisory. Formal approval remains human-governed."
+1616:			summary: "Customer operations draft prepared with safe reply language, ticket notes, SLA review, and escalation guardrails.",
+1619:				"Thank the customer, acknowledge the issue, and confirm the next reviewed support step.",
+1623:				"Issue summary: customer concern or request captured for review.",
+1628:				"Unified Inbox is not duplicated here; this is a draft and routing preview only.",
+1635:				"Create ticket draft fields for review",
+1639:			safetyLabel: "No reply sent, ticket created, SLA changed, or escalation triggered."
+1671:				"Draft outreach for review",
+1689:					"Stage 3: Compliance/review gate",
+1692:				safetyLabel: "Workflow run is not started. This is a draft preview only."
+1697:			title: outputType === "handoff" ? "Handoff Preview: Operations package" : "Operations Draft: Task and handoff plan",
+1712:function buildPhase2OutputPreview({ intent, session, prompt, projectName }) {
+1738:		title: outputType === "workflow" ? "Team Workflow" : `Team ${titleCase(outputType)} Preview`,
+1739:		summary: `Full team ${outputType.replace("_", " ")} preview prepared for ${projectName || "current project"}.`,
+1751:			"Publisher: package channel-ready copy, assets, schedule notes, and publish checks",
+1753:			"Operations: convert the reviewed output into safe tasks, workflow draft, or handoff context"
+1757:		confirmationNote: "No task, workflow, outreach, customer reply, CRM update, approval, or publishing action is executed from Full Team mode.",
+1758:		safetyLabel: "Full Team output is a coordinated draft preview only."
+1767:		handoff: "Handoff Preview",
+1773:function buildPreviewText(output, specialistLabel) {
+1778:		`Status: ${humanizeValue(output.status, "draft_preview")}`,
+1796:function compactPreviewText(value, maxLength = 360) {
+1803:function splitPreviewLines(value, limit = 6) {
+1826:function buildStructuredPreviewBlocks(preview = {}) {
+1827:        const summary = humanizeValue(preview.summary, "");
+1829:                preview.mainOutput ||
+1830:                preview.output ||
+1831:                preview.generatedOutput ||
+1832:                preview.result ||
+1837:        const compactSummary = compactPreviewText(sourceText || summary, 420);
+1840:        const mainLines = splitPreviewLines(sourceText || summary, 14)
+1841:                .map((item) => compactPreviewText(item, 360));
+1847:        const bullets = normalizeUniqueDisplayList(preview.bullets, 8)
+1848:                .map((item) => compactPreviewText(item, 300));
+1854:        const steps = normalizeUniqueDisplayList(preview.steps, 8)
+1855:                .map((item) => compactPreviewText(item, 280));
+1859:        } else if (preview.nextStep) {
+1860:                blocks.push({ label: "Next step", items: [compactPreviewText(preview.nextStep, 280)] });
+1875:		const providerMatch = /openai|replicate|stability|runway|elevenlabs|anthropic/.test(integrationId);
+2004:		operations: ["task plan", "workflow", "handoff", "approval", "timeline", "execution plan", "route", "publish", "status", "priority", "priorities", "blocking", "blocker", "readiness", "next", "do next"],
+2021:	const actionRouting = /launch|build|reconnect|connect|improve|create|fix|route|plan|publish/.test(query);
+2064:	if (aiContext.criticalGaps.length) summaryParts.push(`${aiContext.criticalGaps.length} critical gaps are open.`);
+2108:			top ? `Reuse the pattern from ${extractTopMessage(top)} in the next publishing cycle.` : "Sync social insights to identify winning hooks and formats.",
+2119:			routeSuggestion("Publishing", "publishing", "Schedule the next batch with stronger timing and approval control."),
+2232:		return { title: "Campaign launch task block", owner: "Campaign Studio", steps: ["Define the campaign objective, audience, and offer.", "Choose channels and budget based on current intelligence.", "List required assets and publishing dependencies before launch."] };
+2235:		return { title: "Content plan task block", owner: "Content Studio", steps: ["Use the strongest content pattern as the starting template.", "Map posts by platform, hook, format, and CTA.", "Route approved items into Publishing for scheduling."] };
+2238:		return { title: "Content repair task block", owner: "Content Studio", steps: ["Select the weakest items from Insights.", "Rewrite hooks, sharpen CTAs, and adjust format-platform fit.", "Republish only after updated versions are approved."] };
+2243:	return { title: "Execution task block", owner: "Workflows", steps: ["Confirm the goal and required output.", "Identify which workspace owns the work.", "Move into the correct page and review the first step in the owning workspace."] };
+2253:		routeSuggestions.push(routeSuggestion("Publishing", "publishing", "Schedule or approve if the next step is publishing."));
+2345:					insights: insightsResult.status === "fulfilled" ? insightsResult.value : (insightsMissing ? { project: projectName, generated_at: nowIso(), data_coverage: {} } : null),
+2346:					learning: learningResult.status === "fulfilled" ? learningResult.value : (learningMissing ? { project: projectName, generated_at: nowIso(), learning_patterns: {}, recommendations: [] } : null),
+2381:	publishing: "Publishing",
+2403:	publishing: "publisher",
+2410:	governance: "compliance_reviewer",
+2425:	compliance: "compliance_reviewer",
+2437:	publish: "publishing",
+2438:	publisher: "publishing",
+2519:		const reason = firstAiInboundText(record.reason, record.summary, record.description) || `Return to ${label} after AI Team review.`;
+2527:		reason: `Return to ${fallbackLabel} after AI Team review.`
+2531:function normalizeAiInboundOutputPreview(rawPreview, normalized) {
+2532:	const preview = asObject(rawPreview);
+2533:	if (!Object.keys(preview).length) return null;
+2534:	const outputType = asString(preview.outputType || preview.output_type || preview.type || "handoff").trim() || "handoff";
+2536:		preview.destinationRoute ||
+2537:		preview.destination_route ||
+2542:	const specialistId = normalizeAiInboundSpecialistId(preview.specialistId || preview.specialist_id || normalized.suggestedSpecialist, normalized.suggestedSpecialist);
+2545:		...preview,
+2547:		title: firstAiInboundText(preview.title, normalized.title, `Inbound handoff from ${normalized.sourceLabel}`),
+2548:		summary: firstAiInboundText(preview.summary, preview.description, normalized.prompt),
+2551:		generatedAt: asString(preview.generatedAt || preview.generated_at || nowIso()),
+2552:		sourcePrompt: firstAiInboundText(preview.sourcePrompt, preview.source_prompt, normalized.prompt),
+2553:		status: asString(preview.status || "draft_preview"),
+2554:		safetyLabel: firstAiInboundText(preview.safetyLabel, preview.safety_label, "Guidance and draft only. No backend execution."),
+2555:		confirmationNote: firstAiInboundText(preview.confirmationNote, preview.confirmation_note, "Execution, approvals, publishing, CRM updates, customer replies, and workflow runs require explicit confirmation in the owning workspace."),
+2556:		confirmationRequired: preview.confirmationRequired ?? preview.confirmation_required ?? true
+2576:	const stablePayloadId = firstAiInboundId(payload.handoff_id, payload.handoffId, payload.id, handoff?.created_at, handoff?.createdAt);
+2625:	)) || `Review this ${sourceLabel} handoff for ${projectLabel}. Identify the right specialist, summarize the context, produce a review-ready draft, and recommend the next safe route. Do not execute publishing, task creation, CRM updates, customer replies, workflow runs, or backend actions.`;
+
+----- public/control-center/pages/home.js -----
+62:    text.includes("review")
+103:  const fields = ["updated_at", "completed_at", "executed_at", "scheduled_for", "created_at"];
+178:      status: health.projectReadiness >= 80 ? "Ready" : "Needs review"
+200:      meta: launch.campaignReadiness === "Ready" ? "Execution path looks clear" : "Resolve blockers before publishing",
+234:  if (/(publish|schedule|queue)/.test(text)) return "publishing";
+272:    { id: "publisher", name: "Publisher", fallback: "Prepare publishing packages, schedules, and manual handoffs." },
+275:    { id: "compliance_reviewer", name: "Compliance Reviewer", fallback: "Review claims, approvals, and publish safety before release." },
+282:    const roleApprovals = approvals.filter((item) => asString(item?.reviewer_role).toLowerCase() === role.id);
+363:      .filter((item) => item?.required !== false && ["missing", "needs review"].includes(asString(item.status).toLowerCase()))
+417:    "Not started"
+424:    return text.includes("pending") || text.includes("in_progress") || text.includes("review");
+459:  const publishingQueue = asArray(operations.queues?.items).filter((item) =>
+460:    asString(item.entity_type) === "publishing_job" || asString(item.queue_type) === "publishing"
+462:  const publishReadyCount = publishingQueue.filter((item) => {
+463:    const status = asString(item.status || item.publish_status || item.execution_status).toLowerCase();
+464:    return ["ready", "manual_publish_ready", "scheduled", "queued"].includes(status);
+487:    const when = formatRelativeDate(item?.executed_at || item?.updated_at || item?.created_at);
+499:    const when = formatRelativeDate(item?.scheduled_for || item?.updated_at || item?.created_at);
+513:      when: formatRelativeDate(item?.executed_at || item?.updated_at || item?.created_at),
+521:      when: formatRelativeDate(item?.scheduled_for || item?.updated_at || item?.created_at),
+529:      when: formatRelativeDate(item?.updated_at || item?.created_at),
+595:      buttonLabel: nextActionRoute === "ai-command" ? "Prepare AI Guidance" : `Open ${humanizeStatus(nextActionRoute)} Workspace`,
+682:        : "No scheduled action yet — open Publishing or Campaign Studio to prepare the next launch step."
+692:      publishReadiness: publishReadyCount,
+713:        : "No execution recorded yet — start with a campaign or publishing package to create the first signal.",
+714:      recommendation: asString(recommendations[0]).trim() || asString(insightsRecommendations[0]).trim() || "Ask Executive AI to generate the next best action from readiness, blockers, and recent activity.",
+715:      feedback: asString(learningLessons[0]).trim() || "Connect insights or run a reviewed campaign so the learning engine can capture feedback."
+757:  render({ getState, $, escapeHtml, navigateTo, showMessage }) {
+865:                <span class="mhos-os-chip">No approval, publishing, sending, or record changes here</span>
+868:                <button id="homePrimaryActionBtn" class="mhos-next-action-btn" type="button">
+869:                  ${escapeHtml(dashboard.nextBestAction.buttonLabel)}
+870:                </button>
+871:                <button id="homeAskNextActionBtn" class="mhos-next-action-btn is-ghost" type="button">
+873:                </button>
+874:                <button id="homeOpenOperationsBtn" class="btn btn-secondary btn-sm" type="button">
+876:                </button>
+908:                  <p class="mhos-os-section-copy">A simple view of the operating sequence. Each step opens the workspace that owns the work.</p>
+931:                  <strong>${escapeHtml(formatCount(dashboard.launchSnapshot.publishReadiness))}</strong>
+981:                <p class="mhos-os-panel-copy">These buttons open the right workspace. Home does not save, upload, approve, publish, send, or execute.</p>
+984:              <button id="homeQuickReviewReadinessBtn" class="quick-action-btn" type="button">
+987:              </button>
+988:              <button id="homeQuickAssetLibraryBtn" class="quick-action-btn" type="button">
+991:              </button>
+992:              <button id="homeQuickStartCampaignBtn" class="quick-action-btn" type="button">
+995:              </button>
+1009:                <button class="quick-action-btn mhos-motion-soft" type="button" data-role-id="${escapeHtml(recommendedSpecialist.id)}">
+1012:                </button>
+1015:              <button id="homeQuickOpenAiBtn" class="quick-action-btn" type="button">
+1018:              </button>
+1020:              <button id="homeOpenAiTeamBtn" class="btn btn-ghost btn-sm" type="button">
+1022:              </button>
+1023:              <button id="homeOpenFullAiTeamBtn" class="btn btn-ghost btn-sm" type="button">
+1025:              </button>
+1032:                <p class="mhos-os-panel-copy">Prompt buttons fill AI Command with reviewed guidance requests. They do not execute actions.</p>
+1035:              <button id="homePromptNextBtn" class="home-ai-prompt-card" type="button">
+1038:              </button>
+1039:              <button id="homePromptReadinessBtn" class="home-ai-prompt-card" type="button">
+1042:              </button>
+1043:              <button id="homePromptLaunchBtn" class="home-ai-prompt-card" type="button">
+1045:                <span class="home-prompt-meta">Prepare a launch risk summary for review.</span>
+1046:              </button>
+1047:              <button id="homePromptPlanBtn" class="home-ai-prompt-card" type="button">
+1049:                <span class="home-prompt-meta">Convert the next action into a reviewed plan.</span>
+1050:              </button>
+1068:    const openRoute = (route, message = "") => {
+1069:      navigateTo(route);
+1073:    const openAiWithPrompt = (prompt) => {
+1075:      navigateTo("ai-command");
+1087:        publisher: `Act as the Publisher for ${projectLabel}. Review publishing readiness, scheduled jobs, blockers, and what must be checked before publishing. Do not execute anything; prepare guidance only.`,
+1090:        compliance_reviewer: `Act as the Compliance Reviewer for ${projectLabel}. Review launch blockers, claims, approvals, and publishing safety. Tell me what must be checked before release. Do not execute anything; prepare guidance only.`,
+1095:      openAiWithPrompt(prompt);
+1101:      nextBtn.onclick = () => {
+1105:        openRoute(dashboard.nextBestAction.route, "Next best action opened.");
+1111:      askNextActionBtn.onclick = () => openAiWithPrompt(`Explain this next best action and give me the exact steps: ${dashboard.nextBestAction.recommendation}`);
+1115:    if (operationsBtn) operationsBtn.onclick = () => openRoute("operations-centers");
+1118:    if (aiTeamBtn) aiTeamBtn.onclick = () => openRoute("ai-command");
+1120:    if (fullAiTeamBtn) fullAiTeamBtn.onclick = () => openRoute("ai-command");
+1123:    if (quickCampaignBtn) quickCampaignBtn.onclick = () => openRoute("campaign-studio");
+1126:    if (quickAssetBtn) quickAssetBtn.onclick = () => openRoute("library");
+1129:    if (quickReadinessBtn) quickReadinessBtn.onclick = () => openRoute("setup");
+1133:      quickAiBtn.onclick = () => openAiWithPrompt(dashboard.nextBestAction.recommendation);
+1138:      promptNextBtn.onclick = () => openAiWithPrompt("What should I do next for this project? Prioritize the answer based on readiness, blockers, campaign state, and recent activity.");
+1143:      promptReadinessBtn.onclick = () => openAiWithPrompt("Why is readiness low? Explain the missing integrations, assets, failed jobs, and readiness gaps in simple steps.");
+1148:      promptLaunchBtn.onclick = () => openAiWithPrompt("Summarize the launch blockers and tell me what must be fixed before publishing.");
+1153:      promptPlanBtn.onclick = () => openAiWithPrompt("Prepare today's action plan from the current dashboard. Give me prioritized tasks with owners and expected outcomes.");
+1160:      card.onclick = () => handleAiRoleClick(roleId, roleName);
+
+----- public/control-center/pages/governance/dashboard.js -----
+8: * opened directly.
+22:    "createProjectApproval(projectName, payload)",
+
+API calls from frontend:
+public/control-center/ai-team-model.js:63:    ownerSummary: "Paid media, ad packages, creative testing, budget guidance, and ROAS improvement.",
+public/control-center/ui/page-standard.js:359:    const input = document.getElementById("quickCommandInput");
+public/control-center/ui/page-standard.js:384:  const target = selector ? document.querySelector(selector) : null;
+public/control-center/ui/page-standard.js:479:  const input = document.getElementById("quickCommandInput");
+public/control-center/system-intelligence.js:132:  const hasWorkflowOutput = workflowRuns.length > 0 || handoffs.some((item) => normalizeText(item?.source_page) === "workflows");
+public/control-center/system-intelligence.js:248:      reason: "No approved media output exists yet for publishing execution.",
+public/control-center/system-intelligence.js:271:      draftPayload: { prompt: "Run the highest-impact workflow and route output to the owning page." },
+public/control-center/system-intelligence.js:279:      title: "Schedule ready output in publishing",
+public/control-center/system-intelligence.js:360:    { key: "workflows", label: "Workflows", ready: signals.hasWorkflowOutput, note: signals.hasWorkflowOutput ? "Output available" : "No output" },
+public/control-center/system-intelligence.js:384:    reason: "Core readiness is stable. Continue with optimization and output quality improvements.",
+public/control-center/index.html:342:        var target = event && event.target;
+public/control-center/index.html:343:        var src = target && target.src ? String(target.src) : "";
+public/control-center/index.html:344:        var tagName = target && target.tagName ? String(target.tagName).toUpperCase() : "";
+public/control-center/runtime/lifecycle/README.md:29:- Registry does not create, modify, or delete UI elements
+public/control-center/runtime/lifecycle/README.md:117:Get count of active items in registry.
+public/control-center/runtime/lifecycle/README.md:135:Get errors that occurred during cleanup.
+public/control-center/runtime/lifecycle/README.md:162:  api.closeConnection();
+public/control-center/runtime/lifecycle/lifecycle-registry.js:48:    return target && (
+public/control-center/runtime/lifecycle/lifecycle-registry.js:63:     * @param {EventTarget} target - DOM element, document, window, or similar
+public/control-center/runtime/lifecycle/lifecycle-registry.js:75:      // Validate target and handler
+public/control-center/runtime/lifecycle/lifecycle-registry.js:98:          if (target && typeof target.removeEventListener === 'function') {
+public/control-center/runtime/lifecycle/lifecycle-registry.js:354:     * Get the current count of registered items.
+public/control-center/runtime/lifecycle/lifecycle-registry.js:371:     * Get cleanup errors that occurred during cleanup operations.
+public/control-center/runtime/ai-backend-connector.js:7: * Active AI runtime authority lives in project-scoped api.js helpers:
+public/control-center/runtime/mh-runtime-globals.js:54:    return record("FRONTEND_GATE_BLOCKED", { input });
+public/control-center/legacy/page-standard.legacy-20260508.js:94:    description: "Shape ad briefs, variants, audiences, budget suggestions, tracking status, and campaign handoffs.",
+public/control-center/legacy/page-standard.legacy-20260508.js:172:    { label: "Send output forward", description: "Route the latest workflow result into the owning workspace.", action: "focus-workflow-route" }
+public/control-center/legacy/page-standard.legacy-20260508.js:201:    { label: "Suggest budget", description: "Review budget inputs and paid readiness before launch.", action: "focus-save-budget" },
+public/control-center/legacy/page-standard.legacy-20260508.js:307:    description: "Use AI to turn campaign goals into paid briefs, variants, audiences, and budget guidance.",
+public/control-center/legacy/page-standard.legacy-20260508.js:310:      "Suggest budget allocation from the current paid readiness and tracking state."
+public/control-center/legacy/page-standard.legacy-20260508.js:660:      card("Tracking status", m.paidTrackingReady ? "Ready" : "Needs connection", "Paid and analytics data available for budget decisions.", m.paidTrackingReady ? "success" : "warning")
+public/control-center/legacy/page-standard.legacy-20260508.js:735:      card("Weak campaigns", String(m.weakPaidCampaigns), "Paid signals that need creative, audience, or budget changes.", m.weakPaidCampaigns ? "warning" : "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:736:      card("Next step", "Build ad brief", "Prepare variants and budget guidance for Campaign Studio.", "success")
+public/control-center/legacy/page-standard.legacy-20260508.js:769:    workflows: "Run the workflow with the strongest launch impact and send the output forward.",
+public/control-center/legacy/page-standard.legacy-20260508.js:977:    const input = document.getElementById("quickCommandInput");
+public/control-center/legacy/page-standard.legacy-20260508.js:1000:  const target = selector ? document.querySelector(selector) : null;
+public/control-center/legacy/page-standard.legacy-20260508.js:1051:      const input = document.getElementById("quickCommandInput");
+public/control-center/legacy/integrations.monolith-20260508.js:105:    description: "Post insights, video performance, engagement, comments, publishing paths, and linked account intelligence.",
+public/control-center/legacy/integrations.monolith-20260508.js:112:        purpose: "Page insights, post performance, engagement, and linked business intelligence.",
+public/control-center/legacy/integrations.monolith-20260508.js:114:        enables: "Post insights, engagement data, comments, publishing support, and ad account linkage.",
+public/control-center/legacy/integrations.monolith-20260508.js:115:        dataScope: ["Post insights", "Engagement", "Comments", "Publishing", "Ads linkage"],
+public/control-center/legacy/integrations.monolith-20260508.js:132:        enables: "Post insights, reel insights, engagement, comments, publishing, and business account analytics.",
+public/control-center/legacy/integrations.monolith-20260508.js:148:        purpose: "Video and post insight sync for TikTok creative and audience performance.",
+public/control-center/legacy/integrations.monolith-20260508.js:186:        enables: "Post insights, audience signals, company page analytics, and publishing support.",
+public/control-center/legacy/integrations.monolith-20260508.js:302:          { key: "endpointUrl", label: "Endpoint URL", placeholder: "https://api.brand.com/analytics", required: true },
+public/control-center/legacy/integrations.monolith-20260508.js:779:  delete session.drafts[integrationId];
+public/control-center/legacy/integrations.monolith-20260508.js:900:      write: ["budget changes", "campaign updates"]
+public/control-center/legacy/integrations.monolith-20260508.js:2096:    const input = document.querySelector(`[data-integration-drawer] [data-integration-field="${card.id}"][data-field-key="${fieldKey}"]`);
+public/control-center/legacy/integrations.monolith-20260508.js:2097:    if (input instanceof HTMLElement) {
+public/control-center/legacy/integrations.monolith-20260508.js:2282:    input.oninput = (event) => {
+public/control-center/legacy/integrations.monolith-20260508.js:2335:    input.oninput = (event) => {
+public/control-center/legacy/integrations.monolith-20260508.js:2527:      const input = $("quickCommandInput");
+public/control-center/legacy/styles.legacy-full.css:438:.command-input {
+public/control-center/legacy/styles.legacy-full.css:873:.setup-field-group.is-missing .setup-input {
+public/control-center/legacy/styles.legacy-full.css:4583:section[data-page="ai-command"] .aicmd-input {
+public/control-center/legacy/styles.legacy-full.css:4960:/* What you get / need */
+public/control-center/legacy/styles.legacy-full.css:4961:.wf-what-you-get {
+public/control-center/legacy/styles.legacy-full.css:5047:/* Output */
+public/control-center/legacy/styles.legacy-full.css:5259:section[data-page="workflows"] .wfexec-input {
+public/control-center/legacy/styles.legacy-full.css:5504:/* Empty output */
+public/control-center/legacy/styles.legacy-full.css:5505:.wf-empty-output {
+public/control-center/legacy/styles.legacy-full.css:5620:  .wf-what-you-get {
+public/control-center/legacy/styles.legacy-full.css:7111:[data-page="library"] .library-file-input {
+public/control-center/legacy/styles.legacy-20260508.css:105:.setup-field-group.is-missing .setup-input {
+public/control-center/legacy/styles.legacy-20260508.css:3108:section[data-page="ai-command"] .aicmd-input {
+public/control-center/legacy/styles.legacy-20260508.css:3477:.wf-what-you-get {
+public/control-center/legacy/styles.legacy-20260508.css:3769:section[data-page="workflows"] .wfexec-input {
+public/control-center/legacy/styles.legacy-20260508.css:4015:.wf-empty-output {
+public/control-center/legacy/styles.legacy-20260508.css:4126:.wf-what-you-get {
+public/control-center/legacy/styles.legacy-20260508.css:5322:[data-page="library"] .library-file-input {
+public/control-center/state/mediaState.js:17:  // Get cached state
+public/control-center/styles/16-mhos-theme-v2.css:518:[data-theme-version="v2"] .setup-input {
+public/control-center/styles/16-mhos-theme-v2.css:688:[data-theme-version="v2"].content-studio-v2 textarea.setup-input {
+public/control-center/styles/16-mhos-theme-v2.css:699:[data-theme-version="v2"].content-studio-v2 textarea.setup-input {
+public/control-center/styles/16-mhos-theme-v2.css:857:[data-theme-version="v2"].content-studio-v2 .mh-v2-input {
+public/control-center/styles/16-mhos-theme-v2.css:1205:/* Right drawer sections get separators only. */
+public/control-center/styles/16-mhos-theme-v2.css:1264:[data-theme-version="v2"].content-studio-v2-final-layout .mh-v2-input {
+public/control-center/styles/16-mhos-theme-v2.css:1799:.content-os-input {
+public/control-center/styles/16-mhos-theme-v2.css:2187:.content-os-shell[data-theme-version="v2"] .content-os-input {
+public/control-center/styles/16-mhos-theme-v2.css:2411:.content-os-shell-2c .content-os-command-input span,
+public/control-center/styles/16-mhos-theme-v2.css:2490:.content-os-shell-2c .content-os-start-input {
+public/control-center/styles/16-mhos-theme-v2.css:2495:.content-os-shell-2c .content-os-command-input {
+public/control-center/styles/16-mhos-theme-v2.css:2662:.content-os-shell-2c .content-os-input {
+public/control-center/styles/16-mhos-theme-v2.css:3000:.content-os-shell-2c .content-os-command-input {
+public/control-center/styles/16-mhos-theme-v2.css:3009:.content-os-shell-2c .content-os-command-input .content-os-input {
+public/control-center/styles/16-mhos-theme-v2.css:3015:.content-os-shell-2c .content-os-command-input .content-os-input::placeholder {
+public/control-center/styles/16-mhos-theme-v2.css:3128:.content-os-shell-2c .content-os-input {
+public/control-center/styles/16-mhos-theme-v2.css:3155:/* Output workspace: make the empty state clearer and stronger */
+public/control-center/styles/16-mhos-theme-v2.css:3506:.content-os-shell-2e .content-os-commandline .content-os-input {
+public/control-center/styles/16-mhos-theme-v2.css:3628:.content-os-shell-2e .content-os-input {
+public/control-center/styles/16-mhos-theme-v2.css:4051:.content-os-shell-2e .content-os-commandline .content-os-input {
+public/control-center/styles/16-mhos-theme-v2.css:4108:.content-os-shell-2e .content-os-input {
+public/control-center/styles/16-mhos-theme-v2.css:4404:.content-os-shell-2g .content-os-commandline .content-os-input {
+public/control-center/styles/16-mhos-theme-v2.css:4759:.content-os-shell-2g .content-os-source-rail .content-os-input {
+public/control-center/styles/16-mhos-theme-v2.css:4891:.content-os-shell-2g .content-os-commandline .content-os-input {
+public/control-center/styles/16-mhos-theme-v2.css:5009:.content-os-shell-2g .content-os-commandline .content-os-input {
+public/control-center/styles/16-mhos-theme-v2.css:5345:  .content-os-shell-2g .content-os-commandline .content-os-input {
+public/control-center/styles/16-mhos-theme-v2.css:6469:.content-os-shell-2g .content-os-image-output header span,
+public/control-center/styles/16-mhos-theme-v2.css:6572:.content-os-shell-2g .content-os-image-output header {
+public/control-center/styles/16-mhos-theme-v2.css:6580:.content-os-shell-2g .content-os-image-output header strong {
+public/control-center/styles/16-mhos-theme-v2.css:6713:/* Required output list */
+public/control-center/styles/16-mhos-theme-v2.css:6714:.content-os-shell-2g .content-os-image-output {
+public/control-center/styles/16-mhos-theme-v2.css:6724:.content-os-shell-2g .content-os-image-output > div {
+public/control-center/styles/16-mhos-theme-v2.css:6730:.content-os-shell-2g .content-os-image-output p {
+public/control-center/styles/16-mhos-theme-v2.css:6739:.content-os-shell-2g .content-os-image-output p strong {
+public/control-center/styles/16-mhos-theme-v2.css:6744:.content-os-shell-2g .content-os-image-output p em {
+public/control-center/styles/16-mhos-theme-v2.css:6781:  .content-os-shell-2g .content-os-image-output > div {
+public/control-center/styles/16-mhos-theme-v2.css:6794:  .content-os-shell-2g .content-os-image-output p {
+public/control-center/styles/16-mhos-theme-v2.css:7161:   Goal: prepare VO, sound design, SFX, graphics, editing, exports, and post QC.
+public/control-center/styles/16-mhos-theme-v2.css:7427:/* Scene post plan */
+public/control-center/styles/04-command-layer.css:40:.command-input {
+public/control-center/styles/14-page-standard.css:316:   Form / Input Click Safety
+public/control-center/styles/14-page-standard.css:1278:.library-file-input {
+public/control-center/styles/14-page-standard.css:2672:/* LIB-FINAL-4D — Required asset action target feedback */
+public/control-center/styles/14-page-standard.css:2673:[data-page="library"] #libraryAssetWorkspace.is-required-action-target {
+public/control-center/styles/14-page-standard.css:2681:/* LIB-FINAL-4E — Required asset CTA target feedback */
+public/control-center/styles/14-page-standard.css:2683:[data-page="library"] #libraryDropZone.is-required-action-target {
+public/control-center/styles/08-components-foundation.css:1612:/* MH-OS Library — guided source selection target */
+public/control-center/styles/08-components-foundation.css:1613:.is-source-target {
+public/control-center/styles/12-pages.css:1112:.library-grid-check input {
+public/control-center/styles/12-pages.css:2841:[data-page="settings"] .settings-choice-card input {
+public/control-center/styles/12-pages.css:2903:[data-page="settings"] .settings-chip input {
+public/control-center/styles/12-pages.css:2941:[data-page="settings"] .settings-toggle-input {
+public/control-center/styles/12-pages.css:5840:#aicmdV2ComposerInput {
+public/control-center/styles/12-pages.css:5932:  #aicmdV2ComposerInput {
+public/control-center/styles/12-pages.css:6268:[data-page="ai-command"] .aicmd-room-output {
+public/control-center/styles/12-pages.css:6273:[data-page="ai-command"] .aicmd-room-output {
+public/control-center/styles/12-pages.css:6731:[data-page="ai-command"] .aicmd-room-output {
+public/control-center/styles/12-pages.css:6979:[data-page="ai-command"] .aicmd-room-output {
+public/control-center/styles/12-pages.css:6984:[data-page="ai-command"] .aicmd-room-output {
+public/control-center/styles/12-pages.css:7038:[data-page="ai-command"] .aicmd-room-output {
+public/control-center/styles/12-pages.css:7091:/* Medium workspaces: keep chat central and move output below cleanly */
+public/control-center/styles/12-pages.css:7115:  [data-page="ai-command"] .aicmd-room-output {
+public/control-center/styles/12-pages.css:7187:  [data-page="ai-command"] .aicmd-room-output {
+public/control-center/styles/12-pages.css:7338:/* AI TEAM COMMAND CENTER FINAL ROOM V1 — Final Compact Composer / Output Polish */
+public/control-center/styles/12-pages.css:7364:  [data-page="ai-command"] .aicmd-room-output {
+public/control-center/styles/12-pages.css:7401:/* AI TEAM COMMAND CENTER FINAL ROOM V1 — Content Column Output Fix */
+public/control-center/styles/12-pages.css:7424:  [data-page="ai-command"] .aicmd-room-output {
+public/control-center/styles/12-pages.css:7479:  [data-page="ai-command"] .aicmd-room-output {
+public/control-center/styles/12-pages.css:7626:.aicmd-room-response-card.is-selected-output {
+public/control-center/styles/12-pages.css:8122:[data-page="governance"] .governance-policy-block .settings-toggle-input {
+public/control-center/styles/12-pages.css:8863:/* --- AI Command Pass 4B-1 Output Workspace Readability --- */
+public/control-center/styles/12-pages.css:8877:/* --- AI Command Pass 4B-1C Structured Output Recovery --- */
+public/control-center/styles/12-pages.css:9017:  content: "Ask a question, prepare a task, or refine the output before routing.";
+public/control-center/styles/12-pages.css:11358:/* ===== T181-I2C Voice input activation feedback ===== */
+public/control-center/styles/09-governance.css:6: * Do not move or delete legacy Governance CSS from 12-pages.css in this phase.
+public/control-center/state.js:78:  if (!target || typeof target !== "object") {
+public/control-center/asset-library.js:14:      why_it_matters: "Keeps setup, media creation, publishing previews, and AI output visually tied to the right brand.",
+public/control-center/asset-library.js:123:    description: "Organic social creative, post visuals, reels, stories, and channel-ready source assets.",
+public/control-center/asset-library.js:125:      what_to_upload: "Organic post images, story frames, reels, thumbnails, channel templates, and caption references.",
+public/control-center/api.js:1:// public/control-center/api.js
+public/control-center/api.js:223:    normalized === "api.response.text.start" ||
+public/control-center/api.js:224:    normalized === "api.response.text.done" ||
+public/control-center/api.js:225:    normalized === "api.response.text.timeout" ||
+public/control-center/api.js:226:    normalized === "api.response.parse.start" ||
+public/control-center/api.js:227:    normalized === "api.response.parse.done" ||
+public/control-center/api.js:228:    normalized === "api.response.parse.error" ||
+public/control-center/api.js:229:    normalized === "api.response.json.fallback.done" ||
+public/control-center/api.js:230:    normalized === "api.response.json.fallback.error" ||
+public/control-center/api.js:231:    normalized === "api.response.json.fallback.timeout" ||
+public/control-center/api.js:254:        stage: String(stage || "api.trace"),
+public/control-center/api.js:349:      emitApiRuntimeTrace("api.response.text.timeout", {
+public/control-center/api.js:368:                fallbackTimeoutError.parseStage = "api.response.json.fallback.timeout";
+public/control-center/api.js:380:          emitApiRuntimeTrace("api.response.json.fallback.done", {
+public/control-center/api.js:392:            parseStage: "api.response.json.fallback.done"
+public/control-center/api.js:396:            ? "api.response.json.fallback.timeout"
+public/control-center/api.js:397:            : "api.response.json.fallback.error";
+public/control-center/api.js:399:          emitApiRuntimeTrace("api.response.json.fallback.error", {
+public/control-center/api.js:429:        parseStage: "api.response.text.timeout",
+public/control-center/api.js:466:  emitApiRuntimeTrace("api.response.parse.start", {
+public/control-center/api.js:483:    emitApiRuntimeTrace("api.response.parse.done", {
+public/control-center/api.js:493:    emitApiRuntimeTrace("api.response.parse.error", {
+public/control-center/api.js:510:      parseStage: "api.response.parse.error",
+public/control-center/api.js:525:    parseStage = String(bodyReadResult.parseStage || "api.response.json.fallback.done");
+public/control-center/api.js:536:      parseStage = "api.response.parse.done";
+public/control-center/api.js:538:      parseStage = "api.response.parse.error";
+public/control-center/api.js:663:    const requestPromise = fetch(buildUrl(path), {
+public/control-center/api.js:1023:  const response = await fetch("/media-manager/projects", {
+public/control-center/api.js:1341:    `/api/insights/${encodeURIComponent(projectName)}`,
+public/control-center/api.js:1352:    `/api/learning/${encodeURIComponent(projectName)}`,
+public/control-center/api.js:1374:  const response = await fetch(`/media-manager/project/${encodedProjectName}/apply-template`, {
+public/control-center/api.js:1515:    "Failed to delete asset"
+public/control-center/api.js:1610:    `/api/ai-command/project/${encodedProject}/campaign-preview`,
+public/control-center/api.js:2187:    "/api/media/improve-prompt",
+public/control-center/api.js:2196:    "/api/media/brand-check",
+public/control-center/api.js:2205:    "/api/media/generate-image",
+public/control-center/api.js:2214:    "/api/media/generate-video-brief",
+public/control-center/api.js:2223:    "/api/media/generate-voice-script",
+public/control-center/api.js:2232:    "/api/media/generate-campaign-pack",
+public/control-center/api.js:2362:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/readiness`);
+public/control-center/api.js:2366:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/inbox`);
+public/control-center/api.js:2370:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/conversations`);
+public/control-center/api.js:2374:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/conversations/${encodeURIComponent(conversationId)}`);
+public/control-center/api.js:2378:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/conversations/${encodeURIComponent(conversationId)}/messages`);
+public/control-center/api.js:2382:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/customers/${encodeURIComponent(customerId)}`);
+public/control-center/api.js:2386:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/tickets`);
+public/control-center/api.js:2390:  return requestJson(`/api/projects/${encodeURIComponent(projectName)}/customer-operations/channels`);
+public/control-center/pages/ai-command/tool-dock.js:14:function moveFocusOutOfDrawer(drawer, fallbackTarget = null) {
+public/control-center/pages/ai-command/tool-dock.js:19:    if (fallbackTarget && typeof fallbackTarget.focus === "function") {
+public/control-center/pages/ai-command/tool-dock.js:329:  const sourceInput = drawer.querySelector("[data-aicmd-tool-drawer-source-details]");
+public/control-center/pages/ai-command/tool-dock.js:336:    if (sourceInput && !sourceInput.value) {
+public/control-center/pages/ai-command/tool-dock.js:361:  if (sourceInput && !sourceInput.value) {
+public/control-center/pages/ai-command/tool-dock.js:410:    template: "Translate or adapt the selected text for the project target market. Keep the explanation in the user's chat language and prepare only review-ready copy."
+public/control-center/pages/ai-command/tool-dock.js:515:      template: "Use the Content Writer to create a new written output for {projectName}. First ask or infer the output type: company profile, product copy, email, blog article, landing page, contract draft, presentation outline, speech, FAQ, proposal, social post, or ad copy. Ask for sources if needed. Keep it review-ready and do not publish or send anything."
+public/control-center/pages/ai-command/tool-dock.js:541:      template: "Translate and localize the current text for {projectName}. Ask for target language and market if missing. Preserve brand tone, adapt CTA and wording for the target audience, and keep the result review-ready."
+public/control-center/pages/ai-command/tool-dock.js:606:      template: "Repurpose existing content for {projectName}. Ask or infer the source format and target format: blog to posts, profile to pitch, product page to ad copy, transcript to article, notes to presentation outline, or long text to email sequence."
+public/control-center/pages/ai-command/tool-dock.js:619:      template: "Prepare safe routing for this Content Writer output for {projectName}. Ask the destination: Content Studio, Save to Library, Prepare Media Brief, Publishing package, Compliance review, Task, or Handoff. Do not route or execute before review."
+public/control-center/pages/ai-command/tool-dock.js:1326:            <span class="mhos-tool-drawer-section-label">1. Output type</span>
+public/control-center/pages/ai-command/tool-dock.js:1530:function isSeoRelevantOutput(output = "") {
+public/control-center/pages/ai-command/tool-dock.js:1531:  const value = String(output || "").toLowerCase();
+public/control-center/pages/ai-command/tool-dock.js:1539:function buildOutputSpecificRules(output = "") {
+public/control-center/pages/ai-command/tool-dock.js:1558:  const output = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-output-select]", "Auto / infer from request");
+public/control-center/pages/ai-command/tool-dock.js:1576:    `- Output type: ${output}.`,
+public/control-center/pages/ai-command/tool-dock.js:1605:    "- If the conversation language differs from the publishable output language, keep any short explanation in the conversation language and put only the publishable content in the selected output language.",
+public/control-center/pages/ai-command/tool-dock.js:1617:    `Prepare the output for ${destination}, but do not send, save, route, publish, or create records automatically.`,
+public/control-center/pages/ai-command/tool-dock.js:1620:    "- Prepare review-ready output only.",
+public/control-center/pages/ai-command/tool-dock.js:1633:  const output = getSelectedLabel(drawer, "[data-aicmd-tool-drawer-output-select]", "Auto");
+public/control-center/pages/ai-command/tool-dock.js:1658:function closeToolDrawer(drawer, fallbackTarget = null) {
+public/control-center/pages/ai-command/tool-dock.js:1706:  populateDrawerSelect(drawer.querySelector("[data-aicmd-tool-drawer-output-select]"), rawOutputs, "Choose output type");
+public/control-center/pages/ai-command/tool-dock.js:1711:    field.oninput = () => {
+public/control-center/pages/publishing/publishing-payloads.js:57:  const output = asObject(payload.output);
+public/control-center/pages/campaign-studio.js:308:          ? `<textarea id="campaign-${escapeHtml(name)}" name="${escapeHtml(name)}" class="setup-input setup-textarea" rows="${rows}" placeholder="${escapeHtml(placeholder || "")}">${escapeHtml(asString(value))}</textarea>`
+public/control-center/pages/campaign-studio.js:309:          : `<input id="campaign-${escapeHtml(name)}" name="${escapeHtml(name)}" class="setup-input" type="text" value="${escapeHtml(asString(value))}" placeholder="${escapeHtml(placeholder || "")}">`
+public/control-center/pages/campaign-studio.js:357:    budget: asString(formValues.budget || record.budget || defaults.budget)
+public/control-center/pages/campaign-studio.js:385:  const output = asObject(payload.output);
+public/control-center/pages/campaign-studio.js:877:  if (!values.budget) adsBlockers.push("Add a working campaign budget before routing to Ads Manager.");
+public/control-center/pages/campaign-studio.js:1289:    form.oninput = (event) => {
+public/control-center/pages/campaign-studio.js:1290:      const target = event.target;
+public/control-center/pages/campaign-studio.js:1298:      // Rerendering here replaces the focused input and breaks typing/focus.
+public/control-center/pages/campaign-studio.js:1363:      const input = $("quickCommandInput");
+public/control-center/pages/campaign-studio.js:1592:    const budgetLabel = budgetValue === "-" ? "Budget pending" : budgetValue;
+public/control-center/pages/campaign-studio.js:1640:              <span class="mhos-campaign-context-item mhos-context-chip">Budget <strong class="mhos-campaign-context-value">${escapeHtml(budgetLabel)}</strong></span>
+public/control-center/pages/campaign-studio.js:1819:                  helper: "Use one working budget number even if later split by channel.",
+public/control-center/pages/media-studio-workspace.js:21:} from "../api.js";
+public/control-center/pages/media-studio-workspace.js:326:    : raw.output != null
+public/control-center/pages/media-studio-workspace.js:708:  const output = asObject(payload.output);
+public/control-center/pages/media-studio-workspace.js:832:  if (!clean(form.outputPurpose)) errors.outputPurpose = "Output purpose is required.";
+public/control-center/pages/media-studio-workspace.js:984:    label: `${titleCase(mode)} output ${new Date().toISOString().slice(0, 19).replace("T", " ")}`,
+public/control-center/pages/media-studio-workspace.js:1094:    session.validation = { ...session.validation, librarySave: "Version needs prompt or output payload before saving to Library." };
+public/control-center/pages/media-studio-workspace.js:1273:      why: "Draft media work exists. Complete prompt, brand style, format, and output purpose before review."
+public/control-center/pages/media-studio-workspace.js:4495:  const hasOutput = hasSelectedVersionOutput(version);
+public/control-center/pages/media-studio-workspace.js:4531:      state: packageReady ? "ready" : hasOutput ? "active" : hasBrief ? "warning" : "missing",
+public/control-center/pages/media-studio-workspace.js:4532:      status: packageReady ? "Package ready" : hasOutput ? "Review package" : hasBrief ? "Prepare output" : "Needs brief",
+public/control-center/pages/media-studio-workspace.js:4612:  const hasOutput = hasSelectedVersionOutput(version);
+public/control-center/pages/media-studio-workspace.js:4630:      state: hasOutput ? "ready" : hasBrief ? "active" : "missing",
+public/control-center/pages/media-studio-workspace.js:4631:      detail: hasOutput ? "Output captured" : hasBrief ? "Prompt ready" : "Needs brief"
+public/control-center/pages/media-studio-workspace.js:4635:      state: ["approved", "publishing_ready", "sent_to_publishing"].includes(readiness.readinessStatus) ? "ready" : hasOutput ? "active" : "missing",
+public/control-center/pages/media-studio-workspace.js:4636:      detail: hasOutput ? displayMediaStatusLabel(readiness.readinessStatus) : "Needs output"
+public/control-center/pages/media-studio-workspace.js:4640:      state: savedToLibrary ? "ready" : hasOutput || hasBrief ? "active" : "missing",
+public/control-center/pages/media-studio-workspace.js:4732:  const input = options.length
+public/control-center/pages/media-studio-workspace.js:4741:      ? `<textarea id="${escapeHtml(id)}" name="${escapeHtml(name)}" class="setup-input setup-textarea" rows="${rows}">${escapeHtml(value)}</textarea>`
+public/control-center/pages/media-studio-workspace.js:4742:      : `<input id="${escapeHtml(id)}" name="${escapeHtml(name)}" class="setup-input" type="${escapeHtml(type)}" value="${escapeHtml(value)}">`;
+public/control-center/pages/media-studio-workspace.js:4781:        <input type="hidden" name="mode" value="${escapeHtml(mode)}">
+public/control-center/pages/media-studio-workspace.js:4792:          ${renderField({ id: "mediaPurposeInput", name: "outputPurpose", label: "Output purpose", value: form.outputPurpose, options: OUTPUT_PURPOSES }, session, escapeHtml)}
+public/control-center/pages/media-studio-workspace.js:4889:      ? "Content Studio output is ready to become a design brief."
+public/control-center/pages/media-studio-workspace.js:4890:      : "Handoff output is ready to become a media brief.";
+public/control-center/pages/media-studio-workspace.js:4976:  const hasOutput = Boolean(
+public/control-center/pages/media-studio-workspace.js:5030:          <div class="setup-kicker">Output Readiness State</div>
+public/control-center/pages/media-studio-workspace.js:5031:          <h3>Output readiness</h3>
+public/control-center/pages/media-studio-workspace.js:5128:            <div class="setup-kicker">Output Preview</div>
+public/control-center/pages/media-studio-workspace.js:5145:  let previewBody = `<div class="media-prompt-box">${escapeHtml("Prompt-ready state. Generate output or switch version to inspect payload.")}</div>`;
+public/control-center/pages/media-studio-workspace.js:5157:      : `<div class="media-prompt-box">${escapeHtml(JSON.stringify(payload, null, 2) || "No image output was returned yet. If the provider is not connected or timed out, keep the prompt/job-ready draft and continue with review, Library save, or provider setup in Integrations.")}</div>`;
+public/control-center/pages/media-studio-workspace.js:5194:        <div class="media-prompt-box media-block-gap">${escapeHtml(voiceScript || asString(payload.message) || "No voice script or audio output is available yet. Voice mode prepares voiceover scripts/audio outputs only; it does not run IVR, phone calls, or call-center workflows.")}</div>
+public/control-center/pages/media-studio-workspace.js:5215:          <div class="setup-kicker">Output Preview</div>
+public/control-center/pages/media-studio-workspace.js:5217:          <p class="media-section-copy">${escapeHtml(firstText(payload.message, `Detected output type: ${mediaPreview.detectedType}.`))}</p>
+public/control-center/pages/media-studio-workspace.js:5286:        <textarea id="mediaVersionCompareNotes" class="setup-input setup-textarea" rows="3">${escapeHtml(versioning.compareNotes || "")}</textarea>
+public/control-center/pages/media-studio-workspace.js:5492:    `Output purpose: ${session.form.outputPurpose || selectedItem?.outputPurpose || "not set"}`,
+public/control-center/pages/media-studio-workspace.js:5625:      `Action: Start provider-backed media generation for ${selectedMode}.\nRisk: This may call a configured AI/media provider and create a new generated output that must be reviewed before approval or publishing.`
+public/control-center/pages/media-studio-workspace.js:5638:    const callApi = generationApiForMode(activeRequestType);
+public/control-center/pages/media-studio-workspace.js:5641:      const response = await callApi(buildGenerationRequestPayload(session));
+public/control-center/pages/media-studio-workspace.js:5737:    form.oninput = () => {
+public/control-center/pages/media-studio-workspace.js:6293:            summary: session.form.reviewNotes || "Review media output before publishing handoff.",
+public/control-center/pages/media-studio-workspace.js:6485:    versionNotes.oninput = () => {
+public/control-center/pages/media-studio-workspace.js:6681:  const output = asObject(payload.output);
+public/control-center/pages/media-studio-workspace.js:6747:  const hasOutput = hasSelectedVersionOutput(version);
+public/control-center/pages/media-studio-workspace.js:6763:          <p>Every media job is treated as an execution packet: source, mode, provider readiness, prompt quality, output preview, versions, review, Library save, and Publishing handoff stay connected.</p>
+public/control-center/pages/media-studio-workspace.js:6787:        <button type="button" data-media-exec-action="save-library"${hasOutput || hasPrompt ? "" : " disabled aria-disabled=\"true\""}>Save Asset</button>
+public/control-center/pages/media-studio-workspace.js:6833:  const hasOutput = Boolean(selectedItem?.output || selectedItem?.result || selectedItem?.asset_url);
+public/control-center/pages/media-studio-workspace.js:6838:      workflow: "Product photo, campaign visual, post image, start frame, end frame, blog image, or marketplace visual.",
+public/control-center/pages/media-studio-workspace.js:6877:      state: hasOutput ? "ready" : "missing",
+public/control-center/pages/media-studio-workspace.js:6878:      detail: hasOutput ? "Output exists and can move through review/versioning." : "Generate or prepare an output before final approval."
+public/control-center/pages/media-studio-workspace.js:7028:          <p>AI tools do not automatically protect brand identity. Every commercial output must lock product shape, logo, label, cap, color, model, location, platform rules, and negative instructions before generation.</p>
+public/control-center/pages/media-studio-workspace.js:7120:      detail: "Approved final frame or target result to reduce AI drift.",
+public/control-center/pages/media-studio-workspace.js:7121:      ready: /end frame|final frame|target frame/.test(text)
+public/control-center/pages/media-studio-workspace.js:7193:    "the target audience"
+public/control-center/pages/media-studio-workspace.js:7225:    `Keep the output suitable for ${ctx.platform} and ratio ${ctx.ratio}.`
+public/control-center/pages/media-studio-workspace.js:7273:    `Output format: ${ctx.ratio} for ${ctx.platform}.`,
+public/control-center/pages/media-studio-workspace.js:7509:    "Create or approve the target final frame before video generation when the motion is complex.",
+public/control-center/pages/media-studio-workspace.js:7583:            <p>Generate or approve the target final frame for complex motion. The end frame reduces drift and gives the video provider a controlled destination.</p>
+public/control-center/pages/media-studio-workspace.js:8968:  const statusLabel = outputReady ? "Output ready" : providerReady ? "Ready to generate" : "Setup needed";
+public/control-center/pages/media-studio-workspace.js:9017:        <button class="media-r2r-frame-drop" type="button" data-media-action="open-library">+ End frame<br><small>Optional target frame</small></button>
+public/control-center/pages/media-studio-workspace.js:9122:  const hasOutput = Boolean(
+public/control-center/pages/media-studio-workspace.js:9123:    selectedItem?.output ||
+public/control-center/pages/media-studio-workspace.js:9126:    version?.output ||
+public/control-center/pages/media-studio-workspace.js:9141:        <span class="media-os-badge ${hasOutput ? "is-ready" : "is-waiting"}">${escapeHtml(hasOutput ? "Output available" : "No output yet")}</span>
+public/control-center/pages/media-studio-workspace.js:9198:              <p>${escapeHtml(hasOutput ? "Review the generated output before Library save or Publishing handoff." : "No output yet. Generate, connect a provider, or save a draft.")}</p>
+public/control-center/pages/media-studio-workspace.js:9201:              <span class="${hasOutput ? "is-ready" : "is-warning"}">${escapeHtml(hasOutput ? "output ready" : "no output yet")}</span>
+public/control-center/pages/media-studio-workspace.js:9207:          <div class="media-creation-preview-frame" id="mediaStudioOutputCanvas" aria-label="Media output preview canvas">
+public/control-center/pages/media-studio-workspace.js:9208:            ${!hasOutput ? `
+public/control-center/pages/customer-center.js:7:} from "../api.js";
+public/control-center/pages/customer-center.js:489:  get template() {
+public/control-center/pages/operations-centers.js:96:  const input = context.$?.("quickCommandInput");
+public/control-center/pages/operations-centers.js:215:        label: "Find throughput blockers",
+public/control-center/pages/operations-centers.js:217:        prompt: `Analyze Queue Center for ${projectLabel} with focus on ${focusLabel}. Identify throughput blockers, queue bottlenecks, and the next operational adjustments.`
+public/control-center/pages/operations-centers.js:567:              <input id="taskCenterSearch" class="command-input" type="text" placeholder="Search tasks, owners, domains..." value="${escapeHtml(session.search)}">
+public/control-center/pages/operations-centers.js:653:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Delete task (disabled: future mutation safety pass)</button>
+public/control-center/pages/operations-centers.js:939:              <input id="queueCenterSearch" class="command-input" type="text" placeholder="Search queues, items, assignees..." value="${escapeHtml(session.search)}">
+public/control-center/pages/operations-centers.js:961:                  <p class="mhos-os-panel-copy">${escapeHtml(selectedItem ? "Inspect queue type, owner, status, and route target before routing." : "Choose a queue item from the table to inspect details.")}</p>
+public/control-center/pages/operations-centers.js:1227:              <input id="jobMonitorSearch" class="command-input" type="text" placeholder="Search jobs, kinds, owners..." value="${escapeHtml(session.search)}">
+public/control-center/pages/operations-centers.js:1301:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Delete job (disabled: future destructive mutation safety pass)</button>
+public/control-center/pages/operations-centers.js:1650:              <input id="notificationCenterSearch" class="command-input" type="text" placeholder="Search alerts, sources, messages..." value="${escapeHtml(session.search)}">
+public/control-center/pages/operations-centers.js:1725:                <button class="btn btn-ghost ops-deferred-action" type="button" disabled>Delete notification (disabled: future destructive mutation safety pass)</button>
+public/control-center/pages/operations-centers.js:1964:    function doFetch() {
+public/control-center/pages/operations-centers.js:1978:    doFetch();
+public/control-center/pages/operations-centers.js:1997:    function doFetch() {
+public/control-center/pages/operations-centers.js:2026:    doFetch();
+public/control-center/pages/operations-centers.js:2045:    function doFetch() {
+public/control-center/pages/operations-centers.js:2074:    doFetch();
+public/control-center/pages/operations-centers.js:2093:    function doFetch() {
+public/control-center/pages/operations-centers.js:2122:    doFetch();
+public/control-center/pages/business/dashboard.js:6: * /api/governance/* or /api/ai-control/* endpoints if opened directly.
+public/control-center/pages/business/dashboard.js:8: * Active runtime authority lives in router-registered pages and canonical api.js
+public/control-center/pages/research.js:741:      preview: "Turn current research into target topics, landing pages, clusters, and low-competition search plays.",
+public/control-center/pages/research.js:742:      prompt: `Review the research and identify the best SEO opportunities for ${projectLabel}. Start with ${topKeyword} and recommend target topics, landing pages, clusters, and low-competition long-tail ideas.`
+public/control-center/pages/research.js:855:  const input = $("quickCommandInput");
+public/control-center/pages/research.js:970:      const target = button.getAttribute("data-research-route") || "";
+public/control-center/pages/research.js:975:        target === "campaign"
+public/control-center/pages/research.js:977:          : target === "content"
+public/control-center/pages/research.js:979:            : target === "seo"
+public/control-center/pages/research.js:981:              : target === "ads"
+public/control-center/pages/research.js:1015:      if (target === "ai") {
+public/control-center/pages/research.js:1046:    noteTitle.oninput = (event) => {
+public/control-center/pages/research.js:1052:    noteBody.oninput = (event) => {
+public/control-center/pages/research.js:1058:    noteTags.oninput = (event) => {
+public/control-center/pages/research.js:1452:              <input id="researchNoteTitle" class="setup-input" type="text" placeholder="Finding title" value="${escapeHtml(session.noteDraft.title)}" />
+public/control-center/pages/research.js:1453:              <textarea id="researchNoteBody" class="setup-input setup-textarea" rows="5" placeholder="Capture the key observation, implication, or market signal...">${escapeHtml(session.noteDraft.body)}</textarea>
+public/control-center/pages/research.js:1454:              <input id="researchNoteTags" class="setup-input" type="text" placeholder="Tags, comma separated" value="${escapeHtml(session.noteDraft.tags)}" />
+public/control-center/pages/library/action-panel.js:119:        <button class="btn btn-secondary library-danger-action" type="button" data-library-delete="${selectedAssetId}" data-asset-id="${selectedRegistryAssetId}" title="Soft-delete this asset after confirmation"${durableDisabledAttr}>Soft-delete asset</button>
+public/control-center/pages/library/ai-panel.js:77:      description: "Choose an asset to get clear source status, review status, and practical guidance.",
+public/control-center/pages/ai-command.js:31:} from "../api.js";
+public/control-center/pages/ai-command.js:459:		{ id: "channel-formatting", label: "Channel Formatting", action: "preview", intent: "guidance", template: "Format the next output for {project} by channel. Include German copy, limits, CTA, and scheduling notes." },
+public/control-center/pages/ai-command.js:467:		{ id: "budget-notes", label: "Budget Notes", action: "preview", intent: "guidance", template: "Review budget notes for {project}. Summarize constraints and safe test allocation guidance." },
+public/control-center/pages/ai-command.js:508:		{ id: "influencer-lead-plan", label: "Influencer Lead Plan", action: "preview", intent: "workflow", template: "Prepare an influencer lead plan for {project}. Include target profile, outreach angle, qualification criteria, and handoff path." },
+public/control-center/pages/ai-command.js:583:		purpose: "Optimize paid opportunities, creative testing, and budget decisions.",
+public/control-center/pages/ai-command.js:1242:		`Publishable output language: ${safeOutputLanguage}`,
+public/control-center/pages/ai-command.js:1243:		`Target market: ${safeMarket}`,
+public/control-center/pages/ai-command.js:1578:			safetyLabel: "No budget updates or ad launches executed."
+public/control-center/pages/ai-command.js:1753:			"Operations: convert the reviewed output into safe tasks, workflow draft, or handoff context"
+public/control-center/pages/ai-command.js:1758:		safetyLabel: "Full Team output is a coordinated draft preview only."
+public/control-center/pages/ai-command.js:1776:		`Output Type: ${formatOutputTypeLabel(output.outputType)}`,
+public/control-center/pages/ai-command.js:1829:                preview.mainOutput ||
+public/control-center/pages/ai-command.js:1830:                preview.output ||
+public/control-center/pages/ai-command.js:1831:                preview.generatedOutput ||
+public/control-center/pages/ai-command.js:2049:		notes.push("Sync social feeds to learn from real post performance.");
+public/control-center/pages/ai-command.js:2102:			top ? `Top performer: ${extractTopMessage(top)} with ${formatCompactNumber(top.engagement ?? top.reach)} signal.` : "No top post measured yet.",
+public/control-center/pages/ai-command.js:2232:		return { title: "Campaign launch task block", owner: "Campaign Studio", steps: ["Define the campaign objective, audience, and offer.", "Choose channels and budget based on current intelligence.", "List required assets and publishing dependencies before launch."] };
+public/control-center/pages/ai-command.js:3000:		return `<div class="ctrl-response-card"><p style="color:var(--color-text-2);font-size:13px;">No output returned.</p></div>`;
+public/control-center/pages/ai-command.js:3336:                preview.mainOutput = context.assistantText;
+public/control-center/pages/ai-command.js:3378:			reason: `${aiContext.assetBlockers.length} asset category blocker${aiContext.assetBlockers.length === 1 ? "" : "s"} may reduce content throughput and campaign delivery speed.`,
+public/control-center/pages/ai-command.js:3405:		reason: "Core readiness is stable enough to move into output generation and optimization.",
+public/control-center/pages/ai-command.js:3419:    String(input || "")
+public/control-center/pages/ai-command.js:3510:	const firstOutput = asArray(tool.outputTypes)[0];
+public/control-center/pages/ai-command.js:3511:	return firstOutput ? titleCase(asString(firstOutput).replace(/[_-]+/g, " ")) : "Draft";
+public/control-center/pages/ai-command.js:3542:	return "Prepare a review-ready output for the selected specialist lane.";
+public/control-center/pages/ai-command.js:4381:                ["Target audience", asString(campaignPackage.targetAudience || campaignPackage.target_audience)],
+public/control-center/pages/ai-command.js:4441:        const audienceOptions = [["target-customers", "Target customers"], ["new-buyers", "New buyers"], ["returning-customers", "Returning customers"], ["b2b", "B2B"], ["local", "Local audience"]];
+public/control-center/pages/ai-command.js:4755:                                <input id="aicmdFinalUploadInput" type="file" multiple hidden aria-hidden="true" />
+public/control-center/pages/ai-command.js:4958:				<div class="aicmd-chatfirst-output-tabs" role="tablist" aria-label="Output workspace tabs">
+public/control-center/pages/ai-command.js:5008:					<strong>No review output yet</strong>
+public/control-center/pages/ai-command.js:5494:           const savedOutput = asObject(loadLocalOutput(sessionKey));
+public/control-center/pages/ai-command.js:5516:		// Once consumed we clear the global input so re-renders are idempotent.
+public/control-center/pages/ai-command.js:5517:		const globalInput = $("quickCommandInput");
+public/control-center/pages/ai-command.js:5571:		const input = $("aicmdV2Input");
+public/control-center/pages/ai-command.js:5711:				persistSessionDraft(sessionKey, session, `Output view: ${titleCase(nextTab)}`);
+public/control-center/pages/ai-command.js:5829:                                        const uploadInput = document.getElementById("aicmdFinalUploadInput");
+public/control-center/pages/ai-command.js:5848:                                        showMessage?.("AI Command will use current workspace context as planning input only.");
+public/control-center/pages/ai-command.js:5870:                const finalUploadInput = document.getElementById("aicmdFinalUploadInput");
+public/control-center/pages/ai-command.js:5917:                        const target = event.target;
+public/control-center/pages/ai-command.js:5964:		// ── INPUT HANDLING ───────────────────────────────────────────
+public/control-center/pages/ai-command.js:6015:                                        body: `Define the ${goalLabel.toLowerCase()} objective, target segment, market angle, and campaign promise for ${projectLabel}.`
+public/control-center/pages/ai-command.js:6108:                                if (event.target === backdrop) closeSmartActionWizard();
+public/control-center/pages/ai-command.js:6134:                                campaignPackage.targetAudience ? { label: "Target audience", body: asString(campaignPackage.targetAudience) } : null,
+public/control-center/pages/ai-command.js:6383:			input.oninput = () => {
+public/control-center/pages/ai-command.js:6474:							updateStatus("Voice input returned no transcript. Try again and speak clearly after pressing the microphone.");
+public/control-center/pages/ai-command.js:6483:						persistSessionDraft(sessionKey, session, "Voice input captured");
+public/control-center/pages/ai-command.js:6988:				const output = asObject(session.outputPreview);
+public/control-center/pages/ai-command.js:7012:				const output = asObject(session.outputPreview);
+public/control-center/pages/ai-command.js:7031:				const output = asObject(session.outputPreview);
+public/control-center/pages/ai-command.js:7067:				const output = asObject(session.outputPreview);
+public/control-center/pages/ai-command.js:7082:				const output = asObject(session.outputPreview);
+public/control-center/pages/ai-command.js:7641:// INPUT GOVERNOR LAYER (PHASE 1.3 STEP 2)
+public/control-center/pages/ai-command.js:7642:// SINGLE SOURCE OF INPUT AUTHORITY
+public/control-center/pages/library.js:47:} from "../api.js";
+public/control-center/pages/library.js:194:  // receive pointer/click/input events directly from the browser.
+public/control-center/pages/library.js:333:function requiresProtectedMediaFetch(fileUrl = "") {
+public/control-center/pages/library.js:408:  if (!requiresProtectedMediaFetch(previewUrl)) {
+public/control-center/pages/library.js:1187:  const protectedPreview = requiresProtectedMediaFetch(previewUrl);
+public/control-center/pages/library.js:1268:    if (isPdf && previewUrl && !requiresProtectedMediaFetch(previewUrl)) {
+public/control-center/pages/library.js:1297:      if (previewUrl && requiresProtectedMediaFetch(previewUrl)) {
+public/control-center/pages/library.js:1551:    const input = document.createElement("input");
+public/control-center/pages/library.js:1593:      if (event.target === overlay) {
+public/control-center/pages/library.js:1625:  if (!target || typeof document === "undefined") return null;
+public/control-center/pages/library.js:1646:  if (!target || typeof document === "undefined") return;
+public/control-center/pages/library.js:2053:          ? requiresProtectedMediaFetch(assetPreviewUrl)
+public/control-center/pages/library.js:2064:              <input type="checkbox" data-library-multi-select="${escapeHtml(asset.id)}"${isMultiSelected ? " checked" : ""}>
+public/control-center/pages/library.js:2334:        const uploadInput = $("libraryUploadInput");
+public/control-center/pages/library.js:2359:      const input = $("quickCommandInput");
+public/control-center/pages/library.js:2724:        showError?.("Choose a target group before moving this asset.");
+public/control-center/pages/library.js:2729:        showError?.(`Invalid target group. Allowed: ${allowedTypes.join(", ")}`);
+public/control-center/pages/library.js:2793:      if (!confirm(`Confirm archive action\n\nAction: Archive this asset.\nRisk: The asset is removed from active Library views but remains in the registry. This does not delete the physical file.\n\nSelect Cancel to keep this asset active.`)) {
+public/control-center/pages/library.js:2868:      if (!confirm(`Confirm soft-delete action\n\nAction: Soft-delete this asset from active views.\nRisk: This applies a registry-level soft delete and removes the asset from active Library flows. This action does not silently publish, approve, or run workflows.\n\nSelect Cancel to keep this asset available.`)) {
+public/control-center/pages/library.js:2880:        showError?.(error.message || "Failed to delete asset.");
+public/control-center/pages/library.js:2941:  const searchInput = $("librarySearchInput");
+public/control-center/pages/library.js:2944:    searchInput.oninput = (event) => {
+public/control-center/pages/library.js:2989:  const uploadInput = $("libraryUploadInput");
+public/control-center/pages/library.js:3006:    const syncDroppedFilesToInput = (files) => {
+public/control-center/pages/library.js:3183:        const input = $("libraryUploadInput");
+public/control-center/pages/library.js:3239:      const input = $("quickCommandInput");
+public/control-center/pages/library.js:3249:      const input = $("quickCommandInput");
+public/control-center/pages/library.js:3264:      const input = $("quickCommandInput");
+
+Dashboard/Home backend routes:
+runtime/orchestrator-service/server.js:11691:app.post('/api/ai-command/project/:project/campaign-preview', handleAiCommandCampaignPreviewOnly);

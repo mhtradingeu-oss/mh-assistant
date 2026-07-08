@@ -1,0 +1,50 @@
+diff --git a/public/control-center/pages/ai-command.js b/public/control-center/pages/ai-command.js
+index c5a9e2e..f399440 100644
+--- a/public/control-center/pages/ai-command.js
++++ b/public/control-center/pages/ai-command.js
+@@ -619,6 +619,45 @@ const aiAutomationState = {
+ 	result: ""
+ };
+ 
++
++function detectSpecialistFromBridgePrompt(prompt) {
++    const text = asString(prompt).toLowerCase();
++
++    const directMap = [
++            ["video", "video_lead"],
++            ["motion", "video_lead"],
++            ["reel", "video_lead"],
++            ["storyboard", "video_lead"],
++            ["shot list", "video_lead"],
++            ["voiceover", "video_lead"],
++            ["media", "video_lead"],
++            ["campaign", "strategist"],
++            ["strategy", "strategist"],
++            ["content", "copywriter"],
++            ["copy", "copywriter"],
++            ["caption", "copywriter"],
++            ["publish", "publisher"],
++            ["schedule", "publisher"],
++            ["ads", "ads_operator"],
++            ["budget", "ads_operator"],
++            ["customer", "customer_ops"],
++            ["crm", "customer_ops"],
++            ["support", "customer_ops"],
++            ["operations", "admin"],
++            ["blocker", "admin"],
++            ["readiness", "admin"],
++            ["setup", "admin"],
++            ["library", "admin"]
++    ];
++
++    for (const [keyword, specialistId] of directMap) {
++            if (text.includes(keyword)) return MODE_ID_ALIASES[specialistId] || specialistId;
++    }
++
++    const classified = classifyIntent(text, null);
++    return MODE_ID_ALIASES[classified?.modeId] || classified?.modeId || "operations";
++}
++
+ function buildAutoPlanFromCommand(commandText, session) {
+ 	function getSpecialistById(id) {
+ 		const resolvedId = MODE_ID_ALIASES[id] || id;

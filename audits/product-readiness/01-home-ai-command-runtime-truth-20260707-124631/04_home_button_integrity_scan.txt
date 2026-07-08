@@ -1,0 +1,40 @@
+Home buttons:
+399:  const nextAction = humanizeExecutiveAction(rawNextAction, "Ask AI Command");
+874:                <button id="homePrimaryActionBtn" class="mhos-next-action-btn" type="button">
+877:                <button id="homeAskNextActionBtn" class="mhos-next-action-btn is-ghost" type="button">
+878:                  Ask Head Office AI
+1030:              <button id="homeQuickReviewReadinessBtn" class="quick-action-btn" type="button">
+1034:              <button id="homeQuickAssetLibraryBtn" class="quick-action-btn" type="button">
+1038:              <button id="homeQuickStartCampaignBtn" class="quick-action-btn" type="button">
+1049:                  ${escapeHtml(recommendedSpecialist?.summary || "Use AI Command to turn the current state into a clear operating plan.")}
+1055:                <button class="quick-action-btn mhos-motion-soft" type="button" data-role-id="${escapeHtml(recommendedSpecialist.id)}">
+1056:                  <span class="home-action-title">Ask Head Office AI</span>
+1070:              <button id="homePromptNextBtn" class="home-ai-prompt-card" type="button">
+1074:              <button id="homePromptReadinessBtn" class="home-ai-prompt-card" type="button">
+1103:      showMessage?.("Prompt prepared in AI Command.");
+1123:      showMessage?.(`${roleName} context prepared in AI Command.`);
+1126:    const nextBtn = $("homePrimaryActionBtn");
+1136:    const askNextActionBtn = $("homeAskNextActionBtn");
+1149:    const promptNextBtn = $("homePromptNextBtn");
+1154:    const promptReadinessBtn = $("homePromptReadinessBtn");
+
+Home event bindings:
+742:function setGlobalAiPrompt($, prompt) {
+874:                <button id="homePrimaryActionBtn" class="mhos-next-action-btn" type="button">
+877:                <button id="homeAskNextActionBtn" class="mhos-next-action-btn is-ghost" type="button">
+1070:              <button id="homePromptNextBtn" class="home-ai-prompt-card" type="button">
+1074:              <button id="homePromptReadinessBtn" class="home-ai-prompt-card" type="button">
+1100:    const openAiWithPrompt = (prompt) => {
+1101:      setGlobalAiPrompt($, prompt);
+1102:      navigateTo("ai-command");
+1122:      openAiWithPrompt(prompt);
+1126:    const nextBtn = $("homePrimaryActionBtn");
+1130:          setGlobalAiPrompt($, dashboard.nextBestAction.recommendation);
+1136:    const askNextActionBtn = $("homeAskNextActionBtn");
+1138:      askNextActionBtn.onclick = () => openAiWithPrompt(`Explain this next best action like an operations director and give me the exact safe steps: ${dashboard.nextBestAction.recommendation}. Include which workspace owns it, what it unlocks for campaign creation, scheduled posts, publishing, ads, and customer operations. Do not execute anything.`);
+1149:    const promptNextBtn = $("homePromptNextBtn");
+1151:      promptNextBtn.onclick = () => openAiWithPrompt("What is the best next executive action for this project? Prioritize the answer based on readiness, blockers, campaign state, scheduled posts, publishing safety, ads readiness, customer operations, and recent activity. Give one clear recommendation and the reason.");
+1154:    const promptReadinessBtn = $("homePromptReadinessBtn");
+1156:      promptReadinessBtn.onclick = () => openAiWithPrompt("Why is readiness low? Explain the missing integrations, assets, failed jobs, campaign gaps, scheduled post risks, publishing blockers, and ad launch risks in simple business language. End with the fastest safe fix path.");
+
+Malformed HTML / merged words:

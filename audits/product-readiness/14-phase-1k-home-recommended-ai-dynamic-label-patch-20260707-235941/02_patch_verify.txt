@@ -1,0 +1,75 @@
+Recommended AI specialist render window after patch:
+
+          <aside class="mhos-os-rail" aria-label="Action and AI Guidance">
+
+            <section class="mhos-os-action-panel">
+              <div>
+                <p class="mhos-os-kicker">Workspaces</p>
+                <h2 class="mhos-os-panel-title">Open the owner</h2>
+                <p class="mhos-os-panel-copy">These buttons open the right workspace. Home does not save, upload, approve, publish, send, or execute.</p>
+              </div>
+
+              <button id="homeQuickReviewReadinessBtn" class="quick-action-btn" type="button">
+                <span class="home-action-title">Open Setup Readiness</span>
+                <span class="home-action-meta">Review foundation gaps in the Setup workspace.</span>
+              </button>
+              <button id="homeQuickAssetLibraryBtn" class="quick-action-btn" type="button">
+                <span class="home-action-title">Open Asset Library</span>
+                <span class="home-action-meta">Review source assets in the Library workspace.</span>
+              </button>
+              <button id="homeQuickStartCampaignBtn" class="quick-action-btn" type="button">
+                <span class="home-action-title">Open Campaign Studio</span>
+                <span class="home-action-meta">Plan the next campaign wave in its workspace.</span>
+              </button>
+            </section>
+
+            <section class="mhos-os-ai-panel">
+              <div>
+                <p class="mhos-os-kicker">Recommended AI Specialist</p>
+                <h2 class="mhos-os-panel-title">${escapeHtml(recommendedSpecialist?.name || "Executive AI")}</h2>
+                <p class="mhos-os-panel-copy">
+                  ${escapeHtml(recommendedSpecialist?.summary || "Use AI Command to turn the current state into a clear operating plan.")}
+                  AI prepares guidance only; destination workspaces own any execution.
+                </p>
+              </div>
+
+              ${recommendedSpecialist ? `
+                <button class="quick-action-btn mhos-motion-soft" type="button" data-role-id="${escapeHtml(recommendedSpecialist.id)}">
+                  <span class="home-action-title">Ask ${escapeHtml(recommendedSpecialist?.name || "Recommended AI")}</span>
+                  <span class="home-action-meta">Uses the recommended specialist context. No execution from Home.</span>
+                </button>
+              ` : ""}
+
+</section>
+
+            <section class="mhos-os-ai-panel">
+              <div>
+                <p class="mhos-os-kicker">AI guidance</p>
+                <h2 class="mhos-os-panel-title">Ask safely</h2>
+                <p class="mhos-os-panel-copy">Use one AI prompt when you need explanation or a safe action plan. Nothing executes from Home.</p>
+              </div>
+
+              <button id="homePromptNextBtn" class="home-ai-prompt-card" type="button">
+                <span class="home-prompt-title">What is the next executive action?</span>
+                <span class="home-prompt-meta">Prepare a short explanation and handoff path.</span>
+              </button>
+              <button id="homePromptReadinessBtn" class="home-ai-prompt-card" type="button">
+                <span class="home-prompt-title">Why is readiness low?</span>
+
+Ask Head Office AI remaining occurrences:
+878:                  Ask Head Office AI
+
+Dynamic Ask label markers:
+1047:                <h2 class="mhos-os-panel-title">${escapeHtml(recommendedSpecialist?.name || "Executive AI")}</h2>
+1056:                  <span class="home-action-title">Ask ${escapeHtml(recommendedSpecialist?.name || "Recommended AI")}</span>
+
+Click binding still unchanged:
+742:function setGlobalAiPrompt($, prompt) {
+1055:                <button class="quick-action-btn mhos-motion-soft" type="button" data-role-id="${escapeHtml(recommendedSpecialist.id)}">
+1101:      setGlobalAiPrompt($, prompt);
+1102:      navigateTo("ai-command");
+1107:    const handleAiRoleClick = (roleId, roleName) => {
+1130:          setGlobalAiPrompt($, dashboard.nextBestAction.recommendation);
+1158:    const aiRoleCards = document.querySelectorAll(".quick-action-btn[data-role-id], .home-ai-team-card[data-role-id], .mhos-specialist[data-role-id], .mhos-workflow-step[data-role-id]");
+1160:      const roleId = card.getAttribute("data-role-id");
+1162:      card.onclick = () => handleAiRoleClick(roleId, roleName);

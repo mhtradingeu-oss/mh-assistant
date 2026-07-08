@@ -1,0 +1,306 @@
+===== public/control-center/ai-team-model.js =====
+/*
+  Canonical AI Team Model
+  Source of truth for MH Assistant Control Center.
+
+  Phase 1 rule:
+  - Read-only model.
+  - No backend calls.
+  - No automation.
+  - No publishing.
+  - No execution side effects.
+*/
+
+export const AI_TEAM_ROLES = [
+  {
+    id: "strategist",
+    label: "Strategist",
+    icon: "🎯",
+    ownerSummary: "Campaign planning, positioning, launch decisions, and next best action.",
+    primaryPages: ["home", "campaign-studio", "ai-command"],
+    outputTargets: ["campaign-studio", "content-studio", "media-studio", "publishing"],
+    defaultPrompt: "Act as Strategist. Review the current project state and recommend the highest-impact next move."
+  },
+  {
+    id: "content_writer",
+    label: "Content Writer",
+    icon: "✍️",
+    ownerSummary: "Copy, captions, product text, emails, scripts, and landing page content.",
+    primaryPages: ["content-studio", "campaign-studio", "ai-command"],
+    outputTargets: ["content-studio", "governance", "publishing"],
+    defaultPrompt: "Act as Content Writer. Create high-converting content based on the current campaign and project context."
+  },
+  {
+    id: "media_director",
+    label: "Media Director",
+    icon: "🎨",
+    ownerSummary: "Visual direction, brand assets, image quality, creative briefs, and media readiness.",
+    primaryPages: ["media-studio", "library", "campaign-studio"],
+    outputTargets: ["media-studio", "library", "publishing"],
+    defaultPrompt: "Act as Media Director. Review available assets and define the strongest visual direction."
+  },
+  {
+    id: "video_lead",
+    label: "Video Lead",
+    icon: "🎬",
+    ownerSummary: "Short-form video, motion content, video briefs, scripts, and platform formats.",
+    primaryPages: ["media-studio", "content-studio", "publishing"],
+    outputTargets: ["media-studio", "content-studio", "publishing"],
+    defaultPrompt: "Act as Video Lead. Plan the next short-form video package for the active campaign."
+  },
+  {
+    id: "publisher",
+    label: "Publisher",
+    icon: "📤",
+    ownerSummary: "Publishing queue, schedules, manual handoffs, retries, and release readiness.",
+    primaryPages: ["publishing", "queue-center", "ai-command"],
+    outputTargets: ["publishing", "queue-center", "insights"],
+    defaultPrompt: "Act as Publisher. Prepare the next publish-ready package and identify missing approvals or queue steps."
+  },
+  {
+    id: "ads_optimizer",
+    label: "Ads Optimizer",
+    icon: "📢",
+    ownerSummary: "Paid media, ad packages, creative testing, budget guidance, and ROAS improvement.",
+    primaryPages: ["ads-manager", "campaign-studio", "insights"],
+    outputTargets: ["ads-manager", "campaign-studio", "insights"],
+    defaultPrompt: "Act as Ads Optimizer. Build a paid testing plan based on current readiness and performance signals."
+  },
+  {
+    id: "seo_insights_analyst",
+    label: "SEO & Insights Analyst",
+    icon: "📊",
+    ownerSummary: "Search, performance, weak signals, learning patterns, and measurable optimization.",
+    primaryPages: ["insights", "research", "home"],
+    outputTargets: ["insights", "campaign-studio", "content-studio", "ads-manager"],
+    defaultPrompt: "Act as SEO & Insights Analyst. Identify what is working, what is weak, and what action should happen next."
+  },
+  {
+    id: "researcher",
+    label: "Researcher",
+    icon: "🔬",
+    ownerSummary: "Market research, competitors, audience intelligence, and positioning evidence.",
+    primaryPages: ["research", "setup", "campaign-studio"],
+    outputTargets: ["research", "setup", "campaign-studio", "content-studio"],
+    defaultPrompt: "Act as Researcher. Find the strongest market, competitor, and audience insights for this project."
+  },
+  {
+    id: "compliance_reviewer",
+    label: "Compliance Reviewer",
+    icon: "🛡️",
+    ownerSummary: "Claims, approvals, publishing risk, brand safety, governance, and release trust.",
+    primaryPages: ["governance", "publishing", "content-studio", "media-studio"],
+    outputTargets: ["governance", "publishing", "content-studio", "media-studio"],
+    defaultPrompt: "Act as Compliance Reviewer. Flag claims, approval gaps, and publishing risks before release."
+  },
+  {
+    id: "operations_lead",
+    label: "Operations Lead",
+    icon: "⚙️",
+    ownerSummary: "Workflows, tasks, queues, jobs, notifications, handoffs, and execution safety.",
+    primaryPages: ["workflows", "task-center", "queue-center", "job-monitor", "notifications"],
+    outputTargets: ["workflows", "task-center", "queue-center", "job-monitor", "notifications"],
+    defaultPrompt: "Act as Operations Lead. Convert priorities into executable steps with owners, queues, and next workspace."
+  }
+];
+
+export const AI_PAGE_SPECIALIST_MAP = {
+  home: ["strategist", "operations_lead", "seo_insights_analyst"],
+  setup: ["strategist", "researcher", "compliance_reviewer"],
+  library: ["media_director", "content_writer", "publisher"],
+  integrations: ["operations_lead", "seo_insights_analyst"],
+  "ai-command": ["operations_lead", "strategist"],
+  workflows: ["operations_lead"],
+  publishing: ["publisher", "compliance_reviewer"],
+  "campaign-studio": ["strategist", "content_writer", "media_director", "ads_optimizer"],
+  "content-studio": ["content_writer", "compliance_reviewer", "publisher"],
+  "media-studio": ["media_director", "video_lead", "publisher"],
+  "ads-manager": ["ads_optimizer", "seo_insights_analyst", "compliance_reviewer"],
+  insights: ["seo_insights_analyst", "strategist"],
+  research: ["researcher", "strategist"],
+  governance: ["compliance_reviewer", "operations_lead"],
+  settings: ["operations_lead", "compliance_reviewer"],
+  "task-center": ["operations_lead"],
+  "queue-center": ["operations_lead", "publisher"],
+  "job-monitor": ["operations_lead", "media_director"],
+  notifications: ["operations_lead"]
+};
+
+export function getAiTeamRole(roleId) {
+  return AI_TEAM_ROLES.find((role) => role.id === roleId) || null;
+}
+
+export function getAiRolesForPage(pageId) {
+  const ids = AI_PAGE_SPECIALIST_MAP[pageId] || [];
+  return ids.map(getAiTeamRole).filter(Boolean);
+}
+
+export function getPrimaryAiRoleForPage(pageId) {
+  return getAiRolesForPage(pageId)[0] || AI_TEAM_ROLES[0];
+}
+
+===== route-role-fallback.js =====
+const DEFAULT_ROLE = "admin";
+
+const ACTIVE_ROUTE_ROLES = [
+  "strategist",
+  "writer",
+  "designer",
+  "video_lead",
+  "publisher",
+  "ads_operator",
+  "analyst",
+  "compliance_reviewer",
+  "admin"
+];
+
+const DEFAULT_ROUTE_ROLE_ACCESS = {
+  home: ["strategist", "analyst", "admin"],
+  "ai-command": ACTIVE_ROUTE_ROLES,
+  "campaign-studio": ["strategist", "ads_operator", "admin"],
+  "content-studio": ["writer", "strategist", "compliance_reviewer", "admin"],
+  "media-studio": ["designer", "video_lead", "compliance_reviewer", "admin"],
+  publishing: ["publisher", "compliance_reviewer", "admin"],
+  research: ["strategist", "analyst", "writer", "admin"],
+  setup: ACTIVE_ROUTE_ROLES,
+  "task-center": ACTIVE_ROUTE_ROLES,
+  "queue-center": ACTIVE_ROUTE_ROLES,
+  "job-monitor": ACTIVE_ROUTE_ROLES,
+  "notification-center": ACTIVE_ROUTE_ROLES,
+  governance: ["compliance_reviewer", "admin", "analyst"],
+  "ads-manager": ["ads_operator", "strategist", "analyst", "admin"],
+  insights: ["analyst", "strategist", "ads_operator", "admin"],
+  integrations: ["admin"],
+  workflows: ACTIVE_ROUTE_ROLES,
+  library: ["designer", "video_lead", "publisher", "admin"],
+  settings: ["admin"]
+};
+
+function buildBlockedReason(route, allowedRoles, activeRole, useDefaultRoleMessage = false) {
+  const rolesStr = allowedRoles.join(", ");
+  if (useDefaultRoleMessage) {
+    return (
+      `Route "${route}" requires one of: [${rolesStr}]. ` +
+      `Default role is "${activeRole}". Use the Role selector in the top bar to switch.`
+    );
+  }
+
+  return (
+    `Route "${route}" requires one of: [${rolesStr}]. ` +
+    `Your current role is "${activeRole}". ` +
+    `Use the Role selector in the top bar to switch roles for internal testing.`
+  );
+}
+
+function getFallbackRouteAccess(route, activeRole = DEFAULT_ROLE, options = {}) {
+  const allowedRoles = DEFAULT_ROUTE_ROLE_ACCESS[route];
+  if (!Array.isArray(allowedRoles)) {
+    return { allowed: true, reason: "" };
+  }
+
+  const normalizedRole = String(activeRole || "").trim().toLowerCase() || DEFAULT_ROLE;
+  const allowed = allowedRoles.includes(normalizedRole);
+  return {
+    allowed,
+    reason: allowed
+      ? ""
+      : buildBlockedReason(route, allowedRoles, normalizedRole, options.useDefaultRoleMessage === true)
+  };
+}
+
+export {
+  ACTIVE_ROUTE_ROLES,
+  DEFAULT_ROLE,
+  DEFAULT_ROUTE_ROLE_ACCESS,
+  getFallbackRouteAccess
+};
+===== authority-projection.js =====
+/**
+ * MH-OS Authority Projection Helper
+ *
+ * IMPORTANT:
+ * This file is projection-only.
+ *
+ * Backend owns operational authority.
+ * Frontend projects operational authority.
+ *
+ * This helper MUST NEVER:
+ * - enforce permissions
+ * - mutate governance
+ * - become source of truth
+ * - generate authority
+ * - own approvals
+ * - own workflows
+ */
+
+function safeArray(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+function safeObject(value) {
+  return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+}
+
+function readOperationsProjection(state = {}) {
+  return safeObject(state.operations);
+}
+
+export function getProjectedTeamServiceModel(state = {}) {
+  const operations = readOperationsProjection(state);
+  return safeObject(operations.team_service_model);
+}
+
+export function getProjectedGovernance(state = {}) {
+  const operations = readOperationsProjection(state);
+  return safeObject(operations.governance);
+}
+
+export function getProjectedApprovals(state = {}) {
+  const operations = readOperationsProjection(state);
+  return safeObject(operations.approvals);
+}
+
+export function getProjectedWorkflowRuns(state = {}) {
+  const operations = readOperationsProjection(state);
+  return safeObject(operations.workflow_runs);
+}
+
+export function getProjectedHandoffs(state = {}) {
+  const operations = readOperationsProjection(state);
+  return safeObject(operations.handoffs);
+}
+
+export function getProjectedAiRecommendations(state = {}) {
+  const operations = readOperationsProjection(state);
+  return safeObject(operations.ai_recommendations);
+}
+
+export function getProjectedAiMemory(state = {}) {
+  const operations = readOperationsProjection(state);
+  return safeObject(operations.ai_memory);
+}
+
+export function getProjectedRoutePermissions(state = {}) {
+  const model = getProjectedTeamServiceModel(state);
+  return safeArray(model.route_permissions);
+}
+
+export function getProjectedTeamMembers(state = {}) {
+  const model = getProjectedTeamServiceModel(state);
+  return safeArray(model.members);
+}
+
+export function getProjectedServiceDomains(state = {}) {
+  const model = getProjectedTeamServiceModel(state);
+  return safeArray(model.domains);
+}
+
+export function getProjectedActiveRole(state = {}) {
+  const model = getProjectedTeamServiceModel(state);
+
+  return (
+    model.active_role ||
+    state.activeRole ||
+    "admin"
+  );
+}

@@ -1,0 +1,189 @@
+Recommended specialist data construction:
+  if (/(publish|schedule|queue)/.test(text)) return "publishing";
+  if (/(ad|budget|paid)/.test(text)) return "ads-manager";
+  if (/(content|copy)/.test(text)) return "content-studio";
+  if (/(job|operation)/.test(text)) return "operations-centers";
+  return "ai-command";
+}
+
+function buildAiTeamCards(state) {
+  const operations = asObject(selectOperationsSnapshot(state));
+  const notifications = asArray(operations.notifications?.items);
+  const tasks = asArray(operations.tasks?.items);
+  const approvals = asArray(operations.approvals?.items);
+
+  const projectedMembers = getProjectedTeamMembers(state);
+  const projectedActiveRole = asString(
+    getProjectedActiveRole(state)
+  ).toLowerCase();
+
+  const roles = projectedMembers.length
+    ? projectedMembers.map((member) => ({
+        id: asString(member.role || member.id).toLowerCase(),
+        name: asString(
+          member.name ||
+          member.role ||
+          member.id ||
+          "AI Specialist"
+        ),
+        fallback: asString(
+          member.description ||
+          member.summary ||
+          "Ready to support this project."
+        )
+      }))
+    : [
+    { id: "strategist", name: "Strategist", fallback: "Align campaign priorities and launch sequencing." },
+    { id: "writer", name: "Content Writer", fallback: "Prepare high-conversion messaging for active channels." },
+    { id: "designer", name: "Media Director", fallback: "Polish visual direction and creative consistency." },
+    { id: "video_lead", name: "Video Lead", fallback: "Queue the next motion and short-form variants." },
+    { id: "publisher", name: "Publisher", fallback: "Prepare publishing packages, schedules, and manual handoffs." },
+    { id: "ads_operator", name: "Ads Optimizer", fallback: "Optimize paid testing, creative variants, and budget decisions." },
+    { id: "analyst", name: "SEO & Insights Analyst", fallback: "Read weak signals and recommend measurable improvements." },
+    { id: "compliance_reviewer", name: "Compliance Reviewer", fallback: "Review claims, approvals, and publish safety before release." },
+    { id: "admin", name: "Operations Lead", fallback: "Clear blockers and keep execution flow healthy." }
+  ];
+
+  return roles.map((role) => {
+    const roleNotifications = notifications.filter((item) => asString(item?.owner_role).toLowerCase() === role.id);
+    const roleTasks = tasks.filter((item) => asString(item?.owner_role).toLowerCase() === role.id);
+    const roleApprovals = approvals.filter((item) => asString(item?.reviewer_role).toLowerCase() === role.id);
+
+    const latest = roleNotifications[0] || roleTasks[0] || roleApprovals[0] || null;
+    const statusRaw = asString(latest?.status || latest?.level || "idle");
+    const tone = statusTone(statusRaw);
+
+    return {
+      ...role,
+      tone,
+      status:
+        role.id === projectedActiveRole
+          ? "Active role"
+          : humanizeStatus(statusRaw, "Idle"),
+      summary: latest
+        ? asString(latest.title || latest.summary || latest.action || role.fallback)
+        : role.fallback
+    };
+  });
+}
+
+function buildExecutiveData(state) {
+  const overview = asObject(state.data.overview);
+  const readiness = asObject(state.data.readiness);
+  const integrations = asObject(state.data.integrations);
+  const activity = asObject(state.data.activity);
+  const assets = asObject(state.data.assets);
+  const operations = asObject(selectOperationsSnapshot(state));
+
+  const overviewData = asObject(overview.overview);
+  const readinessData = asObject(readiness.dashboard);
+  const readinessPriorities = asObject(readinessData.priorities || readiness.priorities);
+
+  const scheduledJobs = asArray(activity.scheduled_jobs);
+  const executionResults = asArray(activity.execution_results);
+  const recommendations = asArray(readinessData.next_best_actions).length
+    ? asArray(readinessData.next_best_actions)
+    : asArray(overview.next_best_actions);
+
+  const insights = asObject(activity.insights);
+  const learning = asObject(activity.learning);
+  const notifications = asArray(operations.notifications?.items);
+
+  const sortedExecution = executionResults
+
+Dashboard / next action construction:
+  const connectedConnectorCount = connectorKeys.filter((key) => Boolean(connectorChecks[key])).length;
+  const missingIntegrations = asArray(integrations.readiness?.missing).map((item) => humanizeStatus(item)).filter(Boolean);
+
+  const categoryReadiness = asArray(assets.category_readiness?.categories);
+  const missingAssetLabels = [
+    ...asArray(assets.missing_assets?.assets),
+    ...asArray(assets.missing_assets?.missing),
+    ...asArray(assets.missing_assets?.blockers),
+    ...categoryReadiness
+      .filter((item) => item?.required !== false && ["missing", "needs review"].includes(asString(item.status).toLowerCase()))
+      .map((item) => asString(item.display_label || item.label || item.asset_type))
+  ].map((item) => item.trim()).filter(Boolean);
+  const missingAssets = dedupe(missingAssetLabels).map((item) => humanizeStatus(item));
+
+  const assetItems = asArray(assets.assets);
+  const sourceOfTruthCount = assetItems.filter((item) => Boolean(item.source_of_truth || item.use_as_source_of_truth)).length;
+
+  const insightsRecommendations = asArray(insights.recommendations);
+  const learningLessons = asArray(learning.system_lessons);
+  const tasks = asArray(operations.tasks?.items);
+  const approvals = asArray(operations.approvals?.items);
+
+  const automationTone = failedExecutions.length
+    ? "danger"
+    : scheduledJobs.length
+      ? "success"
+      : "warning";
+
+  const intelligenceScore = insightsRecommendations.length + learningLessons.length;
+  const intelligenceTone = intelligenceScore > 0 ? "success" : "warning";
+
+  const fallbackAction =
+    criticalGaps[0]
+      ? `Resolve: ${criticalGaps[0]}`
+      : failedExecutions.length
+        ? "Recover failed execution items"
+        : "Review and confirm next launch move";
+
+  const rawNextAction = asString(recommendations[0]).trim() || fallbackAction;
+  const nextAction = humanizeExecutiveAction(rawNextAction, "Ask AI Command");
+  const nextActionRoute = routeForAction(nextAction || rawNextAction);
+
+  const whyItMatters = criticalGaps.length
+    ? "Removing this blocker increases launch confidence and prevents avoidable delays."
+    : failedExecutions.length
+      ? "Stabilizing this now protects delivery quality and keeps automation reliable."
+      : "Acting now keeps momentum and converts current readiness into measurable output.";
+
+  const activeCampaignName =
+    asString(state.context.activeCampaign) ||
+    asString(latestExecution?.wave_name) ||
+    asString(nextScheduled?.wave_name);
+
+  const activeChannels = dedupe([
+    asString(latestExecution?.channel),
+    asString(nextScheduled?.channel)
+  ]).slice(0, 3);
+
+  const currentStage = humanizeStatus(
+    latestExecution?.execution_status ||
+    nextScheduled?.status ||
+    readinessData.readiness_status ||
+    overviewData.readiness_status,
+    "Not started"
+  );
+
+  const systemScore = Math.round((asNumber(readinessScore) + asNumber(connectorScore)) / 2);
+
+  const pendingTasks = tasks.filter((item) => {
+    const text = asString(item?.status || "").toLowerCase();
+    return text.includes("pending") || text.includes("in_progress") || text.includes("review");
+
+Specialist selection logic:
+234:function routeForAction(action) {
+274:    { id: "strategist", name: "Strategist", fallback: "Align campaign priorities and launch sequencing." },
+277:    { id: "video_lead", name: "Video Lead", fallback: "Queue the next motion and short-form variants." },
+278:    { id: "publisher", name: "Publisher", fallback: "Prepare publishing packages, schedules, and manual handoffs." },
+279:    { id: "ads_operator", name: "Ads Optimizer", fallback: "Optimize paid testing, creative variants, and budget decisions." },
+282:    { id: "admin", name: "Operations Lead", fallback: "Clear blockers and keep execution flow healthy." }
+400:  const nextActionRoute = routeForAction(nextAction || rawNextAction);
+580:    primaryActionLabel: nextActionRoute === "ai-command" ? "Prepare AI Guidance" : `Open ${humanizeStatus(nextActionRoute)} Workspace`,
+581:    primaryActionRoute: nextActionRoute,
+600:      route: nextActionRoute,
+601:      buttonLabel: nextActionRoute === "ai-command" ? "Prepare AI Guidance" : `Open ${humanizeStatus(nextActionRoute)} Workspace`,
+675:        value: humanizeStatus(nextActionRoute),
+806:    const recommendedSpecialist = pickRecommendedSpecialist(aiTeamCards, dashboard);
+1047:                <h2 class="mhos-os-panel-title">${escapeHtml(recommendedSpecialist?.name || "Executive AI")}</h2>
+1049:                  ${escapeHtml(recommendedSpecialist?.summary || "Use AI Command to turn the current state into a clear operating plan.")}
+1054:              ${recommendedSpecialist ? `
+1055:                <button class="quick-action-btn mhos-motion-soft" type="button" data-role-id="${escapeHtml(recommendedSpecialist.id)}">
+1110:        strategist: `Act as the Strategist for ${projectLabel}. Review readiness, blockers, campaign state, and next best action. Give me the highest-impact strategic moves. Do not execute anything; prepare guidance only.`,
+1113:        video_lead: `Act as the Video Lead for ${projectLabel}. Review the project context and suggest the next best short-form/video actions. Do not execute anything; prepare guidance only.`,
+1114:        publisher: `Act as the Publisher for ${projectLabel}. Review publishing readiness, scheduled jobs, blockers, and what must be checked before publishing. Do not execute anything; prepare guidance only.`,
+1115:        ads_operator: `Act as the Ads Optimizer for ${projectLabel}. Review campaign readiness, channels, and paid media opportunities. Suggest next ad actions safely. Do not execute anything; prepare guidance only.`,
+1118:        admin: `Act as the Operations Lead for ${projectLabel}. Review tasks, blockers, failed jobs, and execution health. Give me the next operational steps. Do not execute anything; prepare guidance only.`

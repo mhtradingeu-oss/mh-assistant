@@ -1,0 +1,131 @@
+Home visible render anchors:
+809:    root.innerHTML = `
+812:        <section class="mhos-os-header" aria-label="Executive Command Brief">
+813:          <div class="mhos-os-header-main">
+825:              <span class="mhos-os-chip">Routes and AI guidance only</span>
+856:            <section class="mhos-os-decision-card mhos-motion-soft" aria-label="Primary Decision">
+887:            <section class="mhos-real-head-office-coverage" aria-label="Head Office campaign execution coverage">
+891:                  <h2 class="mhos-os-section-title">Campaign execution at a glance</h2>
+933:                  <h2 class="mhos-os-section-title">${dashboard.totalBlockers ? "Operating blockers" : "No critical blockers"}</h2>
+956:                  <h2 class="mhos-os-section-title">Readiness to execution</h2>
+976:              <summary class="mhos-os-panel-title">System details and evidence</summary>
+1018:              <summary class="mhos-os-panel-title">Recent activity</summary>
+1049:                <p class="mhos-os-kicker">Recommended AI Specialist</p>
+1068:                <p class="mhos-os-kicker">AI guidance</p>
+1084:              <p class="mhos-os-kicker">Customer operations</p>
+
+Home visible buttons and labels:
+16:  selectOperationsSnapshot
+153:    "library": "Prepare missing brand assets",
+155:    "campaign studio": "Prepare the next campaign wave"
+187:      title: "Prepare assets",
+248:  const operations = asObject(selectOperationsSnapshot(state));
+275:    { id: "writer", name: "Content Writer", fallback: "Prepare high-conversion messaging for active channels." },
+278:    { id: "publisher", name: "Publisher", fallback: "Prepare publishing packages, schedules, and manual handoffs." },
+282:    { id: "admin", name: "Operations Lead", fallback: "Clear blockers and keep execution flow healthy." }
+314:  const operations = asObject(selectOperationsSnapshot(state));
+399:  const nextAction = humanizeExecutiveAction(rawNextAction, "Ask AI Command");
+580:    primaryActionLabel: nextActionRoute === "ai-command" ? "Prepare AI Guidance" : `Open ${humanizeStatus(nextActionRoute)} Workspace`,
+601:      buttonLabel: nextActionRoute === "ai-command" ? "Prepare AI Guidance" : `Open ${humanizeStatus(nextActionRoute)} Workspace`,
+720:      recommendation: asString(recommendations[0]).trim() || asString(insightsRecommendations[0]).trim() || "Ask Executive AI to generate the next best action from readiness, blockers, and recent activity.",
+742:function setGlobalAiPrompt($, prompt) {
+760:      <div id="homeExecRoot"></div>
+874:                <button id="homePrimaryActionBtn" class="mhos-next-action-btn" type="button">
+877:                <button id="homeAskNextActionBtn" class="mhos-next-action-btn is-ghost" type="button">
+878:                  Ask Head Office AI
+880:                <button id="homeOpen OperationsBtn" class="btn btn-secondary btn-sm" type="button">
+881:                  Open Operations
+900:                  <p>${escapeHtml(dashboard.campaign?.name ? "Campaign context is available." : "Open Campaign Studio to plan the next campaign wave.")}</p>
+922:                  <span class="data-label">Operations</span>
+924:                  <p>Operations owns handoff, review order, and safe execution sequence.</p>
+1029:                <h2 class="mhos-os-panel-title">Open the owner</h2>
+1033:              <button id="homeQuickReviewReadinessBtn" class="quick-action-btn" type="button">
+1034:                <span class="home-action-title">Open Setup Readiness</span>
+1037:              <button id="homeQuickAssetLibraryBtn" class="quick-action-btn" type="button">
+1038:                <span class="home-action-title">Open Asset Library</span>
+1041:              <button id="homeQuickStartCampaignBtn" class="quick-action-btn" type="button">
+1042:                <span class="home-action-title">Open Campaign Studio</span>
+1052:                  ${escapeHtml(recommendedSpecialist?.summary || "Use AI Command to turn the current state into a clear operating plan.")}
+1058:                <button class="quick-action-btn mhos-motion-soft" type="button" data-role-id="${escapeHtml(recommendedSpecialist.id)}">
+1059:                  <span class="home-action-title">Ask Head Office AI</span>
+1069:                <h2 class="mhos-os-panel-title">Ask safely</h2>
+1073:              <button id="homePromptNextBtn" class="home-ai-prompt-card" type="button">
+1075:                <span class="home-prompt-meta">Prepare a short explanation and handoff path.</span>
+1077:              <button id="homePromptReadinessBtn" class="home-ai-prompt-card" type="button">
+1103:    const openAiWithPrompt = (prompt) => {
+1104:      setGlobalAiPrompt($, prompt);
+1106:      showMessage?.("Prompt prepared in AI Command.");
+1112:      const rolePrompts = {
+1121:        admin: `Act as the Operations Lead for ${projectLabel}. Review tasks, blockers, failed jobs, and execution health. Give me the next operational steps. Do not execute anything; prepare guidance only.`
+1124:      const prompt = rolePrompts[roleId] || `Act as the ${roleName} specialist for ${projectLabel}. Review the current project context and recommend the next best actions. Do not execute anything; prepare guidance only.`;
+1125:      openAiWithPrompt(prompt);
+1126:      showMessage?.(`${roleName} context prepared in AI Command.`);
+1133:          setGlobalAiPrompt($, dashboard.nextBestAction.recommendation);
+1141:      askNextActionBtn.onclick = () => openAiWithPrompt(`Explain this next best action like an operations director and give me the exact safe steps: ${dashboard.nextBestAction.recommendation}. Include which workspace owns it, what it unlocks for campaign creation, scheduled posts, publishing, ads, and customer operations. Do not execute anything.`);
+1144:    const operationsBtn = $("homeOpen OperationsBtn");
+1163:      quickAiBtn.onclick = () => openAiWithPrompt(dashboard.nextBestAction.recommendation);
+1166:    const promptNextBtn = $("homePromptNextBtn");
+1168:      promptNextBtn.onclick = () => openAiWithPrompt("What is the best next executive action for this project? Prioritize the answer based on readiness, blockers, campaign state, scheduled posts, publishing safety, ads readiness, customer operations, and recent activity. Give one clear recommendation and the reason.");
+1171:    const promptReadinessBtn = $("homePromptReadinessBtn");
+1173:      promptReadinessBtn.onclick = () => openAiWithPrompt("Why is readiness low? Explain the missing integrations, assets, failed jobs, campaign gaps, scheduled post risks, publishing blockers, and ad launch risks in simple business language. End with the fastest safe fix path.");
+1176:    const promptLaunchBtn = $("homePromptLaunchBtn");
+1178:      promptLaunchBtn.onclick = () => openAiWithPrompt("Summarize the launch blockers and tell me what must be fixed before publishing.");
+1181:    const promptPlanBtn = $("homePromptPlanBtn");
+1183:      promptPlanBtn.onclick = () => openAiWithPrompt("Prepare today's action plan from the current dashboard. Give me prioritized tasks with owners and expected outcomes.");
+
+Home event bindings:
+742:function setGlobalAiPrompt($, prompt) {
+763:  render({ getState, $, escapeHtml, navigateTo, showMessage }) {
+766:    const root = $("homeExecRoot");
+1098:    const openRoute = (route, message = "") => {
+1099:      navigateTo(route);
+1103:    const openAiWithPrompt = (prompt) => {
+1104:      setGlobalAiPrompt($, prompt);
+1105:      navigateTo("ai-command");
+1110:    const handleAiRoleClick = (roleId, roleName) => {
+1125:      openAiWithPrompt(prompt);
+1129:    const nextBtn = $("homePrimaryActionBtn");
+1131:      nextBtn.onclick = () => {
+1133:          setGlobalAiPrompt($, dashboard.nextBestAction.recommendation);
+1135:        openRoute(dashboard.nextBestAction.route, "Next best action opened.");
+1139:    const askNextActionBtn = $("homeAskNextActionBtn");
+1141:      askNextActionBtn.onclick = () => openAiWithPrompt(`Explain this next best action like an operations director and give me the exact safe steps: ${dashboard.nextBestAction.recommendation}. Include which workspace owns it, what it unlocks for campaign creation, scheduled posts, publishing, ads, and customer operations. Do not execute anything.`);
+1144:    const operationsBtn = $("homeOpen OperationsBtn");
+1145:    if (operationsBtn) operationsBtn.onclick = () => openRoute("operations-centers");
+1147:    const aiTeamBtn = $("homeOpenAiTeamBtn");
+1148:    if (aiTeamBtn) aiTeamBtn.onclick = () => openRoute("ai-command");
+1149:    const fullAiTeamBtn = $("homeOpenFullAiTeamBtn");
+1150:    if (fullAiTeamBtn) fullAiTeamBtn.onclick = () => openRoute("ai-command");
+1152:    const quickCampaignBtn = $("homeQuickStartCampaignBtn");
+1153:    if (quickCampaignBtn) quickCampaignBtn.onclick = () => openRoute("campaign-studio");
+1155:    const quickAssetBtn = $("homeQuickAssetLibraryBtn") || $("homeQuickUploadAssetBtn");
+1156:    if (quickAssetBtn) quickAssetBtn.onclick = () => openRoute("library");
+1158:    const quickReadinessBtn = $("homeQuickReviewReadinessBtn");
+1159:    if (quickReadinessBtn) quickReadinessBtn.onclick = () => openRoute("setup");
+1161:    const quickAiBtn = $("homeQuickOpenAiBtn");
+1163:      quickAiBtn.onclick = () => openAiWithPrompt(dashboard.nextBestAction.recommendation);
+1166:    const promptNextBtn = $("homePromptNextBtn");
+1168:      promptNextBtn.onclick = () => openAiWithPrompt("What is the best next executive action for this project? Prioritize the answer based on readiness, blockers, campaign state, scheduled posts, publishing safety, ads readiness, customer operations, and recent activity. Give one clear recommendation and the reason.");
+1171:    const promptReadinessBtn = $("homePromptReadinessBtn");
+1173:      promptReadinessBtn.onclick = () => openAiWithPrompt("Why is readiness low? Explain the missing integrations, assets, failed jobs, campaign gaps, scheduled post risks, publishing blockers, and ad launch risks in simple business language. End with the fastest safe fix path.");
+1176:    const promptLaunchBtn = $("homePromptLaunchBtn");
+1178:      promptLaunchBtn.onclick = () => openAiWithPrompt("Summarize the launch blockers and tell me what must be fixed before publishing.");
+1181:    const promptPlanBtn = $("homePromptPlanBtn");
+1183:      promptPlanBtn.onclick = () => openAiWithPrompt("Prepare today's action plan from the current dashboard. Give me prioritized tasks with owners and expected outcomes.");
+1190:      card.onclick = () => handleAiRoleClick(roleId, roleName);
+
+Known malformed or leftover strings:
+public/control-center/pages/home.js:761:    </section>
+public/control-center/pages/home.js:851:        </section>
+public/control-center/pages/home.js:880:                <button id="homeOpen OperationsBtn" class="btn btn-secondary btn-sm" type="button">
+public/control-center/pages/home.js:884:            </section>
+public/control-center/pages/home.js:927:            </section>
+public/control-center/pages/home.js:950:            </section>
+public/control-center/pages/home.js:973:            </section>
+public/control-center/pages/home.js:1045:            </section>
+public/control-center/pages/home.js:1064:</section>
+public/control-center/pages/home.js:1081:</section>
+public/control-center/pages/home.js:1090:            </section>
+public/control-center/pages/home.js:1144:    const operationsBtn = $("homeOpen OperationsBtn");
+public/control-center/pages/home/render-sections.js:203:    </section>
+public/control-center/pages/home/render-sections.js:214:    </section>

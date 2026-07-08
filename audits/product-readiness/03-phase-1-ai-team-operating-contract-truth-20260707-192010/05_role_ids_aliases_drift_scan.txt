@@ -1,0 +1,1379 @@
+Role names and aliases across active frontend/runtime/backend:
+public/control-center/ai-team-model.js:15:    id: "strategist",
+public/control-center/ai-team-model.js:16:    label: "Strategist",
+public/control-center/ai-team-model.js:21:    defaultPrompt: "Act as Strategist. Review the current project state and recommend the highest-impact next move."
+public/control-center/ai-team-model.js:24:    id: "content_writer",
+public/control-center/ai-team-model.js:25:    label: "Content Writer",
+public/control-center/ai-team-model.js:30:    defaultPrompt: "Act as Content Writer. Create high-converting content based on the current campaign and project context."
+public/control-center/ai-team-model.js:33:    id: "media_director",
+public/control-center/ai-team-model.js:34:    label: "Media Director",
+public/control-center/ai-team-model.js:39:    defaultPrompt: "Act as Media Director. Review available assets and define the strongest visual direction."
+public/control-center/ai-team-model.js:42:    id: "video_lead",
+public/control-center/ai-team-model.js:43:    label: "Video Lead",
+public/control-center/ai-team-model.js:48:    defaultPrompt: "Act as Video Lead. Plan the next short-form video package for the active campaign."
+public/control-center/ai-team-model.js:51:    id: "publisher",
+public/control-center/ai-team-model.js:52:    label: "Publisher",
+public/control-center/ai-team-model.js:57:    defaultPrompt: "Act as Publisher. Prepare the next publish-ready package and identify missing approvals or queue steps."
+public/control-center/ai-team-model.js:60:    id: "ads_optimizer",
+public/control-center/ai-team-model.js:61:    label: "Ads Optimizer",
+public/control-center/ai-team-model.js:64:    primaryPages: ["ads-manager", "campaign-studio", "insights"],
+public/control-center/ai-team-model.js:65:    outputTargets: ["ads-manager", "campaign-studio", "insights"],
+public/control-center/ai-team-model.js:66:    defaultPrompt: "Act as Ads Optimizer. Build a paid testing plan based on current readiness and performance signals."
+public/control-center/ai-team-model.js:69:    id: "seo_insights_analyst",
+public/control-center/ai-team-model.js:70:    label: "SEO & Insights Analyst",
+public/control-center/ai-team-model.js:74:    outputTargets: ["insights", "campaign-studio", "content-studio", "ads-manager"],
+public/control-center/ai-team-model.js:75:    defaultPrompt: "Act as SEO & Insights Analyst. Identify what is working, what is weak, and what action should happen next."
+public/control-center/ai-team-model.js:78:    id: "researcher",
+public/control-center/ai-team-model.js:79:    label: "Researcher",
+public/control-center/ai-team-model.js:84:    defaultPrompt: "Act as Researcher. Find the strongest market, competitor, and audience insights for this project."
+public/control-center/ai-team-model.js:87:    id: "compliance_reviewer",
+public/control-center/ai-team-model.js:88:    label: "Compliance Reviewer",
+public/control-center/ai-team-model.js:93:    defaultPrompt: "Act as Compliance Reviewer. Flag claims, approval gaps, and publishing risks before release."
+public/control-center/ai-team-model.js:96:    id: "operations_lead",
+public/control-center/ai-team-model.js:97:    label: "Operations Lead",
+public/control-center/ai-team-model.js:102:    defaultPrompt: "Act as Operations Lead. Convert priorities into executable steps with owners, queues, and next workspace."
+public/control-center/ai-team-model.js:107:  home: ["strategist", "operations_lead", "seo_insights_analyst"],
+public/control-center/ai-team-model.js:108:  setup: ["strategist", "researcher", "compliance_reviewer"],
+public/control-center/ai-team-model.js:109:  library: ["media_director", "content_writer", "publisher"],
+public/control-center/ai-team-model.js:110:  integrations: ["operations_lead", "seo_insights_analyst"],
+public/control-center/ai-team-model.js:111:  "ai-command": ["operations_lead", "strategist"],
+public/control-center/ai-team-model.js:112:  workflows: ["operations_lead"],
+public/control-center/ai-team-model.js:113:  publishing: ["publisher", "compliance_reviewer"],
+public/control-center/ai-team-model.js:114:  "campaign-studio": ["strategist", "content_writer", "media_director", "ads_optimizer"],
+public/control-center/ai-team-model.js:115:  "content-studio": ["content_writer", "compliance_reviewer", "publisher"],
+public/control-center/ai-team-model.js:116:  "media-studio": ["media_director", "video_lead", "publisher"],
+public/control-center/ai-team-model.js:117:  "ads-manager": ["ads_optimizer", "seo_insights_analyst", "compliance_reviewer"],
+public/control-center/ai-team-model.js:118:  insights: ["seo_insights_analyst", "strategist"],
+public/control-center/ai-team-model.js:119:  research: ["researcher", "strategist"],
+public/control-center/ai-team-model.js:120:  governance: ["compliance_reviewer", "operations_lead"],
+public/control-center/ai-team-model.js:121:  settings: ["operations_lead", "compliance_reviewer"],
+public/control-center/ai-team-model.js:122:  "task-center": ["operations_lead"],
+public/control-center/ai-team-model.js:123:  "queue-center": ["operations_lead", "publisher"],
+public/control-center/ai-team-model.js:124:  "job-monitor": ["operations_lead", "media_director"],
+public/control-center/ai-team-model.js:125:  notifications: ["operations_lead"]
+public/control-center/runtime/lifecycle/README.md:5:The **Lifecycle Registry** provides a safe, reusable foundation for managing frontend listeners, timers, and cleanup operations during page transitions.
+public/control-center/runtime/lifecycle/README.md:17:- **Idempotent operations** — cleanup can be called multiple times without issues
+public/control-center/runtime/lifecycle/lifecycle-registry.js:371:     * Get cleanup errors that occurred during cleanup operations.
+public/control-center/runtime/lifecycle/lifecycle-registry.js:385: * All operations return no-op disposers.
+public/control-center/runtime/ai-settings-controller.js:12:  canRunAds: false,
+public/control-center/runtime/ai-settings-controller.js:21:      this.canRunAds = true;
+public/control-center/runtime/ai-settings-controller.js:27:      this.canRunAds = false;
+public/control-center/runtime/authority/route-role-fallback.js:1:const DEFAULT_ROLE = "admin";
+public/control-center/runtime/authority/route-role-fallback.js:4:  "strategist",
+public/control-center/runtime/authority/route-role-fallback.js:5:  "writer",
+public/control-center/runtime/authority/route-role-fallback.js:6:  "designer",
+public/control-center/runtime/authority/route-role-fallback.js:7:  "video_lead",
+public/control-center/runtime/authority/route-role-fallback.js:8:  "publisher",
+public/control-center/runtime/authority/route-role-fallback.js:9:  "ads_operator",
+public/control-center/runtime/authority/route-role-fallback.js:10:  "analyst",
+public/control-center/runtime/authority/route-role-fallback.js:11:  "compliance_reviewer",
+public/control-center/runtime/authority/route-role-fallback.js:12:  "admin"
+public/control-center/runtime/authority/route-role-fallback.js:16:  home: ["strategist", "analyst", "admin"],
+public/control-center/runtime/authority/route-role-fallback.js:18:  "campaign-studio": ["strategist", "ads_operator", "admin"],
+public/control-center/runtime/authority/route-role-fallback.js:19:  "content-studio": ["writer", "strategist", "compliance_reviewer", "admin"],
+public/control-center/runtime/authority/route-role-fallback.js:20:  "media-studio": ["designer", "video_lead", "compliance_reviewer", "admin"],
+public/control-center/runtime/authority/route-role-fallback.js:21:  publishing: ["publisher", "compliance_reviewer", "admin"],
+public/control-center/runtime/authority/route-role-fallback.js:22:  research: ["strategist", "analyst", "writer", "admin"],
+public/control-center/runtime/authority/route-role-fallback.js:28:  governance: ["compliance_reviewer", "admin", "analyst"],
+public/control-center/runtime/authority/route-role-fallback.js:29:  "ads-manager": ["ads_operator", "strategist", "analyst", "admin"],
+public/control-center/runtime/authority/route-role-fallback.js:30:  insights: ["analyst", "strategist", "ads_operator", "admin"],
+public/control-center/runtime/authority/route-role-fallback.js:31:  integrations: ["admin"],
+public/control-center/runtime/authority/route-role-fallback.js:33:  library: ["designer", "video_lead", "publisher", "admin"],
+public/control-center/runtime/authority/route-role-fallback.js:34:  settings: ["admin"]
+public/control-center/runtime/authority/authority-projection.js:27:function readOperationsProjection(state = {}) {
+public/control-center/runtime/authority/authority-projection.js:28:  return safeObject(state.operations);
+public/control-center/runtime/authority/authority-projection.js:32:  const operations = readOperationsProjection(state);
+public/control-center/runtime/authority/authority-projection.js:33:  return safeObject(operations.team_service_model);
+public/control-center/runtime/authority/authority-projection.js:37:  const operations = readOperationsProjection(state);
+public/control-center/runtime/authority/authority-projection.js:38:  return safeObject(operations.governance);
+public/control-center/runtime/authority/authority-projection.js:42:  const operations = readOperationsProjection(state);
+public/control-center/runtime/authority/authority-projection.js:43:  return safeObject(operations.approvals);
+public/control-center/runtime/authority/authority-projection.js:47:  const operations = readOperationsProjection(state);
+public/control-center/runtime/authority/authority-projection.js:48:  return safeObject(operations.workflow_runs);
+public/control-center/runtime/authority/authority-projection.js:52:  const operations = readOperationsProjection(state);
+public/control-center/runtime/authority/authority-projection.js:53:  return safeObject(operations.handoffs);
+public/control-center/runtime/authority/authority-projection.js:57:  const operations = readOperationsProjection(state);
+public/control-center/runtime/authority/authority-projection.js:58:  return safeObject(operations.ai_recommendations);
+public/control-center/runtime/authority/authority-projection.js:62:  const operations = readOperationsProjection(state);
+public/control-center/runtime/authority/authority-projection.js:63:  return safeObject(operations.ai_memory);
+public/control-center/runtime/authority/authority-projection.js:87:    "admin"
+public/control-center/pages/home.js:16:  selectOperationsSnapshot
+public/control-center/pages/home.js:141:    "brand guideline": "Add the brand guideline so content, media, ads, and publishing stay consistent",
+public/control-center/pages/home.js:142:    "brand guidelines": "Add the brand guideline so content, media, ads, and publishing stay consistent",
+public/control-center/pages/home.js:144:    "legal doc": "Add the legal document so publishing and ads can pass review",
+public/control-center/pages/home.js:227:    return aiTeamCards.find((card) => /operations|integrations|automation|system/i.test(card.name || card.id || "")) || aiTeamCards[0];
+public/control-center/pages/home.js:241:  if (/(ad|budget|paid)/.test(text)) return "ads-manager";
+public/control-center/pages/home.js:243:  if (/(job|operation)/.test(text)) return "operations-centers";
+public/control-center/pages/home.js:248:  const operations = asObject(selectOperationsSnapshot(state));
+public/control-center/pages/home.js:249:  const notifications = asArray(operations.notifications?.items);
+public/control-center/pages/home.js:250:  const tasks = asArray(operations.tasks?.items);
+public/control-center/pages/home.js:251:  const approvals = asArray(operations.approvals?.items);
+public/control-center/pages/home.js:274:    { id: "strategist", name: "Strategist", fallback: "Align campaign priorities and launch sequencing." },
+public/control-center/pages/home.js:275:    { id: "writer", name: "Content Writer", fallback: "Prepare high-conversion messaging for active channels." },
+public/control-center/pages/home.js:276:    { id: "designer", name: "Media Director", fallback: "Polish visual direction and creative consistency." },
+public/control-center/pages/home.js:277:    { id: "video_lead", name: "Video Lead", fallback: "Queue the next motion and short-form variants." },
+public/control-center/pages/home.js:278:    { id: "publisher", name: "Publisher", fallback: "Prepare publishing packages, schedules, and manual handoffs." },
+public/control-center/pages/home.js:279:    { id: "ads_operator", name: "Ads Optimizer", fallback: "Optimize paid testing, creative variants, and budget decisions." },
+public/control-center/pages/home.js:280:    { id: "analyst", name: "SEO & Insights Analyst", fallback: "Read weak signals and recommend measurable improvements." },
+public/control-center/pages/home.js:281:    { id: "compliance_reviewer", name: "Compliance Reviewer", fallback: "Review claims, approvals, and publish safety before release." },
+public/control-center/pages/home.js:282:    { id: "admin", name: "Operations Lead", fallback: "Clear blockers and keep execution flow healthy." }
+public/control-center/pages/home.js:314:  const operations = asObject(selectOperationsSnapshot(state));
+public/control-center/pages/home.js:328:  const notifications = asArray(operations.notifications?.items);
+public/control-center/pages/home.js:379:  const tasks = asArray(operations.tasks?.items);
+public/control-center/pages/home.js:380:  const approvals = asArray(operations.approvals?.items);
+public/control-center/pages/home.js:462:  const mediaJobs = asArray(operations.media_jobs?.items);
+public/control-center/pages/home.js:465:  const publishingQueue = asArray(operations.queues?.items).filter((item) =>
+public/control-center/pages/home.js:878:                  Ask Head Office AI
+public/control-center/pages/home.js:884:            <section class="mhos-real-head-office-coverage" aria-label="Head Office campaign execution coverage">
+public/control-center/pages/home.js:887:                  <p class="mhos-os-kicker">HEAD OFFICE COVERAGE</p>
+public/control-center/pages/home.js:889:                  <p class="mhos-os-panel-copy">One-second view of campaign, schedule, publishing, ads, and operations readiness. Home shows ownership only; execution stays inside the owning workspace.</p>
+public/control-center/pages/home.js:913:                  <span class="data-label">Ads</span>
+public/control-center/pages/home.js:919:                  <span class="data-label">Operations</span>
+public/control-center/pages/home.js:921:                  <p>Operations owns handoff, review order, and safe execution sequence.</p>
+public/control-center/pages/home.js:1056:                  <span class="home-action-title">Ask Head Office AI</span>
+public/control-center/pages/home.js:1081:              <p class="mhos-os-kicker">Customer operations</p>
+public/control-center/pages/home.js:1110:        strategist: `Act as the Strategist for ${projectLabel}. Review readiness, blockers, campaign state, and next best action. Give me the highest-impact strategic moves. Do not execute anything; prepare guidance only.`,
+public/control-center/pages/home.js:1111:        writer: `Act as the Content Writer for ${projectLabel}. Review the current project context and suggest the next best writing actions, messaging angles, and content priorities. Do not execute anything; prepare guidance only.`,
+public/control-center/pages/home.js:1112:        designer: `Act as the Media Director for ${projectLabel}. Review the visual/asset readiness and suggest the next best creative actions. Do not execute anything; prepare guidance only.`,
+public/control-center/pages/home.js:1113:        video_lead: `Act as the Video Lead for ${projectLabel}. Review the project context and suggest the next best short-form/video actions. Do not execute anything; prepare guidance only.`,
+public/control-center/pages/home.js:1114:        publisher: `Act as the Publisher for ${projectLabel}. Review publishing readiness, scheduled jobs, blockers, and what must be checked before publishing. Do not execute anything; prepare guidance only.`,
+public/control-center/pages/home.js:1115:        ads_operator: `Act as the Ads Optimizer for ${projectLabel}. Review campaign readiness, channels, and paid media opportunities. Suggest next ad actions safely. Do not execute anything; prepare guidance only.`,
+public/control-center/pages/home.js:1116:        analyst: `Act as the SEO & Insights Analyst for ${projectLabel}. Review readiness, signals, gaps, and recent activity. Tell me what data matters most and what to improve next. Do not execute anything; prepare guidance only.`,
+public/control-center/pages/home.js:1117:        compliance_reviewer: `Act as the Compliance Reviewer for ${projectLabel}. Review launch blockers, claims, approvals, and publishing safety. Tell me what must be checked before release. Do not execute anything; prepare guidance only.`,
+public/control-center/pages/home.js:1118:        admin: `Act as the Operations Lead for ${projectLabel}. Review tasks, blockers, failed jobs, and execution health. Give me the next operational steps. Do not execute anything; prepare guidance only.`
+public/control-center/pages/home.js:1138:      askNextActionBtn.onclick = () => openAiWithPrompt(`Explain this next best action like an operations director and give me the exact safe steps: ${dashboard.nextBestAction.recommendation}. Include which workspace owns it, what it unlocks for campaign creation, scheduled posts, publishing, ads, and customer operations. Do not execute anything.`);
+public/control-center/pages/home.js:1151:      promptNextBtn.onclick = () => openAiWithPrompt("What is the best next executive action for this project? Prioritize the answer based on readiness, blockers, campaign state, scheduled posts, publishing safety, ads readiness, customer operations, and recent activity. Give one clear recommendation and the reason.");
+public/control-center/pages/ai-command.js:13:        selectOperationsSnapshot,
+public/control-center/pages/ai-command.js:38:                id: "strategist",
+public/control-center/pages/ai-command.js:39:                label: "Strategist",
+public/control-center/pages/ai-command.js:45:                id: "writer",
+public/control-center/pages/ai-command.js:46:                label: "Content Writer",
+public/control-center/pages/ai-command.js:53:                label: "Media Director",
+public/control-center/pages/ai-command.js:59:                id: "video_lead",
+public/control-center/pages/ai-command.js:60:                label: "Video Lead",
+public/control-center/pages/ai-command.js:66:                id: "publisher",
+public/control-center/pages/ai-command.js:67:                label: "Publisher",
+public/control-center/pages/ai-command.js:73:                id: "ads",
+public/control-center/pages/ai-command.js:74:                label: "Ads Optimizer",
+public/control-center/pages/ai-command.js:77:                routeHint: "ads-manager"
+public/control-center/pages/ai-command.js:80:                id: "analyst",
+public/control-center/pages/ai-command.js:81:                label: "SEO & Insights Analyst",
+public/control-center/pages/ai-command.js:87:                id: "compliance_reviewer",
+public/control-center/pages/ai-command.js:88:                label: "Compliance Reviewer",
+public/control-center/pages/ai-command.js:94:                id: "operations",
+public/control-center/pages/ai-command.js:95:                label: "Operations Lead",
+public/control-center/pages/ai-command.js:101:                id: "customer_ops",
+public/control-center/pages/ai-command.js:102:                label: "Customer Operations Lead",
+public/control-center/pages/ai-command.js:105:                routeHint: "operations-centers"
+public/control-center/pages/ai-command.js:108:                id: "sales_crm",
+public/control-center/pages/ai-command.js:109:                label: "Sales / CRM Lead",
+public/control-center/pages/ai-command.js:118:	executive: "operations",
+public/control-center/pages/ai-command.js:119:	campaign: "strategist",
+public/control-center/pages/ai-command.js:120:	content: "writer",
+public/control-center/pages/ai-command.js:121:	designer: "media",
+public/control-center/pages/ai-command.js:122:	media_director: "media",
+public/control-center/pages/ai-command.js:124:	seo: "analyst",
+public/control-center/pages/ai-command.js:125:	research: "researcher",
+public/control-center/pages/ai-command.js:126:	video_lead: "video_lead",
+public/control-center/pages/ai-command.js:127:	publisher: "publisher",
+public/control-center/pages/ai-command.js:128:	compliance_reviewer: "compliance_reviewer",
+public/control-center/pages/ai-command.js:129:	customer_operations: "customer_ops",
+public/control-center/pages/ai-command.js:130:	customer_ops: "customer_ops",
+public/control-center/pages/ai-command.js:131:	support: "customer_ops",
+public/control-center/pages/ai-command.js:132:	sales: "sales_crm",
+public/control-center/pages/ai-command.js:133:	crm: "sales_crm",
+public/control-center/pages/ai-command.js:134:	sales_crm: "sales_crm",
+public/control-center/pages/ai-command.js:135:	admin: "operations"
+public/control-center/pages/ai-command.js:144:		id: "strategist",
+public/control-center/pages/ai-command.js:145:		label: "Strategist",
+public/control-center/pages/ai-command.js:146:		position: "Campaign & Growth Strategist",
+public/control-center/pages/ai-command.js:149:		placeholder: "Ask the Strategist to build a campaign brief, define audience segments, create offer angles, compare launch directions, or prepare a team handoff…",
+public/control-center/pages/ai-command.js:157:		id: "writer",
+public/control-center/pages/ai-command.js:158:		label: "Content Writer",
+public/control-center/pages/ai-command.js:162:		placeholder: "Ask the Content Writer to draft captions, hooks, landing copy, or campaign messages…",
+public/control-center/pages/ai-command.js:163:		canHelp: ["Draft captions and hooks", "Write email copy", "Create landing page text", "Prepare publisher handoff", "Suggest message variants"],
+public/control-center/pages/ai-command.js:171:		label: "Media Director",
+public/control-center/pages/ai-command.js:175:		placeholder: "Ask the Media Director to define visual direction, prepare a creative brief, or review brand consistency…",
+public/control-center/pages/ai-command.js:183:		id: "video_lead",
+public/control-center/pages/ai-command.js:184:		label: "Video Lead",
+public/control-center/pages/ai-command.js:185:		position: "Short-Form Video Lead",
+public/control-center/pages/ai-command.js:188:		placeholder: "Ask the Video Lead to write a reel script, map short-form strategy, or outline the next video concept…",
+public/control-center/pages/ai-command.js:196:		id: "publisher",
+public/control-center/pages/ai-command.js:197:		label: "Publisher",
+public/control-center/pages/ai-command.js:201:		placeholder: "Ask the Publisher to review publishing readiness, check scheduling, or prepare a handoff package…",
+public/control-center/pages/ai-command.js:209:		id: "ads",
+public/control-center/pages/ai-command.js:210:		label: "Ads Optimizer",
+public/control-center/pages/ai-command.js:214:		placeholder: "Ask the Ads Optimizer to draft ad copy, review targeting angles, or plan a paid campaign structure…",
+public/control-center/pages/ai-command.js:216:		cannotDo: ["Launch ads directly", "Set live budgets without review", "Approve spend", "Access ad accounts directly"],
+public/control-center/pages/ai-command.js:217:		destinations: ["Ads Manager", "Integrations", "Campaign Studio"],
+public/control-center/pages/ai-command.js:222:		id: "analyst",
+public/control-center/pages/ai-command.js:223:		label: "SEO & Insights Analyst",
+public/control-center/pages/ai-command.js:227:		placeholder: "Ask the SEO & Insights Analyst to review performance, suggest SEO improvements, or identify top content patterns…",
+public/control-center/pages/ai-command.js:235:		id: "compliance_reviewer",
+public/control-center/pages/ai-command.js:236:		label: "Compliance Reviewer",
+public/control-center/pages/ai-command.js:240:		placeholder: "Ask the Compliance Reviewer to check claims, approval risks, publishing safety, and governance notes…",
+public/control-center/pages/ai-command.js:241:		canHelp: ["Review marketing claims", "Flag approval risks", "Check publishing safety", "Prepare governance notes", "Identify compliance blockers"],
+public/control-center/pages/ai-command.js:244:		safetyNote: "Compliance review is advisory. Approvals always require human confirmation before execution.",
+public/control-center/pages/ai-command.js:248:		id: "operations",
+public/control-center/pages/ai-command.js:249:		label: "Operations Lead",
+public/control-center/pages/ai-command.js:253:		placeholder: "Ask the Operations Lead to turn this into tasks, workflow steps, or handoffs…",
+public/control-center/pages/ai-command.js:255:		cannotDo: ["Run workflows without confirmation", "Auto-approve tasks", "Override authority gates", "Execute backend operations directly"],
+public/control-center/pages/ai-command.js:256:		destinations: ["Workflows", "Operations Centers", "AI Command"],
+public/control-center/pages/ai-command.js:261:		id: "customer_ops",
+public/control-center/pages/ai-command.js:262:		label: "Customer Operations Lead",
+public/control-center/pages/ai-command.js:263:		position: "Customer Experience Operations Lead",
+public/control-center/pages/ai-command.js:266:		placeholder: "Ask the Customer Operations Lead to summarize a customer thread, draft a safe reply, prepare a ticket draft, check SLA risk, or route an escalation for review…",
+public/control-center/pages/ai-command.js:267:		canHelp: ["Review inbox context", "Summarize customer threads", "Draft safe replies", "Prepare ticket drafts", "Flag SLA and escalation risk"],
+public/control-center/pages/ai-command.js:269:		destinations: ["Unified Inbox", "Operations Centers", "Integrations"],
+public/control-center/pages/ai-command.js:270:		safetyNote: "Customer operations outputs are drafts only. Sending replies, ticket creation, and escalations require confirmation in the owning surface.",
+public/control-center/pages/ai-command.js:274:		id: "sales_crm",
+public/control-center/pages/ai-command.js:275:		label: "Sales / CRM Lead",
+public/control-center/pages/ai-command.js:276:		position: "Revenue and CRM Operations Lead",
+public/control-center/pages/ai-command.js:279:		placeholder: "Ask the Sales / CRM Lead to qualify a lead, draft outreach, plan follow-ups, summarize CRM context, or prepare a sales handoff for review…",
+public/control-center/pages/ai-command.js:282:		destinations: ["CRM", "Workflows", "Operations Centers"],
+public/control-center/pages/ai-command.js:290:	strategist: [
+public/control-center/pages/ai-command.js:296:	writer: [
+public/control-center/pages/ai-command.js:299:		{ label: "Prepare a Publisher handoff", sub: "Package ready content for review" },
+public/control-center/pages/ai-command.js:308:	video_lead: [
+public/control-center/pages/ai-command.js:314:	publisher: [
+public/control-center/pages/ai-command.js:320:	ads: [
+public/control-center/pages/ai-command.js:326:	analyst: [
+public/control-center/pages/ai-command.js:332:	compliance_reviewer: [
+public/control-center/pages/ai-command.js:335:		{ label: "Prepare governance notes", sub: "Document compliance status" },
+public/control-center/pages/ai-command.js:338:	operations: [
+public/control-center/pages/ai-command.js:344:	customer_ops: [
+public/control-center/pages/ai-command.js:348:		{ label: "Prepare escalation", sub: "Route support, sales, or operations" }
+public/control-center/pages/ai-command.js:350:	sales_crm: [
+public/control-center/pages/ai-command.js:354:		{ label: "Prepare sales handoff", sub: "Route context to operations" }
+public/control-center/pages/ai-command.js:358:// Full Team mode suggested prompts
+public/control-center/pages/ai-command.js:361:	{ label: "Map the next launch wave", sub: "Strategist to Publisher to Operations" },
+public/control-center/pages/ai-command.js:362:	{ label: "Prepare a full handoff sequence", sub: "Strategy, creative, compliance, publishing, ops" },
+public/control-center/pages/ai-command.js:363:	{ label: "Review customer and sales impact", sub: "Customer Ops, Sales / CRM, Operations" }
+public/control-center/pages/ai-command.js:369:	{ id: "ask", title: "Ask", description: "Choose a specialist or the full team." },
+public/control-center/pages/ai-command.js:385:const AI_ROOM_TEAM_CHAIN = ["Strategist", "Writer", "Media / Video", "Compliance", "Publisher", "Operations"];
+public/control-center/pages/ai-command.js:386:const AI_ROOM_BUSINESS_BRANCH = ["Customer Ops", "Sales / CRM", "Operations"];
+public/control-center/pages/ai-command.js:389:	strategist: "ST",
+public/control-center/pages/ai-command.js:390:	writer: "CW",
+public/control-center/pages/ai-command.js:392:	video_lead: "VL",
+public/control-center/pages/ai-command.js:393:	publisher: "PB",
+public/control-center/pages/ai-command.js:394:	ads: "AO",
+public/control-center/pages/ai-command.js:395:	analyst: "SI",
+public/control-center/pages/ai-command.js:396:	compliance_reviewer: "CR",
+public/control-center/pages/ai-command.js:397:	operations: "OL",
+public/control-center/pages/ai-command.js:398:	customer_ops: "CO",
+public/control-center/pages/ai-command.js:399:	sales_crm: "SC"
+public/control-center/pages/ai-command.js:403:	ads: "ads_operator",
+public/control-center/pages/ai-command.js:404:	media: "designer",
+public/control-center/pages/ai-command.js:405:	compliance_reviewer: "compliance_reviewer"
+public/control-center/pages/ai-command.js:410:		label: "Admin / Governance",
+public/control-center/pages/ai-command.js:416:		label: "Researcher",
+public/control-center/pages/ai-command.js:430:	strategist: [
+public/control-center/pages/ai-command.js:436:	writer: [
+public/control-center/pages/ai-command.js:440:		{ id: "publisher-package", label: "Publisher Package", action: "preview", intent: "handoff", template: "Prepare a Publisher handoff for {project}. Include German copy package, CTA, notes, and remaining checks." }
+public/control-center/pages/ai-command.js:449:	video_lead: [
+public/control-center/pages/ai-command.js:456:	publisher: [
+public/control-center/pages/ai-command.js:463:	ads: [
+public/control-center/pages/ai-command.js:468:		{ id: "open-ads-manager", label: "Open Ads Manager", action: "route", route: "ads-manager" }
+public/control-center/pages/ai-command.js:470:	analyst: [
+public/control-center/pages/ai-command.js:477:	compliance_reviewer: [
+public/control-center/pages/ai-command.js:484:	operations: [
+public/control-center/pages/ai-command.js:489:		{ id: "open-workflows", label: "Open Workflows / Operations", action: "route", route: "workflows" }
+public/control-center/pages/ai-command.js:491:	customer_ops: [
+public/control-center/pages/ai-command.js:499:		{ id: "route-support-sales-ops", label: "Route to Support / Sales / Operations", action: "preview", intent: "handoff", template: "Prepare routing guidance for {project}. Decide whether the customer item belongs with Support, Sales, or Operations, and explain the review gate." }
+public/control-center/pages/ai-command.js:501:	sales_crm: [
+public/control-center/pages/ai-command.js:553:		id: "strategist",
+public/control-center/pages/ai-command.js:554:		name: "Strategist",
+public/control-center/pages/ai-command.js:557:		suggestedPrompt: "Act as Strategist and propose the next campaign move based on current readiness and integrations."
+public/control-center/pages/ai-command.js:560:		id: "writer",
+public/control-center/pages/ai-command.js:561:		name: "Writer",
+public/control-center/pages/ai-command.js:564:		suggestedPrompt: "Act as Writer and generate content angles for the current project and active campaign."
+public/control-center/pages/ai-command.js:567:		id: "designer",
+public/control-center/pages/ai-command.js:568:		name: "Designer",
+public/control-center/pages/ai-command.js:571:		suggestedPrompt: "Act as Designer and propose creative directions tied to current campaign goals."
+public/control-center/pages/ai-command.js:581:		id: "ads",
+public/control-center/pages/ai-command.js:582:		name: "Ads Specialist",
+public/control-center/pages/ai-command.js:585:		suggestedPrompt: "Act as Ads Specialist and propose paid experiments based on current readiness and data coverage."
+public/control-center/pages/ai-command.js:588:		id: "analyst",
+public/control-center/pages/ai-command.js:589:		name: "Analyst",
+public/control-center/pages/ai-command.js:592:		suggestedPrompt: "Act as Analyst and summarize what is working, what is weak, and what to do next."
+public/control-center/pages/ai-command.js:595:		id: "researcher",
+public/control-center/pages/ai-command.js:596:		name: "Researcher",
+public/control-center/pages/ai-command.js:599:		suggestedPrompt: "Act as Researcher and identify high-confidence market opportunities for this project."
+public/control-center/pages/ai-command.js:602:		id: "operations",
+public/control-center/pages/ai-command.js:603:		name: "Operations Assistant",
+public/control-center/pages/ai-command.js:606:		suggestedPrompt: "Act as Operations Assistant and convert priorities into a practical execution sequence."
+public/control-center/pages/ai-command.js:627:            ["video", "video_lead"],
+public/control-center/pages/ai-command.js:628:            ["motion", "video_lead"],
+public/control-center/pages/ai-command.js:629:            ["reel", "video_lead"],
+public/control-center/pages/ai-command.js:630:            ["storyboard", "video_lead"],
+public/control-center/pages/ai-command.js:631:            ["shot list", "video_lead"],
+public/control-center/pages/ai-command.js:632:            ["voiceover", "video_lead"],
+public/control-center/pages/ai-command.js:633:            ["media", "video_lead"],
+public/control-center/pages/ai-command.js:634:            ["campaign", "strategist"],
+public/control-center/pages/ai-command.js:635:            ["strategy", "strategist"],
+public/control-center/pages/ai-command.js:636:            ["content", "copywriter"],
+public/control-center/pages/ai-command.js:637:            ["copy", "copywriter"],
+public/control-center/pages/ai-command.js:638:            ["caption", "copywriter"],
+public/control-center/pages/ai-command.js:639:            ["publish", "publisher"],
+public/control-center/pages/ai-command.js:640:            ["schedule", "publisher"],
+public/control-center/pages/ai-command.js:641:            ["ads", "ads_operator"],
+public/control-center/pages/ai-command.js:642:            ["budget", "ads_operator"],
+public/control-center/pages/ai-command.js:643:            ["customer", "customer_ops"],
+public/control-center/pages/ai-command.js:644:            ["crm", "customer_ops"],
+public/control-center/pages/ai-command.js:645:            ["support", "customer_ops"],
+public/control-center/pages/ai-command.js:646:            ["operations", "admin"],
+public/control-center/pages/ai-command.js:647:            ["blocker", "admin"],
+public/control-center/pages/ai-command.js:648:            ["readiness", "admin"],
+public/control-center/pages/ai-command.js:649:            ["setup", "admin"],
+public/control-center/pages/ai-command.js:650:            ["library", "admin"]
+public/control-center/pages/ai-command.js:658:    return MODE_ID_ALIASES[classified?.modeId] || classified?.modeId || "operations";
+public/control-center/pages/ai-command.js:665:			SPECIALIST_DEFS.find((s) => s.id === "operations") ||
+public/control-center/pages/ai-command.js:671:		if (/act as the strategist/i.test(text)) return "strategist";
+public/control-center/pages/ai-command.js:672:		if (/act as the content writer/i.test(text)) return "writer";
+public/control-center/pages/ai-command.js:673:		if (/act as the media director/i.test(text)) return "media";
+public/control-center/pages/ai-command.js:674:		if (/act as the video lead/i.test(text)) return "video_lead";
+public/control-center/pages/ai-command.js:675:		if (/act as the publisher/i.test(text)) return "publisher";
+public/control-center/pages/ai-command.js:676:		if (/act as the ads optimizer|act as the ads operator/i.test(text)) return "ads";
+public/control-center/pages/ai-command.js:677:		if (/act as the seo|act as the insights analyst/i.test(text)) return "analyst";
+public/control-center/pages/ai-command.js:678:		if (/act as the compliance reviewer/i.test(text)) return "compliance_reviewer";
+public/control-center/pages/ai-command.js:679:		if (/act as the operations lead/i.test(text)) return "operations";
+public/control-center/pages/ai-command.js:680:		if (/act as the customer operations lead|act as customer ops/i.test(text)) return "customer_ops";
+public/control-center/pages/ai-command.js:681:		if (/act as the sales|act as the crm|sales \/ crm lead/i.test(text)) return "sales_crm";
+public/control-center/pages/ai-command.js:684:		if (classified.resolvedModeId && classified.resolvedModeId !== "operations") {
+public/control-center/pages/ai-command.js:716:	if (/publish\s*now|send\s*external|paid\s*ads|final\s*approval/i.test(command)) {
+public/control-center/pages/ai-command.js:951:			modeId: "operations",
+public/control-center/pages/ai-command.js:1237:        session.modeId = asString(record.modeId || session.modeId || "operations");
+public/control-center/pages/ai-command.js:1264:	const safeMode = asString(modeLabel || "Solo Specialist").trim();
+public/control-center/pages/ai-command.js:1268:	const teamWorkflowLines = safeMode === "Full Team"
+public/control-center/pages/ai-command.js:1270:			"Full Team workflow: Strategist -> Writer -> Media/Video -> Compliance -> Publisher -> Operations.",
+public/control-center/pages/ai-command.js:1271:			"When the request touches inbox, tickets, leads, outreach, or CRM, include Customer Ops -> Sales/CRM -> Operations.",
+public/control-center/pages/ai-command.js:1285:                `Use ${safeOutputLanguage} only for customer-facing or publishable copy such as captions, ads, emails, landing pages, final campaign text, or publishing packages.`,
+public/control-center/pages/ai-command.js:1338:	const rawId = getAiRoomRoleId(specialistId || "operations");
+public/control-center/pages/ai-command.js:1341:	if (id === "strategist") return outputType === "task" ? "campaign-studio" : "workflows";
+public/control-center/pages/ai-command.js:1342:	if (id === "writer") return "content-studio";
+public/control-center/pages/ai-command.js:1344:	if (id === "video_lead") return "media-studio";
+public/control-center/pages/ai-command.js:1345:	if (id === "publisher") return "publishing";
+public/control-center/pages/ai-command.js:1346:	if (id === "ads") return "ads-manager";
+public/control-center/pages/ai-command.js:1347:	if (id === "analyst") return "insights";
+public/control-center/pages/ai-command.js:1348:	if (id === "compliance_reviewer") return "governance";
+public/control-center/pages/ai-command.js:1349:	if (id === "operations") return outputType === "task" ? "task-center" : "workflows";
+public/control-center/pages/ai-command.js:1350:	if (id === "customer_ops") return outputType === "task" ? "task-center" : "operations-centers";
+public/control-center/pages/ai-command.js:1351:	if (id === "sales_crm") return "workflows";
+public/control-center/pages/ai-command.js:1357:        const specialistId = getAiRoomRoleId(session?.modeId || "operations");
+public/control-center/pages/ai-command.js:1385:        const looksGovernanceLike = /\b(compliance|governance|claim|claims|risk|risks|approval|approvals|policy|privacy|legal|safe language|safety review)\b/.test(text);
+public/control-center/pages/ai-command.js:1414:        if (/governance|compliance|risk|approval/.test(outputType) || looksGovernanceLike) {
+public/control-center/pages/ai-command.js:1432:        const destinationRoute = explicitDestination || destinationRouteForSpecialist(session?.modeId || "operations", outputType);
+public/control-center/pages/ai-command.js:1442:		"ads-manager": "Ads Manager",
+public/control-center/pages/ai-command.js:1446:		"operations-centers": "Operations Centers",
+public/control-center/pages/ai-command.js:1457:	const specialistId = asString(specialist?.id || "operations");
+public/control-center/pages/ai-command.js:1468:		confirmationRequired: outputType === "handoff" || specialistId === "publisher" || specialistId === "compliance_reviewer",
+public/control-center/pages/ai-command.js:1477:	if (specialistId === "strategist") {
+public/control-center/pages/ai-command.js:1494:			title: `Strategist Guidance: Next operating move`,
+public/control-center/pages/ai-command.js:1504:	if (specialistId === "writer") {
+public/control-center/pages/ai-command.js:1527:			nextStep: "Send this package to Content Studio or Publisher after review.",
+public/control-center/pages/ai-command.js:1558:	if (specialistId === "video_lead") {
+public/control-center/pages/ai-command.js:1573:	if (specialistId === "publisher") {
+public/control-center/pages/ai-command.js:1593:	if (specialistId === "ads") {
+public/control-center/pages/ai-command.js:1596:			title: outputType === "task" ? "Task: Paid test plan" : "Ads Draft: Angles and tests",
+public/control-center/pages/ai-command.js:1609:				"Keep budget, launch, and live ad changes inside Ads Manager.",
+public/control-center/pages/ai-command.js:1621:	if (specialistId === "analyst") {
+public/control-center/pages/ai-command.js:1635:	if (specialistId === "compliance_reviewer") {
+public/control-center/pages/ai-command.js:1638:			title: "Compliance Draft: Risk review checklist",
+public/control-center/pages/ai-command.js:1647:			safetyLabel: "Compliance review is advisory. Formal approval remains human-governed."
+public/control-center/pages/ai-command.js:1651:	if (specialistId === "customer_ops") {
+public/control-center/pages/ai-command.js:1654:			title: outputType === "task" ? "Ticket Draft: Customer operations follow-up" : "Customer Ops Draft: Thread, reply, and routing",
+public/control-center/pages/ai-command.js:1655:			summary: "Customer operations draft prepared with safe reply language, ticket notes, SLA review, and escalation guardrails.",
+public/control-center/pages/ai-command.js:1656:			mainOutput: "Review the customer context, confirm missing details, then route the draft through the owning support, sales, or operations surface.",
+public/control-center/pages/ai-command.js:1664:				"Owner: support, sales, or operations to be confirmed before creation."
+public/control-center/pages/ai-command.js:1668:				"SLA and escalation decisions require confirmation in the owning operations surface."
+public/control-center/pages/ai-command.js:1670:			nextStep: "Review the draft, confirm the destination team, then route through support, sales, or operations.",
+public/control-center/pages/ai-command.js:1682:	if (specialistId === "sales_crm") {
+public/control-center/pages/ai-command.js:1685:			title: outputType === "handoff" ? "Sales Handoff" : "Sales / CRM Draft: Lead and outreach plan",
+public/control-center/pages/ai-command.js:1707:			nextStep: "Review the lead fit, confirm owner, then route the handoff to operations or the CRM surface.",
+public/control-center/pages/ai-command.js:1719:	if (specialistId === "operations") {
+public/control-center/pages/ai-command.js:1728:					"Stage 3: Compliance/review gate",
+public/control-center/pages/ai-command.js:1736:			title: outputType === "handoff" ? "Handoff Preview: Operations package" : "Operations Draft: Task and handoff plan",
+public/control-center/pages/ai-command.js:1754:		? { id: "operations", label: "Full Team" }
+public/control-center/pages/ai-command.js:1778:		summary: `Full team ${outputType.replace("_", " ")} preview prepared for ${projectName || "current project"}.`,
+public/control-center/pages/ai-command.js:1780:			"Strategist defines priorities, positioning, launch sequence, and strongest next move",
+public/control-center/pages/ai-command.js:1781:			"Writer, Media Director, and Video Lead turn strategy into message, asset, and production drafts",
+public/control-center/pages/ai-command.js:1782:			"Compliance and Publisher verify claims, approvals, formatting, and release readiness",
+public/control-center/pages/ai-command.js:1783:			"Customer Ops and Sales / CRM join when the request touches inbox, tickets, leads, outreach, or CRM"
+public/control-center/pages/ai-command.js:1786:			"Strategist: decide priority, offer angle, channel sequence, and launch wave",
+public/control-center/pages/ai-command.js:1787:			"Writer: draft hooks, captions, messages, email, or outreach copy",
+public/control-center/pages/ai-command.js:1789:			"Compliance: flag claims, evidence needs, policy risks, and approval gates",
+public/control-center/pages/ai-command.js:1790:			"Publisher: package channel-ready copy, assets, schedule notes, and publish checks",
+public/control-center/pages/ai-command.js:1792:			"Operations: convert the reviewed output into safe tasks, workflow draft, or handoff context"
+public/control-center/pages/ai-command.js:1796:		confirmationNote: "No task, workflow, outreach, customer reply, CRM update, approval, or publishing action is executed from Full Team mode.",
+public/control-center/pages/ai-command.js:1797:		safetyLabel: "Full Team output is a coordinated draft preview only."
+public/control-center/pages/ai-command.js:2036:		strategist: ["campaign", "launch campaign", "campaign plan", "marketing campaign", "market entry", "growth plan", "offer strategy", "launch plan"],
+public/control-center/pages/ai-command.js:2037:		writer: ["content", "post", "caption", "blog", "script", "email", "landing page section", "reel script", "copy", "write", "hooks"],
+public/control-center/pages/ai-command.js:2038:		designer: ["design", "visual", "creative brief", "format", "brand", "layout", "image direction", "creative direction"],
+public/control-center/pages/ai-command.js:2040:		ads: ["ad ideas", "ad copy", "facebook ads", "meta ads", "tiktok ads", "google ads", "cta", "paid", "targeting angle", "ad creative"],
+public/control-center/pages/ai-command.js:2041:		analyst: ["seo", "keyword", "keywords", "query", "search", "meta", "blog topic", "search intent", "ranking", "analytics", "performance", "traffic", "insights", "metrics"],
+public/control-center/pages/ai-command.js:2042:		researcher: ["research", "market trend", "market research", "audience research", "competitor", "positioning gap", "validate", "competitive"],
+public/control-center/pages/ai-command.js:2043:		operations: ["task plan", "workflow", "handoff", "approval", "timeline", "execution plan", "route", "publish", "status", "priority", "priorities", "blocking", "blocker", "readiness", "next", "do next"],
+public/control-center/pages/ai-command.js:2044:		customer_ops: ["customer", "support", "inbox", "ticket", "tickets", "sla", "reply", "thread", "escalation", "complaint", "refund"],
+public/control-center/pages/ai-command.js:2045:		sales_crm: ["lead", "leads", "crm", "sales", "outreach", "follow-up", "follow up", "pipeline", "dealer", "salon", "influencer"]
+public/control-center/pages/ai-command.js:2058:	const top = scores[0] || { modeId: selectedModeId || "operations" };
+public/control-center/pages/ai-command.js:2063:		resolvedModeId: top.modeId || selectedModeId || "operations",
+public/control-center/pages/ai-command.js:2093:	if (lane === "ads" && asString(coverage.paid_ads?.status) !== "covered") {
+public/control-center/pages/ai-command.js:2201:function buildAdsResponse(aiContext) {
+public/control-center/pages/ai-command.js:2210:			: "Paid reporting not connected — connect Meta Ads, Google Ads, or TikTok Ads.",
+public/control-center/pages/ai-command.js:2228:			routeSuggestion("Ads Manager", "ads-manager", "Review pacing, creative mapping, and paid operating view."),
+public/control-center/pages/ai-command.js:2232:		missingData: buildMissingDataNotes(aiContext, "ads")
+public/control-center/pages/ai-command.js:2262:			...buildMissingDataNotes(aiContext, "ads"),
+public/control-center/pages/ai-command.js:2268:function buildOperationsTaskBlock(aiContext, message) {
+public/control-center/pages/ai-command.js:2285:function buildOperationsResponse(aiContext, message) {
+public/control-center/pages/ai-command.js:2287:	const taskBlock = buildOperationsTaskBlock(aiContext, message);
+public/control-center/pages/ai-command.js:2295:	if (/ads|campaign scale|roas|creative/.test(query)) routeSuggestions.push(routeSuggestion("Ads Manager", "ads-manager", "Review live paid performance and action the next media move."));
+public/control-center/pages/ai-command.js:2298:		title: "Operations routing brief",
+public/control-center/pages/ai-command.js:2317:		case "writer":
+public/control-center/pages/ai-command.js:2318:		case "designer":
+public/control-center/pages/ai-command.js:2321:		case "analyst":
+public/control-center/pages/ai-command.js:2323:		case "ads":
+public/control-center/pages/ai-command.js:2324:			return buildAdsResponse(aiContext);
+public/control-center/pages/ai-command.js:2325:		case "researcher":
+public/control-center/pages/ai-command.js:2327:		case "strategist":
+public/control-center/pages/ai-command.js:2328:			return buildOperationsResponse(aiContext, message);
+public/control-center/pages/ai-command.js:2329:		case "operations":
+public/control-center/pages/ai-command.js:2332:				? buildOperationsResponse(aiContext, message)
+public/control-center/pages/ai-command.js:2428:	"operations-centers": "Operations Centers",
+public/control-center/pages/ai-command.js:2434:	"ads-manager": "Ads Manager",
+public/control-center/pages/ai-command.js:2440:	"content-studio": "writer",
+public/control-center/pages/ai-command.js:2442:	publishing: "publisher",
+public/control-center/pages/ai-command.js:2443:	"campaign-studio": "strategist",
+public/control-center/pages/ai-command.js:2444:	workflows: "operations",
+public/control-center/pages/ai-command.js:2447:	integrations: "operations",
+public/control-center/pages/ai-command.js:2448:	settings: "operations",
+public/control-center/pages/ai-command.js:2449:	governance: "compliance_reviewer",
+public/control-center/pages/ai-command.js:2450:	"operations-centers": "operations",
+public/control-center/pages/ai-command.js:2451:	"task-center": "operations",
+public/control-center/pages/ai-command.js:2452:	"queue-center": "operations",
+public/control-center/pages/ai-command.js:2453:	"job-monitor": "operations",
+public/control-center/pages/ai-command.js:2454:	"notification-center": "operations",
+public/control-center/pages/ai-command.js:2456:	"ads-manager": "ads",
+public/control-center/pages/ai-command.js:2457:	setup: "operations",
+public/control-center/pages/ai-command.js:2458:	workspace: "operations"
+public/control-center/pages/ai-command.js:2462:	designer: "media",
+public/control-center/pages/ai-command.js:2463:	researcher: "seo",
+public/control-center/pages/ai-command.js:2464:	compliance: "compliance_reviewer",
+public/control-center/pages/ai-command.js:2465:	"customer-ops": "customer_ops",
+public/control-center/pages/ai-command.js:2466:	customer_ops: "customer_ops",
+public/control-center/pages/ai-command.js:2467:	"sales-crm": "sales_crm",
+public/control-center/pages/ai-command.js:2468:	sales_crm: "sales_crm"
+public/control-center/pages/ai-command.js:2477:	publisher: "publishing",
+public/control-center/pages/ai-command.js:2483:	operation: "operations-centers",
+public/control-center/pages/ai-command.js:2484:	operations: "operations-centers",
+public/control-center/pages/ai-command.js:2535:function normalizeAiInboundSpecialistId(value, fallback = "operations") {
+public/control-center/pages/ai-command.js:2652:		"operations",
+public/control-center/pages/ai-command.js:2653:		"operations"
+public/control-center/pages/ai-command.js:2710:function applyDurableAiHandoff(projectName, operations, session, consumeProjectHandoff, showMessage) {
+public/control-center/pages/ai-command.js:2711:	const handoff = getSharedHandoff(projectName, "ai-command", operations);
+public/control-center/pages/ai-command.js:2872:      AGENT_CARDS.find((agent) => agent.id === "operations") ||
+public/control-center/pages/ai-command.js:3291:                ? { id: "team", label: "Full Team" }
+public/control-center/pages/ai-command.js:3463:  const rawId = normalize(value || "strategist");
+public/control-center/pages/ai-command.js:3478:    definitions.find((item) => normalize(item?.id || item?.role || item?.key) === "strategist") ||
+public/control-center/pages/ai-command.js:3485:	return asString(value || "operations")
+public/control-center/pages/ai-command.js:3488:		.replace(/[^a-z0-9_]+/g, "_") || "operations";
+public/control-center/pages/ai-command.js:3557:	return destinationRouteForSpecialist(session?.modeId || "operations", outputType);
+public/control-center/pages/ai-command.js:3570:	if (/review|check|compliance|readiness|governance/i.test(asString(tool.label))) return "Review";
+public/control-center/pages/ai-command.js:3593:		<div class="aicmd-room-team-chain" aria-label="Full team orchestration chain">
+public/control-center/pages/ai-command.js:3603:	const modeLabel = session.teamMode === "team" ? "Full Team" : "Solo Specialist";
+public/control-center/pages/ai-command.js:3614:				<p class="aicmd-room-subtitle mhos-context-description">Ask one expert or the full team to prepare strategy, content, analysis, reviews, and destination handoffs. AI prepares and reviews only; sensitive actions stay confirmation-gated in the owning workspace.</p>
+public/control-center/pages/ai-command.js:3687:			<strong>Full Team Review</strong>
+public/control-center/pages/ai-command.js:3688:			<span>Strategy, writing, creative, compliance, publishing, customer, sales, and operations specialists coordinate one review-ready answer. No workflow, send, publish, approval, or CRM action is executed here.</span>
+public/control-center/pages/ai-command.js:3707:					Full Team
+public/control-center/pages/ai-command.js:3747:		const lanes = ["Strategy", "Content", "Media", "Customer Ops", "Sales / CRM", "Compliance", "Publishing", "Operations"];
+public/control-center/pages/ai-command.js:3795:        if (roleId === "content_writer") return `${label} is drafting your content...`;
+public/control-center/pages/ai-command.js:3796:        if (roleId === "media_director" || roleId === "video_lead") return `${label} is preparing creative direction...`;
+public/control-center/pages/ai-command.js:3797:        if (roleId === "operations" || roleId === "customer_ops") return `${label} is preparing your task handoff...`;
+public/control-center/pages/ai-command.js:3798:        if (roleId === "compliance") return `${label} is checking safety and compliance...`;
+public/control-center/pages/ai-command.js:3800:        if (roleId === "publisher") return `${label} is preparing publishing guidance...`;
+public/control-center/pages/ai-command.js:3811:		? "Team orchestration across strategy, writing, media/video, compliance, publishing, customer operations, sales/CRM, and operations"
+public/control-center/pages/ai-command.js:3814:	const modeLabel = isTeam ? "Full Team" : "Solo Specialist";
+public/control-center/pages/ai-command.js:3848:	return destinationRouteForSpecialist(session?.modeId || "operations", getCanonicalToolIntent(tool));
+public/control-center/pages/ai-command.js:3905:	const specialistLabel = session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label || "Specialist";
+public/control-center/pages/ai-command.js:4005:        const governanceRequired = destinationRoute === "governance" || /approval|claim|compliance|risk|gdpr|review/i.test(`${outputType} ${asString(preview.title)} ${asString(preview.summary)}`);
+public/control-center/pages/ai-command.js:4010:        const teamIds = ["strategist", "writer", "media", "video_lead", "compliance_reviewer", "operations"];
+public/control-center/pages/ai-command.js:4016:                        const complianceWatching = spec.id === "compliance_reviewer" && governanceRequired;
+public/control-center/pages/ai-command.js:4021:                                : complianceWatching
+public/control-center/pages/ai-command.js:4057:                                <span><strong>Mode</strong>${escapeHtml(isTeam ? "Full Team" : "Solo Specialist")}</span>
+public/control-center/pages/ai-command.js:4175:	const modeLabel = session.teamMode === "team" ? "Full Team" : "Solo Specialist";
+public/control-center/pages/ai-command.js:4183:					<button class="aicmd-chatfirst-toggle${session.teamMode === "team" ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="team">Full Team</button>
+public/control-center/pages/ai-command.js:4245:        const selectedSpec = isTeam ? { id: "team", label: "Full Team" } : getPhase1SpecialistById(session.modeId);
+public/control-center/pages/ai-command.js:4247:        const selectedLabel = isTeam ? "Full Team" : selectedSpec.label || "Specialist";
+public/control-center/pages/ai-command.js:4294:                        { label: "Ask Compliance", attr: "data-aicmd-smart-compliance" }
+public/control-center/pages/ai-command.js:4470:        const complianceSensitivity = asString(wizard.complianceSensitivity || "standard-review");
+public/control-center/pages/ai-command.js:4474:        const goalOptions = [["sales", "Sales"], ["launch", "Product launch"], ["leads", "Lead generation"], ["awareness", "Awareness"], ["retargeting", "Retargeting"]];
+public/control-center/pages/ai-command.js:4475:        const channelOptions = [["social", "Social"], ["email", "Email"], ["website", "Website"], ["ads", "Ads"], ["publishing", "Publishing package"]];
+public/control-center/pages/ai-command.js:4478:        const formatOptions = [["mixed", "Mixed package"], ["image", "Image"], ["video", "Video"], ["email", "Email"], ["landing", "Landing page"], ["ads", "Ads"]];
+public/control-center/pages/ai-command.js:4483:        const complianceOptions = [["standard-review", "Standard review"], ["claims-sensitive", "Claims sensitive"], ["pricing-sensitive", "Pricing sensitive"], ["regulated", "Regulated"], ["low-risk", "Low risk"]];
+public/control-center/pages/ai-command.js:4562:                                                        ${complianceOptions.map(([value, label]) => optionButton("complianceSensitivity", value, label, complianceSensitivity)).join("")}
+public/control-center/pages/ai-command.js:4600:                                                                <button type="button" data-aicmd-smart-campaign-action="operations">Create Operations Follow-up</button>
+public/control-center/pages/ai-command.js:4709:                                        <small>Strategy, content, media, operations, compliance, customer, campaign and provider-readiness planning.</small>
+public/control-center/pages/ai-command.js:4890:					<p>Choose an active specialist or keep Full Team review. Planned lanes are visible but not active runtime specialists.</p>
+public/control-center/pages/ai-command.js:4895:				<button class="aicmd-chatfirst-toggle${!teamActive ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="solo">Solo Specialist</button>
+public/control-center/pages/ai-command.js:4896:				<button class="aicmd-chatfirst-toggle${teamActive ? " is-active" : ""}" type="button" data-aicmdv2-team-mode="team">Full Team</button>
+public/control-center/pages/ai-command.js:4934:	const specialistLabel = session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label || "Specialist";
+public/control-center/pages/ai-command.js:4978:		? { id: "team", label: "Full Team" }
+public/control-center/pages/ai-command.js:5082:				<span><strong>Mode</strong>${escapeHtml(session.teamMode === "team" ? "Full Team" : "Solo Specialist")}</span>
+public/control-center/pages/ai-command.js:5133:        const selectedSpec = isTeam ? { id: "team", label: "Full Team", position: "Team workflow" } : getPhase1SpecialistById(session.modeId);
+public/control-center/pages/ai-command.js:5135:        const selectedLabel = isTeam ? "Full Team" : selectedSpec.label || "Specialist";
+public/control-center/pages/ai-command.js:5136:        const selectedModeLabel = isTeam ? "Team workflow" : "Solo specialist";
+public/control-center/pages/ai-command.js:5183:                : (SPECIALIST_SUGGESTED_PROMPTS[promptModeId] || SPECIALIST_SUGGESTED_PROMPTS.operations);
+public/control-center/pages/ai-command.js:5344:		: (SPECIALIST_SUGGESTED_PROMPTS[promptModeId] || SPECIALIST_SUGGESTED_PROMPTS.operations);
+public/control-center/pages/ai-command.js:5372:	const specialist = session.teamMode === "team" ? { label: "Full Team" } : getPhase1SpecialistById(session.modeId);
+public/control-center/pages/ai-command.js:5381:		{ label: "Mode", value: session.teamMode === "team" ? "Full Team" : "Solo Specialist", present: true },
+public/control-center/pages/ai-command.js:5388:		{ label: "Operations", value: state.data.operations ? "Snapshot available" : "No operations snapshot", present: Boolean(state.data.operations) }
+public/control-center/pages/ai-command.js:5390:	const scopedContextItems = session.teamMode === "solo" && session.modeId === "customer_ops"
+public/control-center/pages/ai-command.js:5393:			{ label: "Tickets", value: "Draft / monitored in Operations", present: true, scoped: true },
+public/control-center/pages/ai-command.js:5398:		: session.teamMode === "solo" && session.modeId === "sales_crm"
+public/control-center/pages/ai-command.js:5400:				{ label: "Leads", value: "Discovery / qualification", present: true, scoped: true },
+public/control-center/pages/ai-command.js:5404:				{ label: "Pipeline", value: "Operations handoff", present: true, scoped: true }
+public/control-center/pages/ai-command.js:5448:					<span>Backend owns authority — AI Command prepares guidance, previews, and handoff context. It does not override execution controls or mutate Operations records.</span>
+public/control-center/pages/ai-command.js:5581:		const operations = asObject(selectOperationsSnapshot(state));
+public/control-center/pages/ai-command.js:5582:		applyDurableAiHandoff(sessionKey, operations, session, consumeProjectHandoff, showMessage);
+public/control-center/pages/ai-command.js:5758:                                const specId = btn.getAttribute("data-aicmdv2-specialist") || "operations";
+public/control-center/pages/ai-command.js:5786:				persistSessionDraft(sessionKey, session, mode === "team" ? "Full Team mode activated" : "Solo Specialist mode activated");
+public/control-center/pages/ai-command.js:5997:                        specialistLabel: session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label,
+public/control-center/pages/ai-command.js:6053:                                        label: "Strategist",
+public/control-center/pages/ai-command.js:6057:                                        label: "Writer",
+public/control-center/pages/ai-command.js:6065:                                        label: "Compliance",
+public/control-center/pages/ai-command.js:6069:                                        label: "Publisher",
+public/control-center/pages/ai-command.js:6073:                                        label: "Operations",
+public/control-center/pages/ai-command.js:6091:                                complianceSensitivity: asString(wizard.complianceSensitivity || "standard-review"),
+public/control-center/pages/ai-command.js:6117:                                                label: "Compliance risks",
+public/control-center/pages/ai-command.js:6125:                                                label: "Operations follow-up",
+public/control-center/pages/ai-command.js:6198:                                complianceSensitivity: asString(body.compliance_sensitivity || body.complianceSensitivity || fallbackPreview.complianceSensitivity || ""),
+public/control-center/pages/ai-command.js:6227:                                        compliance_sensitivity: asString(wizard.complianceSensitivity || localPreview.complianceSensitivity || "")
+public/control-center/pages/ai-command.js:6278:                                        complianceSensitivity: asString(preview.complianceSensitivity || ""),
+public/control-center/pages/ai-command.js:6330:                                compliance_sensitivity: asString(preview.complianceSensitivity || ""),
+public/control-center/pages/ai-command.js:6366:                                operations: "Create Operations Follow-up"
+public/control-center/pages/ai-command.js:6570:		                        ? { id: "team", label: "Full Team" }
+public/control-center/pages/ai-command.js:6828:					specialistLabel: session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label,
+public/control-center/pages/ai-command.js:7030:					? "Full Team"
+public/control-center/pages/ai-command.js:7054:					? "Full Team"
+public/control-center/pages/ai-command.js:7240:        { id: "strategist", label: "Strategist" },
+public/control-center/pages/ai-command.js:7241:        { id: "writer", label: "Writer" },
+public/control-center/pages/ai-command.js:7243:        { id: "operations", label: "Operations" }
+public/control-center/pages/ai-command.js:7249:        if (state === "thinking" && member.id === "strategist") status = "active";
+public/control-center/pages/ai-command.js:7250:        if (state === "composing" && member.id === "writer") status = "active";
+public/control-center/pages/ai-command.js:7531:        loadStrategy: "balanced"
+public/control-center/pages/ai-command.js:7720:    // StateKernel is the ONLY direct writer to draftMessage.
+public/control-center/pages/operations-centers.js:133:      context.showMessage?.("Operations prompt added to AI Command.");
+public/control-center/pages/operations-centers.js:255:      preview: "Turn the current notification stream into a short operations summary.",
+public/control-center/pages/operations-centers.js:264:  return asObject(asObject(state.data).operations);
+public/control-center/pages/operations-centers.js:346:      helper: "Compliance review signals",
+public/control-center/pages/operations-centers.js:661:                  <h3 class="mhos-os-panel-title">Operations AI Assistant</h3>
+public/control-center/pages/operations-centers.js:689:  const ops = asObject(state.data.operations);
+public/control-center/pages/operations-centers.js:743:          const ops = asObject(context.getState().data.operations);
+public/control-center/pages/operations-centers.js:745:          renderTaskCenter(context, { ...context.getState(), data: { ...context.getState().data, operations: ops } }, projectName);
+public/control-center/pages/operations-centers.js:923:                <h3 class="mhos-os-section-title">Queue review operations</h3>
+public/control-center/pages/operations-centers.js:1014:                  <h3 class="mhos-os-panel-title">Operations AI Assistant</h3>
+public/control-center/pages/operations-centers.js:1041:  const queueCenter = asObject(asObject(state.data.operations).queue_center);
+public/control-center/pages/operations-centers.js:1084:          const ops = asObject(context.getState().data.operations);
+public/control-center/pages/operations-centers.js:1086:          renderQueueCenter(context, { ...context.getState(), data: { ...context.getState().data, operations: ops } }, projectName);
+public/control-center/pages/operations-centers.js:1309:                  <h3 class="mhos-os-panel-title">Operations AI Assistant</h3>
+public/control-center/pages/operations-centers.js:1336:  const jobMonitor = asObject(asObject(state.data.operations).job_monitor);
+public/control-center/pages/operations-centers.js:1377:          const ops = asObject(context.getState().data.operations);
+public/control-center/pages/operations-centers.js:1379:          renderJobMonitor(context, { ...context.getState(), data: { ...context.getState().data, operations: ops } }, projectName);
+public/control-center/pages/operations-centers.js:1498:  const notificationCenter = asObject(asObject(state.data.operations).notification_center);
+public/control-center/pages/operations-centers.js:1733:                  <h3 class="mhos-os-panel-title">Operations AI Assistant</h3>
+public/control-center/pages/operations-centers.js:1765:          const ops = asObject(context.getState().data.operations);
+public/control-center/pages/operations-centers.js:1767:          renderNotificationCenter(context, { ...context.getState(), data: { ...context.getState().data, operations: ops } }, projectName);
+public/control-center/pages/operations-centers.js:1871:          escalate_to: "admin"
+public/control-center/pages/operations-centers.js:1916:          const ops = asObject(currentState.data.operations);
+public/control-center/pages/operations-centers.js:1927:              operations: ops,
+public/control-center/pages/operations-centers.js:1969:          const ops = asObject(context.getState().data.operations);
+public/control-center/pages/operations-centers.js:1971:          renderTaskCenter(context, { ...context.getState(), data: { ...context.getState().data, operations: ops } }, projectName);
+public/control-center/pages/operations-centers.js:2014:          const ops = asObject(context.getState().data.operations);
+public/control-center/pages/operations-centers.js:2016:          renderQueueCenter(context, { ...context.getState(), data: { ...context.getState().data, operations: ops } }, projectName);
+public/control-center/pages/operations-centers.js:2062:          const ops = asObject(context.getState().data.operations);
+public/control-center/pages/operations-centers.js:2064:          renderJobMonitor(context, { ...context.getState(), data: { ...context.getState().data, operations: ops } }, projectName);
+public/control-center/pages/operations-centers.js:2110:          const ops = asObject(context.getState().data.operations);
+public/control-center/pages/operations-centers.js:2112:          renderNotificationCenter(context, { ...context.getState(), data: { ...context.getState().data, operations: ops } }, projectName);
+public/control-center/pages/operations-centers.js:2126:function renderOperationsCentersOverview(context) {
+public/control-center/pages/operations-centers.js:2127:  const root = document.querySelector('[data-page="operations-centers"] .ops-shell');
+public/control-center/pages/operations-centers.js:2132:  const operations = asObject(asObject(state.data).operations);
+public/control-center/pages/operations-centers.js:2134:  const taskCount = asArray(operations.tasks?.items || operations.tasks).length;
+public/control-center/pages/operations-centers.js:2135:  const queueCount = asArray(operations.queue?.items || operations.queue).length;
+public/control-center/pages/operations-centers.js:2136:  const jobCount = asArray(operations.jobs?.items || operations.jobs).length;
+public/control-center/pages/operations-centers.js:2137:  const notificationCount = asArray(operations.notifications?.items || operations.notifications).length;
+public/control-center/pages/operations-centers.js:2151:      kicker: "Operations Queue",
+public/control-center/pages/operations-centers.js:2175:    <section class="page is-active" data-page="operations-centers">
+public/control-center/pages/operations-centers.js:2180:              <p class="mhos-os-kicker">AI Operations Execution</p>
+public/control-center/pages/operations-centers.js:2181:              <h2 class="mhos-os-title">Operations Centers</h2>
+public/control-center/pages/operations-centers.js:2194:          kicker: "Operations",
+public/control-center/pages/operations-centers.js:2195:          title: "Operations Health Overview",
+public/control-center/pages/operations-centers.js:2196:          description: "Use this page as the routing hub from AI Team drafts, workflows, tasks, and runtime signals into the correct operations workspace.",
+public/control-center/pages/operations-centers.js:2206:                  <h3 class="mhos-os-section-title">Choose the owning operations surface</h3>
+public/control-center/pages/operations-centers.js:2207:                  <p class="mhos-os-section-copy">AI Team can prepare drafts, tasks, workflows, and handoffs. This overview routes work to the owning operations center for review, monitoring, or controlled follow-up.</p>
+public/control-center/pages/operations-centers.js:2234:                  <h3 class="mhos-os-panel-title">Operations Lead handoff</h3>
+public/control-center/pages/operations-centers.js:2235:                  <p class="mhos-os-panel-copy">For new operational work, start in AI Team with Operations Lead or Full Team, then route the result to Task Center, Workflows, Queue, or Job Monitor.</p>
+public/control-center/pages/operations-centers.js:2267:export const operationsCentersRoute = {
+public/control-center/pages/operations-centers.js:2268:  id: "operations-centers",
+public/control-center/pages/operations-centers.js:2269:  label: "Operations Centers",
+public/control-center/pages/operations-centers.js:2272:    title: "Operations Centers",
+public/control-center/pages/operations-centers.js:2275:  template: `<section class="page is-active" data-page="operations-centers"><div class="ops-shell"></div></section>`,
+public/control-center/pages/operations-centers.js:2277:    renderOperationsCentersOverview(context);
+public/control-center/pages/workflows.js:3:  selectOperationsSnapshot,
+public/control-center/pages/workflows.js:35:    aiModeId: "strategist",
+public/control-center/pages/workflows.js:43:    aiModeId: "writer",
+public/control-center/pages/workflows.js:57:    purpose: "Package final channel payloads, approval checks, and publishing queue dependencies.",
+public/control-center/pages/workflows.js:59:    aiModeId: "operations",
+public/control-center/pages/workflows.js:67:    aiModeId: "analyst",
+public/control-center/pages/workflows.js:75:    aiModeId: "researcher",
+public/control-center/pages/workflows.js:83:    aiModeId: "operations",
+public/control-center/pages/workflows.js:101:  "build-ads": "launch-campaign"
+public/control-center/pages/workflows.js:240:function buildOperationsFingerprint(operations) {
+public/control-center/pages/workflows.js:242:    asString(operations?.backbone?.last_updated),
+public/control-center/pages/workflows.js:243:    String(operations?.workflows?.total_runs || 0),
+public/control-center/pages/workflows.js:244:    String(operations?.tasks?.total || 0)
+public/control-center/pages/workflows.js:314:function ensureSession(projectName, defaults, operations) {
+public/control-center/pages/workflows.js:324:      operationsFingerprint: "",
+public/control-center/pages/workflows.js:349:    session.operationsFingerprint = asString(session.operationsFingerprint);
+public/control-center/pages/workflows.js:365:  hydrateSessionFromOperations(session, operations);
+public/control-center/pages/workflows.js:369:function hydrateSessionFromOperations(session, operations) {
+public/control-center/pages/workflows.js:370:  const fingerprint = buildOperationsFingerprint(operations);
+public/control-center/pages/workflows.js:371:  if (!fingerprint || session.operationsFingerprint === fingerprint) return;
+public/control-center/pages/workflows.js:374:  asArray(operations?.workflows?.items).forEach((item) => {
+public/control-center/pages/workflows.js:399:  session.operationsFingerprint = fingerprint;
+public/control-center/pages/workflows.js:931:function applyDurableWorkflowHandoff({ projectName, session, operations, consumeProjectHandoff, showMessage }) {
+public/control-center/pages/workflows.js:932:  const handoff = getSharedHandoff(projectName, "workflows", operations);
+public/control-center/pages/workflows.js:1139:    const session = ensureSession(projectName, createDefaultInputs(state), state.data.operations);
+public/control-center/pages/workflows.js:1243:  const session = ensureSession(projectName, createDefaultInputs(state), state.data.operations);
+public/control-center/pages/workflows.js:1248:  const aiDraft = asObject(getSharedAiDraft(projectName, state.data.operations));
+public/control-center/pages/workflows.js:1307:      const draft = asObject(getSharedAiDraft(projectName, getState().data.operations));
+public/control-center/pages/workflows.js:1570:          owner_role: "admin",
+public/control-center/pages/workflows.js:1571:          assignee_role: "admin",
+public/control-center/pages/workflows.js:1601:        modeId: "operations",
+public/control-center/pages/workflows.js:1612:            modeId: "operations",
+public/control-center/pages/workflows.js:1637:        modeId: "operations",
+public/control-center/pages/workflows.js:1648:            modeId: "operations",
+public/control-center/pages/workflows.js:1816:    description: "Prepare structured, repeatable workflow review packages and handoffs for common marketing operations."
+public/control-center/pages/workflows.js:1839:    const operations = asObject(selectOperationsSnapshot(state));
+public/control-center/pages/workflows.js:1844:    const workflowsTotal = Number(operations.workflows?.total_runs || operations.workflows?.total || 0);
+public/control-center/pages/workflows.js:1845:    const tasksTotal = Number(operations.tasks?.total || 0);
+public/control-center/pages/workflows.js:1846:    const approvalsTotal = Number(operations.approvals?.total || 0);
+public/control-center/pages/workflows.js:1983:      const recentSessions = asArray(operations.workflows?.items).slice(0, 4);
+public/control-center/pages/governance.js:116:  // Intake context: { ai, publishing, content, media, workflows, operations, notifications, insights }
+public/control-center/pages/governance.js:123:  if (intakeContext?.operations) items.push({ label: "Operations", value: asString(intakeContext.operations) });
+public/control-center/pages/governance.js:260:      allow_admin_override: true,
+public/control-center/pages/governance.js:267:      campaign: asString(approval.adsOwner) || "Operations lead",
+public/control-center/pages/governance.js:268:      publishing: asString(settings.team?.publishAccess) || "Publisher",
+public/control-center/pages/governance.js:269:      compliance: "Compliance Reviewer",
+public/control-center/pages/governance.js:270:      overrides: "Admin"
+public/control-center/pages/governance.js:520:      <label class="settings-toggle" for="governance-admin-override">
+public/control-center/pages/governance.js:521:        <span class="settings-field-label">Allow governed admin override</span>
+public/control-center/pages/governance.js:522:        <input id="governance-admin-override" type="checkbox" class="settings-toggle-input" data-governance-policy="allow_admin_override" ${rules.allow_admin_override ? "checked" : ""} />
+public/control-center/pages/governance.js:585:      queue_owner: approval?.reviewer || "Compliance Reviewer",
+public/control-center/pages/governance.js:634:    queue_owner: item.assignee || item.owner || item.reviewer || "Admin",
+public/control-center/pages/governance.js:696:  let nextBestAction = "Run a governance AI summary, then keep policy owners and rules aligned with live operations.";
+public/control-center/pages/governance.js:1145:                    const operations = session.summary?.operations;
+public/control-center/pages/governance.js:1150:                        intakeContext.ai = (typeof getSharedAiDraft === "function") ? getSharedAiDraft(projectName, operations)?.summary : undefined;
+public/control-center/pages/governance.js:1151:                        intakeContext.publishing = getSharedHandoff(projectName, "publishing", operations)?.payload?.summary;
+public/control-center/pages/governance.js:1152:                        intakeContext.content = getSharedHandoff(projectName, "content-studio", operations)?.payload?.summary;
+public/control-center/pages/governance.js:1153:                        intakeContext.media = getSharedHandoff(projectName, "media-studio", operations)?.payload?.summary;
+public/control-center/pages/governance.js:1154:                        intakeContext.workflows = getSharedHandoff(projectName, "workflows", operations)?.payload?.summary;
+public/control-center/pages/governance.js:1155:                        intakeContext.operations = getSharedHandoff(projectName, "operations", operations)?.payload?.summary;
+public/control-center/pages/governance.js:1156:                        intakeContext.notifications = getSharedHandoff(projectName, "notifications", operations)?.payload?.summary;
+public/control-center/pages/governance.js:1157:                        intakeContext.insights = getSharedHandoff(projectName, "insights", operations)?.payload?.summary;
+public/control-center/pages/governance.js:1337:      const escalateTo = asArray(escalationChain.high)[1] || asArray(escalationChain.high)[0] || "admin";
+public/control-center/pages/governance.js:1389:          reviewer: ownership.compliance || "Compliance Reviewer",
+public/control-center/pages/governance.js:1390:          reviewer_role: "compliance_reviewer",
+public/control-center/pages/governance.js:1392:          requested_for: ownership.compliance || "Compliance Reviewer",
+public/control-center/pages/governance.js:1425:        const confirmed = window.confirm("Confirm backend Governance policy save\n\nAction: Save durable Governance policy rules for this project.\nRisk: These rules can affect approvals, publishing readiness, brand safety review, admin override behavior, and freeze-publishing behavior.\nAuthority: This is a backend-governed durable policy update.\n\nSelect Cancel to review the policy settings before saving.");
+public/control-center/pages/customer-center.js:2:  fetchCustomerOperationsReadiness,
+public/control-center/pages/customer-center.js:3:  fetchCustomerOperationsInbox,
+public/control-center/pages/customer-center.js:55:    fetchCustomerOperationsReadiness(projectName),
+public/control-center/pages/customer-center.js:56:    fetchCustomerOperationsInbox(projectName),
+public/control-center/pages/customer-center.js:251:  const protectedReadStatusTitle = model.protectedReadGuard
+public/control-center/pages/customer-center.js:258:  const protectedReadStatusBody = model.protectedReadGuard
+public/control-center/pages/customer-center.js:271:          <h2>Loading customer operations…</h2>
+public/control-center/pages/customer-center.js:281:        <p class="mhos-context-eyebrow">Customer Operations</p>
+public/control-center/pages/customer-center.js:300:        <div class="panel-header"><div><div class="panel-kicker">Protected-read status</div><h3>${protectedReadStatusTitle}</h3></div></div>
+public/control-center/pages/customer-center.js:301:        <p class="muted">${protectedReadStatusBody}</p>
+public/control-center/pages/customer-center.js:314:        <div class="panel-header"><div><div class="panel-kicker">Readiness Locks</div><h3>Read-only customer operations mode</h3></div></div>
+public/control-center/pages/customer-center.js:485:    eyebrow: "Customer Operations",
+public/control-center/pages/customer-center.js:487:    description: "Read-only customer operations, inbox visibility, ticket/SLA state, and safe AI handoffs."
+public/control-center/pages/campaign-studio.js:45:  google_ads: "Google Ads",
+public/control-center/pages/campaign-studio.js:46:  meta: "Meta Ads",
+public/control-center/pages/campaign-studio.js:48:  ads: "Paid Media",
+public/control-center/pages/campaign-studio.js:56:const PAID_KEYS = ["meta", "google", "google_ads", "tiktok", "facebook", "instagram"];
+public/control-center/pages/campaign-studio.js:59:  ownerRole: "strategist",
+public/control-center/pages/campaign-studio.js:60:  reviewRole: "admin"
+public/control-center/pages/campaign-studio.js:63:  "content-studio": { role: "writer", domain: "content" },
+public/control-center/pages/campaign-studio.js:64:  "media-studio": { role: "designer", domain: "media" },
+public/control-center/pages/campaign-studio.js:65:  publishing: { role: "publisher", domain: "publishing" },
+public/control-center/pages/campaign-studio.js:66:  "ads-manager": { role: "ads_operator", domain: "campaign" },
+public/control-center/pages/campaign-studio.js:67:  "ai-command": { role: "admin", domain: "governance" }
+public/control-center/pages/campaign-studio.js:120:      <div class="data-row"><span>Route map</span><strong>${escapeHtml(`Content ${titleCase(CAMPAIGN_ROUTE_ROLES["content-studio"].role)} • Media ${titleCase(CAMPAIGN_ROUTE_ROLES["media-studio"].role)} • Publishing ${titleCase(CAMPAIGN_ROUTE_ROLES.publishing.role)} • Ads ${titleCase(CAMPAIGN_ROUTE_ROLES["ads-manager"].role)}`)}</strong></div>
+public/control-center/pages/campaign-studio.js:379:function applyAiCampaignHandoff(projectName, operations, session) {
+public/control-center/pages/campaign-studio.js:380:  const handoff = getSharedHandoff(projectName, "campaign-studio", operations, "ai-command");
+public/control-center/pages/campaign-studio.js:423:    ...(getSharedCampaignRecord(projectName, operations) || {}),
+public/control-center/pages/campaign-studio.js:446:    "Authority: This does not publish, send externally, schedule ads, or approve anything automatically.",
+public/control-center/pages/campaign-studio.js:468:    owner: "Strategist",
+public/control-center/pages/campaign-studio.js:785:        ? "Google Ads"
+public/control-center/pages/campaign-studio.js:787:          ? "TikTok Ads"
+public/control-center/pages/campaign-studio.js:788:          : "Meta Ads";
+public/control-center/pages/campaign-studio.js:799:    ["meta", "google_ads", "tiktok"].forEach((item) => {
+public/control-center/pages/campaign-studio.js:863:  const adsBlockers = [];
+public/control-center/pages/campaign-studio.js:877:  if (!values.budget) adsBlockers.push("Add a working campaign budget before routing to Ads Manager.");
+public/control-center/pages/campaign-studio.js:878:  if (!channelMix.paid.length) adsBlockers.push("No paid channel recommendation is strong enough yet.");
+public/control-center/pages/campaign-studio.js:880:    adsBlockers.push("No paid media platform is connected.");
+public/control-center/pages/campaign-studio.js:882:  if (!values.offerHeadline) adsBlockers.push("Offer headline is still too incomplete for ad packaging.");
+public/control-center/pages/campaign-studio.js:904:    adsBlockers.length ||
+public/control-center/pages/campaign-studio.js:918:    adsBlockers,
+public/control-center/pages/campaign-studio.js:926:      adsBlockers.length +
+public/control-center/pages/campaign-studio.js:1279:  const durableCampaign = getSharedCampaignRecord(projectName, state.data.operations);
+public/control-center/pages/campaign-studio.js:1284:  applyAiCampaignHandoff(projectName, state.data.operations, session);
+public/control-center/pages/campaign-studio.js:1444:  const adsBtn = $("campaignOpenAdsManagerBtn");
+public/control-center/pages/campaign-studio.js:1445:  if (adsBtn) {
+public/control-center/pages/campaign-studio.js:1446:    adsBtn.onclick = () => {
+public/control-center/pages/campaign-studio.js:1447:      const accepted = persistCampaignRouteHandoff({ projectName, session, destinationPage: "ads-manager", createProjectHandoff });
+public/control-center/pages/campaign-studio.js:1448:      if (accepted) navigateTo("ads-manager");
+public/control-center/pages/campaign-studio.js:1525:    applyAiCampaignHandoff(projectName, state.data.operations, session);
+public/control-center/pages/campaign-studio.js:1597:    const strategistNextAction = safeText(strategyGuidance.nextAction, "Review campaign plan");
+public/control-center/pages/campaign-studio.js:1598:    const strategistMode = hasLiveIntelligence
+public/control-center/pages/campaign-studio.js:1620:      "Risk and Compliance Notes",
+public/control-center/pages/campaign-studio.js:1645:          <aside class="mhos-campaign-strategist-panel mhos-context-actions mhos-executive-ai-panel" aria-label="Campaign strategist recommendation">
+public/control-center/pages/campaign-studio.js:1646:            <span class="mhos-campaign-panel-label">Strategist next move</span>
+public/control-center/pages/campaign-studio.js:1647:            <strong class="mhos-campaign-panel-action mhos-executive-guidance">${escapeHtml(strategistNextAction)}</strong>
+public/control-center/pages/campaign-studio.js:1648:            <p class="mhos-campaign-panel-copy mhos-executive-guidance">${escapeHtml(strategistMode)}</p>
+public/control-center/pages/campaign-studio.js:1692:                <span class="mhos-campaign-context-item mhos-context-chip">Owner <strong class="mhos-campaign-context-value">Strategist</strong></span>
+public/control-center/pages/campaign-studio.js:1693:                <span class="mhos-campaign-context-item mhos-context-chip">Review <strong class="mhos-campaign-context-value">Admin</strong></span>
+public/control-center/pages/campaign-studio.js:1736:                    <li><strong>Writer / Content Studio</strong>: Campaign objective, audience map, offer angles, and message priorities.</li>
+public/control-center/pages/campaign-studio.js:1737:                    <li><strong>Designer / Media Studio</strong>: Creative direction, channel format notes, and required asset list.</li>
+public/control-center/pages/campaign-studio.js:1738:                    <li><strong>Publisher / Publishing</strong>: Readiness status, blockers, timeline, and approval notes.</li>
+public/control-center/pages/campaign-studio.js:1739:                    <li><strong>Ads Operator / Ads Manager</strong>: Offer focus, audience emphasis, paid channel mix, and risk notes.</li>
+public/control-center/pages/campaign-studio.js:1746:                <h4 class="insights-subtitle">Recommended Strategist Tools</h4>
+public/control-center/pages/campaign-studio.js:1747:                <div class="mhos-campaign-context-row mhos-context-chip-row" aria-label="Recommended strategist tools">
+public/control-center/pages/campaign-studio.js:1753:              <div class="simple-banner" style="margin-top: 12px;">Safe next move: ${escapeHtml(strategistNextAction)}</div>
+public/control-center/pages/campaign-studio.js:2071:                  "Ads blockers",
+public/control-center/pages/campaign-studio.js:2072:                  executionReadiness.adsBlockers,
+public/control-center/pages/campaign-studio.js:2134:                <button id="campaignOpenAdsManagerBtn" class="quick-action-btn" type="button">
+public/control-center/pages/campaign-studio.js:2135:                  <span class="home-action-title">Send to Ads Manager</span>
+public/control-center/pages/campaign-studio.js:2136:                  <span class="home-action-meta">Open Ads Manager with a campaign handoff attached.</span>
+public/control-center/pages/content-studio-workspace.js:7:  fetchProjectOperations,
+public/control-center/pages/content-studio-workspace.js:55:  ownerRole: "writer",
+public/control-center/pages/content-studio-workspace.js:56:  reviewRole: "compliance_reviewer",
+public/control-center/pages/content-studio-workspace.js:57:  mediaRole: "designer",
+public/control-center/pages/content-studio-workspace.js:58:  handoffRole: "publisher"
+public/control-center/pages/content-studio-workspace.js:63:    id: "content-strategist",
+public/control-center/pages/content-studio-workspace.js:64:    title: "Content Strategist",
+public/control-center/pages/content-studio-workspace.js:67:    suggestedPrompt: "Act as Content Strategist. Build a priority content plan by channel with hooks, outcomes, and handoff order."
+public/control-center/pages/content-studio-workspace.js:70:    id: "copywriter",
+public/control-center/pages/content-studio-workspace.js:71:    title: "Copywriter",
+public/control-center/pages/content-studio-workspace.js:74:    suggestedPrompt: "Act as Copywriter. Produce high-conversion copy with a strong hook, body value stack, and clear CTA."
+public/control-center/pages/content-studio-workspace.js:77:    id: "seo-writer",
+public/control-center/pages/content-studio-workspace.js:78:    title: "SEO Writer",
+public/control-center/pages/content-studio-workspace.js:81:    suggestedPrompt: "Act as SEO Writer. Produce an SEO-structured draft with intent match, metadata, headings, and semantic coverage."
+public/control-center/pages/content-studio-workspace.js:84:    id: "social-writer",
+public/control-center/pages/content-studio-workspace.js:85:    title: "Social Media Writer",
+public/control-center/pages/content-studio-workspace.js:88:    suggestedPrompt: "Act as Social Media Writer. Write platform-native content variants with hook lines, scroll-stopping openings, and CTA endings."
+public/control-center/pages/content-studio-workspace.js:91:    id: "email-writer",
+public/control-center/pages/content-studio-workspace.js:92:    title: "Email Writer",
+public/control-center/pages/content-studio-workspace.js:95:    suggestedPrompt: "Act as Email Writer. Generate subject, preheader, and body with clear structure, benefit-led copy, and CTA clarity."
+public/control-center/pages/content-studio-workspace.js:98:    id: "script-writer",
+public/control-center/pages/content-studio-workspace.js:99:    title: "Script Writer",
+public/control-center/pages/content-studio-workspace.js:102:    suggestedPrompt: "Act as Script Writer. Create a short-form script with opening hook, scene beats, voiceover-friendly lines, and CTA close."
+public/control-center/pages/content-studio-workspace.js:105:    id: "marketplace-copywriter",
+public/control-center/pages/content-studio-workspace.js:106:    title: "Marketplace Copywriter",
+public/control-center/pages/content-studio-workspace.js:109:    suggestedPrompt: "Act as Marketplace Copywriter. Draft title, bullet points, and description focused on conversion while keeping product truth."
+public/control-center/pages/content-studio-workspace.js:114:    purpose: "Validate tone, claims, and compliance before downstream handoffs.",
+public/control-center/pages/content-studio-workspace.js:558:      operations: null,
+public/control-center/pages/content-studio-workspace.js:782:  const operations = session.operations || {};
+public/control-center/pages/content-studio-workspace.js:784:    getSharedHandoff(projectName, "content-studio", operations, "workflows") ||
+public/control-center/pages/content-studio-workspace.js:785:    getSharedHandoff(projectName, "content-studio", operations, "ai-command") ||
+public/control-center/pages/content-studio-workspace.js:786:    getSharedHandoff(projectName, "content-studio", operations)
+public/control-center/pages/content-studio-workspace.js:805:    const [contentItems, tasks, approvals, handoffs, events, operations] = await Promise.all([
+public/control-center/pages/content-studio-workspace.js:811:      fetchProjectOperations(projectName)
+public/control-center/pages/content-studio-workspace.js:821:    session.operations = operations || null;
+public/control-center/pages/content-studio-workspace.js:1903:      if (action === "build-ads") {
+public/control-center/pages/content-studio-workspace.js:2784:    id: "content-strategist",
+public/control-center/pages/content-studio-workspace.js:2785:    title: "Content Strategist",
+public/control-center/pages/content-studio-workspace.js:2788:    suggestedPrompt: "Act as Content Strategist.",
+public/control-center/pages/content-studio-workspace.js:2843:  if (/campaign|ad|ads|caption|social|post|instagram|tiktok|facebook|linkedin/.test(joined)) {
+public/control-center/pages/content-studio-workspace.js:2866:  if (/ad|ads|campaign|variant/.test(text)) {
+public/control-center/pages/content-studio-workspace.js:2867:    return "Ads / Campaign";
+public/control-center/pages/content-studio-workspace.js:2969:  if (destination === "Ads / Campaign") {
+public/control-center/pages/content-studio-workspace.js:3728:      ["Competitor pattern", "Needs research packet", "Winning ads, repeated hooks, claims, visual structure, and offer style"],
+public/control-center/pages/content-studio-workspace.js:3772:          "Top 5 competitor ads",
+public/control-center/pages/content-studio-workspace.js:3804:    ["Thumbnail / hero image", "draft", "High-attention campaign still for ads, reels cover, website, and marketplace use"],
+public/control-center/pages/content-studio-workspace.js:3891:    ["Thumbnail / cover image", "Required for publishing and ads"],
+public/control-center/pages/content-studio-workspace.js:4111:    ["Publishing readiness", "Final assets can move to Publishing / Ads after review and approval"]
+public/control-center/pages/content-studio-workspace.js:4119:    ["Platform versions", "draft", "Instagram, TikTok, YouTube Shorts, Facebook, LinkedIn, website, marketplace, email, and ads variants"],
+public/control-center/pages/content-studio-workspace.js:4147:      title: "Ads Manager",
+public/control-center/pages/content-studio-workspace.js:4213:    ["Approval", "High-risk claims route to Governance before Publishing / Ads"]
+public/control-center/pages/content-studio-workspace.js:4223:    ["Conversion", "Track orders, leads, CRM replies, booking, or campaign goal completion"],
+public/control-center/pages/content-studio-workspace.js:4259:        <button type="button" data-content-publish-action="build-ads">
+public/control-center/pages/content-studio-workspace.js:4288:          <strong>Publishing, ads, legal, and learning must be ready before campaign release</strong>
+public/control-center/pages/content-studio-workspace.js:4350:        <p>Send the final packet to Publishing / Ads only after caption, hashtags, CTA, legal safety, platform specs, approval gates, asset links, schedule plan, A/B variants, and performance learning rules are prepared.</p>
+public/control-center/pages/content-studio-workspace.js:4839:          <strong>Copy, social, ads, voice, landing, and learning assets</strong>
+public/control-center/pages/content-studio-workspace.js:4840:          <p>Prepare the campaign assets around the storyboard so Media Studio, Publishing, Ads, and CRM receive one consistent package.</p>
+public/control-center/pages/content-studio-workspace.js:4958:        ${["Media Studio", "Publishing", "Ads", "CRM", "AI Command", "Library"].map((item) => `
+public/control-center/pages/content-studio-workspace.js:5094:    eyebrow: "Operations",
+public/control-center/pages/content-studio-workspace.js:5197:        <li>Legal/compliance sensitivity?</li>
+public/control-center/pages/media-studio-workspace.js:7:  fetchProjectOperations,
+public/control-center/pages/media-studio-workspace.js:39:  designRole: "designer",
+public/control-center/pages/media-studio-workspace.js:40:  videoRole: "video_lead",
+public/control-center/pages/media-studio-workspace.js:41:  reviewRole: "compliance_reviewer",
+public/control-center/pages/media-studio-workspace.js:42:  handoffRole: "publisher"
+public/control-center/pages/media-studio-workspace.js:54:    id: "video-strategist",
+public/control-center/pages/media-studio-workspace.js:55:    title: "Video Strategist",
+public/control-center/pages/media-studio-workspace.js:58:    suggestedPrompt: "Act as Video Strategist. Convert this brief into a 9:16 short video plan with hook, beat-by-beat storyboard, scene transitions, and CTA timing."
+public/control-center/pages/media-studio-workspace.js:72:    suggestedPrompt: "Act as Brand Guardian. Audit this draft for logo fit, claim risk, brand color compliance, German tone quality, and platform-safe layout."
+public/control-center/pages/media-studio-workspace.js:473:      operations: null,
+public/control-center/pages/media-studio-workspace.js:586:      fetchProjectOperations(backendProjectName)
+public/control-center/pages/media-studio-workspace.js:596:      operationsResult
+public/control-center/pages/media-studio-workspace.js:608:    const operations = fulfilledValue(operationsResult, null);
+public/control-center/pages/media-studio-workspace.js:610:    const failedLoads = results.filter((result) => result.status === "rejected").length;
+public/control-center/pages/media-studio-workspace.js:620:    session.operations = operations || null;
+public/control-center/pages/media-studio-workspace.js:621:    session.error = failedLoads
+public/control-center/pages/media-studio-workspace.js:622:      ? `${failedLoads} Media Studio data source${failedLoads === 1 ? "" : "s"} could not be loaded. Available data is still shown.`
+public/control-center/pages/media-studio-workspace.js:696:  const operations = session.operations || {};
+public/control-center/pages/media-studio-workspace.js:698:    getSharedHandoff(projectName, "media-studio", operations, "workflows") ||
+public/control-center/pages/media-studio-workspace.js:699:    getSharedHandoff(projectName, "media-studio", operations, "ai-command") ||
+public/control-center/pages/media-studio-workspace.js:700:    getSharedHandoff(projectName, "media-studio", operations, "content-studio") ||
+public/control-center/pages/media-studio-workspace.js:701:    getSharedHandoff(projectName, "media-studio", operations)
+public/control-center/pages/media-studio-workspace.js:1282:function capabilityFromOperations(operations, hints = []) {
+public/control-center/pages/media-studio-workspace.js:1283:  const text = clean(JSON.stringify(asObject(operations))).toLowerCase();
+public/control-center/pages/media-studio-workspace.js:1290:  const operations = session.operations;
+public/control-center/pages/media-studio-workspace.js:1291:  const imageConnected = capabilityFromOperations(operations, ["image_generation", "image generator", "image_backend"]);
+public/control-center/pages/media-studio-workspace.js:1292:  const videoConnected = capabilityFromOperations(operations, ["video_generation", "video generator", "video_backend"]);
+public/control-center/pages/media-studio-workspace.js:1293:  const voiceConnected = capabilityFromOperations(operations, ["voice_generation", "audio_generation", "voice_backend"]);
+public/control-center/pages/media-studio-workspace.js:1295:  const publishingConnected = hasBackend || capabilityFromOperations(operations, ["publishing", "handoff"]);
+public/control-center/pages/media-studio-workspace.js:1296:  const approvalsConnected = hasBackend || capabilityFromOperations(operations, ["approval", "approvals"]);
+public/control-center/pages/media-studio-workspace.js:5378:  if (mode.includes("video") || mode.includes("reel") || mode.includes("storyboard")) return "video-strategist";
+public/control-center/pages/media-studio-workspace.js:6280:        "Action: Request Governance/Compliance review for this media job.\nRisk: This may create a backend approval item for a reviewer."
+public/control-center/pages/media-studio-workspace.js:6937:      license: "Check commercial usage and model license before paid ads or marketplace use."
+public/control-center/pages/media-studio-workspace.js:6951:      license: "Paid ads require licensed or verified commercial-safe music/audio."
+public/control-center/pages/media-studio-workspace.js:6957:      best: "Product facts, campaign bible, research notes, hooks, compliance, platform rules.",
+public/control-center/pages/media-studio-workspace.js:7018:      ready: /license|commercial|amazon|claims|compliance|safe/.test(sourceText)
+public/control-center/pages/media-studio-workspace.js:7286:    "License guard: paid ads and marketplace usage require licensed or verified commercial-safe audio."
+public/control-center/pages/media-studio-workspace.js:7298:    "Compliance guard: avoid exaggerated before/after, medical claims, guaranteed results, or unsupported claims."
+public/control-center/pages/media-studio-workspace.js:7696:      { value: "suno-music", label: "Suno music", note: "Paid/cloud music generation. Commercial usage must be verified before ads." }
+public/control-center/pages/media-studio-workspace.js:8151:      bestFor: "Cinematic social video, fashion motion, product ads.",
+public/control-center/pages/media-studio-workspace.js:8972:    ["image", "Image", "Product photos, ads, posts, marketplace visuals."],
+public/control-center/pages/media-studio-workspace.js:9110:    ["image", "Image", "Product photos, ads, posts, thumbnails, marketplace visuals."],
+public/control-center/pages/media-studio-workspace.js:9303:    eyebrow: "Operations",
+public/control-center/pages/media-studio-workspace.js:9363:              <p class="media-section-copy">Start with a brief or handoff. Attach Library assets when needed. Review creative readiness and brand compliance. Save approved assets to Library or prepare handoff to Publishing/Governance. All routing is handoff/review-based and user-triggered. Media Studio does not publish, send, or approve directly.</p>
+public/control-center/pages/media-studio-workspace.js:9427:    // Brand Compliance Checklist Panel
+public/control-center/pages/media-studio-workspace.js:9428:    function renderBrandCompliancePanel() {
+public/control-center/pages/media-studio-workspace.js:9432:        <section class="card media-card media-rail-card" id="mediaBrandCompliancePanel" aria-label="Brand Compliance Checklist">
+public/control-center/pages/media-studio-workspace.js:9435:              <div class="setup-kicker">Brand Compliance</div>
+public/control-center/pages/media-studio-workspace.js:9448:          <div class="media-hint media-readiness-hint" aria-label="Governance review guidance">Prepare Governance Review if any risk or compliance concern exists.</div>
+public/control-center/pages/media-studio-workspace.js:9507:            ${renderBrandCompliancePanel()}
+public/control-center/pages/publishing.js:102:} from "./publishing/publishing-payloads.js";
+public/control-center/pages/publishing.js:1011:function getPublishingHandoff(projectName, operations) {
+public/control-center/pages/publishing.js:1016:    getSharedHandoff(projectName, "publishing", operations, "workflows") ||
+public/control-center/pages/publishing.js:1017:    getSharedHandoff(projectName, "publishing", operations, "ai-command") ||
+public/control-center/pages/publishing.js:1018:    getSharedHandoff(projectName, "publishing", operations)
+public/control-center/pages/publishing.js:1919:        modeId: "operations",
+public/control-center/pages/publishing.js:2064:    const operations = asObject(state.data.operations);
+public/control-center/pages/publishing.js:2069:    const handoff = getPublishingHandoff(projectName, operations);
+public/control-center/pages/ads-manager.js:1:const adsManagerSessions = new Map();
+public/control-center/pages/ads-manager.js:6:    label: "Meta Ads",
+public/control-center/pages/ads-manager.js:13:    label: "Google Ads",
+public/control-center/pages/ads-manager.js:14:    primarySources: ["google_ads", "google", "website"],
+public/control-center/pages/ads-manager.js:20:    label: "TikTok Ads",
+public/control-center/pages/ads-manager.js:27:    label: "Amazon Ads",
+public/control-center/pages/ads-manager.js:104:  if (!adsManagerSessions.has(key)) {
+public/control-center/pages/ads-manager.js:105:    adsManagerSessions.set(key, {
+public/control-center/pages/ads-manager.js:109:  return adsManagerSessions.get(key);
+public/control-center/pages/ads-manager.js:237:function bindAdsManager({
+public/control-center/pages/ads-manager.js:249:  const form = $("adsManagerBudgetForm");
+public/control-center/pages/ads-manager.js:259:  const aiButtons = Array.from(document.querySelectorAll("[data-ads-prompt]"));
+public/control-center/pages/ads-manager.js:262:      const index = Number(button.getAttribute("data-ads-prompt"));
+public/control-center/pages/ads-manager.js:275:  const publishingBtn = $("adsManagerOpenPublishingBtn");
+public/control-center/pages/ads-manager.js:280:  const libraryBtn = $("adsManagerOpenLibraryBtn");
+public/control-center/pages/ads-manager.js:286:export const adsManagerRoute = {
+public/control-center/pages/ads-manager.js:287:  id: "ads-manager",
+public/control-center/pages/ads-manager.js:291:    title: "Ads Manager",
+public/control-center/pages/ads-manager.js:295:    <section class="page is-active" data-page="ads-manager">
+public/control-center/pages/ads-manager.js:296:      <div id="adsManagerRoot"></div>
+public/control-center/pages/ads-manager.js:341:    const root = $("adsManagerRoot");
+public/control-center/pages/ads-manager.js:345:      <div class="ads-manager-wrapper">
+public/control-center/pages/ads-manager.js:346:        <div class="ads-manager-hero">
+public/control-center/pages/ads-manager.js:347:          <div class="ads-manager-hero-copy">
+public/control-center/pages/ads-manager.js:348:            <div class="setup-kicker">Paid Media Operations</div>
+public/control-center/pages/ads-manager.js:349:            <h3 class="setup-hero-title">${escapeHtml(projectName ? `${projectName} Ads Manager` : "Ads Manager")}</h3>
+public/control-center/pages/ads-manager.js:353:            <div class="ads-manager-status">
+public/control-center/pages/ads-manager.js:374:            <button id="adsManagerOpenLibraryBtn" class="btn btn-secondary" type="button">Navigate: Open Library Workspace</button>
+public/control-center/pages/ads-manager.js:375:            <button id="adsManagerOpenPublishingBtn" class="btn btn-primary" type="button">Navigate: Open Publishing Workspace</button>
+public/control-center/pages/ads-manager.js:379:        <div class="ads-manager-layout">
+public/control-center/pages/ads-manager.js:380:          <div class="ads-manager-main">
+public/control-center/pages/ads-manager.js:386:              <form id="adsManagerBudgetForm" class="setup-form-grid setup-form-grid-2">
+public/control-center/pages/ads-manager.js:388:                  id: "adsTotalBudgetInput",
+public/control-center/pages/ads-manager.js:397:                  id: "adsDailyBudgetInput",
+public/control-center/pages/ads-manager.js:406:                  id: "adsSpendInput",
+public/control-center/pages/ads-manager.js:414:                <div class="ads-budget-summary">
+public/control-center/pages/ads-manager.js:440:              <div class="ads-pacing-grid">
+public/control-center/pages/ads-manager.js:458:              <div class="ads-helper-copy">
+public/control-center/pages/ads-manager.js:472:              <div class="ads-platform-grid">
+public/control-center/pages/ads-manager.js:474:                  <div class="ads-platform-card">
+public/control-center/pages/ads-manager.js:475:                    <div class="ads-platform-head">
+public/control-center/pages/ads-manager.js:487:                    <div class="ads-platform-note">
+public/control-center/pages/ads-manager.js:500:              <div class="ads-creative-list">
+public/control-center/pages/ads-manager.js:502:                  <div class="ads-creative-item">
+public/control-center/pages/ads-manager.js:503:                    <div class="ads-creative-head">
+public/control-center/pages/ads-manager.js:510:                    <div class="ads-creative-copy">${escapeHtml(item.creativeSet)}</div>
+public/control-center/pages/ads-manager.js:511:                    <div class="ads-creative-next">${escapeHtml(`Next: ${item.nextNeed}`)}</div>
+public/control-center/pages/ads-manager.js:518:          <aside class="ads-manager-side">
+public/control-center/pages/ads-manager.js:526:                  id: "adsCtrInput",
+public/control-center/pages/ads-manager.js:535:                  id: "adsCpcInput",
+public/control-center/pages/ads-manager.js:544:                  id: "adsCpaInput",
+public/control-center/pages/ads-manager.js:553:                  id: "adsRoasInput",
+public/control-center/pages/ads-manager.js:562:              <div class="ads-metric-grid">
+public/control-center/pages/ads-manager.js:593:              <div class="ads-prompt-list">
+public/control-center/pages/ads-manager.js:595:                  <button class="quick-action-btn" type="button" data-ads-prompt="${index}">
+public/control-center/pages/ads-manager.js:607:    bindAdsManager({
+public/control-center/pages/ads-manager.js:612:      render: () => adsManagerRoute.render({
+public/control-center/pages/insights.js:48:    label: "Paid Ads",
+public/control-center/pages/insights.js:50:    sourceKeys: ["google_ads", "facebook", "instagram", "tiktok", "amazon", "analytics"],
+public/control-center/pages/insights.js:588:    connected: getConnectedValue(["google_ads", "facebook", "instagram", "tiktok", "amazon", "analytics"], connections),
+public/control-center/pages/insights.js:1334:            Prioritized actions the operator can route safely into Campaign, Content, Ads, Publishing, or AI review.
+public/control-center/pages/insights.js:1375:            <button class="btn btn-secondary" type="button" data-insights-route="ads-manager">Open Ads Manager</button>
+public/control-center/pages/research.js:6:  campaign: { route: "campaign-studio", label: "Campaign Studio", destinationRole: "strategist", destinationDomain: "campaign" },
+public/control-center/pages/research.js:7:  content: { route: "content-studio", label: "Content Studio", destinationRole: "writer", destinationDomain: "content" },
+public/control-center/pages/research.js:8:  seo: { route: "workflows", label: "SEO Workflow", destinationRole: "strategist", destinationDomain: "research" },
+public/control-center/pages/research.js:9:  ads: { route: "ads-manager", label: "Ads Manager", destinationRole: "ads_operator", destinationDomain: "campaign" },
+public/control-center/pages/research.js:10:  ai: { route: "ai-command", label: "AI Command", destinationRole: "admin", destinationDomain: "governance" }
+public/control-center/pages/research.js:14:  ownerRole: "analyst",
+public/control-center/pages/research.js:15:  reviewRole: "strategist"
+public/control-center/pages/research.js:77:  const operations = asObject(state.data.operations);
+public/control-center/pages/research.js:78:  const handoffsByRole = asObject(operations.handoffs?.by_role);
+public/control-center/pages/research.js:79:  const approvalsByRole = asObject(operations.approvals?.by_reviewer_role);
+public/control-center/pages/research.js:87:      <div class="data-row"><span>Analyst inbound</span><strong>${escapeHtml(formatCount(asArray(handoffsByRole[RESEARCH_ROLE_DEFAULTS.ownerRole]).length))}</strong></div>
+public/control-center/pages/research.js:88:      <div class="data-row"><span>Strategist review queue</span><strong>${escapeHtml(formatCount(asArray(approvalsByRole[RESEARCH_ROLE_DEFAULTS.reviewRole]).length))}</strong></div>
+public/control-center/pages/research.js:362:      adStyle: firstNonEmpty(meta.ad_style, meta.creative_style, "Ad style not classified"),
+public/control-center/pages/research.js:533:    if (type.includes("ad") || type.includes("paid")) lane = "ads";
+public/control-center/pages/research.js:545:        lane === "ads" ? ACTION_ROUTES.ads :
+public/control-center/pages/research.js:752:      modeId: "ads",
+public/control-center/pages/research.js:981:              : target === "ads"
+public/control-center/pages/research.js:1388:              <p class="research-section-copy">Audience needs, buying intent, search openings, and keyword evidence that can support content, SEO, ads, or campaign decisions.</p>
+public/control-center/pages/research.js:1596:                  <button class="quick-action-btn" type="button" data-research-route="ads">Route to Ads Manager</button>
+runtime/orchestrator-service/lib/insights/learning-engine.js:316:      action: 'Reconnect GA4, conversion tracking, or landing-page analytics so the system can tie content and ads to business outcomes.',
+runtime/orchestrator-service/lib/insights/learning-engine.js:317:      reason: 'Without traffic and conversion data, the system can only optimize for engagement, not revenue or leads.'
+runtime/orchestrator-service/lib/insights/learning-engine.js:429:          label: 'Paid Ads',
+runtime/orchestrator-service/lib/insights/ingestion-service.js:161:function readSyncHistory(projectPaths) {
+runtime/orchestrator-service/lib/insights/ingestion-service.js:750:    if (!['meta_ads', 'google_ads', 'tiktok_ads'].includes(provider)) {
+runtime/orchestrator-service/lib/insights/ingestion-service.js:829:          ...asArray(historyByIntegration['meta-ads']),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:830:          ...asArray(historyByIntegration.meta_ads),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:831:          ...asArray(historyByIntegration['google-ads']),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:832:          ...asArray(historyByIntegration.google_ads),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:833:          ...asArray(historyByIntegration['tiktok-ads']),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:834:          ...asArray(historyByIntegration.tiktok_ads)
+runtime/orchestrator-service/lib/insights/ingestion-service.js:957:    paid_ads: {
+runtime/orchestrator-service/lib/insights/ingestion-service.js:958:      status: evaluate(['meta-ads', 'google-ads', 'tiktok-ads']),
+runtime/orchestrator-service/lib/insights/ingestion-service.js:959:      integrations: ['meta-ads', 'google-ads', 'tiktok-ads']
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1035:      platform: 'Paid Ads',
+runtime/orchestrator-service/lib/insights/ingestion-service.js:1149:  const syncHistory = readSyncHistory(projectPaths);
+runtime/orchestrator-service/lib/security/provider-execution-gate.js:85:    match: /meta|facebook|instagram|tiktok|google|ads/i,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:250:  const payloadSummary = payload && typeof payload === "object" ? payload : { value: payload };
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:251:  const payloadHash = crypto.createHash("sha256").update(stableStringify(payloadSummary)).digest("hex");
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:275:    payloadSummary,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:281:    requestedFor: asString(input.requestedFor || input.requested_for || "admin"),
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:395:    request_payload_summary: context.payloadSummary,
+runtime/orchestrator-service/lib/security/governance-mutation-gate.js:513:      "policy_blocked_for_admin_mutation",
+runtime/orchestrator-service/lib/security/public-alias-compatibility.js:48:  return /customer-operations|integrations|publishing|governance|approvals|sources|workflows|ai\/workflows/i.test(value);
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:22:  ADMIN: "admin",
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:37:    domain: "customer_operations",
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:38:    match: /customer-operations|customer|conversation|message|ticket|crm|call|ivr|whatsapp|sms/i,
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:39:    defaultReadScope: "customer.read",
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:47:    match: /publishing|publish|approval|governance|claim|compliance/i,
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:48:    defaultReadScope: "publishing.read",
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:57:    defaultReadScope: "integration.read",
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:66:    defaultReadScope: "ai.read",
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:73:    domain: "workflow_operations",
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:75:    defaultReadScope: "operations.read",
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:76:    defaultWriteScope: "operations.write",
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:84:    defaultReadScope: "media.read",
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:93:    defaultReadScope: "commerce.read",
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:102:    defaultReadScope: "project.read",
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:111:    defaultReadScope: "platform.health",
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:112:    defaultWriteScope: "platform.admin",
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:146:    defaultReadScope: "general.read",
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:174:  if (publicAlias && /customer-operations|publishing|integration|governance|approval|sources/i.test(routePath)) {
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:178:  const requiredScope = mutation ? domainRule.defaultWriteScope : domainRule.defaultReadScope;
+runtime/orchestrator-service/lib/security/route-permission-catalog.js:211:  if (domain === "customer_operations") return "require_pii_scope_and_access_log";
+runtime/orchestrator-service/lib/integrations/insights-contract.js:22:  if (/ads|campaign/.test(scopeText)) return 'ads';
+runtime/orchestrator-service/lib/integrations/providers/ebay.js:42:    readScopes: ['listings', 'orders'],
+runtime/orchestrator-service/lib/integrations/providers/ebay.js:76:    readScopes: ['listings', 'orders']
+runtime/orchestrator-service/lib/integrations/providers/woocommerce.js:58:    readScopes: ['products', 'orders', 'sales'],
+runtime/orchestrator-service/lib/integrations/providers/woocommerce.js:108:    readScopes: ['products', 'orders', 'sales']
+runtime/orchestrator-service/lib/integrations/providers/woocommerce.js:142:      readScopes: ['orders', 'sales']
+runtime/orchestrator-service/lib/integrations/providers/google.js:136:async function fetchGoogleAdsCustomer(ctx) {
+runtime/orchestrator-service/lib/integrations/providers/google.js:149:    url: `https://googleads.googleapis.com/v18/customers/${customerId.replace(/-/g, '')}`,
+runtime/orchestrator-service/lib/integrations/providers/google.js:153:  const error = buildResponseError('google-ads', response, 'Google Ads request failed');
+runtime/orchestrator-service/lib/integrations/providers/google.js:253:    readScopes: ['traffic', 'sessions', 'events', 'conversions'],
+runtime/orchestrator-service/lib/integrations/providers/google.js:303:    readScopes: ['traffic', 'sessions', 'events', 'conversions']
+runtime/orchestrator-service/lib/integrations/providers/google.js:331:    readScopes: ['seo', 'queries', 'pages'],
+runtime/orchestrator-service/lib/integrations/providers/google.js:375:    readScopes: ['seo', 'queries', 'pages']
+runtime/orchestrator-service/lib/integrations/providers/google.js:404:    readScopes: ['posts', 'insights'],
+runtime/orchestrator-service/lib/integrations/providers/google.js:447:    readScopes: ['posts', 'insights']
+runtime/orchestrator-service/lib/integrations/providers/google.js:451:async function connectGoogleAds(ctx) {
+runtime/orchestrator-service/lib/integrations/providers/google.js:462:  const customer = await fetchGoogleAdsCustomer(ctx);
+runtime/orchestrator-service/lib/integrations/providers/google.js:467:    health: 'Google Ads account access validated successfully.',
+runtime/orchestrator-service/lib/integrations/providers/google.js:469:      scope: 'ads',
+runtime/orchestrator-service/lib/integrations/providers/google.js:470:      provider: 'google_ads',
+runtime/orchestrator-service/lib/integrations/providers/google.js:473:    notes: 'Connected through the Google Ads API.',
+runtime/orchestrator-service/lib/integrations/providers/google.js:475:    permissionScope: 'Google Ads developer token + customer OAuth access',
+runtime/orchestrator-service/lib/integrations/providers/google.js:476:    dataScopes: ['ads'],
+runtime/orchestrator-service/lib/integrations/providers/google.js:477:    readScopes: ['ads', 'campaigns', 'insights'],
+runtime/orchestrator-service/lib/integrations/providers/google.js:478:    writeScopes: ['ads updates'],
+runtime/orchestrator-service/lib/integrations/providers/google.js:505:    readScopes: ['files'],
+runtime/orchestrator-service/lib/integrations/providers/google.js:533:    readScopes: ['tracking config'],
+runtime/orchestrator-service/lib/integrations/providers/google.js:554:    if (ctx.integrationId === 'google-ads') {
+runtime/orchestrator-service/lib/integrations/providers/google.js:555:      return connectGoogleAds(ctx);
+runtime/orchestrator-service/lib/integrations/providers/google.js:572:  integrationIds: ['ga4', 'search-console', 'youtube', 'google-ads', 'google-drive', 'gtm'],
+runtime/orchestrator-service/lib/integrations/providers/shopify.js:11:    url: `https://${getStoreDomain(ctx.config)}/admin/api/2025-01/graphql.json`,
+runtime/orchestrator-service/lib/integrations/providers/shopify.js:14:      'X-Shopify-Access-Token': ctx.credentials.adminToken
+runtime/orchestrator-service/lib/integrations/providers/shopify.js:33:  requireFields(ctx.credentials, ['adminToken'], 'credentials');
+runtime/orchestrator-service/lib/integrations/providers/shopify.js:59:    health: 'Shopify Admin API token validated successfully.',
+runtime/orchestrator-service/lib/integrations/providers/shopify.js:70:    notes: 'Connected through the Shopify Admin GraphQL API.',
+runtime/orchestrator-service/lib/integrations/providers/shopify.js:71:    permissionScope: 'Store domain + Admin API token',
+runtime/orchestrator-service/lib/integrations/providers/shopify.js:73:    readScopes: ['products', 'orders', 'sales'],
+runtime/orchestrator-service/lib/integrations/providers/shopify.js:152:    readScopes: ['products', 'orders', 'sales']
+runtime/orchestrator-service/lib/integrations/providers/shopify.js:203:    readScopes: ['orders', 'sales']
+runtime/orchestrator-service/lib/integrations/providers/website.js:47:    readScopes: ['traffic'],
+runtime/orchestrator-service/lib/integrations/providers/website.js:76:    readScopes: ['traffic'],
+runtime/orchestrator-service/lib/integrations/providers/website.js:115:      readScopes: ['traffic']
+runtime/orchestrator-service/lib/integrations/providers/meta.js:98:    readScopes: ['posts', 'insights'],
+runtime/orchestrator-service/lib/integrations/providers/meta.js:142:    readScopes: ['posts', 'insights']
+runtime/orchestrator-service/lib/integrations/providers/meta.js:173:    readScopes: ['posts', 'insights'],
+runtime/orchestrator-service/lib/integrations/providers/meta.js:219:    readScopes: ['posts', 'insights']
+runtime/orchestrator-service/lib/integrations/providers/meta.js:223:async function connectMetaAds(ctx) {
+runtime/orchestrator-service/lib/integrations/providers/meta.js:236:    health: 'Meta Ads account access validated successfully.',
+runtime/orchestrator-service/lib/integrations/providers/meta.js:238:      scope: 'ads',
+runtime/orchestrator-service/lib/integrations/providers/meta.js:239:      provider: 'meta_ads',
+runtime/orchestrator-service/lib/integrations/providers/meta.js:244:    permissionScope: 'Meta Ads account access',
+runtime/orchestrator-service/lib/integrations/providers/meta.js:245:    dataScopes: ['ads'],
+runtime/orchestrator-service/lib/integrations/providers/meta.js:246:    readScopes: ['ads', 'campaigns', 'insights'],
+runtime/orchestrator-service/lib/integrations/providers/meta.js:247:    writeScopes: ['ads updates'],
+runtime/orchestrator-service/lib/integrations/providers/meta.js:256:async function syncMetaAds(ctx) {
+runtime/orchestrator-service/lib/integrations/providers/meta.js:271:    health: 'Meta Ads insights synced successfully.',
+runtime/orchestrator-service/lib/integrations/providers/meta.js:273:      scope: 'ads',
+runtime/orchestrator-service/lib/integrations/providers/meta.js:274:      provider: 'meta_ads',
+runtime/orchestrator-service/lib/integrations/providers/meta.js:284:    notes: 'Synced Meta Ads campaign metrics.',
+runtime/orchestrator-service/lib/integrations/providers/meta.js:288:    dataScopes: ['ads'],
+runtime/orchestrator-service/lib/integrations/providers/meta.js:289:    readScopes: ['ads', 'campaigns', 'insights']
+runtime/orchestrator-service/lib/integrations/providers/meta.js:312:    dataScopes: ['traffic', 'ads'],
+runtime/orchestrator-service/lib/integrations/providers/meta.js:313:    readScopes: ['events', 'conversions', 'ads'],
+runtime/orchestrator-service/lib/integrations/providers/meta.js:331:    if (ctx.integrationId === 'meta-ads') {
+runtime/orchestrator-service/lib/integrations/providers/meta.js:332:      return type === 'sync' || type === 'import' ? syncMetaAds(ctx) : connectMetaAds(ctx);
+runtime/orchestrator-service/lib/integrations/providers/meta.js:346:  integrationIds: ['facebook', 'instagram', 'meta-ads', 'meta-pixel'],
+runtime/orchestrator-service/lib/integrations/providers/ops.js:37:    readScopes: ['notifications'],
+runtime/orchestrator-service/lib/integrations/providers/ops.js:73:    readScopes: ['notifications'],
+runtime/orchestrator-service/lib/integrations/providers/ops.js:112:    readScopes: ['docs'],
+runtime/orchestrator-service/lib/integrations/providers/ops.js:159:    readScopes: ['events'],
+runtime/orchestrator-service/lib/integrations/providers/ops.js:205:    readScopes: ['traffic', 'events', 'conversions'],
+runtime/orchestrator-service/lib/integrations/providers/ops.js:242:    readScopes: ['posts', 'insights'],
+runtime/orchestrator-service/lib/integrations/providers/ops.js:283:    readScopes: ['email'],
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:65:    readScopes: ['posts', 'insights'],
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:108:    readScopes: ['posts', 'insights']
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:112:async function connectTikTokAds(ctx) {
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:135:    health: 'TikTok Ads advertiser access validated successfully.',
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:137:      scope: 'ads',
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:138:      provider: 'tiktok_ads',
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:143:    permissionScope: 'TikTok Ads advertiser access',
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:144:    dataScopes: ['ads'],
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:145:    readScopes: ['ads', 'campaigns', 'insights'],
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:146:    writeScopes: ['ads updates'],
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:155:async function syncTikTokAds(ctx) {
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:175:    health: 'TikTok Ads reporting sync completed successfully.',
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:177:      scope: 'ads',
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:178:      provider: 'tiktok_ads',
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:189:    notes: 'Synced TikTok Ads campaign performance.',
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:193:    dataScopes: ['ads'],
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:194:    readScopes: ['ads', 'campaigns', 'insights']
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:233:    dataScopes: ['traffic', 'ads'],
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:234:    readScopes: ['events', 'conversions', 'ads'],
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:249:    if (ctx.integrationId === 'tiktok-ads') {
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:250:      return type === 'sync' || type === 'import' ? syncTikTokAds(ctx) : connectTikTokAds(ctx);
+runtime/orchestrator-service/lib/integrations/providers/tiktok.js:264:  integrationIds: ['tiktok', 'tiktok-ads', 'tiktok-pixel'],
+runtime/orchestrator-service/lib/integrations/provider-utils.js:50:  readScopes = [],
+runtime/orchestrator-service/lib/integrations/provider-utils.js:65:    read_scopes: readScopes,
+runtime/orchestrator-service/lib/integrations/storage.js:25: * Suitable for optional/non-critical reads where missing or bad data should
+runtime/orchestrator-service/lib/execution/scheduler-helpers.js:36:    ads: '/build_ad_execution_package'
+runtime/orchestrator-service/lib/execution/scheduler-storage.js:29:  function readSchedulerJobs(projectName) {
+runtime/orchestrator-service/lib/execution/scheduler-storage.js:62:    readSchedulerJobs,
+runtime/orchestrator-service/lib/execution/performance-storage.js:96:  function writeRecommendationsStore(projectName, store) {
+runtime/orchestrator-service/lib/execution/performance-storage.js:115:    writeRecommendationsStore
+runtime/orchestrator-service/lib/execution/intelligence-loop.js:11:    writeRecommendationsStore,
+runtime/orchestrator-service/lib/execution/intelligence-loop.js:68:    writeRecommendationsStore(safeProject, recommendationStore);
+runtime/orchestrator-service/lib/execution/execution-job-bridge.js:10:    resolveCampaignPackageForAds,
+runtime/orchestrator-service/lib/execution/execution-job-bridge.js:116:    if (job.type === 'ads') {
+runtime/orchestrator-service/lib/execution/execution-job-bridge.js:117:      const campaignPackage = resolveCampaignPackageForAds(project, payload);
+runtime/orchestrator-service/lib/ai/providers/openai.js:245:      operationsPlan: parsed.operationsPlan || parsed.operations_plan || null,
+runtime/orchestrator-service/lib/ai/providers/openai.js:268:    operationsPlan: null,
+runtime/orchestrator-service/lib/ai/providers/openai.js:296:              'Return actionable marketing output, not a process description, unless the command asks for operations.',
+runtime/orchestrator-service/lib/ai/providers/openai.js:306:              'For outputType "operations_plan", include operationsPlan with tasks, timeline, owners, handoffs, approvals, dependencies.',
+runtime/orchestrator-service/lib/ai/providers/openai.js:407:        operationsPlan: normalized.operationsPlan,
+runtime/orchestrator-service/lib/ai/provider-config.js:34:    label: 'Campaign Strategist',
+runtime/orchestrator-service/lib/ai/provider-config.js:38:      'You are the Campaign Strategist mode for MH Assistant OS.',
+runtime/orchestrator-service/lib/ai/provider-config.js:53:  ads: {
+runtime/orchestrator-service/lib/ai/provider-config.js:54:    label: 'Ads Specialist',
+runtime/orchestrator-service/lib/ai/provider-config.js:58:      'You are the Ads Specialist mode for MH Assistant OS.',
+runtime/orchestrator-service/lib/ai/provider-config.js:74:    label: 'Research Analyst',
+runtime/orchestrator-service/lib/ai/provider-config.js:78:      'You are the Research Analyst mode for MH Assistant OS.',
+runtime/orchestrator-service/lib/ai/provider-config.js:83:  operations: {
+runtime/orchestrator-service/lib/ai/provider-config.js:84:    label: 'Operations Planner',
+runtime/orchestrator-service/lib/ai/provider-config.js:86:    outputType: 'operations_plan',
+runtime/orchestrator-service/lib/ai/provider-config.js:88:      'You are the Operations Planner mode for MH Assistant OS.',
+runtime/orchestrator-service/lib/ai/provider-config.js:98:    campaign_strategist: 'campaign',
+runtime/orchestrator-service/lib/ai/provider-config.js:100:    ads_specialist: 'ads',
+runtime/orchestrator-service/lib/ai/provider-config.js:102:    research_analyst: 'research',
+runtime/orchestrator-service/lib/ai/provider-config.js:103:    operations_planner: 'operations'
+runtime/orchestrator-service/lib/ops/backbone.js:24:  allow_admin_override: true,
+runtime/orchestrator-service/lib/ops/backbone.js:82:    route_targets: ['campaign-studio', 'content-studio', 'media-studio', 'publishing', 'ads-manager', 'task-center', 'governance']
+runtime/orchestrator-service/lib/ops/backbone.js:116:    id: 'strategist',
+runtime/orchestrator-service/lib/ops/backbone.js:117:    label: 'Strategist',
+runtime/orchestrator-service/lib/ops/backbone.js:123:    id: 'writer',
+runtime/orchestrator-service/lib/ops/backbone.js:124:    label: 'Writer',
+runtime/orchestrator-service/lib/ops/backbone.js:130:    id: 'designer',
+runtime/orchestrator-service/lib/ops/backbone.js:131:    label: 'Designer',
+runtime/orchestrator-service/lib/ops/backbone.js:137:    id: 'video_lead',
+runtime/orchestrator-service/lib/ops/backbone.js:138:    label: 'Video Lead',
+runtime/orchestrator-service/lib/ops/backbone.js:144:    id: 'publisher',
+runtime/orchestrator-service/lib/ops/backbone.js:145:    label: 'Publisher',
+runtime/orchestrator-service/lib/ops/backbone.js:151:    id: 'ads_operator',
+runtime/orchestrator-service/lib/ops/backbone.js:152:    label: 'Ads Operator',
+runtime/orchestrator-service/lib/ops/backbone.js:153:    routes: ['ads-manager', 'campaign-studio', 'workflows', 'insights'],
+runtime/orchestrator-service/lib/ops/backbone.js:155:    actions: ['launch_ads', 'update_budget', 'request_creative', 'analyze_paid']
+runtime/orchestrator-service/lib/ops/backbone.js:158:    id: 'analyst',
+runtime/orchestrator-service/lib/ops/backbone.js:159:    label: 'Analyst',
+runtime/orchestrator-service/lib/ops/backbone.js:165:    id: 'compliance_reviewer',
+runtime/orchestrator-service/lib/ops/backbone.js:166:    label: 'Compliance Reviewer',
+runtime/orchestrator-service/lib/ops/backbone.js:172:    id: 'admin',
+runtime/orchestrator-service/lib/ops/backbone.js:173:    label: 'Admin',
+runtime/orchestrator-service/lib/ops/backbone.js:181:  home: ['strategist', 'analyst', 'admin'],
+runtime/orchestrator-service/lib/ops/backbone.js:182:  'campaign-studio': ['strategist', 'ads_operator', 'admin'],
+runtime/orchestrator-service/lib/ops/backbone.js:183:  'content-studio': ['writer', 'strategist', 'compliance_reviewer', 'admin'],
+runtime/orchestrator-service/lib/ops/backbone.js:184:  'media-studio': ['designer', 'video_lead', 'compliance_reviewer', 'admin'],
+runtime/orchestrator-service/lib/ops/backbone.js:185:  publishing: ['publisher', 'compliance_reviewer', 'admin'],
+runtime/orchestrator-service/lib/ops/backbone.js:186:  research: ['strategist', 'analyst', 'writer', 'admin'],
+runtime/orchestrator-service/lib/ops/backbone.js:187:  governance: ['compliance_reviewer', 'admin', 'analyst'],
+runtime/orchestrator-service/lib/ops/backbone.js:188:  'ads-manager': ['ads_operator', 'strategist', 'analyst', 'admin'],
+runtime/orchestrator-service/lib/ops/backbone.js:189:  insights: ['analyst', 'strategist', 'ads_operator', 'admin'],
+runtime/orchestrator-service/lib/ops/backbone.js:190:  integrations: ['admin'],
+runtime/orchestrator-service/lib/ops/backbone.js:192:  library: ['designer', 'video_lead', 'publisher', 'admin'],
+runtime/orchestrator-service/lib/ops/backbone.js:193:  settings: ['admin']
+runtime/orchestrator-service/lib/ops/backbone.js:199:    owner_role: 'strategist',
+runtime/orchestrator-service/lib/ops/backbone.js:200:    review_role: 'admin',
+runtime/orchestrator-service/lib/ops/backbone.js:201:    handoff_to: ['writer', 'designer', 'ads_operator', 'analyst'],
+runtime/orchestrator-service/lib/ops/backbone.js:207:    owner_role: 'writer',
+runtime/orchestrator-service/lib/ops/backbone.js:208:    review_role: 'compliance_reviewer',
+runtime/orchestrator-service/lib/ops/backbone.js:209:    handoff_to: ['designer', 'video_lead', 'publisher', 'compliance_reviewer'],
+runtime/orchestrator-service/lib/ops/backbone.js:215:    owner_role: 'designer',
+runtime/orchestrator-service/lib/ops/backbone.js:216:    review_role: 'compliance_reviewer',
+runtime/orchestrator-service/lib/ops/backbone.js:217:    handoff_to: ['publisher', 'ads_operator', 'compliance_reviewer'],
+runtime/orchestrator-service/lib/ops/backbone.js:223:    owner_role: 'publisher',
+runtime/orchestrator-service/lib/ops/backbone.js:224:    review_role: 'compliance_reviewer',
+runtime/orchestrator-service/lib/ops/backbone.js:225:    handoff_to: ['analyst', 'strategist'],
+runtime/orchestrator-service/lib/ops/backbone.js:231:    owner_role: 'analyst',
+runtime/orchestrator-service/lib/ops/backbone.js:232:    review_role: 'strategist',
+runtime/orchestrator-service/lib/ops/backbone.js:233:    handoff_to: ['strategist', 'writer', 'ads_operator'],
+runtime/orchestrator-service/lib/ops/backbone.js:239:    owner_role: 'compliance_reviewer',
+runtime/orchestrator-service/lib/ops/backbone.js:240:    review_role: 'admin',
+runtime/orchestrator-service/lib/ops/backbone.js:241:    handoff_to: ['admin'],
+runtime/orchestrator-service/lib/ops/backbone.js:258:  low: ['compliance_reviewer'],
+runtime/orchestrator-service/lib/ops/backbone.js:259:  medium: ['compliance_reviewer', 'strategist'],
+runtime/orchestrator-service/lib/ops/backbone.js:260:  high: ['compliance_reviewer', 'admin'],
+runtime/orchestrator-service/lib/ops/backbone.js:261:  critical: ['compliance_reviewer', 'admin']
+runtime/orchestrator-service/lib/ops/backbone.js:361:  const roleId = normalizeRoleKey(source.role, 'strategist');
+runtime/orchestrator-service/lib/ops/backbone.js:401:    active_role: 'strategist',
+runtime/orchestrator-service/lib/ops/backbone.js:456:  const paths = getOperationsPaths(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:468:  const paths = getOperationsPaths(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:485:    title: 'Team operations model updated',
+runtime/orchestrator-service/lib/ops/backbone.js:518:  if (routeTarget === 'campaign-studio' || routeTarget === 'ads-manager') return 'campaign';
+runtime/orchestrator-service/lib/ops/backbone.js:533:  let ownerRole = domain.owner_role || 'strategist';
+runtime/orchestrator-service/lib/ops/backbone.js:538:      ownerRole = 'video_lead';
+runtime/orchestrator-service/lib/ops/backbone.js:540:      ownerRole = 'designer';
+runtime/orchestrator-service/lib/ops/backbone.js:548:    reviewer_role: normalizeRoleKey(record.reviewer_role || domain.review_role, domain.review_role || 'admin'),
+runtime/orchestrator-service/lib/ops/backbone.js:774:function getOperationsPaths(projectName) {
+runtime/orchestrator-service/lib/ops/backbone.js:805:  ensureOperationsFiles(paths);
+runtime/orchestrator-service/lib/ops/backbone.js:809:function ensureOperationsFiles(paths) {
+runtime/orchestrator-service/lib/ops/backbone.js:862:      allow_admin_override: true,
+runtime/orchestrator-service/lib/ops/backbone.js:875:      campaign: 'Operations lead',
+runtime/orchestrator-service/lib/ops/backbone.js:876:      publishing: 'Publisher',
+runtime/orchestrator-service/lib/ops/backbone.js:877:      compliance: 'Compliance Reviewer',
+runtime/orchestrator-service/lib/ops/backbone.js:878:      overrides: 'Admin'
+runtime/orchestrator-service/lib/ops/backbone.js:938: * readCollection — reads a durable JSON array file.
+runtime/orchestrator-service/lib/ops/backbone.js:991:  const paths = getOperationsPaths(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:1015:  const paths = getOperationsPaths(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:1043:  const paths = getOperationsPaths(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:1048:  const paths = getOperationsPaths(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:1072:  const paths = getOperationsPaths(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:1114:  const paths = getOperationsPaths(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:1119:  const paths = getOperationsPaths(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:1165:  const paths = getOperationsPaths(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:1227:  const paths = getOperationsPaths(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:1241:  const paths = getOperationsPaths(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:1315:  const paths = getOperationsPaths(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:1484:  const paths = getOperationsPaths(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:1601:        campaign: roleDisplay(team, 'strategist'),
+runtime/orchestrator-service/lib/ops/backbone.js:1602:        content: roleDisplay(team, 'writer'),
+runtime/orchestrator-service/lib/ops/backbone.js:1603:        media: roleDisplay(team, 'designer'),
+runtime/orchestrator-service/lib/ops/backbone.js:1604:        publishing: roleDisplay(team, 'publisher'),
+runtime/orchestrator-service/lib/ops/backbone.js:1605:        compliance: roleDisplay(team, 'compliance_reviewer'),
+runtime/orchestrator-service/lib/ops/backbone.js:1606:        admin: roleDisplay(team, 'admin')
+runtime/orchestrator-service/lib/ops/backbone.js:1620:        allow_admin_override: asBoolean(governance.policy_rules?.allow_admin_override, true)
+runtime/orchestrator-service/lib/ops/backbone.js:1642:    role: asString(item.owner_role || item.review_role || 'writer'),
+runtime/orchestrator-service/lib/ops/backbone.js:1667:    role: asString(job.owner_role || job.review_role || 'designer'),
+runtime/orchestrator-service/lib/ops/backbone.js:1686:  const paths = getOperationsPaths(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:1762:  const paths = getOperationsPaths(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:1767:  const paths = getOperationsPaths(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:1772:  const paths = getOperationsPaths(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:1899:  const paths = getOperationsPaths(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:1909:  const paths = getOperationsPaths(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:1914:  const paths = getOperationsPaths(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:2031:  const paths = getOperationsPaths(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:2048:  const paths = getOperationsPaths(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:2053:  const paths = getOperationsPaths(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:2162:  const paths = getOperationsPaths(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:2220:  const paths = getOperationsPaths(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:2225:  const paths = getOperationsPaths(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:2230:  const paths = getOperationsPaths(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:2279:  const paths = getOperationsPaths(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:2289:  const paths = getOperationsPaths(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:2341:  const paths = getOperationsPaths(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:2351:  const paths = getOperationsPaths(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:2406:  const paths = getOperationsPaths(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:2416:  const paths = getOperationsPaths(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:2421:  const paths = getOperationsPaths(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:2426:  const paths = getOperationsPaths(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:2558:  const paths = getOperationsPaths(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:2563:  const paths = getOperationsPaths(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:2568:  const paths = getOperationsPaths(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:2758:  const paths = getOperationsPaths(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:2763:  const paths = getOperationsPaths(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:2788:      'admin',
+runtime/orchestrator-service/lib/ops/backbone.js:2789:    'admin'
+runtime/orchestrator-service/lib/ops/backbone.js:2954:  const paths = getOperationsPaths(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:2979:  const destinationRole = getDomainDef(destinationDomain)?.owner_role || sourceRouting.reviewer_role || 'admin';
+runtime/orchestrator-service/lib/ops/backbone.js:3100:  const paths = getOperationsPaths(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:3122:  const paths = getOperationsPaths(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:3160:  const paths = getOperationsPaths(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:3184:    assignee: roleDisplay(team, 'publisher'),
+runtime/orchestrator-service/lib/ops/backbone.js:3185:    role: 'publisher',
+runtime/orchestrator-service/lib/ops/backbone.js:3194:      owner_role: 'publisher',
+runtime/orchestrator-service/lib/ops/backbone.js:3195:      review_role: 'compliance_reviewer'
+runtime/orchestrator-service/lib/ops/backbone.js:3501:      role: 'admin',
+runtime/orchestrator-service/lib/ops/backbone.js:3847:function buildOperationsSnapshot(projectName, options = {}) {
+runtime/orchestrator-service/lib/ops/backbone.js:3848:  const paths = getOperationsPaths(projectName);
+runtime/orchestrator-service/lib/ops/backbone.js:4069:  buildOperationsSnapshot,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:122:  ads: 'ads-manager',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:125:  operations: 'workflows'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:132:  ads: 'ad_ideas',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:135:  operations: 'operations_plan'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:139:  strategist: 'campaign',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:140:  writer: 'content',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:141:  designer: 'content',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:143:  video_lead: 'content',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:144:  publisher: 'operations',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:145:  ads: 'ads',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:146:  analyst: 'seo',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:147:  researcher: 'research',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:148:  compliance_reviewer: 'operations',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:149:  operations: 'operations',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:206:    'Guidance-only response. Do not execute operations. Do not claim execution happened.'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:209:  const specialistInstruction = specialistId === 'writer'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:210:    ? 'As Content Writer, return actual copy now: hooks, captions, CTA lines, emails, scripts, and landing copy. Never answer with only a description of what the copy could be.'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:211:    : specialistId === 'video_lead'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:212:      ? 'As Video Lead, return actual script output now: hooks, script lines, storyboard beats, and shot-list style sequencing when requested.'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:213:      : specialistId === 'strategist'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:214:        ? 'As Strategist, return a practical priority plan with positioning, rationale, and ordered next moves.'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:215:        : specialistId === 'compliance_reviewer'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:216:          ? 'As Compliance Reviewer, return concrete risks, safer wording replacements, and approval notes.'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:217:          : specialistId === 'operations'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:218:            ? 'As Operations Lead, return draft checklist/task/workflow steps only; do not execute or claim execution.'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:261:    'Do not claim operations were run.',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:276:    strategist: [
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:279:      "When asked for help, think like a senior strategist and keep the answer practical and decision-oriented."
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:281:    writer: [
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:291:    video_lead: [
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:292:      "Specialist role: Short-Form Video Lead.",
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:296:    publisher: [
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:301:    ads: [
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:304:      "When asked about ads, provide practical paid-growth recommendations and next test ideas."
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:311:    compliance: [
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:313:      "Focus on approval safety, claims review, legal/compliance risk, disclaimers, and governance boundaries.",
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:316:    operations: [
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:321:    customer_ops: [
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:322:      "Specialist role: Customer Experience Operations Lead.",
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:328:      "Focus on leads, follow-up drafts, CRM notes, offers, pipeline thinking, and relationship management.",
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:333:      "Think across strategy, content, media, publishing, ads, SEO, compliance, operations, customer operations, and sales.",
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:535:  if (intent === 'ads') return 'ads-manager';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:540:  if (intent === 'operations') return 'workflows';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:563:      intent: 'ads',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:564:      modeId: 'ads',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:567:      pattern: /\b(ad ideas?|ad copy|ads?|facebook ads?|meta ads?|tiktok ads?|google ads?|paid media|primary text|headline|hooks?|cta|creative angles?|targeting angles?)\b/
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:598:      intent: 'operations',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:599:      modeId: 'operations',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:601:      outputType: 'operations_plan',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:609:      intent: selectedMode === 'operations' ? 'operations' : selectedMode,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:611:      actionType: selectedMode === 'operations' ? 'workflow' : 'recommendation',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:629:  if (matches(/\b(approve|approval|review)\b/) && !['ads', 'content', 'campaign'].includes(intent)) {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:632:    modeId = modeId || 'operations';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:633:    outputType = 'operations_plan';
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:634:  } else if (matches(/\b(task|todo|follow up|assign)\b/) && intent === 'operations') {
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:682:  const operations = asObject(deps.buildOperations(projectName));
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:696:    recent_handoffs: asArray(operations.handoffs?.items).filter((item) => asString(item.destination_page) === 'research').slice(0, 3)
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:705:    operations,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:844:    ['content-studio', 'media-studio', 'publishing', 'ads-manager'],
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:926:  const operationsPlan = outputType === 'operations_plan'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:927:    ? normalizeStructuredObject(providerOutput.operationsPlan || providerOutput.raw?.operationsPlan || providerOutput.raw?.operations_plan)
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:950:        normalizeRouteSuggestion('ads-manager', 'Prepare paid media activation.')
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:970:      owner: classified.resolvedModeId === 'operations' ? 'Operations Planner' : 'mh-assistant',
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1001:    operationsPlan,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1024:    ? 'ads-manager'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1039:      context.summary.recommendations[0] || 'No recommendation stack was available, so the workflow leaned on project settings and operations context.'
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1461:            mutated_operations: false,
+runtime/orchestrator-service/lib/ops/ai-orchestrator.js:1638:            mutated_operations: false
+runtime/orchestrator-service/lib/data/execution-artifact-writer-adapter.js:64:class ExecutionArtifactWriterAdapter {
+runtime/orchestrator-service/lib/data/execution-artifact-writer-adapter.js:70:      throw new Error('ExecutionArtifactWriterAdapter requires a resolver instance');
+runtime/orchestrator-service/lib/data/execution-artifact-writer-adapter.js:97:  writeDual(params = {}, writer) {
+runtime/orchestrator-service/lib/data/execution-artifact-writer-adapter.js:156:        writer(target.targetPath, params.payload, params.encoding);
+runtime/orchestrator-service/lib/data/execution-artifact-writer-adapter.js:231:        `[ExecutionArtifactWriterAdapter] failed to persist telemetry: ${error.message}`
+runtime/orchestrator-service/lib/data/execution-artifact-writer-adapter.js:236:      `[ExecutionArtifactWriterAdapter] project=${result.project} domain=${result.domain} artifact=${result.artifact_type} id=${result.identifier || 'n/a'} canonical=${result.canonical_path} legacy=${result.legacy_path} statuses=${result.writes.map((entry) => `${entry.root}:${entry.status}`).join(',')}`
+runtime/orchestrator-service/lib/data/execution-artifact-writer-adapter.js:242:  ExecutionArtifactWriterAdapter
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:97:      fallback_reads: 0,
+runtime/orchestrator-service/lib/data/unified-data-path-resolver.js:377:      this.telemetry.fallback_reads += 1;
+runtime/orchestrator-service/lib/customer-operations/contracts/message-contract.js:39:      source_runtime: 'mh-os-customer-operations'
+runtime/orchestrator-service/lib/customer-operations/contracts/unified-inbox-contract.js:57:      source_runtime: 'mh-os-customer-operations'
+runtime/orchestrator-service/lib/customer-operations/contracts/conversation-contract.js:32:      source_runtime: 'mh-os-customer-operations'
+runtime/orchestrator-service/lib/customer-operations/contracts/README.md:1:# Customer Operations Contracts
+runtime/orchestrator-service/lib/customer-operations/contracts/ticket-contract.js:33:      source_runtime: 'mh-os-customer-operations'
+runtime/orchestrator-service/lib/customer-operations/contracts/escalation-contract.js:55:      source_runtime: 'mh-os-customer-operations'
+runtime/orchestrator-service/lib/customer-operations/contracts/customer-profile-contract.js:43:      source_runtime: 'mh-os-customer-operations'
+runtime/orchestrator-service/lib/customer-operations/contracts/sla-policy-contract.js:53:      source_runtime: 'mh-os-customer-operations'
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:40:  createCustomerOperationsReadinessSnapshot
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:41:} = require('./readiness/customer-operations-readiness-snapshot');
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:43:function createCustomerOperationsRuntime() {
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:111:      snapshot: () => createCustomerOperationsReadinessSnapshot(runtime)
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:116:        runtime: 'mh-os-customer-operations',
+runtime/orchestrator-service/lib/customer-operations/customer-operations-runtime.js:142:  createCustomerOperationsRuntime
+runtime/orchestrator-service/lib/customer-operations/projections/customer-center-projection.js:45:    runtime: 'mh-os-customer-operations',
+runtime/orchestrator-service/lib/customer-operations/README.md:1:# Customer Operations Runtime
+runtime/orchestrator-service/lib/customer-operations/README.md:13:- AI customer operations
+runtime/orchestrator-service/lib/customer-operations/conversations/README.md:6:- inbox threads
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:17:function createCustomerOperationsReadinessSnapshot(runtime = {}) {
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:32:    runtime: 'mh-os-customer-operations',
+runtime/orchestrator-service/lib/customer-operations/readiness/customer-operations-readiness-snapshot.js:89:  createCustomerOperationsReadinessSnapshot
+runtime/orchestrator-service/lib/customer-operations/registry/README.md:1:# Customer Operations Registry
+runtime/orchestrator-service/lib/customer-operations/unified-inbox/register-integration-inbox.js:81:      source_runtime: 'mh-os-customer-operations'
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js:119:    customer_operations: {
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js:122:      supports_leads: ['instagram', 'facebook', 'website', 'telegram'].includes(base.channel_id),
+runtime/orchestrator-service/lib/customer-operations/channels/channel-integration-mapper.js:128:      source_runtime: 'mh-os-customer-operations'
+runtime/orchestrator-service/lib/customer-operations/channels/register-integration-channel.js:33:      customer_operations: channel.customer_operations
+runtime/orchestrator-service/lib/customer-operations/channels/registry/channel-registry-store.js:27:      source_runtime: 'mh-os-customer-operations'
+runtime/orchestrator-service/lib/media/native/intelligence/media-quality-scorer.js:19:  const avoidText = asText(plan.avoid || plan.compliance_avoid);
+runtime/orchestrator-service/lib/media/native/intelligence/media-quality-scorer.js:60:      passed: includesAny(prompt + ' ' + avoidText, ['avoid', 'compliance', 'medical claims', 'brand-safe']),
+runtime/orchestrator-service/lib/media/native/intelligence/media-prompt-intelligence.js:73:    compliance_avoid: [
+runtime/orchestrator-service/lib/media/native/intelligence/media-prompt-intelligence.js:98:    `Avoid: ${brief.compliance_avoid.join(', ')}`
+runtime/orchestrator-service/lib/media/native/knowledge/winning-hooks-library.json:12:      "best_for": ["problem-solution", "paid ads"]
+runtime/orchestrator-service/lib/media/native/knowledge/product-visual-rules.json:9:    "compliance": "Do not imply medical treatment, guaranteed results, or unverified certification claims."
+runtime/orchestrator-service/lib/media/native/knowledge/voice-tone-profiles.json:14:      "best_for": ["ads", "marketplaces", "product explainers"]
+runtime/orchestrator-service/lib/media/provider-layer.js:311:      systemPrompt: 'You are a short-form video strategist. Return practical production brief text only.',

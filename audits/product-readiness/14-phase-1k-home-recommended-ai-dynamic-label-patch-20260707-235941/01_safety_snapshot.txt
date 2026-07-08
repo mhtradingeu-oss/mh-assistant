@@ -1,0 +1,199 @@
+Branch:
+main
+
+Status:
+ M data/projects/hairoticmen/ops/approvals.json
+ M data/projects/hairoticmen/ops/events.json
+ M data/projects/hairoticmen/ops/notifications.json
+ M data/projects/hairoticmen/ops/system.json
+ M public/control-center/pages/ai-command.js
+ M public/control-center/pages/home.js
+ M public/control-center/pages/home/render-sections.js
+ M public/control-center/styles/13-home-executive.css
+ M runtime/orchestrator-service/server.js
+?? audits/product-readiness/
+?? audits/system-truth/cloud-grade-readiness-20260706-171752/
+?? audits/system-truth/content-to-media-studio-truth-20260706-161134/
+?? audits/system-truth/media-engine-upgrade-phase-2a-truth-scan-20260706-122813/
+?? audits/system-truth/media-engine-upgrade-phase-2b-contract-20260706-123139/
+?? audits/system-truth/media-execution-activation-a0-deep-truth-scan-20260706-114055/
+?? audits/system-truth/media-execution-activation-a1-exact-execution-contract-20260706-114301/
+?? audits/system-truth/media-execution-activation-a2-api-media-route-truth-20260706-115001/
+?? audits/system-truth/media-execution-activation-a3-live-image-proof-20260706-115143/
+?? audits/system-truth/media-execution-activation-a3b-live-image-proof-with-control-key-20260706-115319/
+?? audits/system-truth/media-execution-activation-a3d-live-image-proof-correct-write-key-20260706-115622/
+?? audits/system-truth/media-studio-rebase-20260706-165209/
+?? infra/
+?? public/control-center/pages/media-studio.BACKUP.js
+?? public/control-center/pages/media-studio.BACKUP_FINAL_FLOW_LOCK.js
+?? public/control-center/pages/media-studio.BACKUP_FLOW_LOCK.js
+?? public/control-center/pages/media-studio.js
+?? public/control-center/runtime/ai-team/
+?? public/control-center/state/
+?? runtime/orchestrator-service/lib/media/cluster/
+?? runtime/orchestrator-service/lib/media/contracts/
+?? runtime/orchestrator-service/lib/media/events/
+?? runtime/orchestrator-service/lib/media/governance/
+?? runtime/orchestrator-service/lib/media/library-engine.js
+?? runtime/orchestrator-service/lib/media/orchestrator/
+?? runtime/orchestrator-service/lib/media/publishing/
+?? runtime/orchestrator-service/lib/media/queue/
+?? runtime/orchestrator-service/lib/media/realtime/
+?? scripts/audit/ai-team-contract-conformance-check.mjs
+?? scripts/audit/validate-ai-team-operating-contract.mjs
+
+Diff stat:
+ data/projects/hairoticmen/ops/approvals.json       | 127 ++++++++++
+ data/projects/hairoticmen/ops/events.json          |  18 ++
+ data/projects/hairoticmen/ops/notifications.json   |  22 ++
+ data/projects/hairoticmen/ops/system.json          |   2 +-
+ public/control-center/pages/ai-command.js          |  67 +++--
+ public/control-center/pages/home.js                | 120 ++++-----
+ .../control-center/pages/home/render-sections.js   |  71 +++++-
+ public/control-center/styles/13-home-executive.css |  62 +++++
+ runtime/orchestrator-service/server.js             | 281 +++++++++++++++++++++
+ 9 files changed, 686 insertions(+), 84 deletions(-)
+
+Home recommended specialist markers:
+806:    const recommendedSpecialist = pickRecommendedSpecialist(aiTeamCards, dashboard);
+878:                  Ask Head Office AI
+1031:                <span class="home-action-title">Open Setup Readiness</span>
+1035:                <span class="home-action-title">Open Asset Library</span>
+1039:                <span class="home-action-title">Open Campaign Studio</span>
+1047:                <h2 class="mhos-os-panel-title">${escapeHtml(recommendedSpecialist?.name || "Executive AI")}</h2>
+1049:                  ${escapeHtml(recommendedSpecialist?.summary || "Use AI Command to turn the current state into a clear operating plan.")}
+1054:              ${recommendedSpecialist ? `
+1055:                <button class="quick-action-btn mhos-motion-soft" type="button" data-role-id="${escapeHtml(recommendedSpecialist.id)}">
+1056:                  <span class="home-action-title">Ask Head Office AI</span>
+1107:    const handleAiRoleClick = (roleId, roleName) => {
+1158:    const aiRoleCards = document.querySelectorAll(".quick-action-btn[data-role-id], .home-ai-team-card[data-role-id], .mhos-specialist[data-role-id], .mhos-workflow-step[data-role-id]");
+1160:      const roleId = card.getAttribute("data-role-id");
+1162:      card.onclick = () => handleAiRoleClick(roleId, roleName);
+
+Recommended AI specialist render window before patch:
+
+          <aside class="mhos-os-rail" aria-label="Action and AI Guidance">
+
+            <section class="mhos-os-action-panel">
+              <div>
+                <p class="mhos-os-kicker">Workspaces</p>
+                <h2 class="mhos-os-panel-title">Open the owner</h2>
+                <p class="mhos-os-panel-copy">These buttons open the right workspace. Home does not save, upload, approve, publish, send, or execute.</p>
+              </div>
+
+              <button id="homeQuickReviewReadinessBtn" class="quick-action-btn" type="button">
+                <span class="home-action-title">Open Setup Readiness</span>
+                <span class="home-action-meta">Review foundation gaps in the Setup workspace.</span>
+              </button>
+              <button id="homeQuickAssetLibraryBtn" class="quick-action-btn" type="button">
+                <span class="home-action-title">Open Asset Library</span>
+                <span class="home-action-meta">Review source assets in the Library workspace.</span>
+              </button>
+              <button id="homeQuickStartCampaignBtn" class="quick-action-btn" type="button">
+                <span class="home-action-title">Open Campaign Studio</span>
+                <span class="home-action-meta">Plan the next campaign wave in its workspace.</span>
+              </button>
+            </section>
+
+            <section class="mhos-os-ai-panel">
+              <div>
+                <p class="mhos-os-kicker">Recommended AI Specialist</p>
+                <h2 class="mhos-os-panel-title">${escapeHtml(recommendedSpecialist?.name || "Executive AI")}</h2>
+                <p class="mhos-os-panel-copy">
+                  ${escapeHtml(recommendedSpecialist?.summary || "Use AI Command to turn the current state into a clear operating plan.")}
+                  AI prepares guidance only; destination workspaces own any execution.
+                </p>
+              </div>
+
+              ${recommendedSpecialist ? `
+                <button class="quick-action-btn mhos-motion-soft" type="button" data-role-id="${escapeHtml(recommendedSpecialist.id)}">
+                  <span class="home-action-title">Ask Head Office AI</span>
+                  <span class="home-action-meta">Uses the recommended specialist context. No execution from Home.</span>
+                </button>
+              ` : ""}
+
+</section>
+
+            <section class="mhos-os-ai-panel">
+              <div>
+                <p class="mhos-os-kicker">AI guidance</p>
+                <h2 class="mhos-os-panel-title">Ask safely</h2>
+                <p class="mhos-os-panel-copy">Use one AI prompt when you need explanation or a safe action plan. Nothing executes from Home.</p>
+              </div>
+
+              <button id="homePromptNextBtn" class="home-ai-prompt-card" type="button">
+                <span class="home-prompt-title">What is the next executive action?</span>
+                <span class="home-prompt-meta">Prepare a short explanation and handoff path.</span>
+              </button>
+              <button id="homePromptReadinessBtn" class="home-ai-prompt-card" type="button">
+                <span class="home-prompt-title">Why is readiness low?</span>
+
+Click binding window before patch:
+    const openAiWithPrompt = (prompt) => {
+      setGlobalAiPrompt($, prompt);
+      navigateTo("ai-command");
+      showMessage?.("Prompt prepared in AI Command.");
+    };
+
+
+    const handleAiRoleClick = (roleId, roleName) => {
+      const projectLabel = dashboard.projectName || "this project";
+      const rolePrompts = {
+        strategist: `Act as the Strategist for ${projectLabel}. Review readiness, blockers, campaign state, and next best action. Give me the highest-impact strategic moves. Do not execute anything; prepare guidance only.`,
+        writer: `Act as the Content Writer for ${projectLabel}. Review the current project context and suggest the next best writing actions, messaging angles, and content priorities. Do not execute anything; prepare guidance only.`,
+        designer: `Act as the Media Director for ${projectLabel}. Review the visual/asset readiness and suggest the next best creative actions. Do not execute anything; prepare guidance only.`,
+        video_lead: `Act as the Video Lead for ${projectLabel}. Review the project context and suggest the next best short-form/video actions. Do not execute anything; prepare guidance only.`,
+        publisher: `Act as the Publisher for ${projectLabel}. Review publishing readiness, scheduled jobs, blockers, and what must be checked before publishing. Do not execute anything; prepare guidance only.`,
+        ads_operator: `Act as the Ads Optimizer for ${projectLabel}. Review campaign readiness, channels, and paid media opportunities. Suggest next ad actions safely. Do not execute anything; prepare guidance only.`,
+        analyst: `Act as the SEO & Insights Analyst for ${projectLabel}. Review readiness, signals, gaps, and recent activity. Tell me what data matters most and what to improve next. Do not execute anything; prepare guidance only.`,
+        compliance_reviewer: `Act as the Compliance Reviewer for ${projectLabel}. Review launch blockers, claims, approvals, and publishing safety. Tell me what must be checked before release. Do not execute anything; prepare guidance only.`,
+        admin: `Act as the Operations Lead for ${projectLabel}. Review tasks, blockers, failed jobs, and execution health. Give me the next operational steps. Do not execute anything; prepare guidance only.`
+      };
+
+      const prompt = rolePrompts[roleId] || `Act as the ${roleName} specialist for ${projectLabel}. Review the current project context and recommend the next best actions. Do not execute anything; prepare guidance only.`;
+      openAiWithPrompt(prompt);
+      showMessage?.(`${roleName} context prepared in AI Command. Review and send when ready.`);
+    };
+
+    const nextBtn = $("homePrimaryActionBtn");
+    if (nextBtn) {
+      nextBtn.onclick = () => {
+        if (dashboard.nextBestAction.route === "ai-command") {
+          setGlobalAiPrompt($, dashboard.nextBestAction.recommendation);
+        }
+        openRoute(dashboard.nextBestAction.route, "Next best action opened.");
+      };
+    }
+
+    const askNextActionBtn = $("homeAskNextActionBtn");
+    if (askNextActionBtn) {
+      askNextActionBtn.onclick = () => openAiWithPrompt(`Explain this next best action like an operations director and give me the exact safe steps: ${dashboard.nextBestAction.recommendation}. Include which workspace owns it, what it unlocks for campaign creation, scheduled posts, publishing, ads, and customer operations. Do not execute anything.`);
+    }
+
+    const quickCampaignBtn = $("homeQuickStartCampaignBtn");
+    if (quickCampaignBtn) quickCampaignBtn.onclick = () => openRoute("campaign-studio");
+
+    const quickAssetBtn = $("homeQuickAssetLibraryBtn") || $("homeQuickUploadAssetBtn");
+    if (quickAssetBtn) quickAssetBtn.onclick = () => openRoute("library");
+
+    const quickReadinessBtn = $("homeQuickReviewReadinessBtn");
+    if (quickReadinessBtn) quickReadinessBtn.onclick = () => openRoute("setup");
+    const promptNextBtn = $("homePromptNextBtn");
+    if (promptNextBtn) {
+      promptNextBtn.onclick = () => openAiWithPrompt("What is the best next executive action for this project? Prioritize the answer based on readiness, blockers, campaign state, scheduled posts, publishing safety, ads readiness, customer operations, and recent activity. Give one clear recommendation and the reason.");
+    }
+
+    const promptReadinessBtn = $("homePromptReadinessBtn");
+    if (promptReadinessBtn) {
+      promptReadinessBtn.onclick = () => openAiWithPrompt("Why is readiness low? Explain the missing integrations, assets, failed jobs, campaign gaps, scheduled post risks, publishing blockers, and ad launch risks in simple business language. End with the fastest safe fix path.");
+    }
+    const aiRoleCards = document.querySelectorAll(".quick-action-btn[data-role-id], .home-ai-team-card[data-role-id], .mhos-specialist[data-role-id], .mhos-workflow-step[data-role-id]");
+    aiRoleCards.forEach((card) => {
+      const roleId = card.getAttribute("data-role-id");
+      const roleName = card.querySelector("strong")?.textContent || "AI Specialist";
+      card.onclick = () => handleAiRoleClick(roleId, roleName);
+    });
+  }
+};
+
+Syntax before patch:

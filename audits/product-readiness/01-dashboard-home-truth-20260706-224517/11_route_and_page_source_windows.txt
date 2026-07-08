@@ -1,0 +1,3561 @@
+Router source windows around dashboard/home references:
+public/control-center/router.js:3:import { homeRoute } from "./pages/home.js";
+public/control-center/router.js:4:import { aiCommandRoute } from "./pages/ai-command.js";
+public/control-center/router.js:32:  [homeRoute.id]: homeRoute,
+public/control-center/router.js:33:  [aiCommandRoute.id]: aiCommandRoute,
+public/control-center/router.js:240:  renderRouteTemplate("home");
+public/control-center/app.js:46:  executeProjectAiCommand,
+public/control-center/app.js:496:  navigateTo("home");
+public/control-center/app.js:540:        navigateTo("home");
+public/control-center/app.js:1034:    commandRuntime: getCommandRuntimeState(),
+public/control-center/app.js:1068:      `commandRuntime.version: ${payload.commandRuntime?.version || "-"}`,
+public/control-center/app.js:1069:      `commandBar.exists: ${payload.commandRuntime?.commandBar?.exists ? "true" : "false"}`,
+public/control-center/app.js:1070:      `commandBackdrop.exists: ${payload.commandRuntime?.commandBackdrop?.exists ? "true" : "false"}`,
+public/control-center/app.js:1071:      `aiDock.exists: ${payload.commandRuntime?.aiDock?.exists ? "true" : "false"}`,
+public/control-center/app.js:1072:      `aiDock.open: ${payload.commandRuntime?.aiDock?.open ? "true" : "false"}`,
+public/control-center/app.js:1073:      `aiDock.dataOpen: ${payload.commandRuntime?.aiDock?.dataOpen || "-"}`,
+public/control-center/app.js:1074:      `aiDock.toggle.aria-expanded: ${payload.commandRuntime?.aiDock?.toggle?.ariaExpanded || "-"}`,
+public/control-center/app.js:1075:      `aiDock.panel.hidden: ${payload.commandRuntime?.aiDock?.panel?.hidden ? "true" : "false"}`,
+public/control-center/app.js:1076:      `aiDock.panel.aria-hidden: ${payload.commandRuntime?.aiDock?.panel?.ariaHidden || "-"}`,
+public/control-center/app.js:1133:    commandRuntime: getCommandRuntimeState(),
+public/control-center/app.js:1941:  setText("ctxRoute", state.currentRoute || "home");
+public/control-center/app.js:1998:    ["aiCommandChat", "This section is currently unavailable."],
+public/control-center/app.js:1999:    ["aiCommandSuggestions", "No data is available yet."],
+public/control-center/app.js:2000:    ["aiCommandHistory", "No data is available yet."],
+public/control-center/app.js:2022:    ["insightsOverview", "This section is currently unavailable."],
+public/control-center/app.js:2089:      executeProjectAiCommand,
+public/control-center/app.js:2382:  const requiredSections = ["overview", "readiness", "assets"];
+public/control-center/app.js:2416:    overview: payload.overview,
+public/control-center/app.js:2427:  const overviewData = payload?.overview?.overview || {};
+public/control-center/app.js:2438:    market: overviewData.market || "",
+public/control-center/app.js:2439:    language: overviewData.language || "",
+public/control-center/app.js:2440:    mode: overviewData.execution_mode || "",
+public/control-center/app.js:2451:    overviewProject: String(overviewData.project_name || "")
+public/control-center/app.js:3038:    Home: "home",
+public/control-center/app.js:3042:    "AI Command": "ai-command",
+public/control-center/app.js:3065:    "open-ai-command": "ai-command",
+public/control-center/app.js:3068:    "send-ai-command": "ai-command"
+public/control-center/app.js:3091:      navigateTo("home");
+public/control-center/app.js:3095:    if (actionName === "send-ai-command") {
+public/control-center/app.js:3096:      if (typeof executeQuickCommand === "function") {
+public/control-center/app.js:3097:        executeQuickCommand();
+public/control-center/app.js:3099:        navigateTo("ai-command");
+public/control-center/app.js:3100:        showMessage("AI Command opened.");
+public/control-center/app.js:3136:      (candidate.closest("#openAiBtn") ? "open-ai-command" : "") ||
+public/control-center/app.js:3138:      (candidate.closest("#runQuickCommandBtn") ? "send-ai-command" : "") ||
+public/control-center/app.js:3179:    const route = event?.detail?.route || "home";
+public/control-center/app.js:3188:    const route = (location.hash.slice(1) || "home").trim();
+public/control-center/app.js:3235:  const commandBar = $("globalCommandBar");
+public/control-center/app.js:3236:  const commandToggleBtn = $("commandToggleBtn");
+public/control-center/app.js:3237:  const commandBackdrop = $("commandBackdrop");
+public/control-center/app.js:3255:  function setMobileCommandExpanded(expanded) {
+public/control-center/app.js:3256:    if (!appRoot || !commandBar || !commandToggleBtn) return;
+public/control-center/app.js:3259:      appRoot.classList.remove("is-mobile-shell", "is-mobile-command-open");
+public/control-center/app.js:3260:      const desktopCommandOpen = appRoot.classList.contains("is-command-open");
+public/control-center/app.js:3261:      commandBar.classList.toggle("is-collapsed", !desktopCommandOpen);
+public/control-center/app.js:3262:      commandBar.hidden = !desktopCommandOpen;
+public/control-center/app.js:3263:      commandBar.setAttribute("aria-hidden", desktopCommandOpen ? "false" : "true");
+public/control-center/app.js:3264:      if (commandBackdrop) {
+public/control-center/app.js:3265:        commandBackdrop.classList.toggle("is-visible", desktopCommandOpen);
+public/control-center/app.js:3266:        commandBackdrop.hidden = !desktopCommandOpen;
+public/control-center/app.js:3267:        commandBackdrop.setAttribute("aria-hidden", desktopCommandOpen ? "false" : "true");
+public/control-center/app.js:3269:      commandToggleBtn.setAttribute("aria-expanded", desktopCommandOpen ? "true" : "false");
+public/control-center/app.js:3270:      commandToggleBtn.textContent = desktopCommandOpen ? "Close" : "Command";
+public/control-center/app.js:3275:    appRoot.classList.toggle("is-mobile-command-open", expanded);
+public/control-center/app.js:3276:    commandBar.classList.toggle("is-collapsed", !expanded);
+public/control-center/app.js:3277:    commandBar.hidden = !expanded;
+public/control-center/app.js:3278:    commandBar.setAttribute("aria-hidden", expanded ? "false" : "true");
+public/control-center/app.js:3279:    if (commandBackdrop) {
+public/control-center/app.js:3280:      commandBackdrop.classList.toggle("is-visible", expanded);
+public/control-center/app.js:3281:      commandBackdrop.hidden = !expanded;
+public/control-center/app.js:3282:      commandBackdrop.setAttribute("aria-hidden", expanded ? "false" : "true");
+public/control-center/app.js:3284:    commandToggleBtn.setAttribute("aria-expanded", expanded ? "true" : "false");
+public/control-center/app.js:3285:    commandToggleBtn.textContent = expanded ? "Close" : "Command";
+public/control-center/app.js:3290:    if (!appRoot || !commandToggleBtn) return;
+public/control-center/app.js:3293:    commandToggleBtn.hidden = false;
+public/control-center/app.js:3296:      setMobileCommandExpanded(false);
+public/control-center/app.js:3300:    const isOpen = appRoot.classList.contains("is-mobile-command-open");
+public/control-center/app.js:3301:    setMobileCommandExpanded(isOpen);
+public/control-center/app.js:3351:  if (commandToggleBtn) {
+public/control-center/app.js:3352:    commandToggleBtn.onclick = (event) => {
+public/control-center/app.js:3356:        if (appRoot.classList.contains("is-command-open")) {
+public/control-center/app.js:3357:          closeGlobalCommandBarSafe();
+public/control-center/app.js:3359:          openGlobalCommandBar();
+public/control-center/app.js:3363:      const nextOpen = !appRoot.classList.contains("is-mobile-command-open");
+public/control-center/app.js:3364:      setMobileCommandExpanded(nextOpen);
+public/control-center/app.js:3368:  if (commandBackdrop) {
+public/control-center/app.js:3369:    commandBackdrop.onclick = () => {
+public/control-center/app.js:3370:      setMobileCommandExpanded(false);
+public/control-center/app.js:3371:      closeGlobalCommandBarSafe();
+public/control-center/app.js:3381:    if (!isCompactMobileViewport() || !appRoot?.classList.contains("is-mobile-command-open")) {
+public/control-center/app.js:3385:    const clickedCommandToggle = event.target.closest("#commandToggleBtn");
+public/control-center/app.js:3386:    const clickedInsideCommand = event.target.closest("#globalCommandBar");
+public/control-center/app.js:3387:    if (!clickedCommandToggle && !clickedInsideCommand) {
+public/control-center/app.js:3388:      setMobileCommandExpanded(false);
+public/control-center/app.js:3396:    if (event.key === "Escape" && appRoot?.classList.contains("is-mobile-command-open")) {
+public/control-center/app.js:3397:      setMobileCommandExpanded(false);
+public/control-center/app.js:3424:   COMMANDS & SEARCH
+public/control-center/app.js:3431:  const commandBackdrop = $("commandBackdrop");
+public/control-center/app.js:3441:  const commandActive =
+public/control-center/app.js:3442:    commandBackdrop &&
+public/control-center/app.js:3443:    !commandBackdrop.hidden &&
+public/control-center/app.js:3444:    commandBackdrop.getAttribute("aria-hidden") !== "true";
+public/control-center/app.js:3451:  const blocked = loadingActive || commandActive || sidebarActive;
+public/control-center/app.js:3464:function getCommandRuntimeState() {
+public/control-center/app.js:3465:  const commandBar = $("globalCommandBar");
+public/control-center/app.js:3466:  const commandBackdrop = $("commandBackdrop");
+public/control-center/app.js:3470:  const fallbackCommandRuntimeSnapshot = ({
+public/control-center/app.js:3471:    commandBar: fallbackCommandBar = null,
+public/control-center/app.js:3472:    commandBackdrop: fallbackCommandBackdrop = null,
+public/control-center/app.js:3479:    commandBar: {
+public/control-center/app.js:3480:      exists: Boolean(fallbackCommandBar),
+public/control-center/app.js:3481:      hidden: Boolean(fallbackCommandBar?.hidden),
+public/control-center/app.js:3482:      ariaHidden: String(fallbackCommandBar?.getAttribute?.("aria-hidden") || ""),
+public/control-center/app.js:3483:      className: String(fallbackCommandBar?.className || "")
+public/control-center/app.js:3486:    commandBackdrop: {
+public/control-center/app.js:3487:      exists: Boolean(fallbackCommandBackdrop),
+public/control-center/app.js:3488:      hidden: Boolean(fallbackCommandBackdrop?.hidden),
+public/control-center/app.js:3489:      ariaHidden: String(fallbackCommandBackdrop?.getAttribute?.("aria-hidden") || ""),
+public/control-center/app.js:3490:      className: String(fallbackCommandBackdrop?.className || "")
+public/control-center/app.js:3513:    window.__MH_COMMAND_RUNTIME__?.getCommandRuntimeSnapshot || fallbackCommandRuntimeSnapshot;
+public/control-center/app.js:3516:    commandBar,
+public/control-center/app.js:3517:    commandBackdrop,
+public/control-center/app.js:3563:function openGlobalCommandBar() {
+public/control-center/app.js:3565:  const commandBar = $("globalCommandBar");
+public/control-center/app.js:3566:  const commandBackdrop = $("commandBackdrop");
+public/control-center/app.js:3567:  const commandInput = $("quickCommandInput");
+public/control-center/app.js:3568:  const toggleBtn = $("commandToggleBtn");
+public/control-center/app.js:3572:    appRoot?.classList.add("is-mobile-shell", "is-mobile-command-open");
+public/control-center/app.js:3573:    appRoot?.classList.remove("is-command-open");
+public/control-center/app.js:3575:    appRoot?.classList.add("is-command-open");
+public/control-center/app.js:3576:    appRoot?.classList.remove("is-mobile-command-open");
+public/control-center/app.js:3578:  commandBar?.classList.remove("is-collapsed");
+public/control-center/app.js:3579:  if (commandBar) {
+public/control-center/app.js:3580:    commandBar.hidden = false;
+public/control-center/app.js:3582:  commandBar?.setAttribute("aria-hidden", "false");
+public/control-center/app.js:3583:  commandBackdrop?.classList.add("is-visible");
+public/control-center/app.js:3584:  if (commandBackdrop) {
+public/control-center/app.js:3585:    commandBackdrop.hidden = false;
+public/control-center/app.js:3587:  commandBackdrop?.setAttribute("aria-hidden", "false");
+public/control-center/app.js:3593:  setTimeout(() => commandInput?.focus(), 40);
+public/control-center/app.js:3596:function executeQuickCommand() {
+public/control-center/app.js:3597:  const value = $("quickCommandInput")?.value?.trim() || "";
+public/control-center/app.js:3599:    showError("Please enter a command first.");
+public/control-center/app.js:3603:  navigateTo("ai-command");
+public/control-center/app.js:3605:  window.dispatchEvent(new CustomEvent("mh:submit-ai-command", {
+public/control-center/app.js:3609:        source: "global-quick-command"
+public/control-center/app.js:3616:function closeGlobalCommandBarSafe() {
+public/control-center/app.js:3618:  const commandBar = $("globalCommandBar");
+public/control-center/app.js:3619:  const commandBackdrop = $("commandBackdrop");
+public/control-center/app.js:3620:  const toggleBtn = $("commandToggleBtn");
+public/control-center/app.js:3622:  appRoot?.classList.remove("is-command-open", "is-mobile-command-open");
+public/control-center/app.js:3623:  commandBar?.classList.add("is-collapsed");
+public/control-center/app.js:3624:  if (commandBar) {
+public/control-center/app.js:3625:    commandBar.hidden = true;
+public/control-center/app.js:3627:  commandBar?.setAttribute("aria-hidden", "true");
+public/control-center/app.js:3628:  commandBackdrop?.classList.remove("is-visible");
+public/control-center/app.js:3629:  if (commandBackdrop) {
+public/control-center/app.js:3630:    commandBackdrop.hidden = true;
+public/control-center/app.js:3632:  commandBackdrop?.setAttribute("aria-hidden", "true");
+public/control-center/app.js:3637:    toggleBtn.textContent = "Command";
+public/control-center/app.js:3641:function bindCommandOutsideClose() {
+public/control-center/app.js:3642:  if (window.__mhCommandOutsideBound) return;
+public/control-center/app.js:3643:window.__mhCommandOutsideBound = true;
+public/control-center/app.js:3645:  const commandBar = $("globalCommandBar");
+public/control-center/app.js:3648:    const commandOpen = appRoot?.classList.contains("is-command-open") || appRoot?.classList.contains("is-mobile-command-open");
+public/control-center/app.js:3649:    if (!commandOpen) return;
+public/control-center/app.js:3651:    const clickedInsideCommand = event.target.closest("#globalCommandBar");
+public/control-center/app.js:3652:    const clickedCommandToggle = event.target.closest("#commandToggleBtn");
+public/control-center/app.js:3653:    const clickedAiButton = event.target.closest("#execAskAiBtn, #openAiBtn, [data-action='open-ai-command']");
+public/control-center/app.js:3656:    if (!clickedInsideCommand && !clickedCommandToggle && !clickedAiButton && !clickedDock) {
+public/control-center/app.js:3657:      closeGlobalCommandBarSafe();
+public/control-center/app.js:3663:      closeGlobalCommandBarSafe();
+public/control-center/app.js:3667:  if (commandBar) {
+public/control-center/app.js:3668:    commandBar.addEventListener("click", (event) => event.stopPropagation());
+public/control-center/app.js:3673:function bindCommandInputs() {
+public/control-center/app.js:3675:  const commandInput = $("quickCommandInput");
+public/control-center/app.js:3676:  const runBtn = $("runQuickCommandBtn");
+public/control-center/app.js:3687:  if (commandInput && commandInput.dataset.mhCommandEnterBound !== "true") {
+public/control-center/app.js:3688:    commandInput.dataset.mhCommandEnterBound = "true";
+public/control-center/app.js:3689:    commandInput.addEventListener("keydown", (event) => {
+public/control-center/app.js:3692:        executeQuickCommand();
+public/control-center/app.js:3709:    runBtn.setAttribute("data-action", "send-ai-command");
+public/control-center/app.js:3768:      const input = $("quickCommandInput");
+public/control-center/app.js:3774:      openGlobalCommandBar?.();
+public/control-center/app.js:3792:    const route = window.location.hash.replace(/^#/, "") || "home";
+public/control-center/app.js:4023:        const route = button.getAttribute("data-new-route") || "ai-command";
+public/control-center/app.js:4025:        const input = $("quickCommandInput");
+public/control-center/app.js:4029:        openGlobalCommandBar();
+public/control-center/app.js:4045:function bindExecutiveNewLauncherKeyboard() {
+public/control-center/app.js:4070:      navigateTo("ai-command");
+public/control-center/app.js:4080:    openAiBtn.setAttribute("data-action", "open-ai-command");
+public/control-center/app.js:4115:    const startRoute = (location.hash.slice(1) || "home").trim();
+public/control-center/app.js:4116:    setCurrentRoute(startRoute || "home");
+public/control-center/app.js:4123:    bindExecutiveNewLauncherKeyboard();
+public/control-center/app.js:4127:    bindCommandInputs();
+public/control-center/app.js:4128:    bindCommandOutsideClose();
+public/control-center/app.js:4184:  const route = String(state.currentRoute || "home");
+
+----- public/control-center/router.js lines 1-83 -----
+// public/control-center/router.js
+
+import { homeRoute } from "./pages/home.js";
+import { aiCommandRoute } from "./pages/ai-command.js";
+import { campaignStudioRoute } from "./pages/campaign-studio.js";
+import { contentStudioRoute } from "./pages/content-studio-workspace.js";
+import { mediaStudioRoute } from "./pages/media-studio-workspace.js";
+import { publishingRoute } from "./pages/publishing.js";
+import { adsManagerRoute } from "./pages/ads-manager.js";
+import { insightsRoute } from "./pages/insights.js";
+import { researchRoute } from "./pages/research.js";
+import { workflowsRoute } from "./pages/workflows.js";
+import {
+  taskCenterRoute,
+  queueCenterRoute,
+  jobMonitorRoute,
+  notificationCenterRoute,
+  operationsCentersRoute
+} from "./pages/operations-centers.js";
+import { setupRoute } from "./pages/setup.js";
+import { libraryRoute } from "./pages/library.js";
+import { integrationsRoute } from "./pages/integrations.js";
+import { customerCenterRoute } from "./pages/customer-center.js";
+import { settingsRoute } from "./pages/settings.js";
+import { governanceRoute } from "./pages/governance.js";
+import {
+  DEFAULT_ROLE,
+  getFallbackRouteAccess
+} from "./runtime/authority/route-role-fallback.js";
+
+const routeRegistry = {
+  [homeRoute.id]: homeRoute,
+  [aiCommandRoute.id]: aiCommandRoute,
+  [workflowsRoute.id]: workflowsRoute,
+  [operationsCentersRoute.id]: operationsCentersRoute,
+  [taskCenterRoute.id]: taskCenterRoute,
+  [queueCenterRoute.id]: queueCenterRoute,
+  [jobMonitorRoute.id]: jobMonitorRoute,
+  [notificationCenterRoute.id]: notificationCenterRoute,
+  [campaignStudioRoute.id]: campaignStudioRoute,
+  [contentStudioRoute.id]: contentStudioRoute,
+  [mediaStudioRoute.id]: mediaStudioRoute,
+  [publishingRoute.id]: publishingRoute,
+  [adsManagerRoute.id]: adsManagerRoute,
+  [insightsRoute.id]: insightsRoute,
+  [researchRoute.id]: researchRoute,
+  [setupRoute.id]: setupRoute,
+  [libraryRoute.id]: libraryRoute,
+  [customerCenterRoute.id]: customerCenterRoute,
+  [integrationsRoute.id]: integrationsRoute,
+  [settingsRoute.id]: settingsRoute,
+  [governanceRoute.id]: governanceRoute
+};
+
+let routeAccessResolver = null;
+
+const routeChangeSubscribers = new Set();
+
+export function subscribeRouteChange(handler) {
+  if (typeof handler !== "function") return () => {};
+  routeChangeSubscribers.add(handler);
+  return () => routeChangeSubscribers.delete(handler);
+}
+
+function notifyRouteChange(route) {
+  routeChangeSubscribers.forEach((handler) => {
+    try {
+      handler(route);
+    } catch (error) {
+      console.warn("Route change subscriber failed:", error?.message || error);
+    }
+  });
+}
+
+
+function getPageRoot() {
+  return document.getElementById("pageRoot");
+}
+
+function getFallbackRoute(route) {
+  return {
+    id: route,
+    meta: {
+
+----- public/control-center/router.js lines 1-84 -----
+// public/control-center/router.js
+
+import { homeRoute } from "./pages/home.js";
+import { aiCommandRoute } from "./pages/ai-command.js";
+import { campaignStudioRoute } from "./pages/campaign-studio.js";
+import { contentStudioRoute } from "./pages/content-studio-workspace.js";
+import { mediaStudioRoute } from "./pages/media-studio-workspace.js";
+import { publishingRoute } from "./pages/publishing.js";
+import { adsManagerRoute } from "./pages/ads-manager.js";
+import { insightsRoute } from "./pages/insights.js";
+import { researchRoute } from "./pages/research.js";
+import { workflowsRoute } from "./pages/workflows.js";
+import {
+  taskCenterRoute,
+  queueCenterRoute,
+  jobMonitorRoute,
+  notificationCenterRoute,
+  operationsCentersRoute
+} from "./pages/operations-centers.js";
+import { setupRoute } from "./pages/setup.js";
+import { libraryRoute } from "./pages/library.js";
+import { integrationsRoute } from "./pages/integrations.js";
+import { customerCenterRoute } from "./pages/customer-center.js";
+import { settingsRoute } from "./pages/settings.js";
+import { governanceRoute } from "./pages/governance.js";
+import {
+  DEFAULT_ROLE,
+  getFallbackRouteAccess
+} from "./runtime/authority/route-role-fallback.js";
+
+const routeRegistry = {
+  [homeRoute.id]: homeRoute,
+  [aiCommandRoute.id]: aiCommandRoute,
+  [workflowsRoute.id]: workflowsRoute,
+  [operationsCentersRoute.id]: operationsCentersRoute,
+  [taskCenterRoute.id]: taskCenterRoute,
+  [queueCenterRoute.id]: queueCenterRoute,
+  [jobMonitorRoute.id]: jobMonitorRoute,
+  [notificationCenterRoute.id]: notificationCenterRoute,
+  [campaignStudioRoute.id]: campaignStudioRoute,
+  [contentStudioRoute.id]: contentStudioRoute,
+  [mediaStudioRoute.id]: mediaStudioRoute,
+  [publishingRoute.id]: publishingRoute,
+  [adsManagerRoute.id]: adsManagerRoute,
+  [insightsRoute.id]: insightsRoute,
+  [researchRoute.id]: researchRoute,
+  [setupRoute.id]: setupRoute,
+  [libraryRoute.id]: libraryRoute,
+  [customerCenterRoute.id]: customerCenterRoute,
+  [integrationsRoute.id]: integrationsRoute,
+  [settingsRoute.id]: settingsRoute,
+  [governanceRoute.id]: governanceRoute
+};
+
+let routeAccessResolver = null;
+
+const routeChangeSubscribers = new Set();
+
+export function subscribeRouteChange(handler) {
+  if (typeof handler !== "function") return () => {};
+  routeChangeSubscribers.add(handler);
+  return () => routeChangeSubscribers.delete(handler);
+}
+
+function notifyRouteChange(route) {
+  routeChangeSubscribers.forEach((handler) => {
+    try {
+      handler(route);
+    } catch (error) {
+      console.warn("Route change subscriber failed:", error?.message || error);
+    }
+  });
+}
+
+
+function getPageRoot() {
+  return document.getElementById("pageRoot");
+}
+
+function getFallbackRoute(route) {
+  return {
+    id: route,
+    meta: {
+      eyebrow: "System",
+
+----- public/control-center/router.js lines 2-112 -----
+
+import { homeRoute } from "./pages/home.js";
+import { aiCommandRoute } from "./pages/ai-command.js";
+import { campaignStudioRoute } from "./pages/campaign-studio.js";
+import { contentStudioRoute } from "./pages/content-studio-workspace.js";
+import { mediaStudioRoute } from "./pages/media-studio-workspace.js";
+import { publishingRoute } from "./pages/publishing.js";
+import { adsManagerRoute } from "./pages/ads-manager.js";
+import { insightsRoute } from "./pages/insights.js";
+import { researchRoute } from "./pages/research.js";
+import { workflowsRoute } from "./pages/workflows.js";
+import {
+  taskCenterRoute,
+  queueCenterRoute,
+  jobMonitorRoute,
+  notificationCenterRoute,
+  operationsCentersRoute
+} from "./pages/operations-centers.js";
+import { setupRoute } from "./pages/setup.js";
+import { libraryRoute } from "./pages/library.js";
+import { integrationsRoute } from "./pages/integrations.js";
+import { customerCenterRoute } from "./pages/customer-center.js";
+import { settingsRoute } from "./pages/settings.js";
+import { governanceRoute } from "./pages/governance.js";
+import {
+  DEFAULT_ROLE,
+  getFallbackRouteAccess
+} from "./runtime/authority/route-role-fallback.js";
+
+const routeRegistry = {
+  [homeRoute.id]: homeRoute,
+  [aiCommandRoute.id]: aiCommandRoute,
+  [workflowsRoute.id]: workflowsRoute,
+  [operationsCentersRoute.id]: operationsCentersRoute,
+  [taskCenterRoute.id]: taskCenterRoute,
+  [queueCenterRoute.id]: queueCenterRoute,
+  [jobMonitorRoute.id]: jobMonitorRoute,
+  [notificationCenterRoute.id]: notificationCenterRoute,
+  [campaignStudioRoute.id]: campaignStudioRoute,
+  [contentStudioRoute.id]: contentStudioRoute,
+  [mediaStudioRoute.id]: mediaStudioRoute,
+  [publishingRoute.id]: publishingRoute,
+  [adsManagerRoute.id]: adsManagerRoute,
+  [insightsRoute.id]: insightsRoute,
+  [researchRoute.id]: researchRoute,
+  [setupRoute.id]: setupRoute,
+  [libraryRoute.id]: libraryRoute,
+  [customerCenterRoute.id]: customerCenterRoute,
+  [integrationsRoute.id]: integrationsRoute,
+  [settingsRoute.id]: settingsRoute,
+  [governanceRoute.id]: governanceRoute
+};
+
+let routeAccessResolver = null;
+
+const routeChangeSubscribers = new Set();
+
+export function subscribeRouteChange(handler) {
+  if (typeof handler !== "function") return () => {};
+  routeChangeSubscribers.add(handler);
+  return () => routeChangeSubscribers.delete(handler);
+}
+
+function notifyRouteChange(route) {
+  routeChangeSubscribers.forEach((handler) => {
+    try {
+      handler(route);
+    } catch (error) {
+      console.warn("Route change subscriber failed:", error?.message || error);
+    }
+  });
+}
+
+
+function getPageRoot() {
+  return document.getElementById("pageRoot");
+}
+
+function getFallbackRoute(route) {
+  return {
+    id: route,
+    meta: {
+      eyebrow: "System",
+      title: "Page",
+      description: "Workspace view"
+    },
+    template: `
+      <section class="page is-active">
+        <div class="page-grid">
+          <div class="panel panel-span-2">
+            <div class="empty-box">Unknown route: ${route}</div>
+          </div>
+        </div>
+      </section>
+    `
+  };
+}
+
+function escapeHtmlMin(str) {
+  return String(str == null ? "" : str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function getAccessDeniedRoute(route, reason = "") {
+  const detail = reason || `Route "${route}" is not available for the current role.`;
+  return {
+    id: "__access-denied__",
+    meta: {
+
+----- public/control-center/router.js lines 3-113 -----
+import { homeRoute } from "./pages/home.js";
+import { aiCommandRoute } from "./pages/ai-command.js";
+import { campaignStudioRoute } from "./pages/campaign-studio.js";
+import { contentStudioRoute } from "./pages/content-studio-workspace.js";
+import { mediaStudioRoute } from "./pages/media-studio-workspace.js";
+import { publishingRoute } from "./pages/publishing.js";
+import { adsManagerRoute } from "./pages/ads-manager.js";
+import { insightsRoute } from "./pages/insights.js";
+import { researchRoute } from "./pages/research.js";
+import { workflowsRoute } from "./pages/workflows.js";
+import {
+  taskCenterRoute,
+  queueCenterRoute,
+  jobMonitorRoute,
+  notificationCenterRoute,
+  operationsCentersRoute
+} from "./pages/operations-centers.js";
+import { setupRoute } from "./pages/setup.js";
+import { libraryRoute } from "./pages/library.js";
+import { integrationsRoute } from "./pages/integrations.js";
+import { customerCenterRoute } from "./pages/customer-center.js";
+import { settingsRoute } from "./pages/settings.js";
+import { governanceRoute } from "./pages/governance.js";
+import {
+  DEFAULT_ROLE,
+  getFallbackRouteAccess
+} from "./runtime/authority/route-role-fallback.js";
+
+const routeRegistry = {
+  [homeRoute.id]: homeRoute,
+  [aiCommandRoute.id]: aiCommandRoute,
+  [workflowsRoute.id]: workflowsRoute,
+  [operationsCentersRoute.id]: operationsCentersRoute,
+  [taskCenterRoute.id]: taskCenterRoute,
+  [queueCenterRoute.id]: queueCenterRoute,
+  [jobMonitorRoute.id]: jobMonitorRoute,
+  [notificationCenterRoute.id]: notificationCenterRoute,
+  [campaignStudioRoute.id]: campaignStudioRoute,
+  [contentStudioRoute.id]: contentStudioRoute,
+  [mediaStudioRoute.id]: mediaStudioRoute,
+  [publishingRoute.id]: publishingRoute,
+  [adsManagerRoute.id]: adsManagerRoute,
+  [insightsRoute.id]: insightsRoute,
+  [researchRoute.id]: researchRoute,
+  [setupRoute.id]: setupRoute,
+  [libraryRoute.id]: libraryRoute,
+  [customerCenterRoute.id]: customerCenterRoute,
+  [integrationsRoute.id]: integrationsRoute,
+  [settingsRoute.id]: settingsRoute,
+  [governanceRoute.id]: governanceRoute
+};
+
+let routeAccessResolver = null;
+
+const routeChangeSubscribers = new Set();
+
+export function subscribeRouteChange(handler) {
+  if (typeof handler !== "function") return () => {};
+  routeChangeSubscribers.add(handler);
+  return () => routeChangeSubscribers.delete(handler);
+}
+
+function notifyRouteChange(route) {
+  routeChangeSubscribers.forEach((handler) => {
+    try {
+      handler(route);
+    } catch (error) {
+      console.warn("Route change subscriber failed:", error?.message || error);
+    }
+  });
+}
+
+
+function getPageRoot() {
+  return document.getElementById("pageRoot");
+}
+
+function getFallbackRoute(route) {
+  return {
+    id: route,
+    meta: {
+      eyebrow: "System",
+      title: "Page",
+      description: "Workspace view"
+    },
+    template: `
+      <section class="page is-active">
+        <div class="page-grid">
+          <div class="panel panel-span-2">
+            <div class="empty-box">Unknown route: ${route}</div>
+          </div>
+        </div>
+      </section>
+    `
+  };
+}
+
+function escapeHtmlMin(str) {
+  return String(str == null ? "" : str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function getAccessDeniedRoute(route, reason = "") {
+  const detail = reason || `Route "${route}" is not available for the current role.`;
+  return {
+    id: "__access-denied__",
+    meta: {
+      eyebrow: "Access",
+
+----- public/control-center/router.js lines 210-320 -----
+  const root = getPageRoot();
+  if (!root) return;
+
+  const routeDef = getRouteDefinition(route);
+  root.innerHTML = routeDef.template;
+
+  updatePageHeader(route);
+  updateActiveNav(route);
+}
+
+export function navigateTo(route, emit = true) {
+  renderRouteTemplate(route);
+  notifyRouteChange(route);
+
+  // Sync browser URL — setting the same hash value does not re-fire hashchange
+  const newHash = `#${route}`;
+  if (typeof location !== "undefined" && location.hash !== newHash) {
+    location.hash = newHash;
+  }
+
+  if (emit) {
+    window.dispatchEvent(
+      new CustomEvent("mh:route-change", {
+        detail: { route }
+      })
+    );
+  }
+}
+
+export function initRouter() {
+  renderRouteTemplate("home");
+}
+
+----- public/control-center/app.js lines 16-126 -----
+  getRouteDefinition,
+  setRouteAccessResolver
+} from "./router.js";
+import { applyStandardPageLayout } from "./ui/page-standard.js";
+import {
+  getState,
+  setProjects,
+  setCurrentProject,
+  setCurrentRoute,
+  setProjectContext,
+  patchState,
+  setLoading,
+  setError,
+  clearError,
+  markInitialized,
+  subscribe,
+  resetProjectData
+} from "./state.js";
+import {
+  setApiBaseUrl,
+  isDebugStartupMode,
+  AccessKeyError,
+  fetchProjects,
+  createMediaManagerProject,
+  fetchAllCoreProjectData,
+  fetchProjectInsights,
+  fetchProjectLearning,
+  fetchProjectGovernance,
+  fetchProjectOperations,
+  saveProjectSetup,
+  executeProjectAiCommand,
+  saveProjectConnectorSource,
+  removeProjectConnectorSource,
+  fetchProjectIntegrationControlCenter,
+  connectProjectIntegration,
+  reconnectProjectIntegration,
+  testProjectIntegration,
+  syncProjectIntegration,
+  importProjectIntegrationHistory,
+  disconnectProjectIntegration,
+  runProjectWorkflow,
+  runProjectAiWorkflow,
+  createProjectTask,
+  createProjectApproval,
+  decideProjectApproval,
+  saveProjectCampaign,
+  createProjectHandoff,
+  consumeProjectHandoff,
+  markProjectNotification,
+  savePublishingSchedule,
+  reschedulePublishingItem,
+  approvePublishingItem,
+  publishPublishingItem,
+  failPublishingItem,
+  fetchProjectTaskCenter,
+  fetchProjectQueueCenter,
+  fetchProjectJobMonitor,
+  fetchProjectNotificationCenter
+} from "./api.js";
+import {
+  CONTROL_ACCESS_KEY_STORAGE_KEY,
+  CONTROL_ACCESS_KEY_LEGACY_STORAGE_KEYS
+} from "./constants.js";
+import { getOverlaySnapshot } from "./runtime/overlay/overlay-runtime.js";
+import { createLifecycleRegistry } from "./runtime/lifecycle/lifecycle-registry.js";
+import { installMhRuntimeGlobals } from "./runtime/mh-runtime-globals.js";
+
+/* =========================
+   CONFIG
+========================= */
+
+setApiBaseUrl("");
+
+/* =========================
+   APP SHELL LIFECYCLE REGISTRY
+========================= */
+
+// Module-level registry for app shell listeners
+// Manages global listeners (resize, orientation, route change, navigation)
+// Cleaned up on route changes to prevent listener accumulation
+const appShellLifecycle = createLifecycleRegistry("app-shell");
+
+// Helper function to register app shell listeners with the registry
+function addAppShellListener(target, type, handler, options) {
+  if (!target || typeof handler !== "function") {
+    return () => {};
+  }
+  return appShellLifecycle.addEventListener(target, type, handler, options);
+}
+
+/* =========================
+   CONTROL
+========================= */
+
+const CONTROL_WRITE_HEADER = "x-mh-control-key";
+const CONTROL_ROLE_STORAGE_KEY = "mh-control-role";
+const DEFAULT_ACTIVE_ROLE = "admin";
+
+function persistCanonicalControlKey(key) {
+  const normalized = String(key || "").trim();
+  if (!normalized) return;
+
+  try {
+    window.localStorage?.setItem(CONTROL_ACCESS_KEY_STORAGE_KEY, normalized);
+  } catch (_) {}
+}
+
+function setRuntimeControlKey(key) {
+  const normalized = String(key || "").trim();
+  try {
+    window.__MH_CONTROL_CENTER_READ_KEY__ = normalized;
+
+----- public/control-center/app.js lines 466-576 -----
+      message: response.ok ? "ok" : "not-ok"
+    });
+
+    return {
+      diagnostics,
+      type: response.ok ? "success" : (response.status === 401 || response.status === 403 ? "error" : "warn"),
+      text
+    };
+  } catch (error) {
+    return {
+      diagnostics,
+      type: "error",
+      text: formatAccessKeyDiagnostics(diagnostics, {
+        status: 0,
+        authMode: "x-mh-control-key + Authorization",
+        message: error?.message || "request failed"
+      })
+    };
+  }
+}
+
+async function refreshProjectsAfterKeyUpdate(preferredProjectName = "") {
+  const preferred = await loadProjects();
+  const state = getState();
+  const items = Array.isArray(state.data.projects) ? state.data.projects : [];
+
+  const requested = getSafeProjectName(preferredProjectName, "");
+  const requestedExists = requested && projectExistsInList(requested, items);
+  const projectToLoad = requestedExists ? requested : getSafeProjectName(preferred || DEFAULT_PROJECT_SLUG);
+
+  navigateTo("home");
+  await loadProjectData(projectToLoad);
+  showMessage(`Loaded project: ${projectToLoad}`);
+}
+
+
+
+function bindAccessKeyPanel(modal) {
+  const input = modal.querySelector("#accessKeyInput");
+  const saveBtn = modal.querySelector("#accessKeySaveBtn");
+  const testBtn = modal.querySelector("#accessKeyTestBtn");
+  const diagBtn = modal.querySelector("#accessKeyDiagBtn");
+  const clearBtn = modal.querySelector("#accessKeyClearBtn");
+  const clearReloadBtn = modal.querySelector("#accessKeyClearReloadBtn");
+  const closeBtn = modal.querySelector("#accessKeyCloseBtn");
+
+  if (saveBtn) {
+    saveBtn.addEventListener("click", async () => {
+      const val = getCurrentAccessKeyInputValue();
+      if (!val) {
+        setAccessKeyStatus("No key entered.", "error");
+        return;
+      }
+
+      try {
+        localStorage.setItem("mh-control-write-key", val);
+        localStorage.setItem(CONTROL_ACCESS_KEY_STORAGE_KEY, val);
+        const persisted = String(localStorage.getItem("mh-control-write-key") || "").trim();
+        if (persisted !== val) {
+          setAccessKeyStatus("Failed to save access key to localStorage.", "error");
+          return;
+        }
+
+        setRuntimeControlKey(val);
+      } catch (_) {
+        setAccessKeyStatus("Failed to save access key to localStorage.", "error");
+        return;
+      }
+
+      setAccessKeyStatus("Key saved to mh-control-write-key. Reloading...", "success");
+      updateAccessKeyButton();
+
+      try {
+        const retryProject = ["hairo", "ticmen"].join("");
+        navigateTo("home");
+        await loadProjectData(retryProject);
+        hideAccessKeyModal();
+      } catch (error) {
+        setAccessKeyStatus(error?.message || "Key saved, but project load failed.", "error");
+      }
+    });
+  }
+
+  if (diagBtn) {
+    diagBtn.addEventListener("click", async () => {
+      setAccessKeyStatus("Running access-key diagnostic…", "info");
+      const result = await runAccessKeyDiagnosticProbe(input?.value || "");
+      setAccessKeyStatus(result.text, result.type);
+    });
+  }
+
+  if (testBtn) {
+    testBtn.addEventListener("click", async () => {
+      setAccessKeyStatus("Testing…", "info");
+      const inputVal = (input?.value || "").trim();
+      let storedVal = "";
+      try {
+        storedVal = String(localStorage.getItem(CONTROL_ACCESS_KEY_STORAGE_KEY) || "").trim();
+        if (!storedVal) {
+          storedVal = CONTROL_ACCESS_KEY_LEGACY_STORAGE_KEYS
+            .map((key) => String(localStorage.getItem(key) || "").trim())
+            .find(Boolean) || "";
+        }
+      } catch (_) {}
+      const keyToTest = inputVal || storedVal;
+      if (!keyToTest) {
+        setAccessKeyStatus("No key to test. Enter a key or save one first.", "error");
+        return;
+      }
+      try {
+        const response = await fetch("/media-manager/projects", {
+
+----- public/control-center/app.js lines 510-620 -----
+  const closeBtn = modal.querySelector("#accessKeyCloseBtn");
+
+  if (saveBtn) {
+    saveBtn.addEventListener("click", async () => {
+      const val = getCurrentAccessKeyInputValue();
+      if (!val) {
+        setAccessKeyStatus("No key entered.", "error");
+        return;
+      }
+
+      try {
+        localStorage.setItem("mh-control-write-key", val);
+        localStorage.setItem(CONTROL_ACCESS_KEY_STORAGE_KEY, val);
+        const persisted = String(localStorage.getItem("mh-control-write-key") || "").trim();
+        if (persisted !== val) {
+          setAccessKeyStatus("Failed to save access key to localStorage.", "error");
+          return;
+        }
+
+        setRuntimeControlKey(val);
+      } catch (_) {
+        setAccessKeyStatus("Failed to save access key to localStorage.", "error");
+        return;
+      }
+
+      setAccessKeyStatus("Key saved to mh-control-write-key. Reloading...", "success");
+      updateAccessKeyButton();
+
+      try {
+        const retryProject = ["hairo", "ticmen"].join("");
+        navigateTo("home");
+        await loadProjectData(retryProject);
+        hideAccessKeyModal();
+      } catch (error) {
+        setAccessKeyStatus(error?.message || "Key saved, but project load failed.", "error");
+      }
+    });
+  }
+
+  if (diagBtn) {
+    diagBtn.addEventListener("click", async () => {
+      setAccessKeyStatus("Running access-key diagnostic…", "info");
+      const result = await runAccessKeyDiagnosticProbe(input?.value || "");
+      setAccessKeyStatus(result.text, result.type);
+    });
+  }
+
+  if (testBtn) {
+    testBtn.addEventListener("click", async () => {
+      setAccessKeyStatus("Testing…", "info");
+      const inputVal = (input?.value || "").trim();
+      let storedVal = "";
+      try {
+        storedVal = String(localStorage.getItem(CONTROL_ACCESS_KEY_STORAGE_KEY) || "").trim();
+        if (!storedVal) {
+          storedVal = CONTROL_ACCESS_KEY_LEGACY_STORAGE_KEYS
+            .map((key) => String(localStorage.getItem(key) || "").trim())
+            .find(Boolean) || "";
+        }
+      } catch (_) {}
+      const keyToTest = inputVal || storedVal;
+      if (!keyToTest) {
+        setAccessKeyStatus("No key to test. Enter a key or save one first.", "error");
+        return;
+      }
+      try {
+        const response = await fetch("/media-manager/projects", {
+          method: "GET",
+          headers: {
+            "Accept": "application/json",
+            "x-mh-control-key": keyToTest
+          }
+        });
+        if (response.ok) {
+          setAccessKeyStatus("Valid key — loading front page and project…", "success");
+
+          try {
+            if (inputVal) {
+              setRuntimeControlKey(inputVal);
+              try {
+                localStorage.setItem(CONTROL_ACCESS_KEY_STORAGE_KEY, inputVal);
+              } catch (_) {}
+              updateAccessKeyButton();
+            }
+            await refreshProjectsAfterKeyUpdate();
+            setAccessKeyStatus("Valid key and project loaded.", "success");
+          } catch (error) {
+            setAccessKeyStatus(error?.message || "Valid key, but project load failed.", "error");
+          }
+        } else if (response.status === 401 || response.status === 403) {
+          setAccessKeyStatus("Invalid key — access denied (" + response.status + ").", "error");
+        } else {
+          setAccessKeyStatus("Endpoint responded with " + response.status + ".", "warn");
+        }
+      } catch (_) {
+        setAccessKeyStatus("Request failed — check server connection.", "error");
+      }
+    });
+  }
+
+  if (clearBtn) {
+    clearBtn.addEventListener("click", () => {
+      try {
+        localStorage.removeItem(CONTROL_ACCESS_KEY_STORAGE_KEY);
+        CONTROL_ACCESS_KEY_LEGACY_STORAGE_KEYS.forEach((legacyKey) => localStorage.removeItem(legacyKey));
+      } catch (_) {}
+      setRuntimeControlKey("");
+      if (input) input.value = "";
+      setAccessKeyStatus("Key cleared. Reads will now fail with missing-key errors.", "warn");
+      updateAccessKeyButton();
+    });
+
+----- public/control-center/app.js lines 1004-1114 -----
+}
+
+function boundedTracePush(stage, details = {}) {
+  const entry = {
+    at: new Date().toISOString(),
+    stage: String(stage || "startup.trace"),
+    token: String(details.token || startupRuntimeState.currentToken || ""),
+    detail: String(details.detail || details.message || ""),
+    endpoint: String(details.endpoint || "")
+  };
+
+  boundedPush(runtimeTraceHistory, entry, RUNTIME_TRACE_LIMIT);
+  return entry;
+}
+
+function renderStartupRuntimeTrace(cachedPayload = null) {
+  const state = getState();
+  const payload = cachedPayload || {
+    debugStartup: isDebugStartupMode(),
+    currentProject: startupRuntimeState.currentProject || state.context.currentProject || "",
+    currentToken: startupRuntimeState.currentToken || "",
+    payloadSuccess: Boolean(startupRuntimeState.projectPayloadSuccess),
+    hideLoadingCalled: Boolean(startupRuntimeState.hideLoadingCalled),
+    hideLoadingReason: String(startupRuntimeState.hideLoadingReason || ""),
+    unlocked: Boolean(startupRuntimeState.unlocked),
+    unlockReason: String(startupRuntimeState.unlockReason || ""),
+    lastApiStage: String(startupRuntimeState.lastApiStage || ""),
+    lastClick: readLastClickDiagnostic(),
+    accessKeyBypass: Boolean(startupDiagnostics?.requestAuth?.accessKeyBypass),
+    appLoading: Boolean(state.loading),
+    commandRuntime: getCommandRuntimeState(),
+    overlay: getOverlayState(),
+    trace: runtimeTraceHistory.slice(-20)
+  };
+  const panel = $("startupTracePanel");
+  const meta = $("startupTraceMeta");
+  const body = $("startupTraceBody");
+  const unlockBar = $("startupUnlockBar");
+  const unlockText = $("startupUnlockText");
+  const showPanel = payload.debugStartup;
+  const showUnlockBar = Boolean(startupRuntimeState.unlockVisible || startupRuntimeState.unlocked);
+
+  if (panel) {
+    panel.hidden = !showPanel;
+    panel.inert = !showPanel;
+    panel.classList.toggle("is-visible", showPanel);
+    panel.setAttribute("aria-hidden", showPanel ? "false" : "true");
+  }
+
+  if (meta) {
+    meta.textContent = [
+      `project: ${payload.currentProject || "-"}`,
+      `token: ${payload.currentToken || "-"}`,
+      `appLoading: ${payload.appLoading ? "true" : "false"}`,
+      `payloadSuccess: ${payload.payloadSuccess ? "true" : "false"}`,
+      `hideLoadingCalled: ${payload.hideLoadingCalled ? "true" : "false"}`,
+      `lastApiStage: ${payload.lastApiStage || "-"}`,
+      `accessKeyBypass: ${payload.accessKeyBypass ? "true" : "false"}`,
+      `overlay.className: ${payload.overlay.className || "-"}`,
+      `overlay.display: ${payload.overlay.display || "-"}`,
+      `overlay.pointerEvents: ${payload.overlay.pointerEvents || "-"}`,
+      `overlay.aria-hidden: ${payload.overlay.ariaHidden || "-"}`,
+      `body.loadingClasses: ${payload.overlay.bodyClasses || "-"}`,
+      `overlay.count: ${payload.overlay.count || 0}`,
+      `commandRuntime.version: ${payload.commandRuntime?.version || "-"}`,
+      `commandBar.exists: ${payload.commandRuntime?.commandBar?.exists ? "true" : "false"}`,
+      `commandBackdrop.exists: ${payload.commandRuntime?.commandBackdrop?.exists ? "true" : "false"}`,
+      `aiDock.exists: ${payload.commandRuntime?.aiDock?.exists ? "true" : "false"}`,
+      `aiDock.open: ${payload.commandRuntime?.aiDock?.open ? "true" : "false"}`,
+      `aiDock.dataOpen: ${payload.commandRuntime?.aiDock?.dataOpen || "-"}`,
+      `aiDock.toggle.aria-expanded: ${payload.commandRuntime?.aiDock?.toggle?.ariaExpanded || "-"}`,
+      `aiDock.panel.hidden: ${payload.commandRuntime?.aiDock?.panel?.hidden ? "true" : "false"}`,
+      `aiDock.panel.aria-hidden: ${payload.commandRuntime?.aiDock?.panel?.ariaHidden || "-"}`,
+      `lastClick: ${formatLastClickSummary(payload.lastClick)}`
+    ].join("\n");
+  }
+
+  if (body) {
+    body.textContent = payload.trace.length
+      ? payload.trace.slice(-20).map((entry) => formatRuntimeTraceEntry(entry)).join("\n")
+      : "No startup events recorded yet.";
+  }
+
+  if (unlockBar) {
+    unlockBar.hidden = !showUnlockBar;
+    unlockBar.inert = !showUnlockBar;
+    unlockBar.setAttribute("aria-hidden", showUnlockBar ? "false" : "true");
+  }
+
+  if (unlockText) {
+    unlockText.textContent = startupRuntimeState.unlocked
+      ? "Startup is still syncing. The interface has been unlocked."
+      : "Startup is taking longer than expected. You can unlock the interface now.";
+  }
+}
+
+function persistRuntimeTrace(options = {}) {
+  const force = Boolean(options.force);
+  const debugStartup = isDebugStartupMode();
+
+  if (
+    !force &&
+    !debugStartup &&
+    !startupRuntimeState.unlocked &&
+    !startupRuntimeState.unlockVisible
+  ) {
+    return;
+  }
+
+  const state = getState();
+  const payload = {
+
+----- public/control-center/app.js lines 1038-1148 -----
+  const panel = $("startupTracePanel");
+  const meta = $("startupTraceMeta");
+  const body = $("startupTraceBody");
+  const unlockBar = $("startupUnlockBar");
+  const unlockText = $("startupUnlockText");
+  const showPanel = payload.debugStartup;
+  const showUnlockBar = Boolean(startupRuntimeState.unlockVisible || startupRuntimeState.unlocked);
+
+  if (panel) {
+    panel.hidden = !showPanel;
+    panel.inert = !showPanel;
+    panel.classList.toggle("is-visible", showPanel);
+    panel.setAttribute("aria-hidden", showPanel ? "false" : "true");
+  }
+
+  if (meta) {
+    meta.textContent = [
+      `project: ${payload.currentProject || "-"}`,
+      `token: ${payload.currentToken || "-"}`,
+      `appLoading: ${payload.appLoading ? "true" : "false"}`,
+      `payloadSuccess: ${payload.payloadSuccess ? "true" : "false"}`,
+      `hideLoadingCalled: ${payload.hideLoadingCalled ? "true" : "false"}`,
+      `lastApiStage: ${payload.lastApiStage || "-"}`,
+      `accessKeyBypass: ${payload.accessKeyBypass ? "true" : "false"}`,
+      `overlay.className: ${payload.overlay.className || "-"}`,
+      `overlay.display: ${payload.overlay.display || "-"}`,
+      `overlay.pointerEvents: ${payload.overlay.pointerEvents || "-"}`,
+      `overlay.aria-hidden: ${payload.overlay.ariaHidden || "-"}`,
+      `body.loadingClasses: ${payload.overlay.bodyClasses || "-"}`,
+      `overlay.count: ${payload.overlay.count || 0}`,
+      `commandRuntime.version: ${payload.commandRuntime?.version || "-"}`,
+      `commandBar.exists: ${payload.commandRuntime?.commandBar?.exists ? "true" : "false"}`,
+      `commandBackdrop.exists: ${payload.commandRuntime?.commandBackdrop?.exists ? "true" : "false"}`,
+      `aiDock.exists: ${payload.commandRuntime?.aiDock?.exists ? "true" : "false"}`,
+      `aiDock.open: ${payload.commandRuntime?.aiDock?.open ? "true" : "false"}`,
+      `aiDock.dataOpen: ${payload.commandRuntime?.aiDock?.dataOpen || "-"}`,
+      `aiDock.toggle.aria-expanded: ${payload.commandRuntime?.aiDock?.toggle?.ariaExpanded || "-"}`,
+      `aiDock.panel.hidden: ${payload.commandRuntime?.aiDock?.panel?.hidden ? "true" : "false"}`,
+      `aiDock.panel.aria-hidden: ${payload.commandRuntime?.aiDock?.panel?.ariaHidden || "-"}`,
+      `lastClick: ${formatLastClickSummary(payload.lastClick)}`
+    ].join("\n");
+  }
+
+  if (body) {
+    body.textContent = payload.trace.length
+      ? payload.trace.slice(-20).map((entry) => formatRuntimeTraceEntry(entry)).join("\n")
+      : "No startup events recorded yet.";
+  }
+
+  if (unlockBar) {
+    unlockBar.hidden = !showUnlockBar;
+    unlockBar.inert = !showUnlockBar;
+    unlockBar.setAttribute("aria-hidden", showUnlockBar ? "false" : "true");
+  }
+
+  if (unlockText) {
+    unlockText.textContent = startupRuntimeState.unlocked
+      ? "Startup is still syncing. The interface has been unlocked."
+      : "Startup is taking longer than expected. You can unlock the interface now.";
+  }
+}
+
+function persistRuntimeTrace(options = {}) {
+  const force = Boolean(options.force);
+  const debugStartup = isDebugStartupMode();
+
+  if (
+    !force &&
+    !debugStartup &&
+    !startupRuntimeState.unlocked &&
+    !startupRuntimeState.unlockVisible
+  ) {
+    return;
+  }
+
+  const state = getState();
+  const payload = {
+    at: new Date().toISOString(),
+    debugStartup,
+    currentProject: startupRuntimeState.currentProject || state.context.currentProject || "",
+    currentToken: startupRuntimeState.currentToken || "",
+    payloadSuccess: Boolean(startupRuntimeState.projectPayloadSuccess),
+    payloadSuccessAt: String(startupRuntimeState.payloadSuccessAt || ""),
+    hideLoadingCalled: Boolean(startupRuntimeState.hideLoadingCalled),
+    hideLoadingReason: String(startupRuntimeState.hideLoadingReason || ""),
+    hideLoadingAt: String(startupRuntimeState.hideLoadingAt || ""),
+    unlocked: Boolean(startupRuntimeState.unlocked),
+    unlockReason: String(startupRuntimeState.unlockReason || ""),
+    unlockAt: String(startupRuntimeState.unlockAt || ""),
+    lastApiStage: String(startupRuntimeState.lastApiStage || ""),
+    lastApiMessage: String(startupRuntimeState.lastApiMessage || ""),
+    lastApiEndpoint: String(startupRuntimeState.lastApiEndpoint || ""),
+    lastClick: readLastClickDiagnostic(),
+    accessKeyBypass: Boolean(startupDiagnostics?.requestAuth?.accessKeyBypass),
+    appLoading: Boolean(state.loading),
+    commandRuntime: getCommandRuntimeState(),
+    overlay: getOverlayState(),
+    trace: runtimeTraceHistory.slice(-20)
+  };
+
+  safeStorageSet(RUNTIME_TRACE_STORAGE_KEY, JSON.stringify(payload));
+  renderStartupRuntimeTrace(payload);
+}
+
+let runtimeTracePersistTimer = null;
+
+function scheduleRuntimeTracePersist(force = false) {
+  if (!force && !isDebugStartupMode()) {
+    return;
+  }
+
+
+----- public/control-center/app.js lines 1039-1149 -----
+  const meta = $("startupTraceMeta");
+  const body = $("startupTraceBody");
+  const unlockBar = $("startupUnlockBar");
+  const unlockText = $("startupUnlockText");
+  const showPanel = payload.debugStartup;
+  const showUnlockBar = Boolean(startupRuntimeState.unlockVisible || startupRuntimeState.unlocked);
+
+  if (panel) {
+    panel.hidden = !showPanel;
+    panel.inert = !showPanel;
+    panel.classList.toggle("is-visible", showPanel);
+    panel.setAttribute("aria-hidden", showPanel ? "false" : "true");
+  }
+
+  if (meta) {
+    meta.textContent = [
+      `project: ${payload.currentProject || "-"}`,
+      `token: ${payload.currentToken || "-"}`,
+      `appLoading: ${payload.appLoading ? "true" : "false"}`,
+      `payloadSuccess: ${payload.payloadSuccess ? "true" : "false"}`,
+      `hideLoadingCalled: ${payload.hideLoadingCalled ? "true" : "false"}`,
+      `lastApiStage: ${payload.lastApiStage || "-"}`,
+      `accessKeyBypass: ${payload.accessKeyBypass ? "true" : "false"}`,
+      `overlay.className: ${payload.overlay.className || "-"}`,
+      `overlay.display: ${payload.overlay.display || "-"}`,
+      `overlay.pointerEvents: ${payload.overlay.pointerEvents || "-"}`,
+      `overlay.aria-hidden: ${payload.overlay.ariaHidden || "-"}`,
+      `body.loadingClasses: ${payload.overlay.bodyClasses || "-"}`,
+      `overlay.count: ${payload.overlay.count || 0}`,
+      `commandRuntime.version: ${payload.commandRuntime?.version || "-"}`,
+      `commandBar.exists: ${payload.commandRuntime?.commandBar?.exists ? "true" : "false"}`,
+      `commandBackdrop.exists: ${payload.commandRuntime?.commandBackdrop?.exists ? "true" : "false"}`,
+      `aiDock.exists: ${payload.commandRuntime?.aiDock?.exists ? "true" : "false"}`,
+      `aiDock.open: ${payload.commandRuntime?.aiDock?.open ? "true" : "false"}`,
+      `aiDock.dataOpen: ${payload.commandRuntime?.aiDock?.dataOpen || "-"}`,
+      `aiDock.toggle.aria-expanded: ${payload.commandRuntime?.aiDock?.toggle?.ariaExpanded || "-"}`,
+      `aiDock.panel.hidden: ${payload.commandRuntime?.aiDock?.panel?.hidden ? "true" : "false"}`,
+      `aiDock.panel.aria-hidden: ${payload.commandRuntime?.aiDock?.panel?.ariaHidden || "-"}`,
+      `lastClick: ${formatLastClickSummary(payload.lastClick)}`
+    ].join("\n");
+  }
+
+  if (body) {
+    body.textContent = payload.trace.length
+      ? payload.trace.slice(-20).map((entry) => formatRuntimeTraceEntry(entry)).join("\n")
+      : "No startup events recorded yet.";
+  }
+
+  if (unlockBar) {
+    unlockBar.hidden = !showUnlockBar;
+    unlockBar.inert = !showUnlockBar;
+    unlockBar.setAttribute("aria-hidden", showUnlockBar ? "false" : "true");
+  }
+
+  if (unlockText) {
+    unlockText.textContent = startupRuntimeState.unlocked
+      ? "Startup is still syncing. The interface has been unlocked."
+      : "Startup is taking longer than expected. You can unlock the interface now.";
+  }
+}
+
+function persistRuntimeTrace(options = {}) {
+  const force = Boolean(options.force);
+  const debugStartup = isDebugStartupMode();
+
+  if (
+    !force &&
+    !debugStartup &&
+    !startupRuntimeState.unlocked &&
+    !startupRuntimeState.unlockVisible
+  ) {
+    return;
+  }
+
+  const state = getState();
+  const payload = {
+    at: new Date().toISOString(),
+    debugStartup,
+    currentProject: startupRuntimeState.currentProject || state.context.currentProject || "",
+    currentToken: startupRuntimeState.currentToken || "",
+    payloadSuccess: Boolean(startupRuntimeState.projectPayloadSuccess),
+    payloadSuccessAt: String(startupRuntimeState.payloadSuccessAt || ""),
+    hideLoadingCalled: Boolean(startupRuntimeState.hideLoadingCalled),
+    hideLoadingReason: String(startupRuntimeState.hideLoadingReason || ""),
+    hideLoadingAt: String(startupRuntimeState.hideLoadingAt || ""),
+    unlocked: Boolean(startupRuntimeState.unlocked),
+    unlockReason: String(startupRuntimeState.unlockReason || ""),
+    unlockAt: String(startupRuntimeState.unlockAt || ""),
+    lastApiStage: String(startupRuntimeState.lastApiStage || ""),
+    lastApiMessage: String(startupRuntimeState.lastApiMessage || ""),
+    lastApiEndpoint: String(startupRuntimeState.lastApiEndpoint || ""),
+    lastClick: readLastClickDiagnostic(),
+    accessKeyBypass: Boolean(startupDiagnostics?.requestAuth?.accessKeyBypass),
+    appLoading: Boolean(state.loading),
+    commandRuntime: getCommandRuntimeState(),
+    overlay: getOverlayState(),
+    trace: runtimeTraceHistory.slice(-20)
+  };
+
+  safeStorageSet(RUNTIME_TRACE_STORAGE_KEY, JSON.stringify(payload));
+  renderStartupRuntimeTrace(payload);
+}
+
+let runtimeTracePersistTimer = null;
+
+function scheduleRuntimeTracePersist(force = false) {
+  if (!force && !isDebugStartupMode()) {
+    return;
+  }
+
+  if (runtimeTracePersistTimer) {
+
+----- public/control-center/app.js lines 1040-1150 -----
+  const body = $("startupTraceBody");
+  const unlockBar = $("startupUnlockBar");
+  const unlockText = $("startupUnlockText");
+  const showPanel = payload.debugStartup;
+  const showUnlockBar = Boolean(startupRuntimeState.unlockVisible || startupRuntimeState.unlocked);
+
+  if (panel) {
+    panel.hidden = !showPanel;
+    panel.inert = !showPanel;
+    panel.classList.toggle("is-visible", showPanel);
+    panel.setAttribute("aria-hidden", showPanel ? "false" : "true");
+  }
+
+  if (meta) {
+    meta.textContent = [
+      `project: ${payload.currentProject || "-"}`,
+      `token: ${payload.currentToken || "-"}`,
+      `appLoading: ${payload.appLoading ? "true" : "false"}`,
+      `payloadSuccess: ${payload.payloadSuccess ? "true" : "false"}`,
+      `hideLoadingCalled: ${payload.hideLoadingCalled ? "true" : "false"}`,
+      `lastApiStage: ${payload.lastApiStage || "-"}`,
+      `accessKeyBypass: ${payload.accessKeyBypass ? "true" : "false"}`,
+      `overlay.className: ${payload.overlay.className || "-"}`,
+      `overlay.display: ${payload.overlay.display || "-"}`,
+      `overlay.pointerEvents: ${payload.overlay.pointerEvents || "-"}`,
+      `overlay.aria-hidden: ${payload.overlay.ariaHidden || "-"}`,
+      `body.loadingClasses: ${payload.overlay.bodyClasses || "-"}`,
+      `overlay.count: ${payload.overlay.count || 0}`,
+      `commandRuntime.version: ${payload.commandRuntime?.version || "-"}`,
+      `commandBar.exists: ${payload.commandRuntime?.commandBar?.exists ? "true" : "false"}`,
+      `commandBackdrop.exists: ${payload.commandRuntime?.commandBackdrop?.exists ? "true" : "false"}`,
+      `aiDock.exists: ${payload.commandRuntime?.aiDock?.exists ? "true" : "false"}`,
+      `aiDock.open: ${payload.commandRuntime?.aiDock?.open ? "true" : "false"}`,
+      `aiDock.dataOpen: ${payload.commandRuntime?.aiDock?.dataOpen || "-"}`,
+      `aiDock.toggle.aria-expanded: ${payload.commandRuntime?.aiDock?.toggle?.ariaExpanded || "-"}`,
+      `aiDock.panel.hidden: ${payload.commandRuntime?.aiDock?.panel?.hidden ? "true" : "false"}`,
+      `aiDock.panel.aria-hidden: ${payload.commandRuntime?.aiDock?.panel?.ariaHidden || "-"}`,
+      `lastClick: ${formatLastClickSummary(payload.lastClick)}`
+    ].join("\n");
+  }
+
+  if (body) {
+    body.textContent = payload.trace.length
+      ? payload.trace.slice(-20).map((entry) => formatRuntimeTraceEntry(entry)).join("\n")
+      : "No startup events recorded yet.";
+  }
+
+  if (unlockBar) {
+    unlockBar.hidden = !showUnlockBar;
+    unlockBar.inert = !showUnlockBar;
+    unlockBar.setAttribute("aria-hidden", showUnlockBar ? "false" : "true");
+  }
+
+  if (unlockText) {
+    unlockText.textContent = startupRuntimeState.unlocked
+      ? "Startup is still syncing. The interface has been unlocked."
+      : "Startup is taking longer than expected. You can unlock the interface now.";
+  }
+}
+
+function persistRuntimeTrace(options = {}) {
+  const force = Boolean(options.force);
+  const debugStartup = isDebugStartupMode();
+
+  if (
+    !force &&
+    !debugStartup &&
+    !startupRuntimeState.unlocked &&
+    !startupRuntimeState.unlockVisible
+  ) {
+    return;
+  }
+
+  const state = getState();
+  const payload = {
+    at: new Date().toISOString(),
+    debugStartup,
+    currentProject: startupRuntimeState.currentProject || state.context.currentProject || "",
+    currentToken: startupRuntimeState.currentToken || "",
+    payloadSuccess: Boolean(startupRuntimeState.projectPayloadSuccess),
+    payloadSuccessAt: String(startupRuntimeState.payloadSuccessAt || ""),
+    hideLoadingCalled: Boolean(startupRuntimeState.hideLoadingCalled),
+    hideLoadingReason: String(startupRuntimeState.hideLoadingReason || ""),
+    hideLoadingAt: String(startupRuntimeState.hideLoadingAt || ""),
+    unlocked: Boolean(startupRuntimeState.unlocked),
+    unlockReason: String(startupRuntimeState.unlockReason || ""),
+    unlockAt: String(startupRuntimeState.unlockAt || ""),
+    lastApiStage: String(startupRuntimeState.lastApiStage || ""),
+    lastApiMessage: String(startupRuntimeState.lastApiMessage || ""),
+    lastApiEndpoint: String(startupRuntimeState.lastApiEndpoint || ""),
+    lastClick: readLastClickDiagnostic(),
+    accessKeyBypass: Boolean(startupDiagnostics?.requestAuth?.accessKeyBypass),
+    appLoading: Boolean(state.loading),
+    commandRuntime: getCommandRuntimeState(),
+    overlay: getOverlayState(),
+    trace: runtimeTraceHistory.slice(-20)
+  };
+
+  safeStorageSet(RUNTIME_TRACE_STORAGE_KEY, JSON.stringify(payload));
+  renderStartupRuntimeTrace(payload);
+}
+
+let runtimeTracePersistTimer = null;
+
+function scheduleRuntimeTracePersist(force = false) {
+  if (!force && !isDebugStartupMode()) {
+    return;
+  }
+
+  if (runtimeTracePersistTimer) {
+    clearTimeout(runtimeTracePersistTimer);
+
+----- public/control-center/app.js lines 1041-1151 -----
+  const unlockBar = $("startupUnlockBar");
+  const unlockText = $("startupUnlockText");
+  const showPanel = payload.debugStartup;
+  const showUnlockBar = Boolean(startupRuntimeState.unlockVisible || startupRuntimeState.unlocked);
+
+  if (panel) {
+    panel.hidden = !showPanel;
+    panel.inert = !showPanel;
+    panel.classList.toggle("is-visible", showPanel);
+    panel.setAttribute("aria-hidden", showPanel ? "false" : "true");
+  }
+
+  if (meta) {
+    meta.textContent = [
+      `project: ${payload.currentProject || "-"}`,
+      `token: ${payload.currentToken || "-"}`,
+      `appLoading: ${payload.appLoading ? "true" : "false"}`,
+      `payloadSuccess: ${payload.payloadSuccess ? "true" : "false"}`,
+      `hideLoadingCalled: ${payload.hideLoadingCalled ? "true" : "false"}`,
+      `lastApiStage: ${payload.lastApiStage || "-"}`,
+      `accessKeyBypass: ${payload.accessKeyBypass ? "true" : "false"}`,
+      `overlay.className: ${payload.overlay.className || "-"}`,
+      `overlay.display: ${payload.overlay.display || "-"}`,
+      `overlay.pointerEvents: ${payload.overlay.pointerEvents || "-"}`,
+      `overlay.aria-hidden: ${payload.overlay.ariaHidden || "-"}`,
+      `body.loadingClasses: ${payload.overlay.bodyClasses || "-"}`,
+      `overlay.count: ${payload.overlay.count || 0}`,
+      `commandRuntime.version: ${payload.commandRuntime?.version || "-"}`,
+      `commandBar.exists: ${payload.commandRuntime?.commandBar?.exists ? "true" : "false"}`,
+      `commandBackdrop.exists: ${payload.commandRuntime?.commandBackdrop?.exists ? "true" : "false"}`,
+      `aiDock.exists: ${payload.commandRuntime?.aiDock?.exists ? "true" : "false"}`,
+      `aiDock.open: ${payload.commandRuntime?.aiDock?.open ? "true" : "false"}`,
+      `aiDock.dataOpen: ${payload.commandRuntime?.aiDock?.dataOpen || "-"}`,
+      `aiDock.toggle.aria-expanded: ${payload.commandRuntime?.aiDock?.toggle?.ariaExpanded || "-"}`,
+      `aiDock.panel.hidden: ${payload.commandRuntime?.aiDock?.panel?.hidden ? "true" : "false"}`,
+      `aiDock.panel.aria-hidden: ${payload.commandRuntime?.aiDock?.panel?.ariaHidden || "-"}`,
+      `lastClick: ${formatLastClickSummary(payload.lastClick)}`
+    ].join("\n");
+  }
+
+  if (body) {
+    body.textContent = payload.trace.length
+      ? payload.trace.slice(-20).map((entry) => formatRuntimeTraceEntry(entry)).join("\n")
+      : "No startup events recorded yet.";
+  }
+
+  if (unlockBar) {
+    unlockBar.hidden = !showUnlockBar;
+    unlockBar.inert = !showUnlockBar;
+    unlockBar.setAttribute("aria-hidden", showUnlockBar ? "false" : "true");
+  }
+
+  if (unlockText) {
+    unlockText.textContent = startupRuntimeState.unlocked
+      ? "Startup is still syncing. The interface has been unlocked."
+      : "Startup is taking longer than expected. You can unlock the interface now.";
+  }
+}
+
+function persistRuntimeTrace(options = {}) {
+  const force = Boolean(options.force);
+  const debugStartup = isDebugStartupMode();
+
+  if (
+    !force &&
+    !debugStartup &&
+    !startupRuntimeState.unlocked &&
+    !startupRuntimeState.unlockVisible
+  ) {
+    return;
+  }
+
+  const state = getState();
+  const payload = {
+    at: new Date().toISOString(),
+    debugStartup,
+    currentProject: startupRuntimeState.currentProject || state.context.currentProject || "",
+    currentToken: startupRuntimeState.currentToken || "",
+    payloadSuccess: Boolean(startupRuntimeState.projectPayloadSuccess),
+    payloadSuccessAt: String(startupRuntimeState.payloadSuccessAt || ""),
+    hideLoadingCalled: Boolean(startupRuntimeState.hideLoadingCalled),
+    hideLoadingReason: String(startupRuntimeState.hideLoadingReason || ""),
+    hideLoadingAt: String(startupRuntimeState.hideLoadingAt || ""),
+    unlocked: Boolean(startupRuntimeState.unlocked),
+    unlockReason: String(startupRuntimeState.unlockReason || ""),
+    unlockAt: String(startupRuntimeState.unlockAt || ""),
+    lastApiStage: String(startupRuntimeState.lastApiStage || ""),
+    lastApiMessage: String(startupRuntimeState.lastApiMessage || ""),
+    lastApiEndpoint: String(startupRuntimeState.lastApiEndpoint || ""),
+    lastClick: readLastClickDiagnostic(),
+    accessKeyBypass: Boolean(startupDiagnostics?.requestAuth?.accessKeyBypass),
+    appLoading: Boolean(state.loading),
+    commandRuntime: getCommandRuntimeState(),
+    overlay: getOverlayState(),
+    trace: runtimeTraceHistory.slice(-20)
+  };
+
+  safeStorageSet(RUNTIME_TRACE_STORAGE_KEY, JSON.stringify(payload));
+  renderStartupRuntimeTrace(payload);
+}
+
+let runtimeTracePersistTimer = null;
+
+function scheduleRuntimeTracePersist(force = false) {
+  if (!force && !isDebugStartupMode()) {
+    return;
+  }
+
+  if (runtimeTracePersistTimer) {
+    clearTimeout(runtimeTracePersistTimer);
+  }
+
+----- public/control-center/app.js lines 1042-1152 -----
+  const unlockText = $("startupUnlockText");
+  const showPanel = payload.debugStartup;
+  const showUnlockBar = Boolean(startupRuntimeState.unlockVisible || startupRuntimeState.unlocked);
+
+  if (panel) {
+    panel.hidden = !showPanel;
+    panel.inert = !showPanel;
+    panel.classList.toggle("is-visible", showPanel);
+    panel.setAttribute("aria-hidden", showPanel ? "false" : "true");
+  }
+
+  if (meta) {
+    meta.textContent = [
+      `project: ${payload.currentProject || "-"}`,
+      `token: ${payload.currentToken || "-"}`,
+      `appLoading: ${payload.appLoading ? "true" : "false"}`,
+      `payloadSuccess: ${payload.payloadSuccess ? "true" : "false"}`,
+      `hideLoadingCalled: ${payload.hideLoadingCalled ? "true" : "false"}`,
+      `lastApiStage: ${payload.lastApiStage || "-"}`,
+      `accessKeyBypass: ${payload.accessKeyBypass ? "true" : "false"}`,
+      `overlay.className: ${payload.overlay.className || "-"}`,
+      `overlay.display: ${payload.overlay.display || "-"}`,
+      `overlay.pointerEvents: ${payload.overlay.pointerEvents || "-"}`,
+      `overlay.aria-hidden: ${payload.overlay.ariaHidden || "-"}`,
+      `body.loadingClasses: ${payload.overlay.bodyClasses || "-"}`,
+      `overlay.count: ${payload.overlay.count || 0}`,
+      `commandRuntime.version: ${payload.commandRuntime?.version || "-"}`,
+      `commandBar.exists: ${payload.commandRuntime?.commandBar?.exists ? "true" : "false"}`,
+      `commandBackdrop.exists: ${payload.commandRuntime?.commandBackdrop?.exists ? "true" : "false"}`,
+      `aiDock.exists: ${payload.commandRuntime?.aiDock?.exists ? "true" : "false"}`,
+      `aiDock.open: ${payload.commandRuntime?.aiDock?.open ? "true" : "false"}`,
+      `aiDock.dataOpen: ${payload.commandRuntime?.aiDock?.dataOpen || "-"}`,
+      `aiDock.toggle.aria-expanded: ${payload.commandRuntime?.aiDock?.toggle?.ariaExpanded || "-"}`,
+      `aiDock.panel.hidden: ${payload.commandRuntime?.aiDock?.panel?.hidden ? "true" : "false"}`,
+      `aiDock.panel.aria-hidden: ${payload.commandRuntime?.aiDock?.panel?.ariaHidden || "-"}`,
+      `lastClick: ${formatLastClickSummary(payload.lastClick)}`
+    ].join("\n");
+  }
+
+  if (body) {
+    body.textContent = payload.trace.length
+      ? payload.trace.slice(-20).map((entry) => formatRuntimeTraceEntry(entry)).join("\n")
+      : "No startup events recorded yet.";
+  }
+
+  if (unlockBar) {
+    unlockBar.hidden = !showUnlockBar;
+    unlockBar.inert = !showUnlockBar;
+    unlockBar.setAttribute("aria-hidden", showUnlockBar ? "false" : "true");
+  }
+
+  if (unlockText) {
+    unlockText.textContent = startupRuntimeState.unlocked
+      ? "Startup is still syncing. The interface has been unlocked."
+      : "Startup is taking longer than expected. You can unlock the interface now.";
+  }
+}
+
+function persistRuntimeTrace(options = {}) {
+  const force = Boolean(options.force);
+  const debugStartup = isDebugStartupMode();
+
+  if (
+    !force &&
+    !debugStartup &&
+    !startupRuntimeState.unlocked &&
+    !startupRuntimeState.unlockVisible
+  ) {
+    return;
+  }
+
+  const state = getState();
+  const payload = {
+    at: new Date().toISOString(),
+    debugStartup,
+    currentProject: startupRuntimeState.currentProject || state.context.currentProject || "",
+    currentToken: startupRuntimeState.currentToken || "",
+    payloadSuccess: Boolean(startupRuntimeState.projectPayloadSuccess),
+    payloadSuccessAt: String(startupRuntimeState.payloadSuccessAt || ""),
+    hideLoadingCalled: Boolean(startupRuntimeState.hideLoadingCalled),
+    hideLoadingReason: String(startupRuntimeState.hideLoadingReason || ""),
+    hideLoadingAt: String(startupRuntimeState.hideLoadingAt || ""),
+    unlocked: Boolean(startupRuntimeState.unlocked),
+    unlockReason: String(startupRuntimeState.unlockReason || ""),
+    unlockAt: String(startupRuntimeState.unlockAt || ""),
+    lastApiStage: String(startupRuntimeState.lastApiStage || ""),
+    lastApiMessage: String(startupRuntimeState.lastApiMessage || ""),
+    lastApiEndpoint: String(startupRuntimeState.lastApiEndpoint || ""),
+    lastClick: readLastClickDiagnostic(),
+    accessKeyBypass: Boolean(startupDiagnostics?.requestAuth?.accessKeyBypass),
+    appLoading: Boolean(state.loading),
+    commandRuntime: getCommandRuntimeState(),
+    overlay: getOverlayState(),
+    trace: runtimeTraceHistory.slice(-20)
+  };
+
+  safeStorageSet(RUNTIME_TRACE_STORAGE_KEY, JSON.stringify(payload));
+  renderStartupRuntimeTrace(payload);
+}
+
+let runtimeTracePersistTimer = null;
+
+function scheduleRuntimeTracePersist(force = false) {
+  if (!force && !isDebugStartupMode()) {
+    return;
+  }
+
+  if (runtimeTracePersistTimer) {
+    clearTimeout(runtimeTracePersistTimer);
+  }
+
+
+----- public/control-center/app.js lines 1043-1153 -----
+  const showPanel = payload.debugStartup;
+  const showUnlockBar = Boolean(startupRuntimeState.unlockVisible || startupRuntimeState.unlocked);
+
+  if (panel) {
+    panel.hidden = !showPanel;
+    panel.inert = !showPanel;
+    panel.classList.toggle("is-visible", showPanel);
+    panel.setAttribute("aria-hidden", showPanel ? "false" : "true");
+  }
+
+  if (meta) {
+    meta.textContent = [
+      `project: ${payload.currentProject || "-"}`,
+      `token: ${payload.currentToken || "-"}`,
+      `appLoading: ${payload.appLoading ? "true" : "false"}`,
+      `payloadSuccess: ${payload.payloadSuccess ? "true" : "false"}`,
+      `hideLoadingCalled: ${payload.hideLoadingCalled ? "true" : "false"}`,
+      `lastApiStage: ${payload.lastApiStage || "-"}`,
+      `accessKeyBypass: ${payload.accessKeyBypass ? "true" : "false"}`,
+      `overlay.className: ${payload.overlay.className || "-"}`,
+      `overlay.display: ${payload.overlay.display || "-"}`,
+      `overlay.pointerEvents: ${payload.overlay.pointerEvents || "-"}`,
+      `overlay.aria-hidden: ${payload.overlay.ariaHidden || "-"}`,
+      `body.loadingClasses: ${payload.overlay.bodyClasses || "-"}`,
+      `overlay.count: ${payload.overlay.count || 0}`,
+      `commandRuntime.version: ${payload.commandRuntime?.version || "-"}`,
+      `commandBar.exists: ${payload.commandRuntime?.commandBar?.exists ? "true" : "false"}`,
+      `commandBackdrop.exists: ${payload.commandRuntime?.commandBackdrop?.exists ? "true" : "false"}`,
+      `aiDock.exists: ${payload.commandRuntime?.aiDock?.exists ? "true" : "false"}`,
+      `aiDock.open: ${payload.commandRuntime?.aiDock?.open ? "true" : "false"}`,
+      `aiDock.dataOpen: ${payload.commandRuntime?.aiDock?.dataOpen || "-"}`,
+      `aiDock.toggle.aria-expanded: ${payload.commandRuntime?.aiDock?.toggle?.ariaExpanded || "-"}`,
+      `aiDock.panel.hidden: ${payload.commandRuntime?.aiDock?.panel?.hidden ? "true" : "false"}`,
+      `aiDock.panel.aria-hidden: ${payload.commandRuntime?.aiDock?.panel?.ariaHidden || "-"}`,
+      `lastClick: ${formatLastClickSummary(payload.lastClick)}`
+    ].join("\n");
+  }
+
+  if (body) {
+    body.textContent = payload.trace.length
+      ? payload.trace.slice(-20).map((entry) => formatRuntimeTraceEntry(entry)).join("\n")
+      : "No startup events recorded yet.";
+  }
+
+  if (unlockBar) {
+    unlockBar.hidden = !showUnlockBar;
+    unlockBar.inert = !showUnlockBar;
+    unlockBar.setAttribute("aria-hidden", showUnlockBar ? "false" : "true");
+  }
+
+  if (unlockText) {
+    unlockText.textContent = startupRuntimeState.unlocked
+      ? "Startup is still syncing. The interface has been unlocked."
+      : "Startup is taking longer than expected. You can unlock the interface now.";
+  }
+}
+
+function persistRuntimeTrace(options = {}) {
+  const force = Boolean(options.force);
+  const debugStartup = isDebugStartupMode();
+
+  if (
+    !force &&
+    !debugStartup &&
+    !startupRuntimeState.unlocked &&
+    !startupRuntimeState.unlockVisible
+  ) {
+    return;
+  }
+
+  const state = getState();
+  const payload = {
+    at: new Date().toISOString(),
+    debugStartup,
+    currentProject: startupRuntimeState.currentProject || state.context.currentProject || "",
+    currentToken: startupRuntimeState.currentToken || "",
+    payloadSuccess: Boolean(startupRuntimeState.projectPayloadSuccess),
+    payloadSuccessAt: String(startupRuntimeState.payloadSuccessAt || ""),
+    hideLoadingCalled: Boolean(startupRuntimeState.hideLoadingCalled),
+    hideLoadingReason: String(startupRuntimeState.hideLoadingReason || ""),
+    hideLoadingAt: String(startupRuntimeState.hideLoadingAt || ""),
+    unlocked: Boolean(startupRuntimeState.unlocked),
+    unlockReason: String(startupRuntimeState.unlockReason || ""),
+    unlockAt: String(startupRuntimeState.unlockAt || ""),
+    lastApiStage: String(startupRuntimeState.lastApiStage || ""),
+    lastApiMessage: String(startupRuntimeState.lastApiMessage || ""),
+    lastApiEndpoint: String(startupRuntimeState.lastApiEndpoint || ""),
+    lastClick: readLastClickDiagnostic(),
+    accessKeyBypass: Boolean(startupDiagnostics?.requestAuth?.accessKeyBypass),
+    appLoading: Boolean(state.loading),
+    commandRuntime: getCommandRuntimeState(),
+    overlay: getOverlayState(),
+    trace: runtimeTraceHistory.slice(-20)
+  };
+
+  safeStorageSet(RUNTIME_TRACE_STORAGE_KEY, JSON.stringify(payload));
+  renderStartupRuntimeTrace(payload);
+}
+
+let runtimeTracePersistTimer = null;
+
+function scheduleRuntimeTracePersist(force = false) {
+  if (!force && !isDebugStartupMode()) {
+    return;
+  }
+
+  if (runtimeTracePersistTimer) {
+    clearTimeout(runtimeTracePersistTimer);
+  }
+
+  runtimeTracePersistTimer = window.setTimeout(() => {
+
+----- public/control-center/app.js lines 1044-1154 -----
+  const showUnlockBar = Boolean(startupRuntimeState.unlockVisible || startupRuntimeState.unlocked);
+
+  if (panel) {
+    panel.hidden = !showPanel;
+    panel.inert = !showPanel;
+    panel.classList.toggle("is-visible", showPanel);
+    panel.setAttribute("aria-hidden", showPanel ? "false" : "true");
+  }
+
+  if (meta) {
+    meta.textContent = [
+      `project: ${payload.currentProject || "-"}`,
+      `token: ${payload.currentToken || "-"}`,
+      `appLoading: ${payload.appLoading ? "true" : "false"}`,
+      `payloadSuccess: ${payload.payloadSuccess ? "true" : "false"}`,
+      `hideLoadingCalled: ${payload.hideLoadingCalled ? "true" : "false"}`,
+      `lastApiStage: ${payload.lastApiStage || "-"}`,
+      `accessKeyBypass: ${payload.accessKeyBypass ? "true" : "false"}`,
+      `overlay.className: ${payload.overlay.className || "-"}`,
+      `overlay.display: ${payload.overlay.display || "-"}`,
+      `overlay.pointerEvents: ${payload.overlay.pointerEvents || "-"}`,
+      `overlay.aria-hidden: ${payload.overlay.ariaHidden || "-"}`,
+      `body.loadingClasses: ${payload.overlay.bodyClasses || "-"}`,
+      `overlay.count: ${payload.overlay.count || 0}`,
+      `commandRuntime.version: ${payload.commandRuntime?.version || "-"}`,
+      `commandBar.exists: ${payload.commandRuntime?.commandBar?.exists ? "true" : "false"}`,
+      `commandBackdrop.exists: ${payload.commandRuntime?.commandBackdrop?.exists ? "true" : "false"}`,
+      `aiDock.exists: ${payload.commandRuntime?.aiDock?.exists ? "true" : "false"}`,
+      `aiDock.open: ${payload.commandRuntime?.aiDock?.open ? "true" : "false"}`,
+      `aiDock.dataOpen: ${payload.commandRuntime?.aiDock?.dataOpen || "-"}`,
+      `aiDock.toggle.aria-expanded: ${payload.commandRuntime?.aiDock?.toggle?.ariaExpanded || "-"}`,
+      `aiDock.panel.hidden: ${payload.commandRuntime?.aiDock?.panel?.hidden ? "true" : "false"}`,
+      `aiDock.panel.aria-hidden: ${payload.commandRuntime?.aiDock?.panel?.ariaHidden || "-"}`,
+      `lastClick: ${formatLastClickSummary(payload.lastClick)}`
+    ].join("\n");
+  }
+
+  if (body) {
+    body.textContent = payload.trace.length
+      ? payload.trace.slice(-20).map((entry) => formatRuntimeTraceEntry(entry)).join("\n")
+      : "No startup events recorded yet.";
+  }
+
+  if (unlockBar) {
+    unlockBar.hidden = !showUnlockBar;
+    unlockBar.inert = !showUnlockBar;
+    unlockBar.setAttribute("aria-hidden", showUnlockBar ? "false" : "true");
+  }
+
+  if (unlockText) {
+    unlockText.textContent = startupRuntimeState.unlocked
+      ? "Startup is still syncing. The interface has been unlocked."
+      : "Startup is taking longer than expected. You can unlock the interface now.";
+  }
+}
+
+function persistRuntimeTrace(options = {}) {
+  const force = Boolean(options.force);
+  const debugStartup = isDebugStartupMode();
+
+  if (
+    !force &&
+    !debugStartup &&
+    !startupRuntimeState.unlocked &&
+    !startupRuntimeState.unlockVisible
+  ) {
+    return;
+  }
+
+  const state = getState();
+  const payload = {
+    at: new Date().toISOString(),
+    debugStartup,
+    currentProject: startupRuntimeState.currentProject || state.context.currentProject || "",
+    currentToken: startupRuntimeState.currentToken || "",
+    payloadSuccess: Boolean(startupRuntimeState.projectPayloadSuccess),
+    payloadSuccessAt: String(startupRuntimeState.payloadSuccessAt || ""),
+    hideLoadingCalled: Boolean(startupRuntimeState.hideLoadingCalled),
+    hideLoadingReason: String(startupRuntimeState.hideLoadingReason || ""),
+    hideLoadingAt: String(startupRuntimeState.hideLoadingAt || ""),
+    unlocked: Boolean(startupRuntimeState.unlocked),
+    unlockReason: String(startupRuntimeState.unlockReason || ""),
+    unlockAt: String(startupRuntimeState.unlockAt || ""),
+    lastApiStage: String(startupRuntimeState.lastApiStage || ""),
+    lastApiMessage: String(startupRuntimeState.lastApiMessage || ""),
+    lastApiEndpoint: String(startupRuntimeState.lastApiEndpoint || ""),
+    lastClick: readLastClickDiagnostic(),
+    accessKeyBypass: Boolean(startupDiagnostics?.requestAuth?.accessKeyBypass),
+    appLoading: Boolean(state.loading),
+    commandRuntime: getCommandRuntimeState(),
+    overlay: getOverlayState(),
+    trace: runtimeTraceHistory.slice(-20)
+  };
+
+  safeStorageSet(RUNTIME_TRACE_STORAGE_KEY, JSON.stringify(payload));
+  renderStartupRuntimeTrace(payload);
+}
+
+let runtimeTracePersistTimer = null;
+
+function scheduleRuntimeTracePersist(force = false) {
+  if (!force && !isDebugStartupMode()) {
+    return;
+  }
+
+  if (runtimeTracePersistTimer) {
+    clearTimeout(runtimeTracePersistTimer);
+  }
+
+  runtimeTracePersistTimer = window.setTimeout(() => {
+    runtimeTracePersistTimer = null;
+
+----- public/control-center/app.js lines 1045-1155 -----
+
+  if (panel) {
+    panel.hidden = !showPanel;
+    panel.inert = !showPanel;
+    panel.classList.toggle("is-visible", showPanel);
+    panel.setAttribute("aria-hidden", showPanel ? "false" : "true");
+  }
+
+  if (meta) {
+    meta.textContent = [
+      `project: ${payload.currentProject || "-"}`,
+      `token: ${payload.currentToken || "-"}`,
+      `appLoading: ${payload.appLoading ? "true" : "false"}`,
+      `payloadSuccess: ${payload.payloadSuccess ? "true" : "false"}`,
+      `hideLoadingCalled: ${payload.hideLoadingCalled ? "true" : "false"}`,
+      `lastApiStage: ${payload.lastApiStage || "-"}`,
+      `accessKeyBypass: ${payload.accessKeyBypass ? "true" : "false"}`,
+      `overlay.className: ${payload.overlay.className || "-"}`,
+      `overlay.display: ${payload.overlay.display || "-"}`,
+      `overlay.pointerEvents: ${payload.overlay.pointerEvents || "-"}`,
+      `overlay.aria-hidden: ${payload.overlay.ariaHidden || "-"}`,
+      `body.loadingClasses: ${payload.overlay.bodyClasses || "-"}`,
+      `overlay.count: ${payload.overlay.count || 0}`,
+      `commandRuntime.version: ${payload.commandRuntime?.version || "-"}`,
+      `commandBar.exists: ${payload.commandRuntime?.commandBar?.exists ? "true" : "false"}`,
+      `commandBackdrop.exists: ${payload.commandRuntime?.commandBackdrop?.exists ? "true" : "false"}`,
+      `aiDock.exists: ${payload.commandRuntime?.aiDock?.exists ? "true" : "false"}`,
+      `aiDock.open: ${payload.commandRuntime?.aiDock?.open ? "true" : "false"}`,
+      `aiDock.dataOpen: ${payload.commandRuntime?.aiDock?.dataOpen || "-"}`,
+      `aiDock.toggle.aria-expanded: ${payload.commandRuntime?.aiDock?.toggle?.ariaExpanded || "-"}`,
+      `aiDock.panel.hidden: ${payload.commandRuntime?.aiDock?.panel?.hidden ? "true" : "false"}`,
+      `aiDock.panel.aria-hidden: ${payload.commandRuntime?.aiDock?.panel?.ariaHidden || "-"}`,
+      `lastClick: ${formatLastClickSummary(payload.lastClick)}`
+    ].join("\n");
+  }
+
+  if (body) {
+    body.textContent = payload.trace.length
+      ? payload.trace.slice(-20).map((entry) => formatRuntimeTraceEntry(entry)).join("\n")
+      : "No startup events recorded yet.";
+  }
+
+  if (unlockBar) {
+    unlockBar.hidden = !showUnlockBar;
+    unlockBar.inert = !showUnlockBar;
+    unlockBar.setAttribute("aria-hidden", showUnlockBar ? "false" : "true");
+  }
+
+  if (unlockText) {
+    unlockText.textContent = startupRuntimeState.unlocked
+      ? "Startup is still syncing. The interface has been unlocked."
+      : "Startup is taking longer than expected. You can unlock the interface now.";
+  }
+}
+
+function persistRuntimeTrace(options = {}) {
+  const force = Boolean(options.force);
+  const debugStartup = isDebugStartupMode();
+
+  if (
+    !force &&
+    !debugStartup &&
+    !startupRuntimeState.unlocked &&
+    !startupRuntimeState.unlockVisible
+  ) {
+    return;
+  }
+
+  const state = getState();
+  const payload = {
+    at: new Date().toISOString(),
+    debugStartup,
+    currentProject: startupRuntimeState.currentProject || state.context.currentProject || "",
+    currentToken: startupRuntimeState.currentToken || "",
+    payloadSuccess: Boolean(startupRuntimeState.projectPayloadSuccess),
+    payloadSuccessAt: String(startupRuntimeState.payloadSuccessAt || ""),
+    hideLoadingCalled: Boolean(startupRuntimeState.hideLoadingCalled),
+    hideLoadingReason: String(startupRuntimeState.hideLoadingReason || ""),
+    hideLoadingAt: String(startupRuntimeState.hideLoadingAt || ""),
+    unlocked: Boolean(startupRuntimeState.unlocked),
+    unlockReason: String(startupRuntimeState.unlockReason || ""),
+    unlockAt: String(startupRuntimeState.unlockAt || ""),
+    lastApiStage: String(startupRuntimeState.lastApiStage || ""),
+    lastApiMessage: String(startupRuntimeState.lastApiMessage || ""),
+    lastApiEndpoint: String(startupRuntimeState.lastApiEndpoint || ""),
+    lastClick: readLastClickDiagnostic(),
+    accessKeyBypass: Boolean(startupDiagnostics?.requestAuth?.accessKeyBypass),
+    appLoading: Boolean(state.loading),
+    commandRuntime: getCommandRuntimeState(),
+    overlay: getOverlayState(),
+    trace: runtimeTraceHistory.slice(-20)
+  };
+
+  safeStorageSet(RUNTIME_TRACE_STORAGE_KEY, JSON.stringify(payload));
+  renderStartupRuntimeTrace(payload);
+}
+
+let runtimeTracePersistTimer = null;
+
+function scheduleRuntimeTracePersist(force = false) {
+  if (!force && !isDebugStartupMode()) {
+    return;
+  }
+
+  if (runtimeTracePersistTimer) {
+    clearTimeout(runtimeTracePersistTimer);
+  }
+
+  runtimeTracePersistTimer = window.setTimeout(() => {
+    runtimeTracePersistTimer = null;
+    persistRuntimeTrace({ force });
+
+----- public/control-center/app.js lines 1046-1156 -----
+  if (panel) {
+    panel.hidden = !showPanel;
+    panel.inert = !showPanel;
+    panel.classList.toggle("is-visible", showPanel);
+    panel.setAttribute("aria-hidden", showPanel ? "false" : "true");
+  }
+
+  if (meta) {
+    meta.textContent = [
+      `project: ${payload.currentProject || "-"}`,
+      `token: ${payload.currentToken || "-"}`,
+      `appLoading: ${payload.appLoading ? "true" : "false"}`,
+      `payloadSuccess: ${payload.payloadSuccess ? "true" : "false"}`,
+      `hideLoadingCalled: ${payload.hideLoadingCalled ? "true" : "false"}`,
+      `lastApiStage: ${payload.lastApiStage || "-"}`,
+      `accessKeyBypass: ${payload.accessKeyBypass ? "true" : "false"}`,
+      `overlay.className: ${payload.overlay.className || "-"}`,
+      `overlay.display: ${payload.overlay.display || "-"}`,
+      `overlay.pointerEvents: ${payload.overlay.pointerEvents || "-"}`,
+      `overlay.aria-hidden: ${payload.overlay.ariaHidden || "-"}`,
+      `body.loadingClasses: ${payload.overlay.bodyClasses || "-"}`,
+      `overlay.count: ${payload.overlay.count || 0}`,
+      `commandRuntime.version: ${payload.commandRuntime?.version || "-"}`,
+      `commandBar.exists: ${payload.commandRuntime?.commandBar?.exists ? "true" : "false"}`,
+      `commandBackdrop.exists: ${payload.commandRuntime?.commandBackdrop?.exists ? "true" : "false"}`,
+      `aiDock.exists: ${payload.commandRuntime?.aiDock?.exists ? "true" : "false"}`,
+      `aiDock.open: ${payload.commandRuntime?.aiDock?.open ? "true" : "false"}`,
+      `aiDock.dataOpen: ${payload.commandRuntime?.aiDock?.dataOpen || "-"}`,
+      `aiDock.toggle.aria-expanded: ${payload.commandRuntime?.aiDock?.toggle?.ariaExpanded || "-"}`,
+      `aiDock.panel.hidden: ${payload.commandRuntime?.aiDock?.panel?.hidden ? "true" : "false"}`,
+      `aiDock.panel.aria-hidden: ${payload.commandRuntime?.aiDock?.panel?.ariaHidden || "-"}`,
+      `lastClick: ${formatLastClickSummary(payload.lastClick)}`
+    ].join("\n");
+  }
+
+  if (body) {
+    body.textContent = payload.trace.length
+      ? payload.trace.slice(-20).map((entry) => formatRuntimeTraceEntry(entry)).join("\n")
+      : "No startup events recorded yet.";
+  }
+
+  if (unlockBar) {
+    unlockBar.hidden = !showUnlockBar;
+    unlockBar.inert = !showUnlockBar;
+    unlockBar.setAttribute("aria-hidden", showUnlockBar ? "false" : "true");
+  }
+
+  if (unlockText) {
+    unlockText.textContent = startupRuntimeState.unlocked
+      ? "Startup is still syncing. The interface has been unlocked."
+      : "Startup is taking longer than expected. You can unlock the interface now.";
+  }
+}
+
+function persistRuntimeTrace(options = {}) {
+  const force = Boolean(options.force);
+  const debugStartup = isDebugStartupMode();
+
+  if (
+    !force &&
+    !debugStartup &&
+    !startupRuntimeState.unlocked &&
+    !startupRuntimeState.unlockVisible
+  ) {
+    return;
+  }
+
+  const state = getState();
+  const payload = {
+    at: new Date().toISOString(),
+    debugStartup,
+    currentProject: startupRuntimeState.currentProject || state.context.currentProject || "",
+    currentToken: startupRuntimeState.currentToken || "",
+    payloadSuccess: Boolean(startupRuntimeState.projectPayloadSuccess),
+    payloadSuccessAt: String(startupRuntimeState.payloadSuccessAt || ""),
+    hideLoadingCalled: Boolean(startupRuntimeState.hideLoadingCalled),
+    hideLoadingReason: String(startupRuntimeState.hideLoadingReason || ""),
+    hideLoadingAt: String(startupRuntimeState.hideLoadingAt || ""),
+    unlocked: Boolean(startupRuntimeState.unlocked),
+    unlockReason: String(startupRuntimeState.unlockReason || ""),
+    unlockAt: String(startupRuntimeState.unlockAt || ""),
+    lastApiStage: String(startupRuntimeState.lastApiStage || ""),
+    lastApiMessage: String(startupRuntimeState.lastApiMessage || ""),
+    lastApiEndpoint: String(startupRuntimeState.lastApiEndpoint || ""),
+    lastClick: readLastClickDiagnostic(),
+    accessKeyBypass: Boolean(startupDiagnostics?.requestAuth?.accessKeyBypass),
+    appLoading: Boolean(state.loading),
+    commandRuntime: getCommandRuntimeState(),
+    overlay: getOverlayState(),
+    trace: runtimeTraceHistory.slice(-20)
+  };
+
+  safeStorageSet(RUNTIME_TRACE_STORAGE_KEY, JSON.stringify(payload));
+  renderStartupRuntimeTrace(payload);
+}
+
+let runtimeTracePersistTimer = null;
+
+function scheduleRuntimeTracePersist(force = false) {
+  if (!force && !isDebugStartupMode()) {
+    return;
+  }
+
+  if (runtimeTracePersistTimer) {
+    clearTimeout(runtimeTracePersistTimer);
+  }
+
+  runtimeTracePersistTimer = window.setTimeout(() => {
+    runtimeTracePersistTimer = null;
+    persistRuntimeTrace({ force });
+  }, 250);
+
+----- public/control-center/app.js lines 1103-1213 -----
+
+  if (
+    !force &&
+    !debugStartup &&
+    !startupRuntimeState.unlocked &&
+    !startupRuntimeState.unlockVisible
+  ) {
+    return;
+  }
+
+  const state = getState();
+  const payload = {
+    at: new Date().toISOString(),
+    debugStartup,
+    currentProject: startupRuntimeState.currentProject || state.context.currentProject || "",
+    currentToken: startupRuntimeState.currentToken || "",
+    payloadSuccess: Boolean(startupRuntimeState.projectPayloadSuccess),
+    payloadSuccessAt: String(startupRuntimeState.payloadSuccessAt || ""),
+    hideLoadingCalled: Boolean(startupRuntimeState.hideLoadingCalled),
+    hideLoadingReason: String(startupRuntimeState.hideLoadingReason || ""),
+    hideLoadingAt: String(startupRuntimeState.hideLoadingAt || ""),
+    unlocked: Boolean(startupRuntimeState.unlocked),
+    unlockReason: String(startupRuntimeState.unlockReason || ""),
+    unlockAt: String(startupRuntimeState.unlockAt || ""),
+    lastApiStage: String(startupRuntimeState.lastApiStage || ""),
+    lastApiMessage: String(startupRuntimeState.lastApiMessage || ""),
+    lastApiEndpoint: String(startupRuntimeState.lastApiEndpoint || ""),
+    lastClick: readLastClickDiagnostic(),
+    accessKeyBypass: Boolean(startupDiagnostics?.requestAuth?.accessKeyBypass),
+    appLoading: Boolean(state.loading),
+    commandRuntime: getCommandRuntimeState(),
+    overlay: getOverlayState(),
+    trace: runtimeTraceHistory.slice(-20)
+  };
+
+  safeStorageSet(RUNTIME_TRACE_STORAGE_KEY, JSON.stringify(payload));
+  renderStartupRuntimeTrace(payload);
+}
+
+let runtimeTracePersistTimer = null;
+
+function scheduleRuntimeTracePersist(force = false) {
+  if (!force && !isDebugStartupMode()) {
+    return;
+  }
+
+  if (runtimeTracePersistTimer) {
+    clearTimeout(runtimeTracePersistTimer);
+  }
+
+  runtimeTracePersistTimer = window.setTimeout(() => {
+    runtimeTracePersistTimer = null;
+    persistRuntimeTrace({ force });
+  }, 250);
+}
+
+function recordRuntimeTrace(stage, details = {}) {
+  boundedTracePush(stage, details);
+  scheduleRuntimeTracePersist(false);
+}
+
+function readLastClickDiagnostic() {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const raw = window.localStorage?.getItem(LAST_CLICK_STORAGE_KEY) || "";
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? parsed : null;
+  } catch (_) {
+    return null;
+  }
+}
+
+function formatLastClickSummary(payload) {
+  if (!payload || typeof payload !== "object") {
+    return "none";
+  }
+
+  const parts = [
+    payload.tag ? String(payload.tag).toLowerCase() : "",
+    payload.id ? `#${payload.id}` : "",
+    payload.className ? `.${String(payload.className).split(/\s+/).filter(Boolean).join(".")}` : "",
+    payload.dataRoute ? `route=${payload.dataRoute}` : "",
+    payload.dataPage ? `page=${payload.dataPage}` : "",
+    payload.href ? `href=${payload.href}` : "",
+    payload.text ? `text=${payload.text}` : ""
+  ].filter(Boolean);
+
+  return parts.join(" ") || "none";
+}
+
+function installClickDiagnosticCapture() {
+  if (typeof document === "undefined" || window.__mhControlCenterClickDiagnosticInstalled) {
+    return;
+  }
+
+  document.addEventListener("click", (event) => {
+    const element = event.target instanceof Element
+      ? event.target.closest("button, a, [data-route], [data-page], [data-action], input, select, textarea") || event.target
+      : null;
+
+    if (!element || !(element instanceof Element)) {
+      return;
+    }
+
+    const payload = {
+      at: new Date().toISOString(),
+      tag: String(element.tagName || "").toLowerCase(),
+      id: String(element.id || ""),
+      className: String(element.className || "").trim(),
+
+----- public/control-center/app.js lines 1911-2021 -----
+
+  if (preferred && !isBlockedDefaultProject(preferred) && projectExistsInList(preferred, items)) {
+    return preferred;
+  }
+
+  if (projectExistsInList(DEFAULT_PROJECT_SLUG, items)) {
+    return DEFAULT_PROJECT_SLUG;
+  }
+
+  const firstVisible = getVisibleProjects(items)[0];
+  return getProjectItemSlug(firstVisible) || DEFAULT_PROJECT_SLUG;
+}
+
+/* =========================
+   GLOBAL CONTEXT
+========================= */
+
+function renderTopContext() {
+  const state = getState();
+  const ctx = state.context;
+  const operations = state.data.operations || {};
+  const notifications = Array.isArray(operations?.notifications?.items)
+    ? operations.notifications.items
+    : [];
+  const unread = notifications.filter((item) => !item?.read_at).length;
+
+  setText("ctxProject", ctx.currentProject);
+  setText("ctxMarket", ctx.currentMarket);
+  setText("ctxMode", ctx.executionMode);
+  setText("ctxCampaign", ctx.activeCampaign);
+  setText("ctxRoute", state.currentRoute || "home");
+  setText("ctxAlerts", unread);
+
+  const roleBadge = $("mobileRoleBadge");
+  if (roleBadge) {
+    roleBadge.textContent = formatRoleLabel(getActiveRole());
+  }
+}
+
+function renderProjectSwitcher() {
+  const state = getState();
+  const select = $("projectSwitcher");
+  if (!select) return;
+
+  const currentValue = getSafeProjectName(state.context.currentProject || DEFAULT_PROJECT_SLUG);
+  const items = getVisibleProjects(Array.isArray(state.data.projects) ? state.data.projects : []);
+
+  select.innerHTML = "";
+
+  const defaultOption = document.createElement("option");
+  defaultOption.value = "";
+  defaultOption.textContent = "Select project";
+  select.appendChild(defaultOption);
+
+  const seen = new Set();
+
+  items.forEach((item) => {
+    const slug = getProjectItemSlug(item);
+    const label = getProjectItemLabel(item) || slug;
+    if (!slug || seen.has(slug)) return;
+
+    seen.add(slug);
+
+    const option = document.createElement("option");
+    option.value = slug;
+    option.textContent = label;
+    select.appendChild(option);
+  });
+
+  if (currentValue && !seen.has(currentValue) && !isBlockedDefaultProject(currentValue)) {
+    const option = document.createElement("option");
+    option.value = currentValue;
+    option.textContent = currentValue;
+    select.appendChild(option);
+  }
+
+  select.value = currentValue;
+}
+
+
+
+/* =========================
+   PLACEHOLDERS
+========================= */
+
+function renderPlaceholders() {
+  const placeholders = [
+    ["aiCommandChat", "This section is currently unavailable."],
+    ["aiCommandSuggestions", "No data is available yet."],
+    ["aiCommandHistory", "No data is available yet."],
+
+    ["workflowsCatalog", "No data is available yet."],
+
+    ["campaignBuilder", "No data is available yet."],
+    ["campaignWaves", "No data is available yet."],
+    ["campaignAssets", "Open the related setup page to complete this section."],
+
+    ["contentQueue", "No data is available yet."],
+    ["contentPreview", "This section is currently unavailable."],
+
+    ["mediaImages", "This section is currently unavailable."],
+    ["mediaVideoAudio", "This section is currently unavailable."],
+    ["mediaOutputs", "No data is available yet."],
+
+    ["publishingCalendar", "No data is available yet."],
+    ["publishingQueue", "Open the related setup page to complete this section."],
+    ["publishingChannels", "Open the related setup page to complete this section."],
+
+    ["adsBudget", "This section is currently unavailable."],
+    ["adsPerformance", "This section is currently unavailable."],
+
+
+Likely page file source previews:
+
+================ public/control-center/runtime/command-runtime.js ================
+/*
+  Control Center Command Runtime
+
+  Goal:
+  Canonical ownership layer for:
+  - command lifecycle
+  - command overlay
+  - command accessibility
+  - command state transitions
+  - keyboard interactions
+
+  IMPORTANT:
+  This file is currently a non-active runtime skeleton.
+  No production runtime integration has started yet.
+*/
+
+"use strict";
+
+/* =========================================
+   Runtime State
+========================================= */
+
+const COMMAND_RUNTIME_VERSION = "phase-1-diagnostics";
+
+/* =========================================
+   Runtime Ownership Plan
+========================================= */
+
+/*
+  Future ownership targets:
+
+  - openGlobalCommandBar()
+  - closeGlobalCommandBarSafe()
+  - setMobileCommandExpanded()
+
+  Additional future responsibilities:
+  - overlay lifecycle
+  - focus management
+  - accessibility synchronization
+  - keyboard shortcuts
+  - runtime transitions
+*/
+
+/* =========================================
+   Runtime Snapshot Helpers
+========================================= */
+
+function getCommandRuntimeSnapshot({
+  commandBar = null,
+  commandBackdrop = null,
+  aiDock = null,
+  aiDockToggle = null,
+  aiDockPanel = null
+} = {}) {
+  return {
+    version: COMMAND_RUNTIME_VERSION,
+
+    commandBar: {
+      exists: Boolean(commandBar),
+      hidden: Boolean(commandBar?.hidden),
+      ariaHidden: String(commandBar?.getAttribute?.("aria-hidden") || ""),
+      className: String(commandBar?.className || "")
+    },
+
+    commandBackdrop: {
+      exists: Boolean(commandBackdrop),
+      hidden: Boolean(commandBackdrop?.hidden),
+      ariaHidden: String(commandBackdrop?.getAttribute?.("aria-hidden") || ""),
+      className: String(commandBackdrop?.className || "")
+    },
+
+    aiDock: {
+      exists: Boolean(aiDock),
+      open: Boolean(aiDock?.classList?.contains("is-open")),
+      dataOpen: String(aiDock?.getAttribute?.("data-open") || ""),
+      className: String(aiDock?.className || ""),
+      toggle: {
+        exists: Boolean(aiDockToggle),
+        ariaExpanded: String(aiDockToggle?.getAttribute?.("aria-expanded") || "")
+      },
+      panel: {
+        exists: Boolean(aiDockPanel),
+        hidden: Boolean(aiDockPanel?.hidden),
+        inert: Boolean(aiDockPanel?.inert),
+        ariaHidden: String(aiDockPanel?.getAttribute?.("aria-hidden") || ""),
+        pointerEvents: String(aiDockPanel?.style?.pointerEvents || "")
+      }
+    }
+  };
+}
+
+/* =========================================
+   Future Canonical State Model
+========================================= */
+
+/*
+  Planned states:
+
+  - command-closed
+  - command-inline
+  - command-overlay
+  - command-transitioning
+*/
+
+/* =========================================
+   Future Public Runtime API
+========================================= */
+
+/*
+  Planned API:
+
+  initializeCommandRuntime()
+  openCommandRuntime()
+  closeCommandRuntime()
+  toggleCommandRuntime()
+  syncCommandRuntime()
+*/
+
+/* =========================================
+   Runtime Skeleton Export Placeholder
+========================================= */
+
+window.__MH_COMMAND_RUNTIME__ = {
+  version: COMMAND_RUNTIME_VERSION,
+  active: false,
+  getCommandRuntimeSnapshot
+};
+
+================ public/control-center/pages/ai-command/tool-dock.js ================
+
+import {
+  setSharedLibrarySourceBridge,
+  getSharedAiSource,
+  clearSharedAiSource,
+  getSourceTypeMapping,
+  setSharedAiDrawerReturn,
+  getSharedAiDrawerReturn,
+  clearSharedAiDrawerReturn
+} from "../../shared-context.js";
+
+
+
+function moveFocusOutOfDrawer(drawer, fallbackTarget = null) {
+  if (!drawer || typeof document === "undefined") return;
+
+  const active = document.activeElement;
+  if (active && drawer.contains(active)) {
+    if (fallbackTarget && typeof fallbackTarget.focus === "function") {
+      fallbackTarget.focus({ preventScroll: true });
+      return;
+    }
+
+    const composer = document.querySelector("[data-aicmd-composer-input], textarea, input");
+    if (composer && typeof composer.focus === "function") {
+      composer.focus({ preventScroll: true });
+      return;
+    }
+
+    if (typeof active.blur === "function") {
+      active.blur();
+    }
+  }
+}
+
+function escapeHtml(value = "") {
+  return String(value ?? "").replace(/[&<>"']/g, (char) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    "\"": "&quot;",
+    "'": "&#39;"
+  })[char] || char);
+}
+
+function tryAutoOpenDrawerAfterLibrary(projectName) {
+  const returnContext = getSharedAiDrawerReturn(projectName) || getSharedAiDrawerReturn("__default__");
+  if (!returnContext?.drawerOpen) return;
+
+  const drawer = document.querySelector("[data-aicmd-tool-drawer]");
+  const root = drawer?.closest?.("[data-page='ai-command'], .ai-command-page, body") || document;
+
+  let targetButton = null;
+  if (returnContext.toolId) {
+    targetButton = findToolButton(root, "data-aicmd-tool-dock", returnContext.toolId)
+      || findToolButton(root, "data-aicmdv2-tool", returnContext.toolId);
+  }
+
+  if (!targetButton) {
+    targetButton = root.querySelector("[data-aicmd-tool-dock][data-aicmd-tool-dock-action='guided']")
+      || root.querySelector("[data-aicmd-tool-dock]")
+      || root.querySelector("[data-aicmdv2-tool]");
+  }
+
+  if (targetButton && typeof targetButton.click === "function") {
+    targetButton.click();
+  }
+
+  const activeDrawer = document.querySelector("[data-aicmd-tool-drawer]");
+  let drawerIsOpen = Boolean(
+    activeDrawer &&
+    activeDrawer.hidden === false &&
+    activeDrawer.getAttribute("aria-hidden") === "false" &&
+    activeDrawer.classList.contains("is-open")
+  );
+
+  if (!drawerIsOpen && activeDrawer) {
+    const fallbackTool = findToolMetadataById(returnContext.toolId);
+    if (fallbackTool) {
+      drawerIsOpen = openToolDrawer({
+        drawer: activeDrawer,
+        btn: createToolButtonAdapter(fallbackTool),
+        tool: fallbackTool,
+        text: fallbackTool.template || "",
+        session: {
+          modeId: returnContext.modeId || returnContext.specialistId || "",
+          teamMode: returnContext.teamMode || "solo"
+        },
+        projectName
+      });
+    }
+
+    if (!drawerIsOpen) {
+      if (returnContext.toolId) activeDrawer.dataset.pendingTool = returnContext.toolId;
+      if (returnContext.specialistId) activeDrawer.dataset.specialistId = returnContext.specialistId;
+      if (returnContext.modeId) activeDrawer.dataset.modeId = returnContext.modeId;
+      if (returnContext.teamMode) activeDrawer.dataset.teamMode = returnContext.teamMode;
+
+      activeDrawer.hidden = false;
+      activeDrawer.setAttribute("aria-hidden", "false");
+      activeDrawer.classList.add("is-open");
+
+      drawerIsOpen = true;
+    }
+  }
+
+  if (drawerIsOpen && activeDrawer) {
+    applySharedAiSourceToDrawer(activeDrawer, projectName);
+
+    const selectedSource = getSharedAiSource(projectName) || getSharedAiSource("__default__");
+    const msg = activeDrawer.querySelector("[data-aicmd-tool-drawer-status]") || document.querySelector("[data-aicmd-tool-drawer-status]");
+    if (msg) {
+      msg.textContent = selectedSource?.name
+        ? "Source added to drawer."
+        : "Returned to drawer. No source selected.";
+    }
+
+    clearSharedAiDrawerReturn(projectName);
+    clearSharedAiDrawerReturn("__default__");
+  }
+}
+
+function findToolButton(root, attrName = "", attrValue = "") {
+  if (!root || !attrName || !attrValue) return null;
+  return Array.from(root.querySelectorAll(`[${attrName}]`)).find((btn) => {
+    return btn.getAttribute(attrName) === attrValue;
+  }) || null;
+}
+
+// --- Helper to build AI Drawer Return Context ---
+function buildAiDrawerReturnContext({
+  projectName = "",
+  origin = "ai-command",
+  drawerOpen = true,
+  specialistId = "",
+  modeId = "",
+  toolId = "",
+  teamMode = "solo",
+  sourceType = "",
+  outputType = "",
+  created_at = null,
+  extra = {}
+} = {}) {
+  return {
+    type: "ai_drawer_return",
+    origin,
+    drawerOpen,
+    specialistId,
+    modeId,
+    toolId,
+    teamMode,
+    sourceType,
+    outputType,
+    created_at: created_at || new Date().toISOString(),
+    ...extra
+  };
+}
+
+// --- When Open Library is clicked from tool dock, store both bridge and drawer return context ---
+function handleOpenLibraryFromDrawer({
+  projectName = "",
+  specialistId = "",
+  modeId = "",
+  toolId = "",
+  teamMode = "solo",
+  sourceType = "",
+  outputType = ""
+} = {}) {
+  // Build and store drawer return context
+  const payload = buildAiDrawerReturnContext({
+    projectName,
+    origin: "ai-command",
+    drawerOpen: true,
+    specialistId,
+    modeId,
+    toolId,
+    teamMode,
+    sourceType,
+    outputType
+  });
+  setSharedAiDrawerReturn(projectName || "__default__", payload);
+  // Also set library source bridge context if needed (existing logic)
+  // ...existing bridge logic...
+}
+
+export function openLibrarySourcePickerFromAiCommand({
+  projectName = "",
+  sourceType = "auto",
+  teamMode = "solo",
+  specialistId = "",
+  modeId = "",
+  outputType = "",
+  updateStatus
+} = {}) {
+  const project = projectName || "__default__";
+  const mapping = getSourceTypeMapping(sourceType || "auto");
+  const drawerReturnContext = buildAiDrawerReturnContext({
+    projectName: project,
+    origin: "ai-command",
+    drawerOpen: false,
+    specialistId,
+    modeId,
+    toolId: "",
+    teamMode,
+    sourceType,
+    outputType
+  });
+
+  const payload = {
+    type: "library_source_selection",
+    origin: "ai-command",
+    returnTarget: "ai-command",
+    sourceType,
+    libraryFilter: mapping.libraryFilter,
+    targetSection: "asset-workspace",
+    drawerReturnContext,
+    created_at: new Date().toISOString()
+  };
+
+  setSharedLibrarySourceBridge(project, payload);
+  setSharedLibrarySourceBridge("__default__", payload);
+
+  setSharedAiDrawerReturn(project, drawerReturnContext);
+  setSharedAiDrawerReturn("__default__", drawerReturnContext);
+
+  updateStatus?.("Library opened. Select an asset, click Use as Source in AI Command, then return to AI Command.");
+
+  if (typeof window !== "undefined") {
+    window.location.hash = "#library";
+  }
+
+  return true;
+}
+
+function formatSharedAiSource(source = {}) {
+  if (!source || !source.name) return null;
+  const name = source.name || "(no name)";
+  const type = source.asset_type || source.type || "asset";
+  const path = source.file_path || source.filename || source.fileName || "";
+  return { name, type, path };
+}
+
+export function getSelectedLibrarySource(projectName = "") {
+  return getSharedAiSource(projectName) || getSharedAiSource("__default__");
+}
+
+function truncatePromptText(value = "", maxLength = 900) {
+  const text = String(value || "").replace(/\s+/g, " ").trim();
+  if (!text || text.length <= maxLength) return text;
+  return `${text.slice(0, maxLength).trim()}...`;
+}
+
+function compactSourceReference(value = "", maxLength = 120) {
+  const text = String(value || "").trim();
+  if (!text || text.length <= maxLength) return text;
+  const parts = text.split(/[\/]/).filter(Boolean);
+  const tail = parts.slice(-2).join("/");
+  if (tail && tail.length < maxLength) return `.../${tail}`;
+  return `${text.slice(0, maxLength - 3).trim()}...`;
+}
+
+================ public/control-center/pages/home/render-sections.js ================
+/*
+  Home Executive Runtime Render Sections
+
+  Pure render helpers only.
+  No DOM listeners.
+  No data fetching.
+  No state mutation.
+*/
+
+function asArray(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+function asString(value) {
+  if (value == null) return "";
+  return String(value);
+}
+
+function formatCount(value) {
+  const parsed = Number(value);
+  return String(Math.max(0, Math.round(Number.isFinite(parsed) ? parsed : 0)));
+}
+
+export function renderBadge(tone, label, escapeHtml) {
+  return `<span class="card-badge ${escapeHtml(tone || "neutral")}">${escapeHtml(label || "Unknown")}</span>`;
+}
+
+export function renderCompactList(items, escapeHtml, emptyText = "No active blocker detected.") {
+  const safeItems = asArray(items).slice(0, 5);
+
+  if (!safeItems.length) {
+    return `<p class="home-empty-note">${escapeHtml(emptyText)}</p>`;
+  }
+
+  return `
+    <ul class="home-compact-list">
+      ${safeItems.map((item) => `
+        <li>${escapeHtml(asString(item))}</li>
+      `).join("")}
+    </ul>
+  `;
+}
+
+export function renderBlockerColumn(title, items, tone, escapeHtml) {
+  const safeItems = asArray(items).slice(0, 5);
+
+  return `
+    <article class="home-blocker-card">
+      <div class="home-blocker-head">
+        <span class="data-label">${escapeHtml(title)}</span>
+        ${renderBadge(safeItems.length ? tone : "success", safeItems.length ? formatCount(safeItems.length) : "Clear", escapeHtml)}
+      </div>
+      ${renderCompactList(safeItems, escapeHtml, "No blocker detected.")}
+    </article>
+  `;
+}
+
+export function renderActivityItems(items, escapeHtml) {
+  const safeItems = asArray(items).slice(0, 6);
+
+  if (!safeItems.length) {
+    return `<p class="home-empty-note">No recent activity is recorded yet. Open the owning workspace to create the next reviewed signal.</p>`;
+  }
+
+  return `
+    <div class="home-activity-list">
+      ${safeItems.map((item) => `
+        <article class="home-activity-item">
+          <div>
+            <span class="data-label">${escapeHtml(item.kind || "Activity")}</span>
+            <strong>${escapeHtml(item.title || "Untitled activity")}</strong>
+            <p>${escapeHtml(item.detail || "")}</p>
+          </div>
+          <div class="home-activity-meta">
+            ${renderBadge(item.tone || "neutral", item.when || "Not available", escapeHtml)}
+          </div>
+        </article>
+      `).join("")}
+    </div>
+  `;
+}
+
+export function renderAiTeamCards(cards, escapeHtml) {
+  const safeCards = asArray(cards).slice(0, 7);
+
+  if (!safeCards.length) {
+    return `<p class="home-empty-note">AI team status is not available yet. AI Command can still prepare guidance for the next action.</p>`;
+  }
+
+  return `
+    <div class="home-ai-team-grid">
+      ${safeCards.map((agent) => `
+          <button class="home-ai-team-card" type="button" data-role-id="${escapeHtml(agent.id || "")}" title="Prepare ${escapeHtml(agent.name)} guidance in AI Command">
+          <div class="home-ai-team-card-head">
+            <strong>${escapeHtml(agent.name)}</strong>
+            ${renderBadge(agent.tone || "neutral", agent.status || "Idle", escapeHtml)}
+          </div>
+          <p>${escapeHtml(agent.summary || agent.fallback || "Ready to support the project.")}</p>
+          </button>
+      `).join("")}
+    </div>
+  `;
+}
+
+export function renderHomeExecutiveIntro({
+  dashboard = {},
+  capabilityCards = [],
+  escapeHtml,
+  formatPercent,
+  toneLabel
+}) {
+  return `
+    <section class="card home-exec-hero">
+      <div class="home-exec-hero-main">
+        <div>
+          <p class="card-label">Executive Command Center</p>
+          <h2>${escapeHtml(dashboard.projectName || "Project Command Center")}</h2>
+          <p class="home-decision-copy">${escapeHtml(dashboard.oneLineSummary)}</p>
+        </div>
+
+        <div class="home-exec-hero-status">
+          ${renderBadge(dashboard.headerTone, dashboard.headerStatus, escapeHtml)}
+          <strong>${escapeHtml(formatPercent(dashboard.health?.systemScore))}</strong>
+          <span class="data-label">System Health</span>
+        </div>
+      </div>
+
+      <div class="home-exec-hero-actions">
+        <button id="homeExecutivePrimaryActionBtn" class="btn btn-primary" type="button">
+          ${escapeHtml(dashboard.primaryActionLabel)}
+        </button>
+        <button id="homeSecondaryActionBtn" class="btn btn-secondary" type="button">
+          ${escapeHtml(dashboard.secondaryActionLabel)}
+        </button>
+        <button id="homeAskExecutiveAiBtn" class="btn btn-ghost" type="button">
+          Prepare AI Guidance
+        </button>
+      </div>
+      <p class="home-empty-note">Home opens workspaces or prepares AI guidance only. It does not approve, publish, send, upload, delete, archive, or execute.</p>
+    </section>
+
+    <section class="home-kpi-grid">
+      ${capabilityCards.map((item) => `
+        <article class="card home-kpi-card">
+          <span class="data-label">${escapeHtml(item.title)}</span>
+          <strong>${escapeHtml(item.value)}</strong>
+          <p>${escapeHtml(item.detail)}</p>
+          ${renderBadge(item.tone, toneLabel(item.tone), escapeHtml)}
+        </article>
+      `).join("")}
+    </section>
+
+
+  `;
+}
+
+================ public/control-center/pages/business/dashboard.js ================
+/**
+ * Legacy autonomous business dashboard.
+ *
+ * This file is intentionally preserved as a non-active legacy artifact.
+ * It is not registered by the Control Center router and must not call removed
+ * /api/governance/* or /api/ai-control/* endpoints if opened directly.
+ *
+ * Active runtime authority lives in router-registered pages and canonical api.js
+ * project-scoped helpers.
+ */
+
+const legacyBusinessDashboardState = {
+  ok: false,
+  neutralized: true,
+  legacy: true,
+  page: "business/dashboard",
+  message: "Legacy autonomous business dashboard is neutralized. Use active Control Center routes instead.",
+  canonicalRoutes: {
+    governance: "public/control-center/pages/governance.js",
+    aiCommand: "public/control-center/pages/ai-command.js",
+    settings: "public/control-center/pages/settings.js"
+  }
+};
+
+function renderLegacyBusinessDashboardNotice() {
+  if (typeof document === "undefined" || !document.body) {
+    return legacyBusinessDashboardState;
+  }
+
+  document.body.innerHTML = `
+    <main style="font-family: Arial, sans-serif; padding: 24px; background: #0f172a; color: #fff; min-height: 100vh;">
+      <h1>Legacy Business Dashboard Neutralized</h1>
+      <p>This inactive legacy dashboard no longer calls removed backend endpoints.</p>
+      <pre style="background: #111827; padding: 16px; overflow: auto;">${JSON.stringify(legacyBusinessDashboardState, null, 2)}</pre>
+    </main>
+  `;
+
+  return legacyBusinessDashboardState;
+}
+
+if (typeof window !== "undefined") {
+  window.__LEGACY_BUSINESS_DASHBOARD__ = {
+    state: legacyBusinessDashboardState,
+    render: renderLegacyBusinessDashboardNotice
+  };
+}
+
+================ public/control-center/pages/library/command-router.js ================
+const LIBRARY_COMMANDS = Object.freeze({
+  SELECT_ASSET: "select-asset",
+  SET_FILTER: "set-filter",
+  SET_VIEW_MODE: "set-view-mode",
+  SET_PAGE: "set-page",
+  UPLOAD_TYPE_CHANGE: "upload-type-change",
+  OPEN_UPLOAD: "open-upload",
+  REFRESH_LIBRARY: "refresh-library",
+  OPEN_PREVIEW: "open-preview",
+  SET_SOURCE_OF_TRUTH: "set-source-of-truth",
+  UPDATE_STATUS: "update-status",
+  RENAME_ASSET: "rename-asset",
+  ARCHIVE_ASSET: "archive-asset",
+  DELETE_ASSET: "delete-asset",
+  SEND_TO_AI: "send-to-ai"
+});
+
+export function getLibraryCommands() {
+  return LIBRARY_COMMANDS;
+}
+
+export function createLibraryCommand(command, payload = {}) {
+  return {
+    command,
+    payload,
+    createdAt: new Date().toISOString()
+  };
+}
+
+export function isLibraryMutationCommand(command) {
+  return [
+    LIBRARY_COMMANDS.REFRESH_LIBRARY,
+    LIBRARY_COMMANDS.SET_SOURCE_OF_TRUTH,
+    LIBRARY_COMMANDS.UPDATE_STATUS,
+    LIBRARY_COMMANDS.RENAME_ASSET,
+    LIBRARY_COMMANDS.ARCHIVE_ASSET,
+    LIBRARY_COMMANDS.DELETE_ASSET
+  ].includes(command);
+}
+
+export function isLibraryAiCommand(command) {
+  return command === LIBRARY_COMMANDS.SEND_TO_AI;
+}
+
+export function routeLibraryCommand(commandEnvelope, handlers = {}) {
+  const envelope = commandEnvelope || {};
+  const command = envelope.command;
+  const handler = handlers[command];
+
+  if (typeof handler !== "function") {
+    return {
+      handled: false,
+      command,
+      reason: "No handler registered for Library command."
+    };
+  }
+
+  return {
+    handled: true,
+    command,
+    result: handler(envelope.payload || {}, envelope)
+  };
+}
+
+================ public/control-center/pages/ai-command.js ================
+import {
+        bindAiToolDock,
+        getAiToolDockTools,
+        getSelectedLibrarySource,
+        openAiToolDrawerFromMetadata,
+        openLibrarySourcePickerFromAiCommand,
+        renderAiToolDrawerShell
+} from "./ai-command/tool-dock.js";
+import { getProjectedActiveRole, getProjectedTeamMembers } from "../runtime/authority/authority-projection.js";
+
+import {
+        selectCurrentProject,
+        selectOperationsSnapshot,
+        selectProjectPayload
+} from "../state.js";
+
+import {
+        getSharedHandoff,
+        setSharedAiDraft,
+        setSharedHandoff
+} from "../shared-context.js";
+
+import {
+        getCategoryReadinessList
+} from "../asset-library.js";
+
+import {
+        executeProjectAiChat,
+        executeProjectAiGuidance,
+        generateAiCommandCampaignPreview
+} from "../api.js";
+
+//  AI TEAM DEFINITIONS
+// ============================================================
+
+const MODE_DEFS = [
+        {
+                id: "strategist",
+                label: "Strategist",
+                icon: "🎯",
+                summary: "Campaign briefs, audience strategy, offer angles, launch plans, and team handoff packages.",
+                routeHint: "campaign-studio"
+        },
+        {
+                id: "writer",
+                label: "Content Writer",
+                icon: "✍️",
+                summary: "Captions, hooks, scripts, emails, and landing page copy.",
+                routeHint: "content-studio"
+        },
+        {
+                id: "media",
+                label: "Media Director",
+                icon: "🎨",
+                summary: "Visual direction, creative brief, format guidance, and brand consistency.",
+                routeHint: "media-studio"
+        },
+        {
+                id: "video_lead",
+                label: "Video Lead",
+                icon: "🎬",
+                summary: "Short-form video scripts, motion direction, and reel strategy.",
+                routeHint: "media-studio"
+        },
+        {
+                id: "publisher",
+                label: "Publisher",
+                icon: "📤",
+                summary: "Publishing readiness, schedule review, and handoff preparation.",
+                routeHint: "publishing"
+        },
+        {
+                id: "ads",
+                label: "Ads Optimizer",
+                icon: "📣",
+                summary: "Ad concepts, targeting angles, platform copy, and paid strategy.",
+                routeHint: "ads-manager"
+        },
+        {
+                id: "analyst",
+                label: "SEO & Insights Analyst",
+                icon: "📊",
+                summary: "SEO signals, performance data, content insights, and traffic patterns.",
+                routeHint: "insights"
+        },
+        {
+                id: "compliance_reviewer",
+                label: "Compliance Reviewer",
+                icon: "🛡️",
+                summary: "Claims review, approvals, safety language, and governance checks.",
+                routeHint: "governance"
+        },
+        {
+                id: "operations",
+                label: "Operations Lead",
+                icon: "⚙️",
+                summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+                routeHint: "workflows"
+        },
+        {
+                id: "customer_ops",
+                label: "Customer Operations Lead",
+                icon: "🎧",
+                summary: "Inbox review, reply drafts, ticket drafts, SLA risk, and escalation routing.",
+                routeHint: "operations-centers"
+        },
+        {
+                id: "sales_crm",
+                label: "Sales / CRM Lead",
+                icon: "💼",
+                summary: "Lead qualification, outreach drafts, follow-up cadence, and CRM handoff notes.",
+                routeHint: "workflows"
+        }
+];
+
+// Map legacy mode IDs from older sessions to new team IDs
+const MODE_ID_ALIASES = {
+	executive: "operations",
+	campaign: "strategist",
+	content: "writer",
+	designer: "media",
+	media_director: "media",
+	media_planner: "media",
+	seo: "analyst",
+	research: "researcher",
+	video_lead: "video_lead",
+	publisher: "publisher",
+	compliance_reviewer: "compliance_reviewer",
+	customer_operations: "customer_ops",
+	customer_ops: "customer_ops",
+	support: "customer_ops",
+	sales: "sales_crm",
+	crm: "sales_crm",
+	sales_crm: "sales_crm",
+	admin: "operations"
+};
+
+// ============================================================
+//  PHASE 1: SPECIALIST DEFINITIONS — AI TEAM COMMAND CENTER
+// ============================================================
+
+const SPECIALIST_DEFS = [
+	{
+		id: "strategist",
+		label: "Strategist",
+		position: "Campaign & Growth Strategist",
+		icon: "🎯",
+		summary: "Campaign briefs, positioning, audience strategy, offer angles, launch plans, and team handoff packages.",
+		placeholder: "Ask the Strategist to build a campaign brief, define audience segments, create offer angles, compare launch directions, or prepare a team handoff…",
+		canHelp: ["Build Campaign Briefs", "Define Audience Segments", "Create Offer Angles", "Compare Strategy Directions", "Plan Launch Waves", "Prepare Team Handoffs"],
+		cannotDo: ["Publish campaigns directly", "Execute workflows automatically", "Approve content", "Set live budgets"],
+		destinations: ["Campaign Studio", "Workflows", "AI Command"],
+		safetyNote: "All outputs are guidance and draft only. Execution requires explicit confirmation.",
+		status: "AI ready"
+	},
+	{
+		id: "writer",
+		label: "Content Writer",
+		position: "Messaging and Content Lead",
+		icon: "✍️",
+		summary: "Captions, hooks, scripts, emails, and landing page copy.",
+		placeholder: "Ask the Content Writer to draft captions, hooks, landing copy, or campaign messages…",
+		canHelp: ["Draft captions and hooks", "Write email copy", "Create landing page text", "Prepare publisher handoff", "Suggest message variants"],
+		cannotDo: ["Publish directly", "Approve risky claims", "Invent unsupported facts", "Run workflows automatically"],
+		destinations: ["Content Studio", "Publishing", "AI Command"],
+		safetyNote: "Drafts require review before publishing. Cannot approve or publish without confirmation.",
+		status: "AI ready"
+	},
+	{
+		id: "media",
+		label: "Media Director",
+		position: "Creative Direction Lead",
+		icon: "🎨",
+		summary: "Visual direction, creative briefs, format guidance, and brand consistency.",
+		placeholder: "Ask the Media Director to define visual direction, prepare a creative brief, or review brand consistency…",
+		canHelp: ["Write creative briefs", "Advise on visual direction", "Map format requirements", "Review brand alignment", "Prepare media handoffs"],
+		cannotDo: ["Generate images directly", "Upload assets without review", "Approve without confirmation", "Execute media jobs"],
+		destinations: ["Asset Library", "Content Studio", "AI Command"],
+		safetyNote: "Direction and briefs only. Media generation requires backend confirmation and explicit action.",
+		status: "AI ready"
+	},
+	{
+		id: "video_lead",
+		label: "Video Lead",
+		position: "Short-Form Video Lead",
+		icon: "🎬",
+		summary: "Short-form video scripts, motion direction, and reel strategy.",
+		placeholder: "Ask the Video Lead to write a reel script, map short-form strategy, or outline the next video concept…",
+		canHelp: ["Write video scripts", "Plan short-form strategy", "Define motion direction", "Map video asset requirements", "Prepare video briefs"],
+		cannotDo: ["Generate video directly", "Upload footage without review", "Approve without confirmation", "Run media jobs automatically"],
+		destinations: ["Asset Library", "Content Studio", "Media Native"],
+		safetyNote: "Scripts and direction only. Video generation requires explicit backend action and approval.",
+		status: "AI ready"
+	},
+	{
+		id: "publisher",
+		label: "Publisher",
+		position: "Publishing Readiness Lead",
+		icon: "📤",
+		summary: "Publishing readiness, schedule review, and handoff preparation.",
+		placeholder: "Ask the Publisher to review publishing readiness, check scheduling, or prepare a handoff package…",
+		canHelp: ["Review publishing readiness", "Check scheduled jobs", "Prepare handoff packages", "Map publishing dependencies", "Flag pre-publish risks"],
+		cannotDo: ["Publish without explicit approval", "Override schedules", "Bypass governance gates", "Push to live channels directly"],
+		destinations: ["Publishing", "Workflows", "AI Command"],
+		safetyNote: "Publishing always requires explicit approval. No live publishing from AI guidance alone.",
+		status: "AI ready"
+	},
+	{
+		id: "ads",
+		label: "Ads Optimizer",
+		position: "Paid Growth Lead",
+		icon: "📢",
+		summary: "Ad concepts, targeting angles, platform copy, and paid strategy.",
+		placeholder: "Ask the Ads Optimizer to draft ad copy, review targeting angles, or plan a paid campaign structure…",
+		canHelp: ["Draft ad concepts and copy", "Review targeting angles", "Plan paid campaign structure", "Suggest creative variants", "Map platform-specific strategy"],
+		cannotDo: ["Launch ads directly", "Set live budgets without review", "Approve spend", "Access ad accounts directly"],
+		destinations: ["Ads Manager", "Integrations", "Campaign Studio"],
+		safetyNote: "Ad concepts and copy only. Live ad actions require platform integration and explicit approval.",
+		status: "AI ready"
+	},
+	{
+		id: "analyst",
+		label: "SEO & Insights Analyst",
+		position: "Search and Insights Lead",
+		icon: "📊",
+		summary: "SEO signals, performance data, content insights, and traffic patterns.",
+		placeholder: "Ask the SEO & Insights Analyst to review performance, suggest SEO improvements, or identify top content patterns…",
+		canHelp: ["Review SEO signals", "Analyze content performance", "Identify traffic patterns", "Suggest keyword improvements", "Map data coverage gaps"],
+		cannotDo: ["Update SEO settings directly", "Edit live website", "Set analytics configurations", "Publish recommendations automatically"],
+		destinations: ["Insights", "Integrations", "Setup"],
+		safetyNote: "Analysis and recommendations only. No direct website or analytics changes.",
+		status: "AI ready"
+	},
+	{
+		id: "compliance_reviewer",
+		label: "Compliance Reviewer",
+		position: "Claims and Governance Lead",
+		icon: "🛡️",
+		summary: "Claims review, approval safety, publishing risk, and governance notes.",
+		placeholder: "Ask the Compliance Reviewer to check claims, approval risks, publishing safety, and governance notes…",
+		canHelp: ["Review marketing claims", "Flag approval risks", "Check publishing safety", "Prepare governance notes", "Identify compliance blockers"],
+		cannotDo: ["Grant approvals directly", "Override governance gates", "Publish on behalf of approvers", "Remove flags without review"],
+		destinations: ["Workflows", "Publishing", "Governance"],
+		safetyNote: "Compliance review is advisory. Approvals always require human confirmation before execution.",
+		status: "AI ready"
+	},
+	{
+		id: "operations",
+		label: "Operations Lead",
+		position: "Execution and Handoff Lead",
+		icon: "⚙️",
+		summary: "Tasks, timelines, handoffs, approvals, and execution plans.",
+		placeholder: "Ask the Operations Lead to turn this into tasks, workflow steps, or handoffs…",
+		canHelp: ["Create task plans", "Map execution sequences", "Prepare workflow handoffs", "Review execution health", "Identify operational blockers"],
+		cannotDo: ["Run workflows without confirmation", "Auto-approve tasks", "Override authority gates", "Execute backend operations directly"],
+		destinations: ["Workflows", "Operations Centers", "AI Command"],
+		safetyNote: "Task plans and handoffs only. Workflow execution requires explicit user confirmation.",
+		status: "AI ready"
+	},
+	{
+
+================ public/control-center/pages/home.js ================
+import {
+  renderActivityItems,
+  renderAiTeamCards,
+  renderBadge,
+  renderBlockerColumn,
+  renderCompactList,
+  renderHomeExecutiveIntro
+} from "./home/render-sections.js";
+import {
+  getProjectedActiveRole,
+  getProjectedTeamMembers
+} from "../runtime/authority/authority-projection.js";
+
+import {
+  selectCurrentProject,
+  selectOperationsSnapshot
+} from "../state.js";
+
+function asArray(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+function asObject(value) {
+  return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+}
+
+function asString(value) {
+  if (value == null) return "";
+  return String(value);
+}
+
+function asNumber(value, fallback = 0) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function formatPercent(value) {
+  return `${Math.max(0, Math.round(asNumber(value, 0)))}%`;
+}
+
+function formatCount(value) {
+  return String(Math.max(0, Math.round(asNumber(value, 0))));
+}
+
+function statusTone(input, score) {
+  const text = asString(input).toLowerCase();
+
+  if (
+    text.includes("critical") ||
+    text.includes("failed") ||
+    text.includes("blocked") ||
+    text.includes("error") ||
+    text.includes("missing")
+  ) {
+    return "danger";
+  }
+
+  if (
+    text.includes("warning") ||
+    text.includes("pending") ||
+    text.includes("partial") ||
+    text.includes("review")
+  ) {
+    return "warning";
+  }
+
+  if (
+    text.includes("ready") ||
+    text.includes("healthy") ||
+    text.includes("connected") ||
+    text.includes("active") ||
+    text.includes("complete")
+  ) {
+    return "success";
+  }
+
+  const parsed = Number(score);
+  if (Number.isFinite(parsed)) {
+    if (parsed >= 80) return "success";
+    if (parsed >= 50) return "warning";
+    return "danger";
+  }
+
+  return "neutral";
+}
+
+function toneLabel(tone) {
+  if (tone === "success") return "Healthy";
+  if (tone === "warning") return "Attention";
+  if (tone === "danger") return "Critical";
+  return "Unknown";
+}
+
+function humanizeStatus(value, fallback = "Unknown") {
+  const raw = asString(value).trim();
+  if (!raw) return fallback;
+  return raw
+    .replace(/[_-]+/g, " ")
+    .replace(/\b\w/g, (ch) => ch.toUpperCase());
+}
+
+function parseTimestamp(item) {
+  const fields = ["updated_at", "completed_at", "executed_at", "scheduled_for", "created_at"];
+  for (const field of fields) {
+    const value = item?.[field];
+    if (!value) continue;
+    const stamp = Date.parse(value);
+    if (Number.isFinite(stamp)) {
+      return stamp;
+    }
+  }
+  return 0;
+}
+
+function formatRelativeDate(value) {
+  const stamp = Date.parse(value || "");
+  if (!Number.isFinite(stamp)) return "Not available";
+  return new Date(stamp).toLocaleString();
+}
+
+function dedupe(values = []) {
+  return Array.from(new Set(values.filter(Boolean)));
+}
+
+function compact(value, fallback = "-") {
+  const text = asString(value).trim();
+  return text || fallback;
+}
+
+function humanizeExecutiveAction(value, fallback = "Next executive action") {
+  const raw = asString(value).trim();
+  if (!raw) return fallback;
+
+  const normalized = raw
+    .replace(/[_-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  const known = {
+    "product videos": "Create product videos to unblock launch readiness",
+    "connector ecommerce": "Connect ecommerce data to improve launch confidence",
+    "ecommerce": "Connect ecommerce data to improve launch confidence",
+    "analytics": "Connect analytics to strengthen decision quality",
+    "amazon": "Review Amazon connector readiness",
+    "ebay": "Review eBay connector readiness",
+    "setup": "Complete setup foundation before execution",
+    "library": "Prepare missing brand assets",
+    "integrations": "Connect required platforms",
+    "campaign studio": "Prepare the next campaign wave"
+  };
+
+  const key = normalized.toLowerCase();
+  if (known[key]) return known[key];
+
+  return normalized.replace(/\b\w/g, (ch) => ch.toUpperCase());
+}
+
+function compactModuleState(value, fallback = "Not enabled yet") {
+  const text = asString(value).trim();
+  if (!text) return fallback;
+  if (/planned\/partial|planned|not ready|partial/i.test(text)) {
+    return fallback;
+  }
+  return text;
+}
+
+function buildOperatingPath(dashboard = {}) {
+  const blockers = asObject(dashboard.blockers);
+  const campaign = asObject(dashboard.campaign);
+  const launch = asObject(dashboard.launchSnapshot);
+  const health = asObject(dashboard.health);
+
+  return [
+    {
+      title: "Setup foundation",
+      meta: health.projectReadiness >= 80 ? "Foundation is mostly ready" : "Review setup and readiness gaps",
+      tone: health.projectReadiness >= 80 ? "is-live" : "is-warning",
+      status: health.projectReadiness >= 80 ? "Ready" : "Needs review"
+    },
+    {
+      title: "Prepare assets",
+      meta: asArray(blockers.assets).length ? `${formatCount(asArray(blockers.assets).length)} missing asset groups` : "Assets ready for next step",
+      tone: asArray(blockers.assets).length ? "is-warning" : "is-live",
+      status: asArray(blockers.assets).length ? "Needs assets" : "Ready"
+    },
+    {
+      title: "Connect platforms",
+      meta: asArray(blockers.integrations).length ? `${formatCount(asArray(blockers.integrations).length)} integrations missing` : "Core integrations connected",
+      tone: asArray(blockers.integrations).length ? "is-warning" : "is-live",
+      status: asArray(blockers.integrations).length ? "Needs connection" : "Ready"
+    },
+    {
+      title: "Build campaign",
+      meta: campaign.name ? `Active: ${campaign.name}` : "No active campaign selected",
+      tone: campaign.name ? "is-live" : "is-warning",
+      status: campaign.name ? "Active" : "Missing"
+    },
+    {
+      title: "Publish / execute",
+      meta: launch.campaignReadiness === "Ready" ? "Execution path looks clear" : "Resolve blockers before publishing",
+      tone: launch.campaignReadiness === "Ready" ? "is-live" : "is-warning",
+      status: launch.campaignReadiness || "At risk"
+    }
+  ];
+}
+
+function pickRecommendedSpecialist(aiTeamCards = [], dashboard = {}) {
+  const blockers = asObject(dashboard.blockers);
+  const next = asString(dashboard.nextBestAction?.recommendation).toLowerCase();
+
+  if (next.includes("video") || asArray(blockers.assets).length) {
+    return (
+      aiTeamCards.find((card) => /video/i.test(card.name || card.id || "")) ||
+      aiTeamCards.find((card) => /media/i.test(card.name || card.id || "")) ||
+      aiTeamCards.find((card) => /creative|brand|content/i.test(card.name || card.id || "")) ||
+      aiTeamCards[0]
+    );
+  }
+
+  if (asArray(blockers.integrations).length) {
+    return aiTeamCards.find((card) => /operations|integrations|automation|system/i.test(card.name || card.id || "")) || aiTeamCards[0];
+  }
+
+  return aiTeamCards.find((card) => card.status === "Active role") || aiTeamCards[0] || null;
+}
+
+
+function routeForAction(action) {
+  const text = asString(action).toLowerCase();
+  if (/(video|media|product video|asset|library|upload|brand file)/.test(text)) return "library";
+  if (/(connector|integration|sync|platform)/.test(text)) return "integrations";
+  if (/(setup|foundation)/.test(text)) return "setup";
+  if (/(campaign|launch wave|brief)/.test(text)) return "campaign-studio";
+  if (/(publish|schedule|queue)/.test(text)) return "publishing";
+  if (/(ad|budget|paid)/.test(text)) return "ads-manager";
+  if (/(content|copy)/.test(text)) return "content-studio";
+  if (/(job|operation)/.test(text)) return "operations-centers";
+  return "ai-command";
+}
+
+function buildAiTeamCards(state) {
+  const operations = asObject(selectOperationsSnapshot(state));
+  const notifications = asArray(operations.notifications?.items);
+  const tasks = asArray(operations.tasks?.items);
+  const approvals = asArray(operations.approvals?.items);
+
+  const projectedMembers = getProjectedTeamMembers(state);
+  const projectedActiveRole = asString(
+    getProjectedActiveRole(state)
+  ).toLowerCase();
+
+  const roles = projectedMembers.length
+    ? projectedMembers.map((member) => ({
+        id: asString(member.role || member.id).toLowerCase(),
+        name: asString(
+          member.name ||
+          member.role ||
+          member.id ||
+          "AI Specialist"
+        ),
+
+================ public/control-center/pages/governance/dashboard.js ================
+/**
+ * Legacy governance dashboard.
+ *
+ * This file is intentionally preserved as a non-active legacy artifact.
+ * The active Governance route is public/control-center/pages/governance.js.
+ *
+ * This legacy dashboard must not call removed /api/governance/* endpoints if
+ * opened directly.
+ */
+
+const legacyGovernanceDashboardState = {
+  ok: false,
+  neutralized: true,
+  legacy: true,
+  page: "governance/dashboard",
+  message: "Legacy governance dashboard is neutralized. Use the active Governance route instead.",
+  canonicalRoutes: {
+    governance: "public/control-center/pages/governance.js"
+  },
+  canonicalHelpers: [
+    "fetchProjectGovernance(projectName)",
+    "createProjectApproval(projectName, payload)",
+    "decideProjectApproval(projectName, approvalId, payload)",
+    "updateProjectGovernancePolicy(projectName, payload)"
+  ]
+};
+
+function renderLegacyGovernanceDashboardNotice() {
+  if (typeof document === "undefined" || !document.body) {
+    return legacyGovernanceDashboardState;
+  }
+
+  document.body.innerHTML = `
+    <main style="font-family: Arial, sans-serif; padding: 24px; min-height: 100vh;">
+      <h1>Legacy Governance Dashboard Neutralized</h1>
+      <p>This inactive legacy dashboard no longer calls removed Governance endpoints.</p>
+      <pre style="background: #f3f4f6; padding: 16px; overflow: auto;">${JSON.stringify(legacyGovernanceDashboardState, null, 2)}</pre>
+    </main>
+  `;
+
+  return legacyGovernanceDashboardState;
+}
+
+if (typeof window !== "undefined") {
+  window.__LEGACY_GOVERNANCE_DASHBOARD__ = {
+    state: legacyGovernanceDashboardState,
+    render: renderLegacyGovernanceDashboardNotice
+  };
+}

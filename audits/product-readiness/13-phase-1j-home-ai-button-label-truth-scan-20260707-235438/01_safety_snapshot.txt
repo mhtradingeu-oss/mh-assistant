@@ -1,0 +1,218 @@
+Branch:
+main
+
+Status:
+ M data/projects/hairoticmen/ops/approvals.json
+ M data/projects/hairoticmen/ops/events.json
+ M data/projects/hairoticmen/ops/notifications.json
+ M data/projects/hairoticmen/ops/system.json
+ M public/control-center/pages/ai-command.js
+ M public/control-center/pages/home.js
+ M public/control-center/pages/home/render-sections.js
+ M public/control-center/styles/13-home-executive.css
+ M runtime/orchestrator-service/server.js
+?? audits/product-readiness/
+?? audits/system-truth/cloud-grade-readiness-20260706-171752/
+?? audits/system-truth/content-to-media-studio-truth-20260706-161134/
+?? audits/system-truth/media-engine-upgrade-phase-2a-truth-scan-20260706-122813/
+?? audits/system-truth/media-engine-upgrade-phase-2b-contract-20260706-123139/
+?? audits/system-truth/media-execution-activation-a0-deep-truth-scan-20260706-114055/
+?? audits/system-truth/media-execution-activation-a1-exact-execution-contract-20260706-114301/
+?? audits/system-truth/media-execution-activation-a2-api-media-route-truth-20260706-115001/
+?? audits/system-truth/media-execution-activation-a3-live-image-proof-20260706-115143/
+?? audits/system-truth/media-execution-activation-a3b-live-image-proof-with-control-key-20260706-115319/
+?? audits/system-truth/media-execution-activation-a3d-live-image-proof-correct-write-key-20260706-115622/
+?? audits/system-truth/media-studio-rebase-20260706-165209/
+?? infra/
+?? public/control-center/pages/media-studio.BACKUP.js
+?? public/control-center/pages/media-studio.BACKUP_FINAL_FLOW_LOCK.js
+?? public/control-center/pages/media-studio.BACKUP_FLOW_LOCK.js
+?? public/control-center/pages/media-studio.js
+?? public/control-center/runtime/ai-team/
+?? public/control-center/state/
+?? runtime/orchestrator-service/lib/media/cluster/
+?? runtime/orchestrator-service/lib/media/contracts/
+?? runtime/orchestrator-service/lib/media/events/
+?? runtime/orchestrator-service/lib/media/governance/
+?? runtime/orchestrator-service/lib/media/library-engine.js
+?? runtime/orchestrator-service/lib/media/orchestrator/
+?? runtime/orchestrator-service/lib/media/publishing/
+?? runtime/orchestrator-service/lib/media/queue/
+?? runtime/orchestrator-service/lib/media/realtime/
+?? scripts/audit/ai-team-contract-conformance-check.mjs
+?? scripts/audit/validate-ai-team-operating-contract.mjs
+
+Diff stat:
+ data/projects/hairoticmen/ops/approvals.json       | 127 ++++++++++
+ data/projects/hairoticmen/ops/events.json          |  18 ++
+ data/projects/hairoticmen/ops/notifications.json   |  22 ++
+ data/projects/hairoticmen/ops/system.json          |   2 +-
+ public/control-center/pages/ai-command.js          |  67 +++--
+ public/control-center/pages/home.js                | 120 ++++-----
+ .../control-center/pages/home/render-sections.js   |  71 +++++-
+ public/control-center/styles/13-home-executive.css |  62 +++++
+ runtime/orchestrator-service/server.js             | 281 +++++++++++++++++++++
+ 9 files changed, 686 insertions(+), 84 deletions(-)
+
+Home AI label markers:
+601:      buttonLabel: nextActionRoute === "ai-command" ? "Prepare AI Guidance" : `Open ${humanizeStatus(nextActionRoute)} Workspace`,
+742:function setGlobalAiPrompt($, prompt) {
+806:    const recommendedSpecialist = pickRecommendedSpecialist(aiTeamCards, dashboard);
+875:                  ${escapeHtml(dashboard.nextBestAction.buttonLabel)}
+878:                  Ask Head Office AI
+1031:                <span class="home-action-title">Open Setup Readiness</span>
+1035:                <span class="home-action-title">Open Asset Library</span>
+1039:                <span class="home-action-title">Open Campaign Studio</span>
+1047:                <h2 class="mhos-os-panel-title">${escapeHtml(recommendedSpecialist?.name || "Executive AI")}</h2>
+1049:                  ${escapeHtml(recommendedSpecialist?.summary || "Use AI Command to turn the current state into a clear operating plan.")}
+1054:              ${recommendedSpecialist ? `
+1055:                <button class="quick-action-btn mhos-motion-soft" type="button" data-role-id="${escapeHtml(recommendedSpecialist.id)}">
+1056:                  <span class="home-action-title">Ask Head Office AI</span>
+1101:      setGlobalAiPrompt($, prompt);
+1102:      navigateTo("ai-command");
+1107:    const handleAiRoleClick = (roleId, roleName) => {
+1130:          setGlobalAiPrompt($, dashboard.nextBestAction.recommendation);
+1158:    const aiRoleCards = document.querySelectorAll(".quick-action-btn[data-role-id], .home-ai-team-card[data-role-id], .mhos-specialist[data-role-id], .mhos-workflow-step[data-role-id]");
+1160:      const roleId = card.getAttribute("data-role-id");
+1162:      card.onclick = () => handleAiRoleClick(roleId, roleName);
+
+AI Command bridge markers:
+62:                label: "Video Lead",
+97:                label: "Operations Lead",
+104:                label: "Customer Operations Lead",
+186:		label: "Video Lead",
+187:		position: "Short-Form Video Lead",
+190:		placeholder: "Ask the Video Lead to write a reel script, map short-form strategy, or outline the next video concept…",
+251:		label: "Operations Lead",
+255:		placeholder: "Ask the Operations Lead to turn this into tasks, workflow steps, or handoffs…",
+264:		label: "Customer Operations Lead",
+265:		position: "Customer Experience Operations Lead",
+268:		placeholder: "Ask the Customer Operations Lead to summarize a customer thread, draft a safe reply, prepare a ticket draft, check SLA risk, or route an escalation for review…",
+278:		position: "Revenue and CRM Operations Lead",
+626:function normalizeAiCommandSpecialistId(id, fallback = "operations") {
+631:function detectSpecialistFromBridgePrompt(prompt) {
+662:            if (text.includes(keyword)) return normalizeAiCommandSpecialistId(specialistId);
+666:    return normalizeAiCommandSpecialistId(classified?.modeId, "operations");
+939:			modeId: "operations",
+1028:	if (localDraft.modeId) session.modeId = asString(localDraft.modeId);
+1041:		modeId: session.modeId,
+1124:        const spec = getPhase1SpecialistById(session.modeId);
+1202:                modeId: session.modeId,
+1225:        session.modeId = asString(record.modeId || session.modeId || "operations");
+1345:        const specialistId = getAiRoomRoleId(session?.modeId || "operations");
+1420:        const destinationRoute = explicitDestination || destinationRouteForSpecialist(session?.modeId || "operations", outputType);
+1743:		: getPhase1SpecialistById(session.modeId);
+1769:			"Writer, Media Director, and Video Lead turn strategy into message, asset, and production drafts",
+2021:function scoreMode(text, modeId) {
+2035:	return asArray(keywordMap[modeId]).reduce((total, keyword) => {
+2042:		modeId: mode.id,
+2046:	const top = scores[0] || { modeId: selectedModeId || "operations" };
+2051:		resolvedModeId: top.modeId || selectedModeId || "operations",
+2394:function syncAiWorkflowBridge({ projectName, modeId, command, response }) {
+2397:		modeId: modeId || "",
+2634:		payload.modeId ||
+2638:		draftContext.modeId ||
+2706:	session.modeId = normalized.suggestedSpecialist;
+2725:			modeId: session.modeId,
+2733:		modeId: normalized.suggestedSpecialist,
+2759:	modeId,
+2770:	let resolvedModeId = modeId || session.modeId;
+2776:			mode_id: modeId || session.modeId,
+2787:		resolvedModeId = asString(classification.resolvedModeId) || asString(result?.command?.mode_id) || modeId || session.modeId;
+2794:		resolvedModeId = asString(payloadCommand?.mode_id) || modeId || session.modeId;
+2809:	session.modeId = resolvedModeId;
+2814:		modeId: resolvedModeId,
+2823:		modeId: resolvedModeId,
+2831:		modeId: resolvedModeId,
+2841:	syncAiWorkflowBridge({ projectName: aiContext.projectName, modeId: resolvedModeId, command: cleanCommand, response });
+2951:						class="ctrl-team-card${agent.id === session.modeId ? " is-active" : ""}"
+2958:						${agent.id === session.modeId ? `<span class="ctrl-team-active-dot"></span>` : ""}
+3111:		const mode = getModeMeta(message.modeId);
+3167:							const mode = getModeMeta(entry.modeId);
+3280:                : getPhase1SpecialistById(session.modeId);
+3318:                specialistId: specialist.id || session.modeId,
+3545:	return destinationRouteForSpecialist(session?.modeId || "operations", outputType);
+3592:	const activeSpecialist = session.teamMode === "team" ? "Full AI Team" : getPhase1SpecialistById(session.modeId)?.label || "Specialist";
+3702:					const isActive = spec.id === session.modeId && session.teamMode === "solo";
+3752:	const spec = getPhase1SpecialistById(session.modeId);
+3776:                : getPhase1SpecialistById(session.modeId);
+3782:        const roleId = getAiRoomRoleId(session.modeId);
+3794:	const spec = getPhase1SpecialistById(session.modeId);
+3836:	return destinationRouteForSpecialist(session?.modeId || "operations", getCanonicalToolIntent(tool));
+3856:	const toolModeId = MODE_ID_ALIASES[getAiRoomRoleId(session.modeId)] || getAiRoomRoleId(session.modeId);
+3893:	const specialistLabel = session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label || "Specialist";
+3894:	const roleId = session.teamMode === "team" ? "team" : getAiRoomRoleId(session.modeId);
+3984:                : getPhase1SpecialistById(session.modeId);
+3987:        const destinationRoute = asString(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, outputType));
+4003:                        const active = !isTeam && spec.id === session.modeId;
+4064:                : getPhase1SpecialistById(session.modeId)?.label || "Specialist";
+4091:        const spec = isTeam ? { label: "Full AI Team" } : getPhase1SpecialistById(session.modeId);
+4093:        const destinationRoute = asString(session.outputPreview?.destinationRoute || destinationRouteForSpecialist(session.modeId, outputType));
+4120:		: getPhase1SpecialistById(session.modeId)?.label || "Specialist";
+4187:	const activeSpec = getPhase1SpecialistById(session.modeId);
+4197:					const isActive = !isTeam && spec.id === session.modeId;
+4233:        const selectedSpec = isTeam ? { id: "team", label: "Full Team" } : getPhase1SpecialistById(session.modeId);
+4239:                const messageRoleId = getAiRoomRoleId(message.specialistId || message.modeId || "");
+4276:                const destinationRoute = asString(message.destinationRoute || preview.destinationRoute || destinationRouteForSpecialist(session.modeId, outputType));
+4703:                                        const isActive = !isTeam && spec.id === session.modeId;
+4730:        const spec = getPhase1SpecialistById(session.modeId);
+4759:                                                id="aicmdV2Input"
+4888:					const isActive = !teamActive && spec.id === session.modeId;
+4922:	const specialistLabel = session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label || "Specialist";
+4923:	const roleId = session.teamMode === "team" ? "team" : getAiRoomRoleId(session.modeId);
+4964:	const destination = routeLabel(preview.destinationRoute || destinationRouteForSpecialist(session.modeId, preview.outputType || "guidance"));
+4967:		: getPhase1SpecialistById(preview.specialistId || session.modeId);
+5121:        const selectedSpec = isTeam ? { id: "team", label: "Full Team", position: "Team workflow" } : getPhase1SpecialistById(session.modeId);
+5129:                const messageRoleId = getAiRoomRoleId(message.specialistId || message.modeId || "");
+5164:                specialistId: session.modeId,
+5168:        const promptModeId = MODE_ID_ALIASES[getAiRoomRoleId(session.modeId)] || getAiRoomRoleId(session.modeId);
+5329:	const promptModeId = MODE_ID_ALIASES[getAiRoomRoleId(session.modeId)] || getAiRoomRoleId(session.modeId);
+5360:	const specialist = session.teamMode === "team" ? { label: "Full Team" } : getPhase1SpecialistById(session.modeId);
+5361:	const destination = routeLabel(destinationRouteForSpecialist(session.modeId, asObject(session.outputPreview).outputType || "guidance"));
+5378:	const scopedContextItems = session.teamMode === "solo" && session.modeId === "customer_ops"
+5386:		: session.teamMode === "solo" && session.modeId === "sales_crm"
+5518:		const normalizedSessionModeId = MODE_ID_ALIASES[getAiRoomRoleId(session.modeId)] || getAiRoomRoleId(session.modeId);
+5519:		if (normalizedSessionModeId && normalizedSessionModeId !== session.modeId) session.modeId = normalizedSessionModeId;
+5547:			const detectedSpecialist = detectSpecialistFromBridgePrompt(bridgeValue);
+5549:				session.modeId = detectedSpecialist;
+5598:		const input = $("aicmdV2Input");
+5615:			session.modeId = normalizedSessionModeId;
+5652:                                modeId: session.modeId,
+5696:                                modeId: session.modeId,
+5752:                                session.modeId = specId;
+5865:                                                specialistId: session.modeId,
+5866:                                                modeId: session.modeId,
+5985:                        specialistLabel: session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label,
+6559:		                        : getPhase1SpecialistById(session.modeId);
+6564:		                        modeId: specialist.id || session.modeId,
+6565:		                        specialistId: specialist.id || session.modeId,
+6583:		                        modeId: session.modeId,
+6593:		                                specialistId: specialist.id || session.modeId,
+6630:		                                modeId: specialist.id || session.modeId,
+6631:		                                specialistId: specialist.id || session.modeId,
+6663:		                                specialistId: specialist.id || session.modeId,
+6687:		                                modeId: session.modeId,
+6704:		                                modeId: session.modeId,
+6728:                                const specLabel = session.teamMode === "team" ? "Team" : getPhase1SpecialistById(session.modeId).label;
+6741:                                const spec = getPhase1SpecialistById(session.modeId);
+6764:                                const spec = getPhase1SpecialistById(session.modeId);
+6788:                                const spec = getPhase1SpecialistById(session.modeId);
+6816:					specialistLabel: session.teamMode === "team" ? "Full Team" : getPhase1SpecialistById(session.modeId)?.label,
+6922:					modeId: session.modeId,
+6951:		                        modeId: session.modeId,
+6966:				const destination = asString(latestResponse.destinationRoute || responseRoute.destinationRoute || destinationRouteForSpecialist(session.modeId, responseRoute.outputType || "guidance"));
+6969:					modeId: latestResponse.specialistId || session.modeId,
+7019:					: getPhase1SpecialistById(output.specialistId || session.modeId).label;
+7043:					: getPhase1SpecialistById(output.specialistId || session.modeId).label;
+7075:							modeId: output.specialistId || session.modeId,
+7098:					modeId: session.modeId,
+
+Syntax checks:
+
+Conformance summary:
+Failures: 0
+Warnings: 10
+Unknown route candidates: 6
+Alias drift signals: 49
+Handoff drift pairs: 0
+VERDICT: READY FOR NARROW AI COMMAND ALIAS INTEGRATION CANDIDATE

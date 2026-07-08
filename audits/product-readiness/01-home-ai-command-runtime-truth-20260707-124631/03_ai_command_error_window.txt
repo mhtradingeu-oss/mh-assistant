@@ -1,0 +1,619 @@
+ai-command.js lines 5460-5575:
+	id: "ai-command",
+   disableStandardLayout: true,
+	meta: {
+		eyebrow: "AI & Build",
+		title: "AI Workspace",
+		description: "Talk to your AI team, run structured tasks, and turn intelligence into review-ready plans and routed handoffs."
+	},
+	template: `
+		<section class="page is-active" data-page="ai-command">
+			<div id="ctrlRoomRoot"></div>
+		</section>
+	`,
+	render(context) {
+		const {
+			getState,
+			$,
+			escapeHtml,
+			navigateTo,
+			showMessage,
+			consumeProjectHandoff,
+			executeProjectAiCommand,
+			fetchProjectInsights,
+			fetchProjectLearning,
+			reloadProjectData
+		} = context;
+
+		const state = getState();
+		const projectName = asString(selectCurrentProject(state) || "");
+		const sessionKey = projectName || "__default__";
+		const session = ensureSession(sessionKey);
+		hydrateSessionDraft(sessionKey, session);
+		const normalizedSessionModeId = MODE_ID_ALIASES[getAiRoomRoleId(session.modeId)] || getAiRoomRoleId(session.modeId);
+		if (normalizedSessionModeId && normalizedSessionModeId !== session.modeId) session.modeId = normalizedSessionModeId;
+		refreshAiChatSessions(sessionKey, session);
+           const savedOutput = asObject(loadLocalOutput(sessionKey));
+           if (
+                   asArray(savedOutput.messages).length &&
+                   !asArray(session.messages).length &&
+                   !session.isFreshAiChatSession
+           ) {
+                   session.messages = asArray(savedOutput.messages).slice(-40);
+           }
+		if (!session.outputPreview && !session.isFreshAiChatSession) {
+                        const preview = asObject(savedOutput.preview);
+			if (preview.outputType) {
+				session.outputPreview = preview;
+				session.outputWorkspaceTab = outputTabFromPreview(preview);
+			}
+		}
+		if (!session.responseHistoryLoaded && !session.isFreshAiChatSession) {
+                        session.responseHistory = asArray(savedOutput.responses).slice(0, 12);
+                        session.responseHistoryLoaded = true;
+                }
+
+		// ── HOME → AI COMMAND BRIDGE ────────────────────────────────
+		// Consume prompt set by home.js handleAiRoleClick via quickCommandInput.
+		// Once consumed we clear the global input so re-renders are idempotent.
+		const globalInput = $("quickCommandInput");
+		const bridgeValue = asString(globalInput?.value || "").trim();
+		if (bridgeValue) {
+			const detectedSpecialist = detectSpecialistFromBridgePrompt(bridgeValue);
+			if (detectedSpecialist) {
+				session.modeId = detectedSpecialist;
+				const bridgeSpecialist = getPhase1SpecialistById(detectedSpecialist);
+				session.bridgeContext = {
+					source: "Home",
+					specialistId: detectedSpecialist,
+					specialistLabel: bridgeSpecialist?.label || titleCase(detectedSpecialist),
+					loadedAt: nowIso()
+				};
+			} else {
+				session.bridgeContext = null;
+			}
+			StateKernel.write(session, normalizeAiComposerPrompt(bridgeValue), "ai");
+			persistSessionDraft(sessionKey, session, detectedSpecialist ? "Specialist context loaded from Home" : "AI prompt loaded from workspace");
+			if (globalInput) globalInput.value = "";
+		}
+		// ─────────────────────────────────────────────────────────────
+
+		const payload = asObject(selectProjectPayload(state));
+		const overview = asObject(payload.overview?.overview || payload.overview);
+		const readiness = asObject(payload.readiness?.dashboard || payload.readiness);
+		const operations = asObject(selectOperationsSnapshot(state));
+		applyDurableAiHandoff(sessionKey, operations, session, consumeProjectHandoff, showMessage);
+		const readinessScore = readiness.readiness_score ?? overview.readiness_score ?? null;
+
+		const intelligenceStatus = session.intelligence.status || "idle";
+		const aiContext = buildUnifiedAiContext(state, session.intelligence);
+		const bridgeStatus = getAiResponseBridgeStatus(executeProjectAiChat);
+		if (!session.workspaceTabInitialized) {
+			session.workspaceTab = bridgeStatus.available ? "chat" : "preview";
+			session.workspaceTabInitialized = true;
+		}
+		if (!PHASE35_WORKSPACE_TABS.includes(session.workspaceTab)) {
+			session.workspaceTab = bridgeStatus.available ? "chat" : "preview";
+		}
+		if (!["tools", "output", "flow"].includes(session.chatFirstTab)) {
+			session.chatFirstTab = asObject(session.outputPreview).outputType ? "output" : "tools";
+		}
+
+		const root = $("ctrlRoomRoot");
+		if (!root) return;
+
+		root.innerHTML = renderAiCommandChatFirstShell({
+			session,
+			projectName,
+			aiContext,
+			bridgeStatus,
+			escapeHtml
+		});
+
+		const input = $("aicmdV2Input");
+		const statusEl = $("aicmdV2Status");
+
+		const updateStatus = (msg) => {
+			if (statusEl) statusEl.textContent = msg;
+
+ai-command.js function declarations nearby:
+36:const MODE_DEFS = [
+117:const MODE_ID_ALIASES = {
+142:const SPECIALIST_DEFS = [
+289:const SPECIALIST_SUGGESTED_PROMPTS = {
+359:const TEAM_SUGGESTED_PROMPTS = [
+366:const PHASE35_WORKSPACE_TABS = ["chat", "preview", "tools", "context", "history"];
+368:const AI_ROOM_FLOW_STEPS = [
+377:const AI_ROOM_OUTPUT_TABS = [
+385:const AI_ROOM_TEAM_CHAIN = ["Strategist", "Writer", "Media / Video", "Compliance", "Publisher", "Operations"];
+386:const AI_ROOM_BUSINESS_BRANCH = ["Customer Ops", "Sales / CRM", "Operations"];
+388:const AI_ROOM_ROLE_INITIALS = {
+402:const AI_ROOM_BACKEND_ROLE_ALIASES = {
+408:const AI_ROOM_PLANNED_SPECIALISTS = [
+429:const PHASE35_SPECIALIST_TOOLS = {
+514:const QUICK_ACTIONS = [
+521:const AI_COMMAND_LOCAL_DRAFTS_KEY = "mh-ai-command-local-drafts-v1";
+522:const AI_COMMAND_LOCAL_OUTPUTS_KEY = "mh-ai-command-local-outputs-v1";
+524:const COMMAND_TYPES = [
+535:const TARGET_TYPES = [
+542:const IMPACT_CHIP_LABELS = [
+551:const AGENT_CARDS = [
+610:const aiSessions = new Map();
+611:const AI_COMMAND_CHAT_SESSIONS_KEY = "mh_ai_command_chat_sessions_v1";
+612:const aiInboundHandoffObjectIds = typeof WeakMap !== "undefined" ? new WeakMap() : null;
+613:let aiInboundHandoffCounter = 0;
+614:let lastRenderContext = null;
+615:let aiCommandBridgeRegistered = false;
+616:let aiAutoModeUnsubscribe = null;
+617:const aiAutomationState = {
+622:function buildAutoPlanFromCommand(commandText, session) {
+623:	function getSpecialistById(id) {
+624:		const resolvedId = MODE_ID_ALIASES[id] || id;
+630:	function detectSpecialistFromBridgePrompt(prompt) {
+631:		const text = asString(prompt);
+644:		const classified = classifyIntent(text, null);
+651:	const command = humanizeValue(commandText || session?.draftMessage, "Prepare workflow action from AI command.");
+652:	const plan = [
+694:function asArray(value) {
+698:function asObject(value) {
+702:function asString(value) {
+707:function humanizeValue(value, fallback = "") {
+710:		const clean = value.trim();
+720:		const title = humanizeValue(value.title || value.label || value.name || value.headline || value.hook);
+721:		const detail = humanizeValue(
+744:function applyTokenTemplate(template, context = {}) {
+745:	const tokenMap = {
+756:function normalizeAiComposerPrompt(value) {
+757:  let text = asString(value).trim();
+761:  const commandPrefixes = [
+773:    const escaped = prefix.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+774:    const repeatedPattern = new RegExp(`^(?:${escaped}\\s*){2,}`, "i");
+779:  const latestMarker = commandPrefixes
+790:    const duplicate = `${prefix} ${prefix}`;
+799:function setAiComposerValue(session, input, value) {
+800:  const cleanValue = normalizeAiComposerPrompt(value);
+810:function normalizeDisplayList(value, limit = 8) {
+817:function toNumber(value, fallback = null) {
+819:	const parsed = Number(value);
+823:function nowIso() {
+827:function isMissingIntelligenceError(error) {
+828:	const status = Number(error?.status);
+830:	const message = asString(error?.message).toLowerCase();
+834:function formatTime(value) {
+835:	const date = value ? new Date(value) : new Date();
+840:function getWorkspaceLanguagePlan(aiContext = {}) {
+841:	const overview = asObject(aiContext.overview);
+842:	const rawMarket = asString(aiContext.market || overview.market || "").trim();
+843:	const market = rawMarket || "Germany";
+844:	const configuredPublishLanguage = asString(
+851:	const publishLanguage = configuredPublishLanguage || "German";
+852:	const conversationLanguage = asString(
+866:function titleCase(value) {
+872:function formatCompactNumber(value) {
+873:	const parsed = Number(value);
+881:function formatCurrency(value, currency = "USD") {
+882:	const parsed = Number(value);
+895:function getModeMeta(id) {
+896:	const resolvedId = MODE_ID_ALIASES[id] || id;
+900:function extractTopMessage(item = {}) {
+908:function ensureSession(projectName) {
+909:	const key = projectName || "__default__";
+959:function readLocalDraftMap() {
+962:		const raw = window.localStorage?.getItem(AI_COMMAND_LOCAL_DRAFTS_KEY) || "{}";
+963:		const parsed = JSON.parse(raw);
+970:function writeLocalDraftMap(map) {
+977:function loadLocalDraft(projectName) {
+978:	const key = projectName || "__default__";
+982:function saveLocalDraft(projectName, draftPayload) {
+983:	const key = projectName || "__default__";
+984:	const map = readLocalDraftMap();
+994:function hydrateSessionDraft(projectName, session) {
+996:	const localDraft = loadLocalDraft(projectName);
+1011:function persistSessionDraft(projectName, session, hint) {
+1012:	const saved = saveLocalDraft(projectName, {
+1022:function readLocalOutputMap() {
+1025:		const raw = window.localStorage?.getItem(AI_COMMAND_LOCAL_OUTPUTS_KEY) || "{}";
+1026:		const parsed = JSON.parse(raw);
+1033:function writeLocalOutputMap(map) {
+1040:function loadLocalOutput(projectName) {
+1041:	const key = projectName || "__default__";
+1045:function saveLocalOutput(projectName, outputPayload) {
+1046:	const key = projectName || "__default__";
+1047:	const map = readLocalOutputMap();
+1057:function getAiResponseBridgeStatus(executeProjectAiGuidanceFn) {
+1061:			reason: "AI response guidance bridge is not connected yet (API function unavailable)."
+1071:function readAiChatSessionsMap() {
+1074:                const raw = window.localStorage?.getItem(AI_COMMAND_CHAT_SESSIONS_KEY) || "{}";
+1075:                const parsed = JSON.parse(raw);
+1082:function writeAiChatSessionsMap(map) {
+1089:function getAiChatSessions(projectName) {
+1090:        const key = projectName || "__default__";
+1095:function getAiCommandSessionSpecialistLabel(session = {}) {
+1097:        const spec = getPhase1SpecialistById(session.modeId);
+1101:function summarizeAiCommandSessionIntent(value = "", fallback = "Session") {
+1102:        const text = asString(value || "")
+1109:        const compact = text
+1114:        const source = compact || text;
+1118:function formatAiCommandSessionTime(value) {
+1119:        const date = value ? new Date(value) : new Date();
+1122:        const now = new Date();
+1123:        const sameDay = date.toDateString() === now.toDateString();
+1124:        const yesterday = new Date(now);
+1127:        const time = date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+1134:function buildAiCommandHistoryTitle(session = {}, options = {}) {
+1135:        const specialist = getAiCommandSessionSpecialistLabel(session);
+1136:        const messages = asArray(session.messages);
+1137:        const responses = asArray(session.responseHistory);
+1138:        const latestResponse = responses[0] || {};
+1139:        const latestUser = messages.slice().reverse().find((message) => asString(message.role) === "user");
+1140:        const preview = asObject(session.outputPreview);
+1141:        const explicit = asString(options.title || "").trim();
+1143:        const intent = summarizeAiCommandSessionIntent(
+1155:        const time = formatAiCommandSessionTime(options.updatedAt || session.updatedAt || nowIso());
+1160:function saveAiChatSession(projectName, session, options = {}) {
+1161:        const key = projectName || "__default__";
+1162:        const messages = asArray(session.messages);
+1163:        const responses = asArray(session.responseHistory);
+1164:        const hasContent = messages.length || responses.length || asObject(session.outputPreview).title;
+1167:        const map = readAiChatSessionsMap();
+1168:        const sessions = asArray(map[key]);
+1169:        const now = nowIso();
+1170:        const sessionId = asString(options.sessionId || session.activeChatSessionId || `chat-session-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`);
+1171:        const titleSeed = buildAiCommandHistoryTitle(session, { ...options, updatedAt: now });
+1172:        const record = {
+1184:        const nextSessions = [record, ...sessions.filter((item) => asString(item.id) !== sessionId)].slice(0, 20);
+1194:function loadAiChatSessionIntoState(projectName, session, sessionId) {
+1195:        const record = getAiChatSessions(projectName).find((item) => asString(item.id) === asString(sessionId));
+1216:function refreshAiChatSessions(projectName, session) {
+1221:function buildSpecialistChatPrompt({ prompt, specialistLabel, modeLabel, projectName, language, outputLanguage, market }) {
+1222:	const cleanPrompt = asString(prompt).trim();
+1223:	const safeProject = asString(projectName || "current project").trim();
+1224:	const safeSpecialist = asString(specialistLabel || "Specialist").trim();
+1225:	const safeMode = asString(modeLabel || "Solo Specialist").trim();
+1226:	const safeLanguage = asString(language || "user language").trim();
+1227:	const safeOutputLanguage = asString(outputLanguage || "German").trim();
+1228:	const safeMarket = asString(market || "Germany").trim();
+1229:	const teamWorkflowLines = safeMode === "Full Team"
+1260:function extractGeneratedResponseText(response = {}) {
+1261:	const direct = humanizeValue(
+1271:	const bullets = normalizeDisplayList(response.bullets, 6)
+1277:	const recommendationLine = normalizeDisplayList(response.recommendations, 4)
+1281:	const findingLine = normalizeDisplayList(response.findings, 4)
+1285:	const sectionLine = asArray(response.sections)
+1287:			const title = humanizeValue(section?.title);
+1288:			const items = normalizeDisplayList(section?.items, 4);
+1298:function destinationRouteForSpecialist(specialistId, outputType) {
+1299:	const rawId = getAiRoomRoleId(specialistId || "operations");
+1300:	const id = MODE_ID_ALIASES[rawId] || rawId;
+1316:function resolveAiResponseOutputRoute(session, response = {}) {
+1317:        const activeTab = getOutputWorkspaceTab(session);
+1318:        const specialistId = getAiRoomRoleId(session?.modeId || "operations");
+1319:        const explicitDestination = asString(response.destinationRoute || "").trim();
+1321:        const text = [
+1330:        let outputType = asString(response.outputType || "").toLowerCase();
+1341:        const looksTaskLike = /\b(task|tasks|handoff|ticket|tickets|follow-up|follow up|owner|owners|assignee|assigned|due date|priority|priorities|backlog|checklist|next task|action item|action items)\b/.test(text);
+1342:        const looksWorkflowLike = /\b(workflow|workflows|process|sequence|phase|phases|approval flow|automation|operating loop|step-by-step|steps|dependencies|trigger|review gate|execution flow)\b/.test(text);
+1343:        const looksContentLike = /\b(content|caption|captions|post|posts|email|blog|article|copy|headline|landing page|script|message|cta|product copy|social post)\b/.test(text);
+1344:        const looksMediaLike = /\b(media|visual|creative|image|images|video|reel|storyboard|shot list|asset|assets|design|production|creative direction|voiceover)\b/.test(text);
+1345:        const looksPublishingLike = /\b(publish|publishing|schedule|channel package|channel payload|approval-ready post|final post|ready to publish|publishing package)\b/.test(text);
+1346:        const looksGovernanceLike = /\b(compliance|governance|claim|claims|risk|risks|approval|approvals|policy|privacy|legal|safe language|safety review)\b/.test(text);
+1347:        const looksInsightLike = /\b(insight|insights|seo|keyword|keywords|analytics|performance|traffic|ranking|search intent|metrics|research|competitor|competitors|market research)\b/.test(text);
+1348:        const looksCampaignLike = /\b(campaign|launch|audience|offer|funnel|positioning|channel mix|campaign brief|go-to-market|go to market)\b/.test(text);
+1393:        const destinationRoute = explicitDestination || destinationRouteForSpecialist(session?.modeId || "operations", outputType);
+1397:function routeLabel(route) {
+1398:	const labels = {
+1415:function specialistTemplateForOutput({ specialist, outputType, prompt, projectName }) {
+1416:	const cleanPrompt = asString(prompt).trim();
+1417:	const promptSnippet = cleanPrompt || `Project request for ${projectName || "current project"}`;
+1418:	const specialistId = asString(specialist?.id || "operations");
+1419:	const route = destinationRouteForSpecialist(specialistId, outputType);
+1421:	const base = {
+1712:function buildPhase2OutputPreview({ intent, session, prompt, projectName }) {
+1713:	const teamMode = session.teamMode === "team";
+1714:	const specialist = teamMode
+1718:	const intentToType = {
+1724:	const outputType = intentToType[intent] || "guidance";
+1726:	const base = specialistTemplateForOutput({
+1762:function formatOutputTypeLabel(outputType) {
+1763:	const labels = {
+1773:function buildPreviewText(output, specialistLabel) {
+1775:	const lines = [
+1796:function compactPreviewText(value, maxLength = 360) {
+1797:        const text = humanizeValue(value, "").replace(/\s+/g, " ").trim();
+1803:function splitPreviewLines(value, limit = 6) {
+1804:        const text = humanizeValue(value, "");
+1813:function normalizeUniqueDisplayList(items, limit = 6) {
+1814:        const seen = new Set();
+1818:                        const key = item.replace(/\s+/g, " ").trim().toLowerCase();
+1826:function buildStructuredPreviewBlocks(preview = {}) {
+1827:        const summary = humanizeValue(preview.summary, "");
+1828:        const sourceText = humanizeValue(
+1837:        const compactSummary = compactPreviewText(sourceText || summary, 420);
+1838:        const blocks = [];
+1840:        const mainLines = splitPreviewLines(sourceText || summary, 14)
+1847:        const bullets = normalizeUniqueDisplayList(preview.bullets, 8)
+1854:        const steps = normalizeUniqueDisplayList(preview.steps, 8)
+1870:function isProviderLikelyConfigured(aiContext) {
+1871:	const records = asObject(aiContext?.controlCenter?.records);
+1873:		const integrationId = asString(record?.integration_id || record?.id).toLowerCase();
+1874:		const status = asString(record?.status || record?.status_label).toLowerCase();
+1875:		const providerMatch = /openai|replicate|stability|runway|elevenlabs|anthropic/.test(integrationId);
+1876:		const readyState = /connected|healthy|ready|active|ok/.test(status);
+1885:function buildUnifiedAiContext(state, intelligence) {
+1886:	const overviewBlock = asObject(state.data.overview);
+1887:	const overview = asObject(overviewBlock.overview);
+1888:	const readiness = asObject(state.data.readiness);
+1889:	const readinessDashboard = asObject(readiness.dashboard);
+1890:	const connectors = asObject(state.data.integrations);
+1891:	const controlCenter = asObject(connectors.control_center);
+1892:	const activity = asObject(state.data.activity);
+1893:	const assets = asObject(state.data.assets);
+1894:	const assetCategories = getCategoryReadinessList(assets);
+1905:	const coverage = asObject(insights.data_coverage);
+1906:	const coverageEntries = Object.entries(coverage);
+1907:	const coveredCount = coverageEntries.filter(([, item]) => asString(item?.status) === "covered").length;
+1908:	const recommendations = asArray(learning.recommendations || insights.recommendations);
+1909:	const nextBestActions = asArray(overviewBlock.next_best_actions || readinessDashboard.next_best_actions);
+1910:	const criticalGaps = asArray(readinessDashboard.priorities?.critical || readiness.priorities?.critical);
+1911:	const importantGaps = asArray(readinessDashboard.priorities?.important || readiness.priorities?.important);
+1912:	const missingIntegrations = [];
+1924:	const connectorIssues = Object.values(asObject(controlCenter.records))
+1994:function scoreMode(text, modeId) {
+1995:	const query = asString(text).toLowerCase();
+1996:	const keywordMap = {
+2013:function classifyIntent(message, selectedModeId) {
+2014:	const scores = MODE_DEFS.map((mode) => ({
+2019:	const top = scores[0] || { modeId: selectedModeId || "operations" };
+2020:	const query = asString(message).toLowerCase();
+2021:	const actionRouting = /launch|build|reconnect|connect|improve|create|fix|route|plan|publish/.test(query);
+2029:function routeSuggestion(label, route, reason) {
+2033:function normalizeActionLabel(item) {
+2041:function buildMissingDataNotes(aiContext, lane) {
+2042:	const notes = [];
+2043:	const coverage = aiContext.coverage;
+2060:function buildExecutiveResponse(aiContext) {
+2061:	const topRecommendation = aiContext.recommendations[0];
+2062:	const summaryParts = [];
+2091:function buildContentResponse(aiContext) {
+2092:	const top = aiContext.topContent[0];
+2093:	const weak = aiContext.weakContent[0];
+2094:	const bestFormat = aiContext.learningPatterns.best_formats?.label;
+2095:	const bestPlatform = aiContext.learningPatterns.best_platforms?.label;
+2126:function buildSeoResponse(aiContext) {
+2127:	const seo = aiContext.seo;
+2128:	const website = aiContext.website;
+2129:	const topQuery = asArray(seo.top_queries)[0];
+2130:	const lowCtr = asArray(seo.low_ctr_pages)[0];
+2131:	const weakPage = asArray(website.weak_pages)[0];
+2162:function buildAdsResponse(aiContext) {
+2163:	const paid = aiContext.paid;
+2164:	const bestCampaign = asArray(paid.best_campaigns)[0];
+2165:	const weakCampaign = asArray(paid.weak_campaigns)[0];
+2166:	const bestCreative = asArray(paid.best_creatives)[0];
+2197:function buildResearchResponse(aiContext) {
+2229:function buildOperationsTaskBlock(aiContext, message) {
+2230:	const query = asString(message).toLowerCase();
+2246:function buildOperationsResponse(aiContext, message) {
+2247:	const query = asString(message).toLowerCase();
+2248:	const taskBlock = buildOperationsTaskBlock(aiContext, message);
+2249:	const routeSuggestions = [];
+2276:function buildResponseForMode(aiContext, classified, message) {
+2302:async function ensureIntelligenceLoaded({
+2315:	const current = session.intelligence;
+2316:	const freshEnough = current.status === "ready" && current.project === projectName && current.loadedAt && (Date.now() - Date.parse(current.loadedAt)) < 1000 * 60 * 3;
+2320:	const state = getState();
+2321:	const needsDashboard = !state.data.overview || !state.data.readiness || !state.data.integrations || !state.data.activity;
+2331:				const [insightsResult, learningResult] = await Promise.allSettled([
+2335:				const insightsMissing = insightsResult.status === "rejected" && isMissingIntelligenceError(insightsResult.reason);
+2336:				const learningMissing = learningResult.status === "rejected" && isMissingIntelligenceError(learningResult.reason);
+2337:				const intelligenceErrors = [
+2354:				rerender();
+2359:	rerender();
+2367:function syncAiWorkflowBridge({ projectName, modeId, command, response }) {
+2378:const AI_INBOUND_SOURCE_LABELS = {
+2400:const AI_INBOUND_SPECIALIST_BY_SOURCE = {
+2422:const AI_INBOUND_SPECIALIST_ALIASES = {
+2432:const AI_INBOUND_SOURCE_ALIASES = {
+2455:function firstAiInboundId(...values) {
+2457:		const text = asString(value).trim();
+2463:function firstAiInboundText(...values) {
+2465:		const text = humanizeValue(value, "").trim();
+2471:function firstAiInboundObject(...values) {
+2475:function asAiInboundList(value) {
+2479:		const record = asObject(value);
+2486:function normalizeAiInboundSourcePage(value) {
+2487:	const clean = asString(value)
+2496:function normalizeAiInboundSpecialistId(value, fallback = "operations") {
+2497:	const fallbackId = MODE_ID_ALIASES[getAiRoomRoleId(fallback)] || getAiRoomRoleId(fallback);
+2498:	const raw = getAiRoomRoleId(value || fallbackId);
+2499:	const legacy = AI_INBOUND_SPECIALIST_ALIASES[raw] || AI_INBOUND_SPECIALIST_ALIASES[asString(value).trim().toLowerCase()] || raw;
+2500:	const resolved = MODE_ID_ALIASES[legacy] || MODE_ID_ALIASES[getAiRoomRoleId(legacy)] || getAiRoomRoleId(legacy);
+2501:	const finalId = MODE_ID_ALIASES[resolved] || resolved;
+2505:function normalizeAiInboundTeamMode(value) {
+2506:	const clean = asString(value).trim().toLowerCase().replace(/[\s_]+/g, "-");
+2510:function normalizeAiInboundRouteSuggestions(rawSuggestions, sourcePage, sourceLabel) {
+2511:	const fallbackRoute = sourcePage === "workspace" ? "workflows" : sourcePage;
+2512:	const fallbackLabel = sourceLabel || routeLabel(fallbackRoute);
+2513:	const suggestions = asAiInboundList(rawSuggestions).map((item) => {
+2514:		const record = asObject(item);
+2515:		const rawRoute = firstAiInboundId(record.route, record.destination, record.page, record.targetPage, record.target_page);
+2516:		const stringRoute = rawRoute ? "" : firstAiInboundId(item);
+2517:		const route = normalizeAiInboundSourcePage(rawRoute || stringRoute || fallbackRoute);
+2518:		const label = firstAiInboundText(record.label, record.title, record.name) || routeLabel(route) || fallbackLabel;
+2519:		const reason = firstAiInboundText(record.reason, record.summary, record.description) || `Return to ${label} after AI Team review.`;
+2531:function normalizeAiInboundOutputPreview(rawPreview, normalized) {
+2532:	const preview = asObject(rawPreview);
+2534:	const outputType = asString(preview.outputType || preview.output_type || preview.type || "handoff").trim() || "handoff";
+2535:	const destinationRoute = normalizeAiInboundSourcePage(
+2542:	const specialistId = normalizeAiInboundSpecialistId(preview.specialistId || preview.specialist_id || normalized.suggestedSpecialist, normalized.suggestedSpecialist);
+2560:function getAiInboundDurableHandoffId(handoff) {
+2561:	const payload = asObject(handoff?.payload);
+2571:function getAiInboundHandoffId(handoff) {
+2572:	const durableId = getAiInboundDurableHandoffId(handoff);
+2575:	const payload = asObject(handoff?.payload);
+2576:	const stablePayloadId = firstAiInboundId(payload.handoff_id, payload.handoffId, payload.id, handoff?.created_at, handoff?.createdAt);
+2591:function normalizeAiInboundHandoff(handoff, projectName) {
+2592:	const payload = asObject(handoff?.payload);
+2593:	const draftContext = firstAiInboundObject(payload.draft_context, payload.draftContext, handoff?.draft_context, handoff?.draftContext);
+2594:	const sourcePage = normalizeAiInboundSourcePage(firstAiInboundId(
+2602:	const sourceLabel = AI_INBOUND_SOURCE_LABELS[sourcePage] || routeLabel(sourcePage) || "Workspace";
+2603:	const explicitSpecialist = firstAiInboundId(payload.specialist, payload.specialist_id);
+2604:	const suggestedSpecialist = normalizeAiInboundSpecialistId(
+2616:	const projectLabel = projectName && projectName !== "__default__" ? projectName : "this project";
+2617:	const prompt = normalizeAiComposerPrompt(firstAiInboundText(
+2626:	const title = firstAiInboundText(
+2634:	const routeSuggestions = normalizeAiInboundRouteSuggestions(
+2642:	const teamMode = normalizeAiInboundTeamMode(firstAiInboundId(payload.teamMode, payload.team_mode, draftContext.teamMode, draftContext.team_mode));
+2643:	const rawOutputPreview = firstAiInboundObject(
+2650:	const normalized = {
+2671:function applyDurableAiHandoff(projectName, operations, session, consumeProjectHandoff, showMessage) {
+2672:	const handoff = getSharedHandoff(projectName, "ai-command", operations);
+2673:	const handoffId = getAiInboundHandoffId(handoff);
+2676:	const normalized = normalizeAiInboundHandoff(handoff, projectName);
+2718:	const durableHandoffId = getAiInboundDurableHandoffId(handoff);
+2727:async function submitDurableCommand({
+2737:	const cleanCommand = asString(command).trim();
+2741:	let result = null;
+2742:	let response = {};
+2743:	let resolvedModeId = modeId || session.modeId;
+2744:	let commandId = "";
+2759:		const classification = asObject(result?.command?.classification);
+2763:		const payload = asObject(error?.payload);
+2764:		const payloadResponse = asObject(payload?.response);
+2765:		const payloadCommand = asObject(payload?.command);
+2766:		const failureReason = asString(payload?.error) || asString(payloadResponse?.error) || asString(error?.message) || "AI provider failed to return output.";
+2781:	const createdAt = nowIso();
+2823:function buildProjectedAgentCards(state) {
+2824:  const projectedMembers = getProjectedTeamMembers(state);
+2825:  const activeRole = asString(getProjectedActiveRole(state)).toLowerCase();
+2830:    const id = asString(member.role || member.id).toLowerCase();
+2849:function renderControlRoomHeader(aiContext, session, intelligenceStatus, escapeHtml) {
+2850:	const projectLabel = aiContext.projectName || "No project selected";
+2851:	const readinessLabel = aiContext.readinessScore != null ? `${aiContext.readinessScore}/100` : "--";
+2852:	const coverageLabel = aiContext.coverageTotal > 0 ? `${aiContext.coveredCount}/${aiContext.coverageTotal}` : "--";
+2854:	const intelDotClass = { ready: "ready", loading: "loading", error: "error", idle: "idle" }[intelligenceStatus] || "idle";
+2855:	const intelLabel = { ready: "Live intelligence loaded", loading: "Loading intelligence…", error: "Intelligence limited", idle: "Waiting for intelligence" }[intelligenceStatus] || "Idle";
+2857:	const caps = [];
+2917:function renderTeamSelector(session, escapeHtml) {
+2947:function renderSuggestedPromptsSection(aiContext, session, escapeHtml) {
+2948:	const projectLabel = aiContext.projectName || "this project";
+2981:function renderCleanResponse(response, escapeHtml, ownerId) {
+2982:	const hasError = asString(response.status).toLowerCase() === "failed" || Boolean(asString(response.error));
+2983:	const title = humanizeValue(response.title, "");
+2984:	const summary = humanizeValue(response.summary, "");
+2985:	const findings = normalizeDisplayList(response.findings, 5);
+2986:	const recommendations = normalizeDisplayList(response.recommendations, 4);
+2987:	const nextActions = normalizeDisplayList(response.nextActions || response.next_actions, 4);
+2988:	const routeSuggestions = asArray(response.routeSuggestions || response.route_suggestions).map((item) => {
+2989:		const record = asObject(item);
+2996:	const taskBlock = asObject(response.taskBlock);
+2997:	const hasContent = title || summary || findings.length || recommendations.length || nextActions.length;
+3072:function renderMessageStream(messages, escapeHtml) {
+3084:		const mode = getModeMeta(message.modeId);
+3111:function renderResultsPanel(session, escapeHtml) {
+3129:function renderRecentCommands(session, escapeHtml) {
+3140:							const mode = getModeMeta(entry.modeId);
+3141:							const statusClass = entry.failed ? "danger" : "success";
+3142:							const statusLabel = entry.failed ? "Failed" : "Done";
+3170:function renderArtifactsPanel(aiContext, session, escapeHtml) {
+3171:	const recommendations = aiContext.recommendations.slice(0, 4);
+3172:	const patterns = Object.entries(asObject(aiContext.learningPatterns))
+3175:	const artifacts = session.messages
+3185:	const hasContent = recommendations.length || patterns.length || artifacts.length;
+3207:							const r = asObject(rec);
+3208:							const recTitle = humanizeValue(r.title || r.label || r.headline || rec);
+3209:							const recAction = humanizeValue(r.action || r.recommendation || r.summary || r.description || "");
+3210:							const recDomain = asString(r.domain || r.category || "");
+3221:							const patternLabel = humanizeValue(val.label);
+3222:							const patternDetail = humanizeValue(val.detail || val.insight || val.reason || "");
+3238:function getLastUserMessage(session) {
+3242:function getLastAssistantMessage(session) {
+3246:function buildConversationWorkContext(session, fallbackPrompt = "") {
+3247:        const messages = asArray(session.messages).slice(-12);
+3248:        const latestUser = getLastUserMessage(session);
+3249:        const latestAssistant = getLastAssistantMessage(session);
+3250:        const latestResponse = asArray(session.responseHistory)[0] || null;
+3251:        const specialist = session.teamMode === "team"
+3255:        const conversationLines = messages
+3257:                        const role = asString(message.role || "");
+3258:                        const label = role === "user"
+3261:                        const content = asString(message.content || message.text || message.responseText || "").trim();
+3266:        const prompt = asString(
+3274:        const assistantText = asString(
+3280:        const summaryParts = [
+3298:function buildConversationWorkPrompt(session, outputType, fallbackPrompt = "") {
+3299:        const context = buildConversationWorkContext(session, fallbackPrompt);
+3300:        const typeLabel = {
+3307:        const basePrompt = context.summary || context.prompt || `Prepare a ${typeLabel}.`;
+3319:function setPreviewFromConversation({ session, intent, fallbackPrompt, projectName }) {
+3320:        const workPrompt = buildConversationWorkPrompt(session, intent, fallbackPrompt);
+3321:        const preview = buildPhase2OutputPreview({
+3328:        const context = buildConversationWorkContext(session, fallbackPrompt);
+3349:function buildCommandEnvelope(session, prompt) {
+3350:	const commandTypeLabel = COMMAND_TYPES.find((item) => item.id === session.commandType)?.label || "Strategy";
+3351:	const targetTypeLabel = TARGET_TYPES.find((item) => item.id === session.targetType)?.label || "Current project";
+3352:	const targetValue = asString(session.targetValue).trim();
+3353:	const targetLine = targetValue ? `${targetTypeLabel}: ${targetValue}` : targetTypeLabel;
+3357:function buildImpactChips(activeLabels) {
+3358:	const activeSet = new Set(asArray(activeLabels));
+3365:function buildSmartRecommendation(aiContext) {
+3385:		const impacted = aiContext.missingIntegrations.length + aiContext.connectorIssues.length;
+3417:function getPhase1SpecialistById(value) {
+3418:  const normalize = (input) =>
+3424:  const rawId = normalize(value || "strategist");
+3425:  const requestedId = normalize(MODE_ID_ALIASES[rawId] || rawId);
+3426:  const rawDefinitions = typeof SPECIALIST_DEFS !== "undefined" ? SPECIALIST_DEFS : [];
+3428:  const definitions = Array.isArray(rawDefinitions)
+3445:function getAiRoomRoleId(value) {
+3452:function getAiRoomInitials(specialist) {
+3453:	const id = getAiRoomRoleId(specialist?.id);
+3463:function getAiRoomFlowIndex(session) {
+3464:	const preview = asObject(session.outputPreview);
+3475:function outputTabFromIntent(intent) {
+3476:	const map = {
+3487:function outputTabFromPreview(preview) {
+3488:	const outputType = asString(preview?.outputType || "");
+3495:function getOutputWorkspaceTab(session) {
+3496:	const requested = asString(session.outputWorkspaceTab || "");
+3501:function getToolOutputTypeLabel(tool) {
+3502:	const labels = {
+3510:	const firstOutput = asArray(tool.outputTypes)[0];
+3514:function getToolDestinationRoute(tool, session) {
+3517:	const outputType = tool.intent === "media" ? "guidance" : asString(tool.intent || "guidance");
+3521:function getToolExecutionStatusLabel(tool) {
+3527:function getToolSafeActionLabel(tool) {
+3535:function summarizeToolPurpose(tool) {
+3536:	const template = asString(tool.template || "")
+3540:	const firstSentence = template.split(/[.!?]/)[0]?.trim();
+3545:function renderAiRoomChainSegment(items, escapeHtml) {
+3552:function renderAiRoomTeamChain(escapeHtml) {
+3562:function renderPhase1Header(session, projectName, aiContext, bridgeStatus, escapeHtml) {
+3563:	const safeBridgeStatus = bridgeStatus || { available: false };
+3564:	const modeLabel = session.teamMode === "team" ? "Full Team" : "Solo Specialist";
+3565:	const activeSpecialist = session.teamMode === "team" ? "Full AI Team" : getPhase1SpecialistById(session.modeId)?.label || "Specialist";
+3566:	const languagePlan = getWorkspaceLanguagePlan(aiContext);
+3567:	const activeFlowIndex = getAiRoomFlowIndex(session);
+3568:	const readinessLabel = aiContext.readinessScore != null ? `${aiContext.readinessScore}/100` : "Pending";
+3633:function renderPhase1TeamRail(session, bridgeStatus, escapeHtml) {
+3634:	const safeBridgeStatus = bridgeStatus || { available: false };
+3635:	const plannedSpecialists = AI_ROOM_PLANNED_SPECIALISTS.map((item) => `
+3646:	const teamBanner = session.teamMode === "team" ? `
+3674:					const roleId = getAiRoomRoleId(spec.id);
+3675:					const isActive = spec.id === session.modeId && session.teamMode === "solo";
+3676:					const isTeamActive = session.teamMode === "team";
+3677:					const specialization = asString(spec.summary).replace(/\.$/, "");
+3678:					const roleLine = `${isActive ? "Active now" : (spec.status || "AI ready")} - ${spec.position || spec.label || "Specialist"}`;
+3706:function renderPhase1Profile(session, escapeHtml) {
+3708:		const lanes = ["Strategy", "Content", "Media", "Customer Ops", "Sales / CRM", "Compliance", "Publishing", "Operations"];
+3725:	const spec = getPhase1SpecialistById(session.modeId);
+3726:	const specialistTools = getAiToolDockTools({ specialistId: spec.id, teamMode: "solo", limit: 3 });
+3727:	const strengths = asArray(spec.canHelp).slice(0, 3);
+3745:function getAiSpecialistWorkingMessage(session = {}) {
+3746:        const isTeam = session.teamMode === "team";
+3747:        const spec = isTeam
+3751:        const label = asString(spec?.label || "AI specialist");
+3755:        const roleId = getAiRoomRoleId(session.modeId);
+3766:function renderAiRoomConversationHeader(session, bridgeStatus, escapeHtml) {
+3767:	const spec = getPhase1SpecialistById(session.modeId);
+3768:	const safeBridgeStatus = bridgeStatus || { available: false };
+3769:	const isTeam = session.teamMode === "team";

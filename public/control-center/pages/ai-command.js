@@ -24,6 +24,8 @@ import {
         getCategoryReadinessList
 } from "../asset-library.js";
 
+import { normalizeAiTeamRoleId } from "../runtime/ai-team/ai-team-operating-contract.js";
+
 import {
         executeProjectAiChat,
         executeProjectAiGuidance,
@@ -619,6 +621,51 @@ const aiAutomationState = {
 	result: ""
 };
 
+
+
+function normalizeAiCommandSpecialistId(id, fallback = "operations") {
+    const localResolved = MODE_ID_ALIASES[id] || id;
+    return normalizeAiTeamRoleId(localResolved, fallback);
+}
+
+function detectSpecialistFromBridgePrompt(prompt) {
+    const text = asString(prompt).toLowerCase();
+
+    const directMap = [
+            ["video", "video_lead"],
+            ["motion", "video_lead"],
+            ["reel", "video_lead"],
+            ["storyboard", "video_lead"],
+            ["shot list", "video_lead"],
+            ["voiceover", "video_lead"],
+            ["media", "video_lead"],
+            ["campaign", "strategist"],
+            ["strategy", "strategist"],
+            ["content", "copywriter"],
+            ["copy", "copywriter"],
+            ["caption", "copywriter"],
+            ["publish", "publisher"],
+            ["schedule", "publisher"],
+            ["ads", "ads_operator"],
+            ["budget", "ads_operator"],
+            ["customer", "customer_ops"],
+            ["crm", "customer_ops"],
+            ["support", "customer_ops"],
+            ["operations", "admin"],
+            ["blocker", "admin"],
+            ["readiness", "admin"],
+            ["setup", "admin"],
+            ["library", "admin"]
+    ];
+
+    for (const [keyword, specialistId] of directMap) {
+            if (text.includes(keyword)) return normalizeAiCommandSpecialistId(specialistId);
+    }
+
+    const classified = classifyIntent(text, null);
+    return normalizeAiCommandSpecialistId(classified?.modeId, "operations");
+}
+
 function buildAutoPlanFromCommand(commandText, session) {
 	function getSpecialistById(id) {
 		const resolvedId = MODE_ID_ALIASES[id] || id;
@@ -627,26 +674,6 @@ function buildAutoPlanFromCommand(commandText, session) {
 			SPECIALIST_DEFS[0];
 	}
 
-	function detectSpecialistFromBridgePrompt(prompt) {
-		const text = asString(prompt);
-		if (/act as the strategist/i.test(text)) return "strategist";
-		if (/act as the content writer/i.test(text)) return "writer";
-		if (/act as the media director/i.test(text)) return "media";
-		if (/act as the video lead/i.test(text)) return "video_lead";
-		if (/act as the publisher/i.test(text)) return "publisher";
-		if (/act as the ads optimizer|act as the ads operator/i.test(text)) return "ads";
-		if (/act as the seo|act as the insights analyst/i.test(text)) return "analyst";
-		if (/act as the compliance reviewer/i.test(text)) return "compliance_reviewer";
-		if (/act as the operations lead/i.test(text)) return "operations";
-		if (/act as the customer operations lead|act as customer ops/i.test(text)) return "customer_ops";
-		if (/act as the sales|act as the crm|sales \/ crm lead/i.test(text)) return "sales_crm";
-		// Fallback: use keyword scoring from existing classifyIntent
-		const classified = classifyIntent(text, null);
-		if (classified.resolvedModeId && classified.resolvedModeId !== "operations") {
-			return classified.resolvedModeId;
-		}
-		return null;
-	}
 
 	const command = humanizeValue(commandText || session?.draftMessage, "Prepare workflow action from AI command.");
 	const plan = [

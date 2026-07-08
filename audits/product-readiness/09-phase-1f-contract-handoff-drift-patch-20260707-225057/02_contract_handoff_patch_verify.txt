@@ -1,0 +1,84 @@
+469:export const AI_TEAM_HANDOFF_RULES = Object.freeze({
+534:  return Array.isArray(AI_TEAM_HANDOFF_RULES[source]) && AI_TEAM_HANDOFF_RULES[source].includes(destination);
+    defaultAuthority: "review_only"
+  },
+  "notification-center": {
+    ownerRole: "operations",
+    supportRoles: ["compliance_reviewer", "analyst"],
+    allowedOutputs: ["guidance", "execution_review"],
+    forbiddenActions: ["approve", "publish", "send_customer_reply"],
+    defaultAuthority: "review_only"
+  },
+  "operations-centers": {
+    ownerRole: "operations",
+    supportRoles: ["customer_ops", "sales_crm", "publisher", "compliance_reviewer", "analyst"],
+    allowedOutputs: ["guidance", "task_preview", "workflow_preview", "handoff", "execution_review"],
+    forbiddenActions: ["publish", "send_customer_reply", "approve", "launch_ads", "mutate_crm", "run_provider_execution"],
+    defaultAuthority: "handoff_only"
+  },
+  "customer-center": {
+    ownerRole: "customer_ops",
+    supportRoles: ["sales_crm", "operations", "compliance_reviewer"],
+    allowedOutputs: ["guidance", "draft", "task_preview", "handoff", "approval_request"],
+    forbiddenActions: ["send_customer_reply", "mutate_crm", "change_ticket_status", "assign_conversation", "sync_provider"],
+    defaultAuthority: "draft_only"
+  },
+  governance: {
+    ownerRole: "compliance_reviewer",
+    supportRoles: ["operations", "publisher", "analyst"],
+    allowedOutputs: ["guidance", "approval_request", "handoff", "execution_review"],
+    forbiddenActions: ["approve", "reject_approval", "publish", "override_governance"],
+    defaultAuthority: "approval_required"
+  },
+  settings: {
+    ownerRole: "operations",
+    supportRoles: ["compliance_reviewer"],
+    allowedOutputs: ["guidance", "approval_request", "handoff"],
+    forbiddenActions: ["approve", "publish", "send_customer_reply"],
+    defaultAuthority: "approval_required"
+  }
+});
+
+export const AI_TEAM_HANDOFF_RULES = Object.freeze({
+  "automation-engine": ["publishing", "workflows"],
+  "ai-command": ["campaign-studio", "content-studio", "media-studio", "publishing", "ads-manager", "workflows", "task-center", "governance", "insights", "research", "customer-center", "operations-centers"],
+  "campaign-studio": ["ai-command", "content-studio", "media-studio", "publishing", "ads-manager", "workflows"],
+  "content-studio": ["ai-command", "media-studio", "publishing", "library", "governance"],
+  "media-studio": ["ai-command", "library", "publishing", "governance", "content-studio"],
+  publishing: ["ai-command", "governance", "content-studio", "media-studio"],
+  "ads-manager": ["ai-command", "campaign-studio", "insights", "governance"],
+  workflows: ["ai-command", "task-center", "workflows", "campaign-studio", "content-studio", "media-studio", "publishing", "governance"],
+  "task-center": ["ai-command", "workflows", "operations-centers", "governance"],
+  "customer-center": ["ai-command", "task-center", "governance", "operations-centers"],
+  insights: ["ai-command", "campaign-studio", "content-studio", "ads-manager", "research"],
+  research: ["ai-command", "campaign-studio", "insights", "content-studio"],
+  library: ["ai-command", "media-studio", "publishing", "governance"],
+  governance: ["ai-command", "publishing", "content-studio", "media-studio", "operations-centers"],
+  settings: ["governance"]
+});
+
+export const AI_TEAM_FULL_TEAM_TRIGGERS = Object.freeze([
+  "campaign_project",
+  "project_setup",
+  "workflow_request",
+  "execution_request"
+]);
+
+export const AI_TEAM_SPECIALIST_REQUEST_MAP = Object.freeze({
+  general_question: "operations",
+  guidance_request: "operations",
+  single_task: "operations",
+  project_setup: "strategist",
+  campaign_project: "strategist",
+  content_request: "writer",
+  media_request: "media_director",
+  publishing_request: "publisher",
+  ads_request: "ads_operator",
+  customer_request: "customer_ops",
+  workflow_request: "operations",
+
+Exact new handoff signals:
+460:  settings: {
+470:  "automation-engine": ["publishing", "workflows"],
+477:  workflows: ["ai-command", "task-center", "workflows", "campaign-studio", "content-studio", "media-studio", "publishing", "governance"],
+484:  settings: ["governance"]

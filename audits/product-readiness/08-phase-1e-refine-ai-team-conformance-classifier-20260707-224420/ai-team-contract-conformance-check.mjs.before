@@ -1,0 +1,309 @@
+import fs from "fs";
+import path from "path";
+import {
+  AI_TEAM_CANONICAL_ROLES,
+  AI_TEAM_ROLE_ALIASES,
+  AI_TEAM_PAGE_OWNER_MATRIX,
+  AI_TEAM_HANDOFF_RULES,
+  AI_TEAM_REQUEST_TYPES,
+  AI_TEAM_OUTPUT_TYPES,
+  AI_TEAM_AUTHORITY_LEVELS,
+  AI_TEAM_SPECIALIST_REQUEST_MAP,
+  normalizeAiTeamRoleId
+} from "../../public/control-center/runtime/ai-team/ai-team-operating-contract.js";
+
+const failures = [];
+const warnings = [];
+const info = [];
+
+function read(file) {
+  try {
+    return fs.readFileSync(file, "utf8");
+  } catch {
+    return "";
+  }
+}
+
+function listJsFiles(dir) {
+  const out = [];
+  if (!fs.existsSync(dir)) return out;
+  for (const name of fs.readdirSync(dir)) {
+    const p = path.join(dir, name);
+    const st = fs.statSync(p);
+    if (st.isDirectory()) out.push(...listJsFiles(p));
+    else if (p.endsWith(".js")) out.push(p);
+  }
+  return out;
+}
+
+function pass(label) {
+  console.log(`PASS - ${label}`);
+}
+
+function warn(label, detail = "") {
+  warnings.push(`${label}${detail ? `: ${detail}` : ""}`);
+  console.log(`WARN - ${label}${detail ? `: ${detail}` : ""}`);
+}
+
+function fail(label, detail = "") {
+  failures.push(`${label}${detail ? `: ${detail}` : ""}`);
+  console.log(`FAIL - ${label}${detail ? `: ${detail}` : ""}`);
+}
+
+function note(label, detail = "") {
+  info.push(`${label}${detail ? `: ${detail}` : ""}`);
+  console.log(`INFO - ${label}${detail ? `: ${detail}` : ""}`);
+}
+
+function assert(label, condition, detail = "") {
+  if (condition) pass(label);
+  else fail(label, detail);
+}
+
+function unique(arr) {
+  return [...new Set(arr.filter(Boolean))];
+}
+
+function extractQuotedIdsNear(source, markerRegex, idRegex = /["']([a-z0-9_-]+)["']/gi) {
+  const lines = source.split(/\r?\n/);
+  const hits = [];
+  lines.forEach((line, index) => {
+    if (markerRegex.test(line)) {
+      const window = lines.slice(Math.max(0, index - 12), Math.min(lines.length, index + 35)).join("\n");
+      for (const match of window.matchAll(idRegex)) hits.push(match[1]);
+    }
+  });
+  return unique(hits);
+}
+
+const contractRoleIds = AI_TEAM_CANONICAL_ROLES.map((role) => role.id);
+const contractRoleSet = new Set(contractRoleIds);
+const contractAliases = Object.keys(AI_TEAM_ROLE_ALIASES);
+const contractPageIds = Object.keys(AI_TEAM_PAGE_OWNER_MATRIX);
+
+const files = {
+  contract: "public/control-center/runtime/ai-team/ai-team-operating-contract.js",
+  aiCommand: "public/control-center/pages/ai-command.js",
+  home: "public/control-center/pages/home.js",
+  routeRoleFallback: "public/control-center/runtime/authority/route-role-fallback.js",
+  authorityProjection: "public/control-center/runtime/authority/authority-projection.js",
+  router: "public/control-center/router.js",
+  sharedContext: "public/control-center/shared-context.js",
+  app: "public/control-center/app.js"
+};
+
+const src = Object.fromEntries(Object.entries(files).map(([key, file]) => [key, read(file)]));
+const pageFiles = listJsFiles("public/control-center/pages");
+const pageSource = pageFiles.map((file) => `\n===== ${file} =====\n${read(file)}`).join("\n");
+
+console.log("============================================================");
+console.log("AI TEAM CONTRACT CONFORMANCE CHECK");
+console.log("============================================================");
+console.log("");
+
+console.log("1) CONTRACT BASELINE");
+assert("contract file exists", Boolean(src.contract.trim()));
+assert("contract role count >= 12", contractRoleIds.length >= 12, String(contractRoleIds.length));
+assert("contract has page owners", contractPageIds.length >= 20, String(contractPageIds.length));
+assert("contract has aliases", contractAliases.length >= 30, String(contractAliases.length));
+assert("contract request types exist", AI_TEAM_REQUEST_TYPES.length >= 10);
+assert("contract output types exist", AI_TEAM_OUTPUT_TYPES.length >= 8);
+assert("contract authority levels exist", AI_TEAM_AUTHORITY_LEVELS.length >= 8);
+console.log("");
+
+console.log("2) AI COMMAND LOCAL MAP CONFORMANCE");
+
+assert("AI Command exists", Boolean(src.aiCommand.trim()));
+assert("AI Command has MODE_DEFS", /MODE_DEFS/.test(src.aiCommand));
+assert("AI Command has MODE_ID_ALIASES", /MODE_ID_ALIASES/.test(src.aiCommand));
+assert("AI Command has SPECIALIST_DEFS", /SPECIALIST_DEFS/.test(src.aiCommand));
+assert("AI Command detector count is 1", (src.aiCommand.match(/function\s+detectSpecialistFromBridgePrompt\s*\(/g) || []).length === 1);
+
+const aiCommandRoleSignals = unique([
+  ...contractRoleIds.filter((id) => new RegExp(`\\b${id}\\b`).test(src.aiCommand)),
+  ...contractAliases.filter((id) => new RegExp(`\\b${id}\\b`).test(src.aiCommand))
+]);
+
+note("AI Command role/alias signals", aiCommandRoleSignals.join(", "));
+
+for (const roleId of ["operations", "strategist", "writer", "video_lead", "publisher", "ads_operator", "analyst", "compliance_reviewer", "customer_ops"]) {
+  const aliasOrRolePresent = new RegExp(`\\b${roleId}\\b`).test(src.aiCommand) ||
+    Object.entries(AI_TEAM_ROLE_ALIASES).some(([alias, target]) => target === roleId && new RegExp(`\\b${alias}\\b`).test(src.aiCommand));
+  assert(`AI Command covers ${roleId}`, aliasOrRolePresent);
+}
+
+if (/\bmedia\b/.test(src.aiCommand) && !/\bmedia_director\b/.test(src.aiCommand)) {
+  warn("AI Command uses media alias without media_director canonical ID", "expected before integration, track for alias normalization");
+}
+
+if (/\bads\b/.test(src.aiCommand) && !/\bads_operator\b/.test(src.aiCommand)) {
+  warn("AI Command uses ads alias without ads_operator canonical ID in some zones", "expected before integration, track for alias normalization");
+}
+
+if (/\badmin\b/.test(src.aiCommand)) {
+  warn("AI Command still uses admin alias", "should normalize to operations in a later integration");
+}
+
+console.log("");
+
+console.log("3) HOME CONFORMANCE");
+
+assert("Home exists", Boolean(src.home.trim()));
+assert("Home has recommended specialist logic", /recommendedSpecialist|pickRecommendedSpecialist/.test(src.home));
+assert("Home has role prompt bridge", /rolePrompts|handleAiRoleClick|setGlobalAiPrompt/.test(src.home));
+assert("Home selector can bind data-role-id", /data-role-id/.test(src.home));
+assert("Home references AI Command route", /ai-command/.test(src.home));
+
+for (const roleId of ["strategist", "publisher", "ads_operator", "compliance_reviewer", "operations"]) {
+  const present = new RegExp(`\\b${roleId}\\b`).test(src.home) ||
+    Object.entries(AI_TEAM_ROLE_ALIASES).some(([alias, target]) => target === roleId && new RegExp(`\\b${alias}\\b`).test(src.home));
+  if (present) pass(`Home covers ${roleId}`);
+  else warn(`Home may not visibly cover ${roleId}`, "check fallback/recommendation logic before integration");
+}
+
+if (/\badmin\b/.test(src.home)) {
+  warn("Home uses admin alias", "should normalize to operations later");
+}
+
+console.log("");
+
+console.log("4) ROUTE ROLE FALLBACK CONFORMANCE");
+
+assert("route-role-fallback exists", Boolean(src.routeRoleFallback.trim()));
+assert("authority-projection exists", Boolean(src.authorityProjection.trim()));
+
+const fallbackRoleSignals = unique([
+  ...contractRoleIds.filter((id) => new RegExp(`\\b${id}\\b`).test(src.routeRoleFallback)),
+  ...contractAliases.filter((id) => new RegExp(`\\b${id}\\b`).test(src.routeRoleFallback))
+]);
+
+note("route-role-fallback role/alias signals", fallbackRoleSignals.join(", "));
+
+if (/\badmin\b/.test(src.routeRoleFallback)) {
+  warn("route-role-fallback uses admin alias", "later contract integration should normalize to operations carefully");
+}
+
+if (/\bdesigner\b/.test(src.routeRoleFallback)) {
+  warn("route-role-fallback uses designer alias", "later contract integration should normalize to media_director carefully");
+}
+
+for (const pageId of ["home", "ai-command", "campaign-studio", "content-studio", "media-studio", "publishing", "ads-manager", "insights", "research", "workflows", "governance", "customer-center"]) {
+  const present = new RegExp(`\\b${pageId}\\b`).test(src.routeRoleFallback + src.authorityProjection + src.router);
+  assert(`route/page layer references ${pageId}`, present);
+}
+
+console.log("");
+
+console.log("5) ROUTER VS CONTRACT PAGE OWNER MATRIX");
+
+const routerAndPages = src.router + "\n" + pageSource;
+const routeIdHits = unique([...routerAndPages.matchAll(/id:\s*["']([a-z0-9_-]+)["']/gi)].map((m) => m[1]));
+note("route ids discovered", routeIdHits.join(", "));
+
+for (const pageId of contractPageIds) {
+  if (["queue-center", "job-monitor", "notification-center", "operations-centers"].includes(pageId)) {
+    const found = new RegExp(`\\b${pageId}\\b`).test(routerAndPages);
+    if (found) pass(`contract page ${pageId} appears in route/page layer`);
+    else warn(`contract page ${pageId} not directly visible`, "may be sub-route/view inside operations-centers");
+    continue;
+  }
+
+  const found = new RegExp(`\\b${pageId}\\b`).test(routerAndPages);
+  if (found) pass(`contract page ${pageId} appears in route/page layer`);
+  else warn(`contract page ${pageId} not found in route/page layer`, "verify if page is virtual or future");
+}
+
+for (const routeId of routeIdHits) {
+  if (AI_TEAM_PAGE_OWNER_MATRIX[routeId]) pass(`route ${routeId} has contract owner`);
+  else warn(`route ${routeId} missing contract owner`, "may be non-operational/system route or should be added later");
+}
+
+console.log("");
+
+console.log("6) HANDOFF CONFORMANCE");
+
+assert("shared-context exists", Boolean(src.sharedContext.trim()));
+assert("shared-context has setSharedHandoff", /setSharedHandoff/.test(src.sharedContext));
+assert("shared-context has getSharedHandoff", /getSharedHandoff/.test(src.sharedContext));
+
+const handoffPairs = [];
+for (const match of pageSource.matchAll(/source_page:\s*["']([a-z0-9_-]+)["'][\s\S]{0,260}?destination_page:\s*["']([a-z0-9_-]+)["']/g)) {
+  handoffPairs.push([match[1], match[2]]);
+}
+for (const match of pageSource.matchAll(/setSharedHandoff\([^,]+,\s*["']([a-z0-9_-]+)["']/g)) {
+  handoffPairs.push(["unknown", match[1]]);
+}
+
+const uniquePairs = unique(handoffPairs.map(([source, destination]) => `${source}->${destination}`));
+note("handoff pair signals", uniquePairs.slice(0, 80).join(", "));
+
+for (const pair of uniquePairs) {
+  const [source, destination] = pair.split("->");
+  if (source === "unknown") {
+    if (AI_TEAM_PAGE_OWNER_MATRIX[destination] || destination === "library") pass(`handoff destination ${destination} has contract owner`);
+    else warn(`handoff destination ${destination} missing owner`, pair);
+    continue;
+  }
+
+  const allowed = Array.isArray(AI_TEAM_HANDOFF_RULES[source]) && AI_TEAM_HANDOFF_RULES[source].includes(destination);
+  if (allowed) pass(`handoff ${source} -> ${destination} conforms`);
+  else warn(`handoff ${source} -> ${destination} not in contract rules`, "verify before enforcing handoff rules");
+}
+
+console.log("");
+
+console.log("7) REQUEST / OUTPUT VOCABULARY CONFORMANCE");
+
+const runtimeText = src.aiCommand + "\n" + src.home + "\n" + src.routeRoleFallback + "\n" + pageSource;
+
+for (const outputType of AI_TEAM_OUTPUT_TYPES) {
+  const appears = new RegExp(`\\b${outputType}\\b`).test(runtimeText);
+  if (appears) pass(`runtime mentions output type ${outputType}`);
+  else warn(`runtime does not mention output type ${outputType}`, "may be contract-only vocabulary");
+}
+
+for (const requestType of AI_TEAM_REQUEST_TYPES) {
+  const appears = new RegExp(`\\b${requestType}\\b`).test(runtimeText);
+  if (appears) pass(`runtime mentions request type ${requestType}`);
+  else warn(`runtime does not mention request type ${requestType}`, "expected until intake router integration");
+}
+
+console.log("");
+
+console.log("8) INTEGRATION READINESS DECISION");
+
+const hardFails = failures.length;
+const riskyWarnings = warnings.filter((item) =>
+  /not in contract rules|missing contract owner|detector|syntax|not found/i.test(item)
+);
+
+if (hardFails > 0) {
+  fail("integration readiness", "hard failures exist");
+} else {
+  pass("no hard conformance failures");
+}
+
+if (riskyWarnings.length > 0) {
+  warn("runtime integration should wait", `${riskyWarnings.length} risky warning(s) require review`);
+} else {
+  pass("no risky warnings blocking narrow integration");
+}
+
+console.log("");
+console.log("SUMMARY");
+console.log(`Failures: ${failures.length}`);
+console.log(`Warnings: ${warnings.length}`);
+console.log(`Risky warnings: ${riskyWarnings.length}`);
+console.log("");
+
+if (failures.length) {
+  console.log("VERDICT: FAIL — REVIEW CONTRACT OR RUNTIME BEFORE INTEGRATION");
+  process.exit(1);
+}
+
+if (riskyWarnings.length) {
+  console.log("VERDICT: HOLD RUNTIME INTEGRATION — REVIEW DRIFT FIRST");
+  process.exit(0);
+}
+
+console.log("VERDICT: READY FOR NARROW INTEGRATION CANDIDATE");

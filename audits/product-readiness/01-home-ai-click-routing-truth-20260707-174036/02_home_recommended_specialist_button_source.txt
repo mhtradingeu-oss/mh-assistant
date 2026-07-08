@@ -1,0 +1,41 @@
+Recommended specialist render block:
+806:    const recommendedSpecialist = pickRecommendedSpecialist(aiTeamCards, dashboard);
+878:                  Ask Head Office AI
+1030:              <button id="homeQuickReviewReadinessBtn" class="quick-action-btn" type="button">
+1031:                <span class="home-action-title">Open Setup Readiness</span>
+1032:                <span class="home-action-meta">Review foundation gaps in the Setup workspace.</span>
+1034:              <button id="homeQuickAssetLibraryBtn" class="quick-action-btn" type="button">
+1035:                <span class="home-action-title">Open Asset Library</span>
+1036:                <span class="home-action-meta">Review source assets in the Library workspace.</span>
+1038:              <button id="homeQuickStartCampaignBtn" class="quick-action-btn" type="button">
+1039:                <span class="home-action-title">Open Campaign Studio</span>
+1040:                <span class="home-action-meta">Plan the next campaign wave in its workspace.</span>
+1046:                <p class="mhos-os-kicker">Recommended AI Specialist</p>
+1047:                <h2 class="mhos-os-panel-title">${escapeHtml(recommendedSpecialist?.name || "Executive AI")}</h2>
+1049:                  ${escapeHtml(recommendedSpecialist?.summary || "Use AI Command to turn the current state into a clear operating plan.")}
+1054:              ${recommendedSpecialist ? `
+1055:                <button class="quick-action-btn mhos-motion-soft" type="button" data-role-id="${escapeHtml(recommendedSpecialist.id)}">
+1056:                  <span class="home-action-title">Ask Head Office AI</span>
+1057:                  <span class="home-action-meta">Uses the recommended specialist context. No execution from Home.</span>
+1158:    const aiRoleCards = document.querySelectorAll(".home-ai-team-card, .mhos-specialist, .mhos-workflow-step[data-role-id]");
+1160:      const roleId = card.getAttribute("data-role-id");
+
+Home AI/open prompt functions:
+742:function setGlobalAiPrompt($, prompt) {
+1055:                <button class="quick-action-btn mhos-motion-soft" type="button" data-role-id="${escapeHtml(recommendedSpecialist.id)}">
+1100:    const openAiWithPrompt = (prompt) => {
+1101:      setGlobalAiPrompt($, prompt);
+1102:      navigateTo("ai-command");
+1107:    const handleAiRoleClick = (roleId, roleName) => {
+1122:      openAiWithPrompt(prompt);
+1128:      nextBtn.onclick = () => {
+1130:          setGlobalAiPrompt($, dashboard.nextBestAction.recommendation);
+1138:      askNextActionBtn.onclick = () => openAiWithPrompt(`Explain this next best action like an operations director and give me the exact safe steps: ${dashboard.nextBestAction.recommendation}. Include which workspace owns it, what it unlocks for campaign creation, scheduled posts, publishing, ads, and customer operations. Do not execute anything.`);
+1142:    if (quickCampaignBtn) quickCampaignBtn.onclick = () => openRoute("campaign-studio");
+1145:    if (quickAssetBtn) quickAssetBtn.onclick = () => openRoute("library");
+1148:    if (quickReadinessBtn) quickReadinessBtn.onclick = () => openRoute("setup");
+1151:      promptNextBtn.onclick = () => openAiWithPrompt("What is the best next executive action for this project? Prioritize the answer based on readiness, blockers, campaign state, scheduled posts, publishing safety, ads readiness, customer operations, and recent activity. Give one clear recommendation and the reason.");
+1156:      promptReadinessBtn.onclick = () => openAiWithPrompt("Why is readiness low? Explain the missing integrations, assets, failed jobs, campaign gaps, scheduled post risks, publishing blockers, and ad launch risks in simple business language. End with the fastest safe fix path.");
+1158:    const aiRoleCards = document.querySelectorAll(".home-ai-team-card, .mhos-specialist, .mhos-workflow-step[data-role-id]");
+1160:      const roleId = card.getAttribute("data-role-id");
+1162:      card.onclick = () => handleAiRoleClick(roleId, roleName);

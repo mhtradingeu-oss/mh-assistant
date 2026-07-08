@@ -1,0 +1,92 @@
+Visible button definitions:
+601:      buttonLabel: nextActionRoute === "ai-command" ? "Prepare AI Guidance" : `Open ${humanizeStatus(nextActionRoute)} Workspace`,
+874:                <button id="homePrimaryActionBtn" class="mhos-next-action-btn" type="button">
+875:                  ${escapeHtml(dashboard.nextBestAction.buttonLabel)}
+876:                </button>
+877:                <button id="homeAskNextActionBtn" class="mhos-next-action-btn is-ghost" type="button">
+879:                </button>
+880:                <button id="homeOpenOperationsBtn" class="btn btn-secondary btn-sm" type="button">
+882:                </button>
+987:                <p class="mhos-os-panel-copy">These buttons open the right workspace. Home does not save, upload, approve, publish, send, or execute.</p>
+990:              <button id="homeQuickReviewReadinessBtn" class="quick-action-btn" type="button">
+993:              </button>
+994:              <button id="homeQuickAssetLibraryBtn" class="quick-action-btn" type="button">
+997:              </button>
+998:              <button id="homeQuickStartCampaignBtn" class="quick-action-btn" type="button">
+1001:              </button>
+1015:                <button class="quick-action-btn mhos-motion-soft" type="button" data-role-id="${escapeHtml(recommendedSpecialist.id)}">
+1018:                </button>
+1021:              <button id="homeQuickOpenAiBtn" class="quick-action-btn" type="button">
+1024:              </button>
+1026:              <button id="homeOpenAiTeamBtn" class="btn btn-ghost btn-sm" type="button">
+1028:              </button>
+1029:              <button id="homeOpenFullAiTeamBtn" class="btn btn-ghost btn-sm" type="button">
+1031:              </button>
+1038:                <p class="mhos-os-panel-copy">Prompt buttons fill AI Command with reviewed guidance requests. They do not execute actions.</p>
+1041:              <button id="homePromptNextBtn" class="home-ai-prompt-card" type="button">
+1044:              </button>
+1045:              <button id="homePromptReadinessBtn" class="home-ai-prompt-card" type="button">
+1048:              </button>
+1049:              <button id="homePromptLaunchBtn" class="home-ai-prompt-card" type="button">
+1052:              </button>
+1053:              <button id="homePromptPlanBtn" class="home-ai-prompt-card" type="button">
+1056:              </button>
+1105:    const nextBtn = $("homePrimaryActionBtn");
+1115:    const askNextActionBtn = $("homeAskNextActionBtn");
+1120:    const operationsBtn = $("homeOpenOperationsBtn");
+1123:    const aiTeamBtn = $("homeOpenAiTeamBtn");
+1125:    const fullAiTeamBtn = $("homeOpenFullAiTeamBtn");
+1137:    const quickAiBtn = $("homeQuickOpenAiBtn");
+1142:    const promptNextBtn = $("homePromptNextBtn");
+1147:    const promptReadinessBtn = $("homePromptReadinessBtn");
+1152:    const promptLaunchBtn = $("homePromptLaunchBtn");
+1157:    const promptPlanBtn = $("homePromptPlanBtn");
+
+Event bindings:
+763:  render({ getState, $, escapeHtml, navigateTo, showMessage }) {
+1074:    const openRoute = (route, message = "") => {
+1075:      navigateTo(route);
+1079:    const openAiWithPrompt = (prompt) => {
+1081:      navigateTo("ai-command");
+1101:      openAiWithPrompt(prompt);
+1107:      nextBtn.onclick = () => {
+1111:        openRoute(dashboard.nextBestAction.route, "Next best action opened.");
+1117:      askNextActionBtn.onclick = () => openAiWithPrompt(`Explain this next best action like an operations director and give me the exact safe steps: ${dashboard.nextBestAction.recommendation}. Include which workspace owns it, what it unlocks for campaign creation, scheduled posts, publishing, ads, and customer operations. Do not execute anything.`);
+1121:    if (operationsBtn) operationsBtn.onclick = () => openRoute("operations-centers");
+1124:    if (aiTeamBtn) aiTeamBtn.onclick = () => openRoute("ai-command");
+1126:    if (fullAiTeamBtn) fullAiTeamBtn.onclick = () => openRoute("ai-command");
+1129:    if (quickCampaignBtn) quickCampaignBtn.onclick = () => openRoute("campaign-studio");
+1132:    if (quickAssetBtn) quickAssetBtn.onclick = () => openRoute("library");
+1135:    if (quickReadinessBtn) quickReadinessBtn.onclick = () => openRoute("setup");
+1139:      quickAiBtn.onclick = () => openAiWithPrompt(dashboard.nextBestAction.recommendation);
+1144:      promptNextBtn.onclick = () => openAiWithPrompt("What is the best next executive action for this project? Prioritize the answer based on readiness, blockers, campaign state, scheduled posts, publishing safety, ads readiness, customer operations, and recent activity. Give one clear recommendation and the reason.");
+1149:      promptReadinessBtn.onclick = () => openAiWithPrompt("Why is readiness low? Explain the missing integrations, assets, failed jobs, campaign gaps, scheduled post risks, publishing blockers, and ad launch risks in simple business language. End with the fastest safe fix path.");
+1154:      promptLaunchBtn.onclick = () => openAiWithPrompt("Summarize the launch blockers and tell me what must be fixed before publishing.");
+1159:      promptPlanBtn.onclick = () => openAiWithPrompt("Prepare today's action plan from the current dashboard. Give me prioritized tasks with owners and expected outcomes.");
+1166:      card.onclick = () => handleAiRoleClick(roleId, roleName);
+
+AI-related labels:
+public/control-center/pages/home.js:277:    { id: "video_lead", name: "Video Lead", fallback: "Queue the next motion and short-form variants." },
+public/control-center/pages/home.js:399:  const nextAction = humanizeExecutiveAction(rawNextAction, "Ask AI Command");
+public/control-center/pages/home.js:580:    primaryActionLabel: nextActionRoute === "ai-command" ? "Prepare AI Guidance" : `Open ${humanizeStatus(nextActionRoute)} Workspace`,
+public/control-center/pages/home.js:601:      buttonLabel: nextActionRoute === "ai-command" ? "Prepare AI Guidance" : `Open ${humanizeStatus(nextActionRoute)} Workspace`,
+public/control-center/pages/home.js:847:              <strong class="mhos-os-brief-value">${escapeHtml(dashboard.nextBestAction.route === "ai-command" ? "AI Guidance" : humanizeStatus(dashboard.nextBestAction.route))}</strong>
+public/control-center/pages/home.js:878:                  Prepare AI Explanation
+public/control-center/pages/home.js:981:          <aside class="mhos-os-rail" aria-label="Action and AI Guidance">
+public/control-center/pages/home.js:1009:                  ${escapeHtml(recommendedSpecialist?.summary || "Use AI Command to turn the current state into a clear operating plan.")}
+public/control-center/pages/home.js:1017:                  <span class="home-action-meta">${escapeHtml(recommendedSpecialist.status || "Ready to guide")}. Opens AI Command with context.</span>
+public/control-center/pages/home.js:1022:                <span class="home-action-title">Open AI Workspace</span>
+public/control-center/pages/home.js:1027:                Open AI Command
+public/control-center/pages/home.js:1030:                Open Full Team
+public/control-center/pages/home.js:1038:                <p class="mhos-os-panel-copy">Prompt buttons fill AI Command with reviewed guidance requests. They do not execute actions.</p>
+public/control-center/pages/home.js:1042:                <span class="home-prompt-title">What is the next executive action?</span>
+public/control-center/pages/home.js:1046:                <span class="home-prompt-title">Why is readiness low?</span>
+public/control-center/pages/home.js:1050:                <span class="home-prompt-title">Summarize launch blockers</span>
+public/control-center/pages/home.js:1054:                <span class="home-prompt-title">Turn next action into a plan</span>
+public/control-center/pages/home.js:1082:      showMessage?.("Prompt prepared in AI Command.");
+public/control-center/pages/home.js:1092:        video_lead: `Act as the Video Lead for ${projectLabel}. Review the project context and suggest the next best short-form/video actions. Do not execute anything; prepare guidance only.`,
+public/control-center/pages/home.js:1102:      showMessage?.(`${roleName} context prepared in AI Command.`);
+public/control-center/pages/home.js:1149:      promptReadinessBtn.onclick = () => openAiWithPrompt("Why is readiness low? Explain the missing integrations, assets, failed jobs, campaign gaps, scheduled post risks, publishing blockers, and ad launch risks in simple business language. End with the fastest safe fix path.");
+public/control-center/pages/home/render-sections.js:87:    return `<p class="home-empty-note">AI team status is not available yet. AI Command can still prepare guidance for the next action.</p>`;
+public/control-center/pages/home/render-sections.js:93:          <button class="home-ai-team-card" type="button" data-role-id="${escapeHtml(agent.id || "")}" title="Prepare ${escapeHtml(agent.name)} guidance in AI Command">
+public/control-center/pages/home/render-sections.js:118:    : "Open AI Command or the owning workspace to generate the next reviewed action. Home only guides; it does not execute.";

@@ -1,0 +1,53 @@
+import {
+        bindAiToolDock,
+        getAiToolDockTools,
+        getSelectedLibrarySource,
+        openAiToolDrawerFromMetadata,
+        openLibrarySourcePickerFromAiCommand,
+        renderAiToolDrawerShell
+} from "./ai-command/tool-dock.js";
+import { getProjectedActiveRole, getProjectedTeamMembers } from "../runtime/authority/authority-projection.js";
+
+import {
+        selectCurrentProject,
+        selectOperationsSnapshot,
+        selectProjectPayload
+} from "../state.js";
+
+import {
+        getSharedHandoff,
+        setSharedAiDraft,
+        setSharedHandoff
+} from "../shared-context.js";
+
+import {
+        getCategoryReadinessList
+} from "../asset-library.js";
+
+import { normalizeAiTeamRoleId } from "../runtime/ai-team/ai-team-operating-contract.js";
+
+import {
+        executeProjectAiChat,
+        executeProjectAiGuidance,
+        generateAiCommandCampaignPreview
+} from "../api.js";
+
+//  AI TEAM DEFINITIONS
+// ============================================================
+
+const MODE_DEFS = [
+        {
+                id: "strategist",
+                label: "Strategist",
+                icon: "🎯",
+                summary: "Campaign briefs, audience strategy, offer angles, launch plans, and team handoff packages.",
+                routeHint: "campaign-studio"
+        },
+
+Markers after repair:
+27:import { normalizeAiTeamRoleId } from "../runtime/ai-team/ai-team-operating-contract.js";
+626:function normalizeAiCommandSpecialistId(id, fallback = "operations") {
+628:    return normalizeAiTeamRoleId(localResolved, fallback);
+631:function detectSpecialistFromBridgePrompt(prompt) {
+662:            if (text.includes(keyword)) return normalizeAiCommandSpecialistId(specialistId);
+666:    return normalizeAiCommandSpecialistId(classified?.modeId, "operations");

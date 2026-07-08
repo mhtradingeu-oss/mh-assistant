@@ -1,0 +1,161 @@
+623:function detectSpecialistFromBridgePrompt(prompt) {
+669:	function detectSpecialistFromBridgePrompt(prompt) {
+
+Top-level candidate window:
+	},
+	{
+		id: "operations",
+		name: "Operations Assistant",
+		purpose: "Translate intent into executable workflows and handoffs.",
+		bestUse: "When actions span multiple pages and teams.",
+		suggestedPrompt: "Act as Operations Assistant and convert priorities into a practical execution sequence."
+	}
+];
+
+const aiSessions = new Map();
+const AI_COMMAND_CHAT_SESSIONS_KEY = "mh_ai_command_chat_sessions_v1";
+const aiInboundHandoffObjectIds = typeof WeakMap !== "undefined" ? new WeakMap() : null;
+let aiInboundHandoffCounter = 0;
+let lastRenderContext = null;
+let aiCommandBridgeRegistered = false;
+let aiAutoModeUnsubscribe = null;
+const aiAutomationState = {
+	progress: "",
+	result: ""
+};
+
+
+function detectSpecialistFromBridgePrompt(prompt) {
+    const text = asString(prompt).toLowerCase();
+
+    const directMap = [
+            ["video", "video_lead"],
+            ["motion", "video_lead"],
+            ["reel", "video_lead"],
+            ["storyboard", "video_lead"],
+            ["shot list", "video_lead"],
+            ["voiceover", "video_lead"],
+            ["media", "video_lead"],
+            ["campaign", "strategist"],
+            ["strategy", "strategist"],
+            ["content", "copywriter"],
+            ["copy", "copywriter"],
+            ["caption", "copywriter"],
+            ["publish", "publisher"],
+            ["schedule", "publisher"],
+            ["ads", "ads_operator"],
+            ["budget", "ads_operator"],
+            ["customer", "customer_ops"],
+            ["crm", "customer_ops"],
+            ["support", "customer_ops"],
+            ["operations", "admin"],
+            ["blocker", "admin"],
+            ["readiness", "admin"],
+            ["setup", "admin"],
+            ["library", "admin"]
+    ];
+
+    for (const [keyword, specialistId] of directMap) {
+            if (text.includes(keyword)) return MODE_ID_ALIASES[specialistId] || specialistId;
+    }
+
+    const classified = classifyIntent(text, null);
+    return MODE_ID_ALIASES[classified?.modeId] || classified?.modeId || "operations";
+}
+
+function buildAutoPlanFromCommand(commandText, session) {
+	function getSpecialistById(id) {
+		const resolvedId = MODE_ID_ALIASES[id] || id;
+		return SPECIALIST_DEFS.find((s) => s.id === resolvedId) ||
+			SPECIALIST_DEFS.find((s) => s.id === "operations") ||
+
+Second/nested candidate window:
+			SPECIALIST_DEFS.find((s) => s.id === "operations") ||
+			SPECIALIST_DEFS[0];
+	}
+
+	function detectSpecialistFromBridgePrompt(prompt) {
+		const text = asString(prompt);
+		if (/act as the strategist/i.test(text)) return "strategist";
+		if (/act as the content writer/i.test(text)) return "writer";
+		if (/act as the media director/i.test(text)) return "media";
+		if (/act as the video lead/i.test(text)) return "video_lead";
+		if (/act as the publisher/i.test(text)) return "publisher";
+		if (/act as the ads optimizer|act as the ads operator/i.test(text)) return "ads";
+		if (/act as the seo|act as the insights analyst/i.test(text)) return "analyst";
+		if (/act as the compliance reviewer/i.test(text)) return "compliance_reviewer";
+		if (/act as the operations lead/i.test(text)) return "operations";
+		if (/act as the customer operations lead|act as customer ops/i.test(text)) return "customer_ops";
+		if (/act as the sales|act as the crm|sales \/ crm lead/i.test(text)) return "sales_crm";
+		// Fallback: use keyword scoring from existing classifyIntent
+		const classified = classifyIntent(text, null);
+		if (classified.resolvedModeId && classified.resolvedModeId !== "operations") {
+			return classified.resolvedModeId;
+		}
+		return null;
+	}
+
+	const command = humanizeValue(commandText || session?.draftMessage, "Prepare workflow action from AI command.");
+	const plan = [
+		{
+			id: `auto-generate-${Date.now()}`,
+			type: "generate_prompt",
+			targetPage: "ai-command",
+			action: "Generate prompt from AI command",
+			payload: {
+				prompt: command,
+				title: "AI command auto plan"
+			},
+			priority: "recommended"
+		},
+		{
+			id: `auto-workflow-${Date.now()}`,
+			type: "prepare_workflow",
+
+Render bridge call window:
+           }
+		if (!session.outputPreview && !session.isFreshAiChatSession) {
+                        const preview = asObject(savedOutput.preview);
+			if (preview.outputType) {
+				session.outputPreview = preview;
+				session.outputWorkspaceTab = outputTabFromPreview(preview);
+			}
+		}
+		if (!session.responseHistoryLoaded && !session.isFreshAiChatSession) {
+                        session.responseHistory = asArray(savedOutput.responses).slice(0, 12);
+                        session.responseHistoryLoaded = true;
+                }
+
+		// ── HOME → AI COMMAND BRIDGE ────────────────────────────────
+		// Consume prompt set by home.js handleAiRoleClick via quickCommandInput.
+		// Once consumed we clear the global input so re-renders are idempotent.
+		const globalInput = $("quickCommandInput");
+		const bridgeValue = asString(globalInput?.value || "").trim();
+		if (bridgeValue) {
+			const detectedSpecialist = detectSpecialistFromBridgePrompt(bridgeValue);
+			if (detectedSpecialist) {
+				session.modeId = detectedSpecialist;
+				const bridgeSpecialist = getPhase1SpecialistById(detectedSpecialist);
+				session.bridgeContext = {
+					source: "Home",
+					specialistId: detectedSpecialist,
+					specialistLabel: bridgeSpecialist?.label || titleCase(detectedSpecialist),
+					loadedAt: nowIso()
+				};
+			} else {
+				session.bridgeContext = null;
+			}
+			StateKernel.write(session, normalizeAiComposerPrompt(bridgeValue), "ai");
+			persistSessionDraft(sessionKey, session, detectedSpecialist ? "Specialist context loaded from Home" : "AI prompt loaded from workspace");
+			if (globalInput) globalInput.value = "";
+		}
+		// ─────────────────────────────────────────────────────────────
+
+		const payload = asObject(selectProjectPayload(state));
+		const overview = asObject(payload.overview?.overview || payload.overview);
+		const readiness = asObject(payload.readiness?.dashboard || payload.readiness);
+		const operations = asObject(selectOperationsSnapshot(state));
+		applyDurableAiHandoff(sessionKey, operations, session, consumeProjectHandoff, showMessage);
+		const readinessScore = readiness.readiness_score ?? overview.readiness_score ?? null;
+
+		const intelligenceStatus = session.intelligence.status || "idle";

@@ -1,0 +1,95 @@
+    1169 public/control-center/pages/home.js
+
+8:} from "./home/render-sections.js";
+20:  return Array.isArray(value) ? value : [];
+24:  return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+28:  if (value == null) return "";
+29:  return String(value);
+34:  return Number.isFinite(parsed) ? parsed : fallback;
+38:  return `${Math.max(0, Math.round(asNumber(value, 0)))}%`;
+42:  return String(Math.max(0, Math.round(asNumber(value, 0))));
+55:    return "danger";
+64:    return "warning";
+74:    return "success";
+79:    if (parsed >= 80) return "success";
+80:    if (parsed >= 50) return "warning";
+81:    return "danger";
+84:  return "neutral";
+88:  if (tone === "success") return "Healthy";
+89:  if (tone === "warning") return "Attention";
+90:  if (tone === "danger") return "Critical";
+91:  return "Unknown";
+96:  if (!raw) return fallback;
+97:  return raw
+109:      return stamp;
+112:  return 0;
+117:  if (!Number.isFinite(stamp)) return "Not available";
+118:  return new Date(stamp).toLocaleString();
+122:  return Array.from(new Set(values.filter(Boolean)));
+127:  return text || fallback;
+132:  if (!raw) return fallback;
+159:  if (known[key]) return known[key];
+161:  return normalized.replace(/\b\w/g, (ch) => ch.toUpperCase());
+166:  if (!text) return fallback;
+168:    return fallback;
+170:  return text;
+179:  return [
+218:    return (
+227:    return aiTeamCards.find((card) => /operations|integrations|automation|system/i.test(card.name || card.id || "")) || aiTeamCards[0];
+230:  return aiTeamCards.find((card) => card.status === "Active role") || aiTeamCards[0] || null;
+236:  if (/(video|media|product video|asset|library|upload|brand file)/.test(text)) return "library";
+237:  if (/(connector|integration|sync|platform)/.test(text)) return "integrations";
+238:  if (/(setup|foundation)/.test(text)) return "setup";
+239:  if (/(campaign|launch wave|brief)/.test(text)) return "campaign-studio";
+240:  if (/(publish|schedule|queue)/.test(text)) return "publishing";
+241:  if (/(ad|budget|paid)/.test(text)) return "ads-manager";
+242:  if (/(content|copy)/.test(text)) return "content-studio";
+243:  if (/(job|operation)/.test(text)) return "operations-centers";
+244:  return "ai-command";
+285:  return roles.map((role) => {
+294:    return {
+430:    return text.includes("pending") || text.includes("in_progress") || text.includes("review");
+435:    return !text || text.includes("pending") || text.includes("requested");
+470:    return ["ready", "manual_publish_ready", "scheduled", "queued"].includes(status);
+494:    return {
+506:    return {
+561:  return {
+580:    primaryActionLabel: nextActionRoute === "ai-command" ? "Prepare AI Guidance" : `Open ${humanizeStatus(nextActionRoute)} Workspace`,
+601:      buttonLabel: nextActionRoute === "ai-command" ? "Prepare AI Guidance" : `Open ${humanizeStatus(nextActionRoute)} Workspace`,
+738:  if (score >= 85) return "Strong operating state";
+739:  if (score >= 65) return "Stable with gaps";
+740:  return "Recovery needed";
+750:export const homeRoute = {
+759:    <section class="page is-active" data-page="home">
+761:    </section>
+763:  render({ getState, $, escapeHtml, navigateTo, showMessage }) {
+767:    if (!root) return;
+812:        <section class="mhos-os-header" aria-label="Executive Command Brief">
+847:              <strong class="mhos-os-brief-value">${escapeHtml(dashboard.nextBestAction.route === "ai-command" ? "AI Guidance" : humanizeStatus(dashboard.nextBestAction.route))}</strong>
+851:        </section>
+854:          <main class="mhos-os-main">
+856:            <section class="mhos-os-decision-card mhos-motion-soft" aria-label="Primary Decision">
+884:            </section>
+886:            <section class="mhos-os-section" aria-label="What Needs Attention">
+887:              <div class="mhos-os-section-head">
+890:                  <h2 class="mhos-os-section-title">${dashboard.totalBlockers ? "Operating blockers" : "No critical blockers"}</h2>
+891:                  <p class="mhos-os-section-copy">
+907:            </section>
+909:            <section class="mhos-os-section" aria-label="Operating Path">
+910:              <div class="mhos-os-section-head">
+913:                  <h2 class="mhos-os-section-title">Readiness to execution</h2>
+914:                  <p class="mhos-os-section-copy">A simple view of the operating sequence. Each step opens the workspace that owns the work.</p>
+930:            </section>
+933:              <summary class="mhos-os-panel-title">System details and evidence</summary>
+975:              <summary class="mhos-os-panel-title">Recent activity</summary>
+981:          <aside class="mhos-os-rail" aria-label="Action and AI Guidance">
+983:            <section class="mhos-os-action-panel">
+1002:            </section>
+1004:            <section class="mhos-os-ai-panel">
+1006:                <p class="mhos-os-kicker">Recommended AI Specialist</p>
+1032:            </section>
+1034:            <section class="mhos-os-ai-panel">
+1057:            </section>
+1059:            <section class="mhos-os-evidence-panel">
+1066:            </section>
+1068:          </aside>

@@ -109,6 +109,50 @@ export function renderHomeExecutiveIntro({
   formatPercent,
   toneLabel
 }) {
+  const headOfficeTitle = dashboard?.nextBestAction?.recommendation
+    ? "Head Office live brief"
+    : "Head Office is waiting for a reviewed signal";
+
+  const headOfficeDetail = dashboard?.nextBestAction?.recommendation
+    ? `Best move now: ${dashboard.nextBestAction.recommendation}. This protects campaign planning, scheduled posts, publishing, ads, and customer operations from avoidable mistakes.`
+    : "Open AI Command or the owning workspace to generate the next reviewed action. Home only guides; it does not execute.";
+
+  const campaignSignal = dashboard?.campaign?.name
+    ? `Active campaign: ${dashboard.campaign.name}`
+    : "No active campaign selected";
+
+  const scheduleSignal = dashboard?.execution?.nextSchedule && dashboard.execution.nextSchedule !== "Not available"
+    ? `Next scheduled item: ${dashboard.execution.nextSchedule}`
+    : "No scheduled post is confirmed yet";
+
+  const coverageItems = [
+    {
+      label: "Campaign",
+      value: dashboard?.campaign?.name ? "Active campaign selected" : "Needs campaign selection",
+      tone: dashboard?.campaign?.name ? "success" : "warning"
+    },
+    {
+      label: "Scheduled Posts",
+      value: dashboard?.execution?.nextSchedule && dashboard.execution.nextSchedule !== "Not available" ? dashboard.execution.nextSchedule : "No confirmed schedule",
+      tone: dashboard?.execution?.nextSchedule && dashboard.execution.nextSchedule !== "Not available" ? "success" : "warning"
+    },
+    {
+      label: "Publishing",
+      value: dashboard?.launchSnapshot?.campaignReadiness === "Ready" ? "Ready to review schedule" : "Resolve blockers first",
+      tone: dashboard?.launchSnapshot?.campaignReadiness === "Ready" ? "success" : "warning"
+    },
+    {
+      label: "Ads",
+      value: dashboard?.blockers?.integrations?.length ? "Needs platform connections" : "Ready for strategy review",
+      tone: dashboard?.blockers?.integrations?.length ? "warning" : "success"
+    },
+    {
+      label: "Operations",
+      value: dashboard?.nextBestAction?.recommendation ? "Next action identified" : "Needs reviewed action",
+      tone: dashboard?.nextBestAction?.recommendation ? "success" : "warning"
+    }
+  ];
+
   return `
     <section class="card home-exec-hero">
       <div class="home-exec-hero-main">
@@ -132,11 +176,30 @@ export function renderHomeExecutiveIntro({
         <button id="homeSecondaryActionBtn" class="btn btn-secondary" type="button">
           ${escapeHtml(dashboard.secondaryActionLabel)}
         </button>
-        <button id="homeAskExecutiveAiBtn" class="btn btn-ghost" type="button">
-          Prepare AI Guidance
-        </button>
       </div>
-      <p class="home-empty-note">Home opens workspaces or prepares AI guidance only. It does not approve, publish, send, upload, delete, archive, or execute.</p>
+      <div class="home-head-office-strip" aria-label="Head Office live operating brief">
+        <div>
+          <span class="data-label">Head Office</span>
+          <strong>${escapeHtml(headOfficeTitle)}</strong>
+          <p>${escapeHtml(headOfficeDetail)}</p>
+        </div>
+        <div class="home-head-office-signals">
+          <span>${escapeHtml(campaignSignal)}</span>
+          <span>${escapeHtml(scheduleSignal)}</span>
+          <span>Guidance only - no publish, send, approval, upload, or execution from Home.</span>
+        </div>
+      </div>
+
+      <div class="home-execution-coverage-grid" aria-label="Campaign execution coverage">
+        ${coverageItems.map((item) => `
+          <article class="home-execution-coverage-card is-${escapeHtml(item.tone)}">
+            <span class="data-label">${escapeHtml(item.label)}</span>
+            <strong>${escapeHtml(item.value)}</strong>
+          </article>
+        `).join("")}
+      </div>
+
+      <p class="home-empty-note">Home is the Head Office view: one status, one next move, and clear ownership. Execution stays inside the owning workspace.</p>
     </section>
 
     <section class="home-kpi-grid">

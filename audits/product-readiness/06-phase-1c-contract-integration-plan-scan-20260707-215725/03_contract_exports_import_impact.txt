@@ -1,0 +1,42 @@
+Contract exports:
+17:export const AI_TEAM_CONTRACT_VERSION = "phase-1b-2026-ready-v1";
+19:export const AI_TEAM_ROLE_CATEGORIES = Object.freeze({
+32:export const AI_TEAM_AUTHORITY_LEVELS = Object.freeze([
+43:export const AI_TEAM_REQUEST_TYPES = Object.freeze([
+60:export const AI_TEAM_OUTPUT_TYPES = Object.freeze([
+71:export const AI_TEAM_FORBIDDEN_ACTIONS = Object.freeze([
+89:export const AI_TEAM_CANONICAL_ROLES = Object.freeze([
+260:export const AI_TEAM_ROLE_ALIASES = Object.freeze({
+319:export const AI_TEAM_PAGE_OWNER_MATRIX = Object.freeze({
+469:export const AI_TEAM_HANDOFF_RULES = Object.freeze({
+485:export const AI_TEAM_FULL_TEAM_TRIGGERS = Object.freeze([
+492:export const AI_TEAM_SPECIALIST_REQUEST_MAP = Object.freeze({
+509:export function normalizeAiTeamRoleId(roleId, fallback = "operations") {
+518:export function getAiTeamRole(roleId) {
+524:export function getAiTeamPageOwner(pageId) {
+529:export function canAiTeamHandoff(sourcePage, destinationPage) {
+535:export function getAiTeamDefaultRoleForRequest(requestType) {
+540:export function shouldUseFullAiTeam(requestType) {
+
+Current imports of new contract:
+scripts/audit/validate-ai-team-operating-contract.mjs:14:} from "../../public/control-center/runtime/ai-team/ai-team-operating-contract.js";
+
+Current ai-team-model imports:
+
+Current route-role-fallback imports:
+public/control-center/runtime/authority/authority-projection.js:66:export function getProjectedRoutePermissions(state = {}) {
+public/control-center/runtime/authority/authority-projection.js:71:export function getProjectedTeamMembers(state = {}) {
+public/control-center/runtime/authority/authority-projection.js:81:export function getProjectedActiveRole(state = {}) {
+public/control-center/router.js:29:} from "./runtime/authority/route-role-fallback.js";
+public/control-center/pages/ai-command.js:9:import { getProjectedActiveRole, getProjectedTeamMembers } from "../runtime/authority/authority-projection.js";
+public/control-center/pages/ai-command.js:2843:  const projectedMembers = getProjectedTeamMembers(state);
+public/control-center/pages/ai-command.js:2844:  const activeRole = asString(getProjectedActiveRole(state)).toLowerCase();
+public/control-center/pages/home.js:10:  getProjectedActiveRole,
+public/control-center/pages/home.js:11:  getProjectedTeamMembers
+public/control-center/pages/home.js:253:  const projectedMembers = getProjectedTeamMembers(state);
+public/control-center/pages/home.js:255:    getProjectedActiveRole(state)
+public/control-center/app.js:4:  getProjectedActiveRole,
+public/control-center/app.js:5:  getProjectedRoutePermissions
+public/control-center/app.js:10:} from "./runtime/authority/route-role-fallback.js";
+public/control-center/app.js:182:  const stateRole = getProjectedActiveRole({ operations, activeRole: state.activeRole });
+public/control-center/app.js:254:  const routePermissions = getProjectedRoutePermissions({ operations });

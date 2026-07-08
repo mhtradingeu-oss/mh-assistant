@@ -1,0 +1,149 @@
+Home imports:
+import {
+  renderActivityItems,
+  renderAiTeamCards,
+  renderBadge,
+  renderBlockerColumn,
+  renderCompactList,
+  renderHomeExecutiveIntro
+} from "./home/render-sections.js";
+import {
+  getProjectedActiveRole,
+  getProjectedTeamMembers
+} from "../runtime/authority/authority-projection.js";
+
+import {
+  selectCurrentProject,
+  selectOperationsSnapshot
+} from "../state.js";
+
+function asArray(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+function asObject(value) {
+  return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+}
+
+function asString(value) {
+  if (value == null) return "";
+  return String(value);
+}
+
+function asNumber(value, fallback = 0) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function formatPercent(value) {
+  return `${Math.max(0, Math.round(asNumber(value, 0)))}%`;
+}
+
+function formatCount(value) {
+  return String(Math.max(0, Math.round(asNumber(value, 0))));
+}
+
+function statusTone(input, score) {
+  const text = asString(input).toLowerCase();
+
+  if (
+    text.includes("critical") ||
+    text.includes("failed") ||
+    text.includes("blocked") ||
+    text.includes("error") ||
+    text.includes("missing")
+  ) {
+    return "danger";
+
+Home AI / role / specialist references:
+213:function pickRecommendedSpecialist(aiTeamCards = [], dashboard = {}) {
+247:function buildAiTeamCards(state) {
+274:    { id: "strategist", name: "Strategist", fallback: "Align campaign priorities and launch sequencing." },
+275:    { id: "writer", name: "Content Writer", fallback: "Prepare high-conversion messaging for active channels." },
+277:    { id: "video_lead", name: "Video Lead", fallback: "Queue the next motion and short-form variants." },
+278:    { id: "publisher", name: "Publisher", fallback: "Prepare publishing packages, schedules, and manual handoffs." },
+279:    { id: "ads_operator", name: "Ads Optimizer", fallback: "Optimize paid testing, creative variants, and budget decisions." },
+280:    { id: "analyst", name: "SEO & Insights Analyst", fallback: "Read weak signals and recommend measurable improvements." },
+281:    { id: "compliance_reviewer", name: "Compliance Reviewer", fallback: "Review claims, approvals, and publish safety before release." },
+282:    { id: "admin", name: "Operations Lead", fallback: "Clear blockers and keep execution flow healthy." }
+742:function setGlobalAiPrompt($, prompt) {
+768:    const aiTeamCards = buildAiTeamCards(state);
+806:    const recommendedSpecialist = pickRecommendedSpecialist(aiTeamCards, dashboard);
+878:                  Ask Head Office AI
+884:            <section class="mhos-real-head-office-coverage" aria-label="Head Office campaign execution coverage">
+913:                  <span class="data-label">Ads</span>
+1047:                <h2 class="mhos-os-panel-title">${escapeHtml(recommendedSpecialist?.name || "Executive AI")}</h2>
+1049:                  ${escapeHtml(recommendedSpecialist?.summary || "Use AI Command to turn the current state into a clear operating plan.")}
+1054:              ${recommendedSpecialist ? `
+1055:                <button class="quick-action-btn mhos-motion-soft" type="button" data-role-id="${escapeHtml(recommendedSpecialist.id)}">
+1056:                  <span class="home-action-title">Ask Head Office AI</span>
+1081:              <p class="mhos-os-kicker">Customer operations</p>
+1084:                ${escapeHtml(compactModuleState(dashboard.health?.customerOpsStatus, "Customer Ops activates when CRM/live channels are connected."))}
+1100:    const openAiWithPrompt = (prompt) => {
+1101:      setGlobalAiPrompt($, prompt);
+1107:    const handleAiRoleClick = (roleId, roleName) => {
+1109:      const rolePrompts = {
+1110:        strategist: `Act as the Strategist for ${projectLabel}. Review readiness, blockers, campaign state, and next best action. Give me the highest-impact strategic moves. Do not execute anything; prepare guidance only.`,
+1111:        writer: `Act as the Content Writer for ${projectLabel}. Review the current project context and suggest the next best writing actions, messaging angles, and content priorities. Do not execute anything; prepare guidance only.`,
+1113:        video_lead: `Act as the Video Lead for ${projectLabel}. Review the project context and suggest the next best short-form/video actions. Do not execute anything; prepare guidance only.`,
+1114:        publisher: `Act as the Publisher for ${projectLabel}. Review publishing readiness, scheduled jobs, blockers, and what must be checked before publishing. Do not execute anything; prepare guidance only.`,
+1115:        ads_operator: `Act as the Ads Optimizer for ${projectLabel}. Review campaign readiness, channels, and paid media opportunities. Suggest next ad actions safely. Do not execute anything; prepare guidance only.`,
+1116:        analyst: `Act as the SEO & Insights Analyst for ${projectLabel}. Review readiness, signals, gaps, and recent activity. Tell me what data matters most and what to improve next. Do not execute anything; prepare guidance only.`,
+1117:        compliance_reviewer: `Act as the Compliance Reviewer for ${projectLabel}. Review launch blockers, claims, approvals, and publishing safety. Tell me what must be checked before release. Do not execute anything; prepare guidance only.`,
+1118:        admin: `Act as the Operations Lead for ${projectLabel}. Review tasks, blockers, failed jobs, and execution health. Give me the next operational steps. Do not execute anything; prepare guidance only.`
+1121:      const prompt = rolePrompts[roleId] || `Act as the ${roleName} specialist for ${projectLabel}. Review the current project context and recommend the next best actions. Do not execute anything; prepare guidance only.`;
+1122:      openAiWithPrompt(prompt);
+1130:          setGlobalAiPrompt($, dashboard.nextBestAction.recommendation);
+1138:      askNextActionBtn.onclick = () => openAiWithPrompt(`Explain this next best action like an operations director and give me the exact safe steps: ${dashboard.nextBestAction.recommendation}. Include which workspace owns it, what it unlocks for campaign creation, scheduled posts, publishing, ads, and customer operations. Do not execute anything.`);
+1151:      promptNextBtn.onclick = () => openAiWithPrompt("What is the best next executive action for this project? Prioritize the answer based on readiness, blockers, campaign state, scheduled posts, publishing safety, ads readiness, customer operations, and recent activity. Give one clear recommendation and the reason.");
+1156:      promptReadinessBtn.onclick = () => openAiWithPrompt("Why is readiness low? Explain the missing integrations, assets, failed jobs, campaign gaps, scheduled post risks, publishing blockers, and ad launch risks in simple business language. End with the fastest safe fix path.");
+1158:    const aiRoleCards = document.querySelectorAll(".quick-action-btn[data-role-id], .home-ai-team-card[data-role-id], .mhos-specialist[data-role-id], .mhos-workflow-step[data-role-id]");
+1160:      const roleId = card.getAttribute("data-role-id");
+1162:      card.onclick = () => handleAiRoleClick(roleId, roleName);
+
+Home route decision references:
+141:    "brand guideline": "Add the brand guideline so content, media, ads, and publishing stay consistent",
+142:    "brand guidelines": "Add the brand guideline so content, media, ads, and publishing stay consistent",
+144:    "legal doc": "Add the legal document so publishing and ads can pass review",
+206:      meta: launch.campaignReadiness === "Ready" ? "Execution path looks clear" : "Resolve blockers before publishing",
+215:  const next = asString(dashboard.nextBestAction?.recommendation).toLowerCase();
+239:  if (/(campaign|launch wave|brief)/.test(text)) return "campaign-studio";
+240:  if (/(publish|schedule|queue)/.test(text)) return "publishing";
+241:  if (/(ad|budget|paid)/.test(text)) return "ads-manager";
+242:  if (/(content|copy)/.test(text)) return "content-studio";
+244:  return "ai-command";
+278:    { id: "publisher", name: "Publisher", fallback: "Prepare publishing packages, schedules, and manual handoffs." },
+465:  const publishingQueue = asArray(operations.queues?.items).filter((item) =>
+466:    asString(item.entity_type) === "publishing_job" || asString(item.queue_type) === "publishing"
+468:  const publishReadyCount = publishingQueue.filter((item) => {
+580:    primaryActionLabel: nextActionRoute === "ai-command" ? "Prepare AI Guidance" : `Open ${humanizeStatus(nextActionRoute)} Workspace`,
+597:    nextBestAction: {
+601:      buttonLabel: nextActionRoute === "ai-command" ? "Prepare AI Guidance" : `Open ${humanizeStatus(nextActionRoute)} Workspace`,
+719:        : "No execution recorded yet — start with a campaign or publishing package to create the first signal.",
+763:  render({ getState, $, escapeHtml, navigateTo, showMessage }) {
+847:              <strong class="mhos-os-brief-value">${escapeHtml(dashboard.nextBestAction.route === "ai-command" ? "AI Guidance" : humanizeStatus(dashboard.nextBestAction.route))}</strong>
+848:              <span class="mhos-os-brief-hint">Next handoff: ${escapeHtml(dashboard.nextBestAction.urgencyLabel)}</span>
+858:                <span class="mhos-os-chip ${dashboard.nextBestAction.urgencyLabel === "Urgent" ? "is-danger" : dashboard.nextBestAction.urgencyLabel === "Attention" ? "is-warning" : "is-live"}">${escapeHtml(dashboard.nextBestAction.urgencyLabel)}</span>
+859:                <span class="mhos-os-chip">${escapeHtml(dashboard.nextBestAction.workflowImpact)}</span>
+860:                <span class="mhos-os-chip">${escapeHtml(dashboard.nextBestAction.confidenceSummary)}</span>
+864:                <h2 class="mhos-os-decision-title">${escapeHtml(dashboard.nextBestAction.recommendation)}</h2>
+865:                <p class="mhos-os-decision-copy">${escapeHtml(dashboard.nextBestAction.whyItMatters)}</p>
+868:                <span class="mhos-os-chip">${escapeHtml(dashboard.nextBestAction.continuationSummary)}</span>
+869:                <span class="mhos-os-chip">Opens: ${escapeHtml(humanizeStatus(dashboard.nextBestAction.route))}</span>
+870:                <span class="mhos-os-chip">${escapeHtml(dashboard.nextBestAction.escalationSummary)}</span>
+871:                <span class="mhos-os-chip">No approval, publishing, sending, or record changes here</span>
+875:                  ${escapeHtml(dashboard.nextBestAction.buttonLabel)}
+889:                  <p class="mhos-os-panel-copy">One-second view of campaign, schedule, publishing, ads, and operations readiness. Home shows ownership only; execution stays inside the owning workspace.</p>
+909:                  <p>Resolve blockers before publishing or scheduling live content.</p>
+920:                  <strong>${escapeHtml(dashboard.nextBestAction?.recommendation ? "Next action identified" : "Needs reviewed action")}</strong>
+1096:      navigateTo(route);
+1102:      navigateTo("ai-command");
+1114:        publisher: `Act as the Publisher for ${projectLabel}. Review publishing readiness, scheduled jobs, blockers, and what must be checked before publishing. Do not execute anything; prepare guidance only.`,
+1117:        compliance_reviewer: `Act as the Compliance Reviewer for ${projectLabel}. Review launch blockers, claims, approvals, and publishing safety. Tell me what must be checked before release. Do not execute anything; prepare guidance only.`,
+1129:        if (dashboard.nextBestAction.route === "ai-command") {
+1130:          setGlobalAiPrompt($, dashboard.nextBestAction.recommendation);
+1132:        openRoute(dashboard.nextBestAction.route, "Next best action opened.");
+1138:      askNextActionBtn.onclick = () => openAiWithPrompt(`Explain this next best action like an operations director and give me the exact safe steps: ${dashboard.nextBestAction.recommendation}. Include which workspace owns it, what it unlocks for campaign creation, scheduled posts, publishing, ads, and customer operations. Do not execute anything.`);
+1142:    if (quickCampaignBtn) quickCampaignBtn.onclick = () => openRoute("campaign-studio");
+1151:      promptNextBtn.onclick = () => openAiWithPrompt("What is the best next executive action for this project? Prioritize the answer based on readiness, blockers, campaign state, scheduled posts, publishing safety, ads readiness, customer operations, and recent activity. Give one clear recommendation and the reason.");
+1156:      promptReadinessBtn.onclick = () => openAiWithPrompt("Why is readiness low? Explain the missing integrations, assets, failed jobs, campaign gaps, scheduled post risks, publishing blockers, and ad launch risks in simple business language. End with the fastest safe fix path.");

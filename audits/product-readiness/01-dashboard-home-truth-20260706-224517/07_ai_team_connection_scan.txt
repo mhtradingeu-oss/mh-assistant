@@ -1,0 +1,1043 @@
+AI command / agents / recommendations references:
+public/control-center/ai-team-model.js:9:  - No publishing.
+public/control-center/ai-team-model.js:18:    ownerSummary: "Campaign planning, positioning, launch decisions, and next best action.",
+public/control-center/ai-team-model.js:20:    outputTargets: ["campaign-studio", "content-studio", "media-studio", "publishing"],
+public/control-center/ai-team-model.js:28:    primaryPages: ["content-studio", "campaign-studio", "ai-command"],
+public/control-center/ai-team-model.js:29:    outputTargets: ["content-studio", "governance", "publishing"],
+public/control-center/ai-team-model.js:37:    primaryPages: ["media-studio", "library", "campaign-studio"],
+public/control-center/ai-team-model.js:38:    outputTargets: ["media-studio", "library", "publishing"],
+public/control-center/ai-team-model.js:46:    primaryPages: ["media-studio", "content-studio", "publishing"],
+public/control-center/ai-team-model.js:47:    outputTargets: ["media-studio", "content-studio", "publishing"],
+public/control-center/ai-team-model.js:54:    ownerSummary: "Publishing queue, schedules, manual handoffs, retries, and release readiness.",
+public/control-center/ai-team-model.js:55:    primaryPages: ["publishing", "queue-center", "ai-command"],
+public/control-center/ai-team-model.js:56:    outputTargets: ["publishing", "queue-center", "insights"],
+public/control-center/ai-team-model.js:64:    primaryPages: ["ads-manager", "campaign-studio", "insights"],
+public/control-center/ai-team-model.js:65:    outputTargets: ["ads-manager", "campaign-studio", "insights"],
+public/control-center/ai-team-model.js:69:    id: "seo_insights_analyst",
+public/control-center/ai-team-model.js:70:    label: "SEO & Insights Analyst",
+public/control-center/ai-team-model.js:72:    ownerSummary: "Search, performance, weak signals, learning patterns, and measurable optimization.",
+public/control-center/ai-team-model.js:73:    primaryPages: ["insights", "research", "home"],
+public/control-center/ai-team-model.js:74:    outputTargets: ["insights", "campaign-studio", "content-studio", "ads-manager"],
+public/control-center/ai-team-model.js:75:    defaultPrompt: "Act as SEO & Insights Analyst. Identify what is working, what is weak, and what action should happen next."
+public/control-center/ai-team-model.js:83:    outputTargets: ["research", "setup", "campaign-studio", "content-studio"],
+public/control-center/ai-team-model.js:84:    defaultPrompt: "Act as Researcher. Find the strongest market, competitor, and audience insights for this project."
+public/control-center/ai-team-model.js:90:    ownerSummary: "Claims, approvals, publishing risk, brand safety, governance, and release trust.",
+public/control-center/ai-team-model.js:91:    primaryPages: ["governance", "publishing", "content-studio", "media-studio"],
+public/control-center/ai-team-model.js:92:    outputTargets: ["governance", "publishing", "content-studio", "media-studio"],
+public/control-center/ai-team-model.js:93:    defaultPrompt: "Act as Compliance Reviewer. Flag claims, approval gaps, and publishing risks before release."
+public/control-center/ai-team-model.js:107:  home: ["strategist", "operations_lead", "seo_insights_analyst"],
+public/control-center/ai-team-model.js:110:  integrations: ["operations_lead", "seo_insights_analyst"],
+public/control-center/ai-team-model.js:113:  publishing: ["publisher", "compliance_reviewer"],
+public/control-center/ai-team-model.js:115:  "content-studio": ["content_writer", "compliance_reviewer", "publisher"],
+public/control-center/ai-team-model.js:116:  "media-studio": ["media_director", "video_lead", "publisher"],
+public/control-center/ai-team-model.js:117:  "ads-manager": ["ads_optimizer", "seo_insights_analyst", "compliance_reviewer"],
+public/control-center/ai-team-model.js:118:  insights: ["seo_insights_analyst", "strategist"],
+public/control-center/ai-team-model.js:120:  governance: ["compliance_reviewer", "operations_lead"],
+public/control-center/ui/page-standard.js:11:  "content-studio",
+public/control-center/ui/page-standard.js:12:  "media-studio",
+public/control-center/ui/page-standard.js:13:  "publishing",
+public/control-center/ui/page-standard.js:14:  "ads-manager",
+public/control-center/ui/page-standard.js:15:  "insights",
+public/control-center/ui/page-standard.js:24:    description: "System health, readiness, blockers, active work, and the next best move.",
+public/control-center/ui/page-standard.js:47:    secondary: { label: "Open Insights", route: "insights" }
+public/control-center/ui/page-standard.js:52:    description: "Direct role-aware AI agents, structured tasks, artifacts, and decisions.",
+public/control-center/ui/page-standard.js:68:    secondary: { label: "Send To Content", route: "content-studio" }
+public/control-center/ui/page-standard.js:70:  "content-studio": {
+public/control-center/ui/page-standard.js:75:    secondary: { label: "Send To Media", route: "media-studio" }
+public/control-center/ui/page-standard.js:77:  "media-studio": {
+public/control-center/ui/page-standard.js:82:    secondary: { label: "Send To Publishing", route: "publishing" }
+public/control-center/ui/page-standard.js:84:  publishing: {
+public/control-center/ui/page-standard.js:87:    description: "Schedule, approve, retry, and monitor publishing execution.",
+public/control-center/ui/page-standard.js:91:  "ads-manager": {
+public/control-center/ui/page-standard.js:98:  insights: {
+public/control-center/ui/page-standard.js:101:    description: "Turn signals, risks, and learning memory into clear actions.",
+public/control-center/ui/page-standard.js:102:    primary: { label: "Generate Recommendations", route: "ai-command" },
+public/control-center/ui/page-standard.js:117:    secondary: { label: "Check Governance", route: "governance" }
+public/control-center/ui/page-standard.js:147:  "focus-schedule": "#publishingScheduleBtn",
+public/control-center/ui/page-standard.js:148:  "focus-publishing-ai": "#publishingPushAiBtn",
+public/control-center/ui/page-standard.js:149:  "focus-retry-publishing": "#publishingRequeueBtn",
+public/control-center/ui/page-standard.js:150:  "focus-save-budget": "#adsManagerOpenPublishingBtn, #adsTotalBudgetInput",
+public/control-center/ui/page-standard.js:152:  "focus-save-research": "#researchSaveFindingBtn, #researchSaveRecommendationBtn",
+public/control-center/ui/page-standard.js:264:  const recommendations = [
+public/control-center/ui/page-standard.js:266:    ...asArray(activity.insights?.recommendations),
+public/control-center/ui/page-standard.js:267:    ...asArray(activity.learning?.recommendations),
+public/control-center/ui/page-standard.js:268:    ...asArray(ops.ai_recommendations?.items)
+public/control-center/ui/page-standard.js:271:    return item?.title || item?.summary || item?.recommendation || item?.action || "";
+public/control-center/ui/page-standard.js:291:    recommendations,
+public/control-center/ui/page-standard.js:299:  let recommendation = "";
+public/control-center/ui/page-standard.js:303:    recommendation = asString(cachedAction?.recommendation || cachedAction?.title || cachedAction?.summary || cachedAction);
+public/control-center/ui/page-standard.js:305:    recommendation = "";
+public/control-center/ui/page-standard.js:309:    home: "Review blockers and ask AI Workspace for the next best operating plan.",
+public/control-center/ui/page-standard.js:316:    "content-studio": "Generate or approve the next content item.",
+public/control-center/ui/page-standard.js:317:    "media-studio": "Create the missing media job or approve ready creative.",
+public/control-center/ui/page-standard.js:318:    publishing: "Clear failed or ready publishing jobs before scheduling more work.",
+public/control-center/ui/page-standard.js:319:    "ads-manager": "Build the paid brief and generate variants.",
+public/control-center/ui/page-standard.js:320:    insights: "Convert the top recommendation into execution tasks.",
+public/control-center/ui/page-standard.js:325:  return recommendation || fallback[route] || fallback.home;
+public/control-center/ui/page-standard.js:333:    const next = asString(globalAction?.recommendation || globalAction?.title || globalAction?.summary || globalAction);
+public/control-center/system-intelligence.js:37:function createRecommendation({
+public/control-center/system-intelligence.js:136:  const publishingFailed =
+public/control-center/system-intelligence.js:140:  const hasPublishingScheduled = scheduledJobs.length > 0 || queueItems.some((item) => ["scheduled", "queued"].includes(normalizeText(item?.status)));
+public/control-center/system-intelligence.js:152:    hasPublishingScheduled,
+public/control-center/system-intelligence.js:153:    publishingFailed,
+public/control-center/system-intelligence.js:177:function buildRecommendations(signals) {
+public/control-center/system-intelligence.js:178:  const recommendations = [];
+public/control-center/system-intelligence.js:181:    recommendations.push(createRecommendation({
+public/control-center/system-intelligence.js:184:      reason: "Website URL is missing, reducing attribution clarity and weakening cross-system recommendations.",
+public/control-center/system-intelligence.js:197:    recommendations.push(createRecommendation({
+public/control-center/system-intelligence.js:204:      impactChips: ["Library", "Content", "Media", "Publishing"],
+public/control-center/system-intelligence.js:208:      relatedPages: ["content-studio", "media-studio", "publishing"]
+public/control-center/system-intelligence.js:213:    recommendations.push(createRecommendation({
+public/control-center/system-intelligence.js:224:      relatedPages: ["workflows", "ai-command", "publishing"]
+public/control-center/system-intelligence.js:229:    recommendations.push(createRecommendation({
+public/control-center/system-intelligence.js:232:      reason: "No content draft is available for downstream media or publishing lanes.",
+public/control-center/system-intelligence.js:234:      targetPage: "content-studio",
+public/control-center/system-intelligence.js:240:      relatedPages: ["media-studio", "publishing"]
+public/control-center/system-intelligence.js:245:    recommendations.push(createRecommendation({
+public/control-center/system-intelligence.js:248:      reason: "No approved media output exists yet for publishing execution.",
+public/control-center/system-intelligence.js:250:      targetPage: "media-studio",
+public/control-center/system-intelligence.js:252:      impactChips: ["Media", "Publishing", "Campaign"],
+public/control-center/system-intelligence.js:256:      relatedPages: ["library", "publishing"]
+public/control-center/system-intelligence.js:261:    recommendations.push(createRecommendation({
+public/control-center/system-intelligence.js:272:      relatedPages: ["ai-command", "publishing"]
+public/control-center/system-intelligence.js:276:  if ((signals.hasContentDraft || signals.hasMediaApproved) && !signals.hasPublishingScheduled) {
+public/control-center/system-intelligence.js:277:    recommendations.push(createRecommendation({
+public/control-center/system-intelligence.js:278:      id: "publishing-not-scheduled",
+public/control-center/system-intelligence.js:279:      title: "Schedule ready output in publishing",
+public/control-center/system-intelligence.js:282:      targetPage: "publishing",
+public/control-center/system-intelligence.js:283:      actionLabel: "Open Publishing",
+public/control-center/system-intelligence.js:284:      impactChips: ["Publishing", "Execution", "Campaign"],
+public/control-center/system-intelligence.js:285:      blockerType: "publishing_gap",
+public/control-center/system-intelligence.js:287:      handoffPayload: { destination_page: "publishing", status: "available" },
+public/control-center/system-intelligence.js:288:      relatedPages: ["content-studio", "media-studio"]
+public/control-center/system-intelligence.js:292:  if (signals.publishingFailed) {
+public/control-center/system-intelligence.js:293:    recommendations.push(createRecommendation({
+public/control-center/system-intelligence.js:294:      id: "publishing-failed-items",
+public/control-center/system-intelligence.js:295:      title: "Resolve failed publishing blockers",
+public/control-center/system-intelligence.js:296:      reason: "Publishing contains failed or blocked items that need operator attention.",
+public/control-center/system-intelligence.js:298:      targetPage: "publishing",
+public/control-center/system-intelligence.js:299:      actionLabel: "Review Publishing Queue",
+public/control-center/system-intelligence.js:300:      impactChips: ["Publishing", "Execution", "Risk"],
+public/control-center/system-intelligence.js:301:      blockerType: "publishing_failure",
+public/control-center/system-intelligence.js:308:    recommendations.push(createRecommendation({
+public/control-center/system-intelligence.js:318:      relatedPages: ["content-studio", "media-studio", "publishing"]
+public/control-center/system-intelligence.js:323:    recommendations.push(createRecommendation({
+public/control-center/system-intelligence.js:337:  recommendations.sort((a, b) => {
+public/control-center/system-intelligence.js:343:  return recommendations;
+public/control-center/system-intelligence.js:352:  const publishingReady = signals.hasPublishingScheduled && !signals.publishingFailed;
+public/control-center/system-intelligence.js:361:    { key: "publishing", label: "Publishing", ready: publishingReady, note: publishingReady ? "Queue ready" : "Needs scheduling" }
+public/control-center/system-intelligence.js:367:  const recommendations = buildRecommendations(signals);
+public/control-center/system-intelligence.js:371:  const blockers = recommendations
+public/control-center/system-intelligence.js:381:  const fallback = createRecommendation({
+public/control-center/system-intelligence.js:397:    recommendations,
+public/control-center/system-intelligence.js:398:    topActions: recommendations.slice(0, 3),
+public/control-center/system-intelligence.js:399:    nextBestAction: recommendations[0] || fallback,
+public/control-center/system-intelligence.js:423:    ...asArray(activity.insights?.recommendations),
+public/control-center/system-intelligence.js:424:    ...asArray(activity.learning?.recommendations),
+public/control-center/system-intelligence.js:425:    ...asArray(operations.ai_recommendations?.items)
+public/control-center/system-intelligence.js:434:    return hasValue(obj.recommendation) || hasValue(obj.title) || hasValue(obj.summary) || hasValue(obj.action);
+public/control-center/system-intelligence.js:440:      recommendation: "Maintain execution momentum",
+public/control-center/system-intelligence.js:451:      recommendation: message,
+public/control-center/system-intelligence.js:460:    asString(candidate.recommendation) ||
+public/control-center/system-intelligence.js:468:    recommendation: message,
+public/control-center/system-intelligence.js:475:export function getPageRecommendations(state, pageId) {
+public/control-center/system-intelligence.js:478:  if (!page) return intelligence.recommendations;
+public/control-center/system-intelligence.js:479:  return intelligence.recommendations.filter((item) => {
+public/control-center/index.html:19:  <link rel="stylesheet" href="./styles/09-governance.css?v=20260623-governance-owner-1">
+public/control-center/index.html:104:          <p>Marketing, launch, content, ads, insights, and operations.</p>
+public/control-center/index.html:118:            <button class="nav-item" data-route="ai-command" data-page="ai-command" type="button">AI Command</button>
+public/control-center/index.html:132:            <button class="nav-item" data-route="content-studio" data-page="content-studio" type="button">Content Studio</button>
+public/control-center/index.html:133:            <button class="nav-item" data-route="media-studio" data-page="media-studio" type="button">Media Studio</button>
+public/control-center/index.html:138:            <button class="nav-item" data-route="publishing" data-page="publishing" type="button">Publishing</button>
+public/control-center/index.html:139:            <button class="nav-item" data-route="ads-manager" data-page="ads-manager" type="button">Ads Manager</button>
+public/control-center/index.html:140:            <button class="nav-item" data-route="insights" data-page="insights" type="button">Insights</button>
+public/control-center/index.html:145:            <div class="nav-group-title">Customers</div>
+public/control-center/index.html:146:            <button class="nav-item" data-route="customer-center" data-page="customer-center" type="button">Customer Center</button>
+public/control-center/index.html:160:            <button class="nav-item" data-route="governance" data-page="governance" type="button">Governance</button>
+public/control-center/index.html:265:            <button id="scheduleBtn" class="btn btn-secondary" data-action="open-publishing" type="button">Schedule</button>
+public/control-center/index.html:414:              data-ai-suggestion="Review the current workspace and suggest the next best action."
+public/control-center/index.html:444:              <button class="ai-dock-chip" data-ai-route="content-studio">
+public/control-center/index.html:448:              <button class="ai-dock-chip" data-ai-route="media-studio">
+public/control-center/index.html:452:              <button class="ai-dock-chip" data-ai-route="publishing">
+public/control-center/automation-engine.js:13:  "prepare_publishing_draft"
+public/control-center/automation-engine.js:17:  { test: /publish\s*now|go\s*live|send\s*live|execute\s*publish|push\s*live/i, reason: "Publishing requires approval and manual confirmation." },
+public/control-center/automation-engine.js:231:  if (type === "prepare_publishing_draft") {
+public/control-center/automation-engine.js:235:  if (fingerprint.includes("publishing") && /publish/.test(fingerprint)) {
+public/control-center/automation-engine.js:238:      reason: "Publishing actions require manual approval before execution.",
+public/control-center/automation-engine.js:248:  const recommendations = asArray(intelligence.recommendations);
+public/control-center/automation-engine.js:250:  const steps = recommendations.map((rec) => {
+public/control-center/automation-engine.js:260:        recommendationId: asString(rec?.id),
+public/control-center/automation-engine.js:286:      targetPage: "content-studio",
+public/control-center/automation-engine.js:297:      targetPage: "media-studio",
+public/control-center/automation-engine.js:302:        source_page: "content-studio"
+public/control-center/automation-engine.js:313:        source_page: "media-studio"
+public/control-center/automation-engine.js:319:      targetPage: "publishing",
+public/control-center/automation-engine.js:320:      action: "Create library-to-publishing handoff",
+public/control-center/automation-engine.js:323:        prompt: "Prepare publishing draft with approved content/media and schedule-safe checklist.",
+public/control-center/automation-engine.js:422:    if (normalizeText(step.type) === "prepare_publishing_draft") {
+public/control-center/automation-engine.js:426:        destination_page: "publishing",
+public/control-center/automation-engine.js:430:          title: asString(step?.payload?.title || "Prepared publishing draft"),
+public/control-center/automation-engine.js:432:          intent: "prepare_publishing_draft",
+public/control-center/automation-engine.js:436:      setSharedHandoff(projectName, "publishing", handoff);
+public/control-center/automation-engine.js:440:      return { status: "success", reason: "Publishing draft prepared.", step };
+public/control-center/automation-engine.js:451:          recommendation_id: asString(step?.payload?.recommendationId),
+public/control-center/runtime/RUNTIME_ROADMAP.md:31:- AI command lifecycle
+public/control-center/runtime/lifecycle/README.md:24:- Backend (orchestrator-service) owns all permission/policy authority
+public/control-center/runtime/lifecycle/README.md:192:2. Major pages (library.js, integrations.js, workflows.js, publishing.js, etc.)
+public/control-center/runtime/lifecycle/lifecycle-registry.js:8: * Backend authority (orchestrator-service) remains unchanged.
+public/control-center/runtime/governance-ai-bridge.js:2: * PHASE 19.2 — FRONTEND GOVERNANCE AWARENESS
+public/control-center/runtime/governance-ai-bridge.js:5:window.__GOVERNANCE_AI__ = {
+public/control-center/runtime/governance-ai-bridge.js:13:      window.__mhLog?.("GOVERNANCE_BLOCK", response);
+public/control-center/runtime/governance-ai-bridge.js:15:      window.__mhGraphLog?.("AI_GOVERNANCE_BLOCK", response);
+public/control-center/runtime/authority/route-role-fallback.js:19:  "content-studio": ["writer", "strategist", "compliance_reviewer", "admin"],
+public/control-center/runtime/authority/route-role-fallback.js:20:  "media-studio": ["designer", "video_lead", "compliance_reviewer", "admin"],
+public/control-center/runtime/authority/route-role-fallback.js:21:  publishing: ["publisher", "compliance_reviewer", "admin"],
+public/control-center/runtime/authority/route-role-fallback.js:28:  governance: ["compliance_reviewer", "admin", "analyst"],
+public/control-center/runtime/authority/route-role-fallback.js:29:  "ads-manager": ["ads_operator", "strategist", "analyst", "admin"],
+public/control-center/runtime/authority/route-role-fallback.js:30:  insights: ["analyst", "strategist", "ads_operator", "admin"],
+public/control-center/runtime/authority/authority-projection.js:12: * - mutate governance
+public/control-center/runtime/authority/authority-projection.js:36:export function getProjectedGovernance(state = {}) {
+public/control-center/runtime/authority/authority-projection.js:38:  return safeObject(operations.governance);
+public/control-center/runtime/authority/authority-projection.js:56:export function getProjectedAiRecommendations(state = {}) {
+public/control-center/runtime/authority/authority-projection.js:58:  return safeObject(operations.ai_recommendations);
+public/control-center/runtime/mh-runtime-globals.js:3:// Backend orchestrator remains the single decision authority.
+public/control-center/runtime/mh-runtime-globals.js:37:    backendAuthority: "orchestrator",
+public/control-center/legacy/page-standard.legacy-20260508.js:11:  "content-studio",
+public/control-center/legacy/page-standard.legacy-20260508.js:12:  "media-studio",
+public/control-center/legacy/page-standard.legacy-20260508.js:13:  "publishing",
+public/control-center/legacy/page-standard.legacy-20260508.js:14:  "ads-manager",
+public/control-center/legacy/page-standard.legacy-20260508.js:15:  "insights",
+public/control-center/legacy/page-standard.legacy-20260508.js:24:    description: "Understand system health, readiness, active work, blockers, and the next best move in one scan.",
+public/control-center/legacy/page-standard.legacy-20260508.js:38:    description: "Upload, classify, review, and route source-of-truth assets for campaign, content, media, and publishing.",
+public/control-center/legacy/page-standard.legacy-20260508.js:47:    secondary: { label: "Open Insights", route: "insights" }
+public/control-center/legacy/page-standard.legacy-20260508.js:52:    description: "Direct role-aware AI agents, structured tasks, artifacts, recommendations, and operating decisions.",
+public/control-center/legacy/page-standard.legacy-20260508.js:66:    description: "Build launch waves, inspect channel readiness, and package campaign plans for production and publishing.",
+public/control-center/legacy/page-standard.legacy-20260508.js:68:    secondary: { label: "Send To Content Studio", route: "content-studio" }
+public/control-center/legacy/page-standard.legacy-20260508.js:70:  "content-studio": {
+public/control-center/legacy/page-standard.legacy-20260508.js:73:    description: "Create, review, approve, rewrite, translate, and route platform copy into media or publishing.",
+public/control-center/legacy/page-standard.legacy-20260508.js:75:    secondary: { label: "Send To Media Studio", route: "media-studio" }
+public/control-center/legacy/page-standard.legacy-20260508.js:77:  "media-studio": {
+public/control-center/legacy/page-standard.legacy-20260508.js:80:    description: "Manage media jobs, prompt packs, storyboards, generated assets, approvals, and publishing handoffs.",
+public/control-center/legacy/page-standard.legacy-20260508.js:82:    secondary: { label: "Send To Publishing", route: "publishing" }
+public/control-center/legacy/page-standard.legacy-20260508.js:84:  publishing: {
+public/control-center/legacy/page-standard.legacy-20260508.js:87:    description: "Schedule jobs, approve manual publishing, retry failures, and monitor worker execution state.",
+public/control-center/legacy/page-standard.legacy-20260508.js:91:  "ads-manager": {
+public/control-center/legacy/page-standard.legacy-20260508.js:98:  insights: {
+public/control-center/legacy/page-standard.legacy-20260508.js:101:    description: "Turn performance, channel health, risk alerts, and learning memory into clear optimization moves.",
+public/control-center/legacy/page-standard.legacy-20260508.js:102:    primary: { label: "Generate Recommendations", route: "ai-command" },
+public/control-center/legacy/page-standard.legacy-20260508.js:108:    description: "Capture competitors, trends, keywords, audience insights, opportunities, and campaign-ready findings.",
+public/control-center/legacy/page-standard.legacy-20260508.js:115:    description: "Configure project settings, AI mode, roles, publishing rules, approvals, and readiness safeguards.",
+public/control-center/legacy/page-standard.legacy-20260508.js:117:    secondary: { label: "Check Governance", route: "governance" }
+public/control-center/legacy/page-standard.legacy-20260508.js:127:  "content-studio": { previous: "Campaign Studio", next: "Media Studio" },
+public/control-center/legacy/page-standard.legacy-20260508.js:128:  "media-studio": { previous: "Content Studio", next: "Publishing" },
+public/control-center/legacy/page-standard.legacy-20260508.js:129:  publishing: { previous: "Media Studio", next: "Insights" },
+public/control-center/legacy/page-standard.legacy-20260508.js:130:  insights: { previous: "Publishing", next: "AI Command" },
+public/control-center/legacy/page-standard.legacy-20260508.js:131:  "ai-command": { previous: "Insights", next: "Workflows" },
+public/control-center/legacy/page-standard.legacy-20260508.js:132:  workflows: { previous: "AI Command", next: "Ads Manager" },
+public/control-center/legacy/page-standard.legacy-20260508.js:133:  "ads-manager": { previous: "Workflows", next: "Research" },
+public/control-center/legacy/page-standard.legacy-20260508.js:153:    { label: "Review missing assets", description: "Prioritize files blocking campaign and publishing readiness.", action: "focus-library-missing" },
+public/control-center/legacy/page-standard.legacy-20260508.js:160:    { label: "Diagnose with AI", description: "Send connector failures and coverage gaps to AI Command.", action: "focus-integration-ai" }
+public/control-center/legacy/page-standard.legacy-20260508.js:177:    { label: "Create execution package", description: "Prepare handoffs for content, media, paid, and publishing.", action: "focus-campaign-package" },
+public/control-center/legacy/page-standard.legacy-20260508.js:178:    { label: "Send to Content Studio", description: "Move campaign strategy into production copy.", route: "content-studio" }
+public/control-center/legacy/page-standard.legacy-20260508.js:180:  "content-studio": [
+public/control-center/legacy/page-standard.legacy-20260508.js:184:    { label: "Send to Publishing", description: "Route approved content into execution.", route: "publishing" }
+public/control-center/legacy/page-standard.legacy-20260508.js:186:  "media-studio": [
+public/control-center/legacy/page-standard.legacy-20260508.js:192:  publishing: [
+public/control-center/legacy/page-standard.legacy-20260508.js:195:    { label: "Copy publish payload", description: "Send selected publishing context to AI Command for packaging.", action: "focus-publishing-ai" },
+public/control-center/legacy/page-standard.legacy-20260508.js:196:    { label: "Retry failed jobs", description: "Requeue failed or blocked publishing work.", action: "focus-retry-publishing" }
+public/control-center/legacy/page-standard.legacy-20260508.js:198:  "ads-manager": [
+public/control-center/legacy/page-standard.legacy-20260508.js:204:  insights: [
+public/control-center/legacy/page-standard.legacy-20260508.js:205:    { label: "Generate recommendations", description: "Turn performance signals into priorities.", route: "ai-command" },
+public/control-center/legacy/page-standard.legacy-20260508.js:206:    { label: "Record feedback", description: "Preserve what worked and what failed in learning memory.", route: "ai-command" },
+public/control-center/legacy/page-standard.legacy-20260508.js:208:    { label: "Improve weak channel", description: "Route weak-channel fixes into content, ads, or publishing.", route: "content-studio" }
+public/control-center/legacy/page-standard.legacy-20260508.js:213:    { label: "Save finding", description: "Capture the selected market insight for reuse.", action: "focus-save-research" },
+public/control-center/legacy/page-standard.legacy-20260508.js:214:    { label: "Send insight to Campaign", description: "Route positioning or opportunity notes into Campaign Studio.", route: "campaign-studio" }
+public/control-center/legacy/page-standard.legacy-20260508.js:217:    { label: "Save settings", description: "Persist project, AI, team, publishing, and approval configuration.", action: "focus-save-settings" },
+public/control-center/legacy/page-standard.legacy-20260508.js:246:      "Prioritize missing assets by campaign, media, and publishing impact."
+public/control-center/legacy/page-standard.legacy-20260508.js:277:      "Audit campaign readiness across channels, content, media, paid, and publishing.",
+public/control-center/legacy/page-standard.legacy-20260508.js:281:  "content-studio": {
+public/control-center/legacy/page-standard.legacy-20260508.js:289:  "media-studio": {
+public/control-center/legacy/page-standard.legacy-20260508.js:297:  publishing: {
+public/control-center/legacy/page-standard.legacy-20260508.js:298:    title: "Publishing Operator",
+public/control-center/legacy/page-standard.legacy-20260508.js:302:      "Generate a retry plan for failed or blocked publishing jobs."
+public/control-center/legacy/page-standard.legacy-20260508.js:305:  "ads-manager": {
+public/control-center/legacy/page-standard.legacy-20260508.js:313:  insights: {
+public/control-center/legacy/page-standard.legacy-20260508.js:315:    description: "Use AI to explain winners, weak channels, risks, and learning-memory updates.",
+public/control-center/legacy/page-standard.legacy-20260508.js:318:      "Turn current insights into campaign, content, ads, and publishing tasks."
+public/control-center/legacy/page-standard.legacy-20260508.js:331:    description: "Use AI to review AI mode, roles, publishing safeguards, and production readiness.",
+public/control-center/legacy/page-standard.legacy-20260508.js:333:      "Review settings for operational risk and recommend what to tighten before publishing.",
+public/control-center/legacy/page-standard.legacy-20260508.js:365:  "focus-schedule": "#publishingScheduleBtn",
+public/control-center/legacy/page-standard.legacy-20260508.js:366:  "focus-publishing-ai": "#publishingPushAiBtn",
+public/control-center/legacy/page-standard.legacy-20260508.js:367:  "focus-retry-publishing": "#publishingRequeueBtn",
+public/control-center/legacy/page-standard.legacy-20260508.js:368:  "focus-save-budget": "#adsManagerOpenPublishingBtn, #adsTotalBudgetInput",
+public/control-center/legacy/page-standard.legacy-20260508.js:370:  "focus-save-research": "#researchSaveFindingBtn, #researchSaveRecommendationBtn",
+public/control-center/legacy/page-standard.legacy-20260508.js:507:  const publishingQueue = asArray(ops.queues?.items).filter((item) => asString(item.entity_type) === "publishing_job" || asString(item.queue_type) === "publishing");
+public/control-center/legacy/page-standard.legacy-20260508.js:508:  const insights = asObject(activity.insights);
+public/control-center/legacy/page-standard.legacy-20260508.js:509:  const learning = asObject(activity.learning);
+public/control-center/legacy/page-standard.legacy-20260508.js:510:  const paid = asObject(insights.paid || insights.paid_media || {});
+public/control-center/legacy/page-standard.legacy-20260508.js:531:    recommendations: [
+public/control-center/legacy/page-standard.legacy-20260508.js:533:      ...asArray(insights.recommendations),
+public/control-center/legacy/page-standard.legacy-20260508.js:534:      ...asArray(insights.ai_recommendations),
+public/control-center/legacy/page-standard.legacy-20260508.js:535:      ...asArray(learning.recommendations),
+public/control-center/legacy/page-standard.legacy-20260508.js:536:      ...asArray(ops.ai_recommendations?.items)
+public/control-center/legacy/page-standard.legacy-20260508.js:566:    aiRecommendationsOpen: asNumber(ops.ai_recommendations?.open_count, 0),
+public/control-center/legacy/page-standard.legacy-20260508.js:567:    publishingReady: countByStatus(publishingQueue, ["ready", "manual_publish_ready"]) + scheduled.length,
+public/control-center/legacy/page-standard.legacy-20260508.js:568:    publishingCompleted: countByStatus(publishingQueue, ["published", "completed"]) + completed,
+public/control-center/legacy/page-standard.legacy-20260508.js:569:    publishingFailed: countByStatus(publishingQueue, ["failed"]) + failed,
+public/control-center/legacy/page-standard.legacy-20260508.js:571:    learningCount: [
+public/control-center/legacy/page-standard.legacy-20260508.js:572:      ...asArray(learning.system_lessons),
+public/control-center/legacy/page-standard.legacy-20260508.js:573:      ...asArray(learning.reusable_insights),
+public/control-center/legacy/page-standard.legacy-20260508.js:583:    approvalRulesReady: Boolean(ops.governance?.policy_rules),
+public/control-center/legacy/page-standard.legacy-20260508.js:604:      card("Market / language", `${m.market} / ${m.language}`, "Localization context for copy, campaigns, and publishing.", m.market !== "Not set" && m.language !== "Not set" ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:608:      card("Total assets", String(m.assetsTotal), "Files registered for brand, product, content, media, and publishing.", m.assetsTotal ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:620:      card("AI agents", String(Math.max(m.teamRoles, 8)), "Role-aware strategy, writing, media, paid, analyst, and operations agents.", "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:623:      card("Recommendations", String(m.aiRecommendationsOpen || m.recommendations.length), "AI-suggested actions waiting for operator decision.", m.aiRecommendationsOpen || m.recommendations.length ? "warning" : "neutral")
+public/control-center/legacy/page-standard.legacy-20260508.js:636:      card("Publishing readiness", String(m.publishingReady), "Jobs ready or scheduled for execution.", m.publishingReady ? "success" : "neutral")
+public/control-center/legacy/page-standard.legacy-20260508.js:638:    "content-studio": [
+public/control-center/legacy/page-standard.legacy-20260508.js:641:      card("Approved content", String(m.contentApproved), "Items ready to route into publishing.", m.contentApproved ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:644:    "media-studio": [
+public/control-center/legacy/page-standard.legacy-20260508.js:647:      card("Generated assets", String(m.mediaCompleted), "Completed creative jobs available for campaigns or publishing.", m.mediaCompleted ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:650:    publishing: [
+public/control-center/legacy/page-standard.legacy-20260508.js:651:      card("Scheduler queue", String(m.scheduled + m.publishingReady), "Queued, ready, or scheduled publishing work.", m.scheduled + m.publishingReady ? "warning" : "neutral"),
+public/control-center/legacy/page-standard.legacy-20260508.js:652:      card("Manual publish ready", String(m.publishingReady), "Items ready for approval or manual release.", m.publishingReady ? "success" : "neutral"),
+public/control-center/legacy/page-standard.legacy-20260508.js:653:      card("Completed jobs", String(m.publishingCompleted), "Publishing executions completed recently.", m.publishingCompleted ? "success" : "neutral"),
+public/control-center/legacy/page-standard.legacy-20260508.js:654:      card("Failed / retryable", String(m.publishingFailed), "Jobs requiring retry, repair, or manual diagnosis.", m.publishingFailed ? "danger" : "success")
+public/control-center/legacy/page-standard.legacy-20260508.js:656:    "ads-manager": [
+public/control-center/legacy/page-standard.legacy-20260508.js:662:    insights: [
+public/control-center/legacy/page-standard.legacy-20260508.js:663:      card("Performance summary", String(m.recommendations.length), "Optimization recommendations generated from available data.", m.recommendations.length ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:666:      card("Learning memory", String(m.learningCount), "Reusable lessons captured for future campaign decisions.", m.learningCount ? "success" : "neutral")
+public/control-center/legacy/page-standard.legacy-20260508.js:670:      card("Trends", String(m.recommendations.length), "Opportunity and recommendation signals available for strategy.", m.recommendations.length ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:676:      card("AI settings", m.aiCommandsTotal ? "In use" : "Configurable", "AI command and automation behavior can be governed here.", "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:678:      card("Approval rules", m.approvalRulesReady ? "Configured" : "Default", "Publishing and claim-safety review policy state.", m.approvalRulesReady ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:694:      card("Ready", m.missingAssets.length ? "Incomplete" : "Ready", "Required asset categories for production and publishing.", m.missingAssets.length ? "warning" : "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:704:      card("Ready", "Composer ready", "AI command composer and role mode are available.", "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:706:      card("Next step", m.recommendations.length ? "Run recommendation" : "Ask a role agent", "Best AI action for the current state.", m.recommendations.length ? "warning" : "success")
+public/control-center/legacy/page-standard.legacy-20260508.js:716:      card("Next step", "Build launch wave", "Prepare the campaign for content, media, paid, and publishing handoffs.", "success")
+public/control-center/legacy/page-standard.legacy-20260508.js:718:    "content-studio": [
+public/control-center/legacy/page-standard.legacy-20260508.js:721:      card("Next step", m.contentDrafts ? "Generate content" : "Send to Publishing", "Move copy toward approved execution.", m.contentDrafts ? "warning" : "success")
+public/control-center/legacy/page-standard.legacy-20260508.js:723:    "media-studio": [
+public/control-center/legacy/page-standard.legacy-20260508.js:728:    publishing: [
+public/control-center/legacy/page-standard.legacy-20260508.js:730:      card("Failed", String(m.publishingFailed), "Jobs requiring retry or manual recovery.", m.publishingFailed ? "danger" : "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:731:      card("Worker state", m.publishingFailed ? "Recovery needed" : "Stable", "Execution readiness based on recent publishing state.", m.publishingFailed ? "danger" : "success")
+public/control-center/legacy/page-standard.legacy-20260508.js:733:    "ads-manager": [
+public/control-center/legacy/page-standard.legacy-20260508.js:738:    insights: [
+public/control-center/legacy/page-standard.legacy-20260508.js:739:      card("Ready", m.recommendations.length ? "Recommendations ready" : "Needs signal", "Insights are useful when data and learning memory exist.", m.recommendations.length ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:741:      card("Next step", m.recommendations.length ? "Convert to tasks" : "Connect data sources", "Best way to make insights actionable.", m.recommendations.length ? "success" : "warning")
+public/control-center/legacy/page-standard.legacy-20260508.js:745:      card("Opportunities", String(m.recommendations.length), "Strategy opportunities available from current intelligence.", m.recommendations.length ? "success" : "warning"),
+public/control-center/legacy/page-standard.legacy-20260508.js:746:      card("Next step", "Send insight to Campaign", "Turn market intelligence into positioning or campaign structure.", "success")
+public/control-center/legacy/page-standard.legacy-20260508.js:750:      card("Needs attention", String(m.approvalsPending), "Pending approvals that may affect policy and publishing.", m.approvalsPending ? "warning" : "success"),
+public/control-center/legacy/page-standard.legacy-20260508.js:758:    card("Next step", firstText([m.recommendations[0]], "Open AI Workspace for guidance"), "Recommended operating move.", m.recommendations.length ? "warning" : "neutral")
+public/control-center/legacy/page-standard.legacy-20260508.js:764:    home: "Review the highest-risk blocker and ask AI Command for an owner-by-owner plan.",
+public/control-center/legacy/page-standard.legacy-20260508.js:771:    "content-studio": "Generate or approve the next content item and send it to Publishing.",
+public/control-center/legacy/page-standard.legacy-20260508.js:772:    "media-studio": "Create the missing prompt pack or storyboard, then approve media for use.",
+public/control-center/legacy/page-standard.legacy-20260508.js:773:    publishing: "Clear failed or ready jobs before scheduling more work.",
+public/control-center/legacy/page-standard.legacy-20260508.js:774:    "ads-manager": "Build an ad brief, generate variants, and return the plan to Campaign Studio.",
+public/control-center/legacy/page-standard.legacy-20260508.js:775:    insights: "Convert the top recommendation into campaign, content, ads, or publishing work.",
+public/control-center/legacy/page-standard.legacy-20260508.js:780:  return firstText([m.recommendations[0], map[route]], map.home);
+public/control-center/legacy/page-standard.legacy-20260508.js:859:          <button type="button" class="btn btn-primary std-full-width" id="stdNextBestActionBtn">Send To AI Command</button>
+public/control-center/legacy/page-standard.legacy-20260508.js:865:              <p class="card-label">Contextual AI Agent</p>
+public/control-center/legacy/page-standard.legacy-20260508.js:926:    { label: "Open Insights", route: "insights" }
+public/control-center/legacy/page-standard.legacy-20260508.js:941:      { label: "Open Content Studio", route: "content-studio" },
+public/control-center/legacy/page-standard.legacy-20260508.js:942:      { label: "Open Media Studio", route: "media-studio" },
+public/control-center/legacy/page-standard.legacy-20260508.js:943:      { label: "Open Publishing", route: "publishing" }
+public/control-center/legacy/page-standard.legacy-20260508.js:947:      { label: "Open Publishing", route: "publishing" },
+public/control-center/legacy/page-standard.legacy-20260508.js:948:      { label: "Open Insights", route: "insights" }
+public/control-center/legacy/page-standard.legacy-20260508.js:950:    publishing: [
+public/control-center/legacy/page-standard.legacy-20260508.js:956:      { label: "Open Governance", route: "governance" },
+public/control-center/legacy/page-standard.legacy-20260508.js:980:    context.showMessage?.("AI prompt queued in AI Command.");
+public/control-center/legacy/page-standard.legacy-20260508.js:1054:      context.showMessage?.("AI prompt queued in AI Command.");
+public/control-center/legacy/page-standard.legacy-20260508.js:1079:      { label: "Data used", value: "AI commands, artifacts, recommendations, learning memory" },
+public/control-center/legacy/page-standard.legacy-20260508.js:1090:    "content-studio": [
+public/control-center/legacy/page-standard.legacy-20260508.js:1094:    "media-studio": [
+public/control-center/legacy/page-standard.legacy-20260508.js:1098:    publishing: [
+public/control-center/legacy/page-standard.legacy-20260508.js:1099:      { label: "Data used", value: "Scheduler queue, publishing jobs, execution results, worker status" },
+public/control-center/legacy/page-standard.legacy-20260508.js:1100:      { label: "Queue state", value: `${m.publishingReady} ready / ${m.publishingFailed} failed` }
+public/control-center/legacy/page-standard.legacy-20260508.js:1102:    "ads-manager": [
+public/control-center/legacy/page-standard.legacy-20260508.js:1103:      { label: "Data used", value: "Campaign records, paid insights, tracking connectors" },
+public/control-center/legacy/page-standard.legacy-20260508.js:1106:    insights: [
+public/control-center/legacy/page-standard.legacy-20260508.js:1107:      { label: "Data used", value: "Project insights, learning memory, connected platform coverage" },
+public/control-center/legacy/page-standard.legacy-20260508.js:1108:      { label: "Recommendations", value: String(m.recommendations.length) }
+public/control-center/legacy/page-standard.legacy-20260508.js:1115:      { label: "Data used", value: "Governance policy, role matrix, project configuration" },
+public/control-center/legacy/page-standard.legacy-20260508.js:1165:  if (aiTitle) aiTitle.textContent = "Contextual AI Agent";
+public/control-center/legacy/page-standard.legacy-20260508.js:1167:  if (nextTitle) nextTitle.textContent = `${copy.eyebrow} recommendation`;
+public/control-center/legacy/page-standard.legacy-20260508.js:1178:      context.showMessage?.("AI Command opened.");
+public/control-center/legacy/integrations.monolith-20260508.js:18:        enables: "Landing-page analysis, content-to-site traffic mapping, attribution context, and conversion path learning.",
+public/control-center/legacy/integrations.monolith-20260508.js:53:        whyItMatters: "Shopify unlocks product catalogs, order flow, and conversion insights for commerce-first projects.",
+public/control-center/legacy/integrations.monolith-20260508.js:54:        enables: "Product sync, order sync, customer sync, and sales reporting.",
+public/control-center/legacy/integrations.monolith-20260508.js:55:        dataScope: ["Products", "Orders", "Customers", "Sales"],
+public/control-center/legacy/integrations.monolith-20260508.js:73:        enables: "Listing sync, sales signals, performance by product, and marketplace learning.",
+public/control-center/legacy/integrations.monolith-20260508.js:105:    description: "Post insights, video performance, engagement, comments, publishing paths, and linked account intelligence.",
+public/control-center/legacy/integrations.monolith-20260508.js:112:        purpose: "Page insights, post performance, engagement, and linked business intelligence.",
+public/control-center/legacy/integrations.monolith-20260508.js:113:        whyItMatters: "Facebook insights help the system understand what posts drive reach, clicks, and downstream action.",
+public/control-center/legacy/integrations.monolith-20260508.js:114:        enables: "Post insights, engagement data, comments, publishing support, and ad account linkage.",
+public/control-center/legacy/integrations.monolith-20260508.js:115:        dataScope: ["Post insights", "Engagement", "Comments", "Publishing", "Ads linkage"],
+public/control-center/legacy/integrations.monolith-20260508.js:130:        purpose: "Post, reel, and profile insight sync for Instagram business performance.",
+public/control-center/legacy/integrations.monolith-20260508.js:132:        enables: "Post insights, reel insights, engagement, comments, publishing, and business account analytics.",
+public/control-center/legacy/integrations.monolith-20260508.js:133:        dataScope: ["Posts", "Reels", "Engagement", "Comments", "Publishing"],
+public/control-center/legacy/integrations.monolith-20260508.js:148:        purpose: "Video and post insight sync for TikTok creative and audience performance.",
+public/control-center/legacy/integrations.monolith-20260508.js:150:        enables: "Video insights, engagement, comments, profile metrics, and future publishing support.",
+public/control-center/legacy/integrations.monolith-20260508.js:151:        dataScope: ["Video insights", "Engagement", "Comments", "Audience", "Publishing"],
+public/control-center/legacy/integrations.monolith-20260508.js:166:        purpose: "Video performance and channel insight sync for long-form or short-form YouTube content.",
+public/control-center/legacy/integrations.monolith-20260508.js:167:        whyItMatters: "YouTube data gives stronger watch-based learning and topic-level content intelligence.",
+public/control-center/legacy/integrations.monolith-20260508.js:168:        enables: "Video insights, watch metrics, subscriber trends, comments, and publishing context.",
+public/control-center/legacy/integrations.monolith-20260508.js:169:        dataScope: ["Videos", "Views", "Watch time", "Engagement", "Publishing"],
+public/control-center/legacy/integrations.monolith-20260508.js:184:        purpose: "Future-ready business profile insight and publishing connection for LinkedIn surfaces.",
+public/control-center/legacy/integrations.monolith-20260508.js:186:        enables: "Post insights, audience signals, company page analytics, and publishing support.",
+public/control-center/legacy/integrations.monolith-20260508.js:187:        dataScope: ["Posts", "Audience", "Engagement", "Publishing"],
+public/control-center/legacy/integrations.monolith-20260508.js:245:        enables: "Event tracking, conversion reporting, paid attribution, and audience learning.",
+public/control-center/legacy/integrations.monolith-20260508.js:312:    description: "Lifecycle messaging, customer records, contact sync, and email campaign infrastructure.",
+public/control-center/legacy/integrations.monolith-20260508.js:377:        purpose: "Customer record sync for lead, customer, and lifecycle intelligence.",
+public/control-center/legacy/integrations.monolith-20260508.js:378:        whyItMatters: "CRM data helps the system connect campaigns to pipeline, customers, and repeat purchase behavior.",
+public/control-center/legacy/integrations.monolith-20260508.js:379:        enables: "Contact sync, customer sync, lead intelligence, and lifecycle learning.",
+public/control-center/legacy/integrations.monolith-20260508.js:380:        dataScope: ["Contacts", "Customers", "Leads", "Lifecycle state"],
+public/control-center/legacy/integrations.monolith-20260508.js:423:        permissionScope: "Customer ID + OAuth token",
+public/control-center/legacy/integrations.monolith-20260508.js:425:        primaryField: "customerId",
+public/control-center/legacy/integrations.monolith-20260508.js:427:          { key: "customerId", label: "Customer ID", placeholder: "123-456-7890", required: true },
+public/control-center/legacy/integrations.monolith-20260508.js:438:        whyItMatters: "TikTok Ads data helps connect short-form content learning to actual paid outcomes.",
+public/control-center/legacy/integrations.monolith-20260508.js:847:    { key: "posts", pattern: /post|reel|video|comment|publishing|profile|channel/ },
+public/control-center/legacy/integrations.monolith-20260508.js:848:    { key: "insights", pattern: /insight|engagement|watch|audience|query|ctr|position|seo|analytics|performance/ },
+public/control-center/legacy/integrations.monolith-20260508.js:851:    { key: "orders", pattern: /order|sale|revenue|product|listing|merchant|customer|contact|lead/ }
+public/control-center/legacy/integrations.monolith-20260508.js:864:      read: [...new Set(["posts", "insights", ...scopeKeys])],
+public/control-center/legacy/integrations.monolith-20260508.js:865:      write: ["publishing", "audience updates"]
+public/control-center/legacy/integrations.monolith-20260508.js:1106:      label: "Social Insights",
+public/control-center/legacy/integrations.monolith-20260508.js:1166:function buildAISmartRecommendation(domainModels) {
+public/control-center/legacy/integrations.monolith-20260508.js:1239:    publishing_blocker: ["instagram", "facebook", "tiktok", "youtube", "linkedin"],
+public/control-center/legacy/integrations.monolith-20260508.js:1240:    data_learning_blocker: ["search-console", "mailchimp", "meta-ads", "google-ads"]
+public/control-center/legacy/integrations.monolith-20260508.js:1254:    publishing_blocker: "Publishing blocker",
+public/control-center/legacy/integrations.monolith-20260508.js:1255:    data_learning_blocker: "Data learning blocker"
+public/control-center/legacy/integrations.monolith-20260508.js:1267:    impactChips.push("Publishing");
+public/control-center/legacy/integrations.monolith-20260508.js:1288:function renderAISmartRecommendation(rec, escapeHtml) {
+public/control-center/legacy/integrations.monolith-20260508.js:1359:function buildRecommendations(domainModels, coverageMap) {
+public/control-center/legacy/integrations.monolith-20260508.js:1367:  const recommendations = [];
+public/control-center/legacy/integrations.monolith-20260508.js:1370:    recommendations.push({
+public/control-center/legacy/integrations.monolith-20260508.js:1377:    recommendations.push({
+public/control-center/legacy/integrations.monolith-20260508.js:1384:    recommendations.push({
+public/control-center/legacy/integrations.monolith-20260508.js:1391:    recommendations.push({
+public/control-center/legacy/integrations.monolith-20260508.js:1397:  if (!recommendations.length) {
+public/control-center/legacy/integrations.monolith-20260508.js:1398:    recommendations.push({
+public/control-center/legacy/integrations.monolith-20260508.js:1407:      prompt: "Review all current integrations and tell me which platform or tool I should connect next to improve learning, attribution, and execution fastest."
+public/control-center/legacy/integrations.monolith-20260508.js:1411:      prompt: "Identify the critical missing integrations before launch and explain which ones block publishing, analytics, SEO, paid optimization, and conversion intelligence."
+public/control-center/legacy/integrations.monolith-20260508.js:1427:  return { recommendations, prompts };
+public/control-center/legacy/integrations.monolith-20260508.js:1438:    description: "Organic distribution surfaces that supply audience, content, and publishing signals.",
+public/control-center/legacy/integrations.monolith-20260508.js:1555:function buildIntegrationOverviewSummary(cards, recommendations) {
+public/control-center/legacy/integrations.monolith-20260508.js:1579:    nextRecommendedAction: recommendations.recommendations[0]?.title || "Review connector coverage"
+public/control-center/legacy/integrations.monolith-20260508.js:2148:      description: "Audience and publishing platforms used for organic reach, social engagement, and content performance learning.",
+public/control-center/legacy/integrations.monolith-20260508.js:2160:      description: "Lifecycle messaging, customer records, audience segmentation, and relationship data required for retention and lifecycle operations.",
+public/control-center/legacy/integrations.monolith-20260508.js:2532:      showMessage?.("Integration review prompt added to AI Command.");
+public/control-center/legacy/integrations.monolith-20260508.js:2588:    const recommendations = buildRecommendations(domainModels, coverageMap);
+public/control-center/legacy/integrations.monolith-20260508.js:2589:    const aiRec = buildAISmartRecommendation(domainModels);
+public/control-center/legacy/integrations.monolith-20260508.js:2591:    const overview = buildIntegrationOverviewSummary(allCards, recommendations);
+public/control-center/legacy/integrations.monolith-20260508.js:2656:              <span>${escapeHtml(recommendations.recommendations[0]?.meta || "Review the highest-impact connector gap before the next campaign launch.")}</span>
+public/control-center/legacy/integrations.monolith-20260508.js:2661:        ${renderAISmartRecommendation(aiRec, escapeHtml)}
+public/control-center/legacy/integrations.monolith-20260508.js:2735:                ${recommendations.prompts.slice(0, 2).map((item) => `
+public/control-center/legacy/integrations.monolith-20260508.js:2770:                ${recommendations.recommendations.map((item) => `
+public/control-center/legacy/styles.legacy-full.css:697:.home-ai-agent-head,
+public/control-center/legacy/styles.legacy-full.css:1591:.home-exec-agent-card {
+public/control-center/legacy/styles.legacy-full.css:1600:.home-exec-agent-summary {
+public/control-center/legacy/styles.legacy-full.css:1792:.home-ai-agent-card,
+public/control-center/legacy/styles.legacy-full.css:3464:  .home-exec-agent-card .btn {
+public/control-center/legacy/styles.legacy-full.css:4139:  .ctrl-msg-agent-icon {
+public/control-center/legacy/styles.legacy-full.css:4160:  .ctrl-msg-ai-agent {
+public/control-center/legacy/styles.legacy-full.css:4308:  .ctrl-recent-agent {
+public/control-center/legacy/styles.legacy-full.css:4433:/* AI Command Operating Center (scoped) */
+public/control-center/legacy/styles.legacy-full.css:4665:section[data-page="ai-command"] .aicmd-agent-grid {
+public/control-center/legacy/styles.legacy-full.css:4671:section[data-page="ai-command"] .aicmd-agent-card {
+public/control-center/legacy/styles.legacy-full.css:4680:section[data-page="ai-command"] .aicmd-agent-card h4 {
+public/control-center/legacy/styles.legacy-full.css:4687:section[data-page="ai-command"] .aicmd-agent-card p {
+public/control-center/legacy/styles.legacy-full.css:4694:section[data-page="ai-command"] .aicmd-agent-meta {
+public/control-center/legacy/styles.legacy-full.css:4698:section[data-page="ai-command"] .aicmd-agent-meta span {
+public/control-center/legacy/styles.legacy-full.css:4743:  section[data-page="ai-command"] .aicmd-agent-grid {
+public/control-center/legacy/styles.legacy-full.css:5719:/* ── AI Smart Connect Recommendation Block ──────────────────────────── */
+public/control-center/legacy/styles.legacy-full.css:7244:[data-page="campaign-studio"] .campaign-recommendation-grid,
+public/control-center/legacy/styles.legacy-full.css:7325:  [data-page="campaign-studio"] .campaign-recommendation-grid {
+public/control-center/legacy/styles.legacy-full.css:8050:/* Compact AI command palette */
+public/control-center/legacy/styles.legacy-20260508.css:809:.home-exec-agent-card {
+public/control-center/legacy/styles.legacy-20260508.css:818:.home-exec-agent-summary {
+public/control-center/legacy/styles.legacy-20260508.css:2086:.home-exec-agent-card .btn {
+public/control-center/legacy/styles.legacy-20260508.css:2670:.ctrl-msg-agent-icon {
+public/control-center/legacy/styles.legacy-20260508.css:2691:.ctrl-msg-ai-agent {
+public/control-center/legacy/styles.legacy-20260508.css:2836:.ctrl-recent-agent {
+public/control-center/legacy/styles.legacy-20260508.css:3190:section[data-page="ai-command"] .aicmd-agent-grid {
+public/control-center/legacy/styles.legacy-20260508.css:3196:section[data-page="ai-command"] .aicmd-agent-card {
+public/control-center/legacy/styles.legacy-20260508.css:3205:section[data-page="ai-command"] .aicmd-agent-card h4 {
+public/control-center/legacy/styles.legacy-20260508.css:3212:section[data-page="ai-command"] .aicmd-agent-card p {
+public/control-center/legacy/styles.legacy-20260508.css:3219:section[data-page="ai-command"] .aicmd-agent-meta {
+public/control-center/legacy/styles.legacy-20260508.css:3223:section[data-page="ai-command"] .aicmd-agent-meta span {
+public/control-center/legacy/styles.legacy-20260508.css:3268:section[data-page="ai-command"] .aicmd-agent-grid {
+public/control-center/legacy/styles.legacy-20260508.css:5429:[data-page="campaign-studio"] .campaign-recommendation-grid,
+public/control-center/legacy/styles.legacy-20260508.css:5498:[data-page="campaign-studio"] .campaign-recommendation-grid {
+public/control-center/styles/15-clean-operating-layer.css:1:/* MH-OS Next Best Action Surface Primitives */
+public/control-center/styles/15-clean-operating-layer.css:2:/* MH-OS Next Best Action Primitive */
+public/control-center/styles/16-mhos-theme-v2.css:611:[data-theme-version="v2"].content-studio-v2 {
+public/control-center/styles/16-mhos-theme-v2.css:615:[data-theme-version="v2"].content-studio-v2 .mh-v2-command {
+public/control-center/styles/16-mhos-theme-v2.css:623:[data-theme-version="v2"].content-studio-v2 .mh-v2-title {
+public/control-center/styles/16-mhos-theme-v2.css:627:[data-theme-version="v2"].content-studio-v2 .mh-v2-workspace {
+public/control-center/styles/16-mhos-theme-v2.css:635:[data-theme-version="v2"].content-studio-v2 .mh-v2-editor,
+public/control-center/styles/16-mhos-theme-v2.css:636:[data-theme-version="v2"].content-studio-v2 .mh-v2-stage,
+public/control-center/styles/16-mhos-theme-v2.css:637:[data-theme-version="v2"].content-studio-v2 .mh-v2-inspector {
+public/control-center/styles/16-mhos-theme-v2.css:641:[data-theme-version="v2"].content-studio-v2 .mh-v2-editor {
+public/control-center/styles/16-mhos-theme-v2.css:645:[data-theme-version="v2"].content-studio-v2 .mh-v2-stage {
+public/control-center/styles/16-mhos-theme-v2.css:651:[data-theme-version="v2"].content-studio-v2 .mh-v2-inspector {
+public/control-center/styles/16-mhos-theme-v2.css:656:[data-theme-version="v2"].content-studio-v2 .content-preview-grid {
+public/control-center/styles/16-mhos-theme-v2.css:664:[data-theme-version="v2"].content-studio-v2 .content-preview-grid .setup-field-group {
+public/control-center/styles/16-mhos-theme-v2.css:670:[data-theme-version="v2"].content-studio-v2 .setup-field-group {
+public/control-center/styles/16-mhos-theme-v2.css:674:[data-theme-version="v2"].content-studio-v2 .setup-field-head {
+public/control-center/styles/16-mhos-theme-v2.css:678:[data-theme-version="v2"].content-studio-v2 .setup-label {
+public/control-center/styles/16-mhos-theme-v2.css:686:[data-theme-version="v2"].content-studio-v2 .setup-input,
+public/control-center/styles/16-mhos-theme-v2.css:687:[data-theme-version="v2"].content-studio-v2 input.setup-input,
+public/control-center/styles/16-mhos-theme-v2.css:688:[data-theme-version="v2"].content-studio-v2 textarea.setup-input {
+public/control-center/styles/16-mhos-theme-v2.css:699:[data-theme-version="v2"].content-studio-v2 textarea.setup-input {
+public/control-center/styles/16-mhos-theme-v2.css:706:[data-theme-version="v2"].content-studio-v2 .mh-v2-tabs {
+public/control-center/styles/16-mhos-theme-v2.css:711:[data-theme-version="v2"].content-studio-v2 .mh-v2-tab {
+public/control-center/styles/16-mhos-theme-v2.css:717:[data-theme-version="v2"].content-studio-v2 .mh-v2-tab.is-active,
+public/control-center/styles/16-mhos-theme-v2.css:718:[data-theme-version="v2"].content-studio-v2 .mh-v2-tab[aria-selected="true"] {
+public/control-center/styles/16-mhos-theme-v2.css:723:[data-theme-version="v2"].content-studio-v2 .mh-v2-action {
+public/control-center/styles/16-mhos-theme-v2.css:728:[data-theme-version="v2"].content-studio-v2 .mh-v2-action.is-primary {
+public/control-center/styles/16-mhos-theme-v2.css:734:[data-theme-version="v2"].content-studio-v2 .mh-v2-list {
+public/control-center/styles/16-mhos-theme-v2.css:738:[data-theme-version="v2"].content-studio-v2 .mh-v2-row {
+public/control-center/styles/16-mhos-theme-v2.css:743:[data-theme-version="v2"].content-studio-v2 button.mh-v2-row {
+public/control-center/styles/16-mhos-theme-v2.css:750:[data-theme-version="v2"].content-studio-v2 button.mh-v2-row.is-active {
+public/control-center/styles/16-mhos-theme-v2.css:754:[data-theme-version="v2"].content-studio-v2 .mh-v2-dock {
+public/control-center/styles/16-mhos-theme-v2.css:761:[data-theme-version="v2"].content-studio-v2 .mh-v2-dock > .mh-v2-section {
+public/control-center/styles/16-mhos-theme-v2.css:765:[data-theme-version="v2"].content-studio-v2 .simple-banner,
+public/control-center/styles/16-mhos-theme-v2.css:766:[data-theme-version="v2"].content-studio-v2 .empty-box {
+public/control-center/styles/16-mhos-theme-v2.css:774:  [data-theme-version="v2"].content-studio-v2 .content-preview-grid {
+public/control-center/styles/16-mhos-theme-v2.css:784:[data-theme-version="v2"].content-studio-v2 {
+public/control-center/styles/16-mhos-theme-v2.css:788:[data-theme-version="v2"].content-studio-v2 .mh-v2-command {
+public/control-center/styles/16-mhos-theme-v2.css:795:[data-theme-version="v2"].content-studio-v2 .mh-v2-workspace {
+public/control-center/styles/16-mhos-theme-v2.css:803:[data-theme-version="v2"].content-studio-v2 .mh-v2-editor,
+public/control-center/styles/16-mhos-theme-v2.css:804:[data-theme-version="v2"].content-studio-v2 .mh-v2-stage,
+public/control-center/styles/16-mhos-theme-v2.css:805:[data-theme-version="v2"].content-studio-v2 .mh-v2-inspector {
+public/control-center/styles/16-mhos-theme-v2.css:809:[data-theme-version="v2"].content-studio-v2 .mh-v2-field-grid {
+public/control-center/styles/16-mhos-theme-v2.css:816:[data-theme-version="v2"].content-studio-v2 .mh-v2-form {
+public/control-center/styles/16-mhos-theme-v2.css:821:[data-theme-version="v2"].content-studio-v2 .mh-v2-field {
+public/control-center/styles/16-mhos-theme-v2.css:829:[data-theme-version="v2"].content-studio-v2 .mh-v2-field-grid .mh-v2-field {
+public/control-center/styles/16-mhos-theme-v2.css:835:[data-theme-version="v2"].content-studio-v2 .mh-v2-field > span {
+public/control-center/styles/16-mhos-theme-v2.css:843:[data-theme-version="v2"].content-studio-v2 .mh-v2-input,
+public/control-center/styles/16-mhos-theme-v2.css:844:[data-theme-version="v2"].content-studio-v2 .mh-v2-textarea {
+public/control-center/styles/16-mhos-theme-v2.css:857:[data-theme-version="v2"].content-studio-v2 .mh-v2-input {
+public/control-center/styles/16-mhos-theme-v2.css:862:[data-theme-version="v2"].content-studio-v2 .mh-v2-textarea {
+public/control-center/styles/16-mhos-theme-v2.css:870:[data-theme-version="v2"].content-studio-v2 .mh-v2-input:focus,
+public/control-center/styles/16-mhos-theme-v2.css:871:[data-theme-version="v2"].content-studio-v2 .mh-v2-textarea:focus {
+
+Workflow routing references:
+public/control-center/router.js:5:import { campaignStudioRoute } from "./pages/campaign-studio.js";
+public/control-center/router.js:6:import { contentStudioRoute } from "./pages/content-studio-workspace.js";
+public/control-center/router.js:7:import { mediaStudioRoute } from "./pages/media-studio-workspace.js";
+public/control-center/router.js:8:import { publishingRoute } from "./pages/publishing.js";
+public/control-center/router.js:9:import { adsManagerRoute } from "./pages/ads-manager.js";
+public/control-center/router.js:10:import { insightsRoute } from "./pages/insights.js";
+public/control-center/router.js:21:import { libraryRoute } from "./pages/library.js";
+public/control-center/router.js:23:import { customerCenterRoute } from "./pages/customer-center.js";
+public/control-center/router.js:43:  [publishingRoute.id]: publishingRoute,
+public/control-center/router.js:45:  [insightsRoute.id]: insightsRoute,
+public/control-center/router.js:48:  [libraryRoute.id]: libraryRoute,
+public/control-center/app.js:41:  fetchProjectInsights,
+public/control-center/app.js:65:  savePublishingSchedule,
+public/control-center/app.js:66:  reschedulePublishingItem,
+public/control-center/app.js:67:  approvePublishingItem,
+public/control-center/app.js:68:  publishPublishingItem,
+public/control-center/app.js:69:  failPublishingItem,
+public/control-center/app.js:2015:    ["publishingCalendar", "No data is available yet."],
+public/control-center/app.js:2016:    ["publishingQueue", "Open the related setup page to complete this section."],
+public/control-center/app.js:2017:    ["publishingChannels", "Open the related setup page to complete this section."],
+public/control-center/app.js:2022:    ["insightsOverview", "This section is currently unavailable."],
+public/control-center/app.js:2023:    ["insightsReports", "No data is available yet."],
+public/control-center/app.js:2084:      fetchProjectInsights,
+public/control-center/app.js:2108:      savePublishingSchedule,
+public/control-center/app.js:2109:      reschedulePublishingItem,
+public/control-center/app.js:2110:      approvePublishingItem,
+public/control-center/app.js:2111:      publishPublishingItem,
+public/control-center/app.js:2112:      failPublishingItem,
+public/control-center/app.js:3040:    Library: "library",
+public/control-center/app.js:3044:    Publishing: "publishing"
+public/control-center/app.js:3066:    "open-campaign-studio": "campaign-studio",
+public/control-center/app.js:3067:    "open-publishing": "publishing",
+public/control-center/app.js:3139:      (candidate.closest("#newCampaignBtn") ? "open-campaign-studio" : "") ||
+public/control-center/app.js:3140:      (candidate.closest("#scheduleBtn") ? "open-publishing" : "");
+public/control-center/app.js:3825:            Start with a project, campaign, content, media, publishing, approval, or a custom AI workflow.
+public/control-center/app.js:3895:        <button class="executive-new-option" type="button" data-new-route="campaign-studio" data-new-prompt="Create a campaign plan for the current project. Ask me the required questions step by step.">
+public/control-center/app.js:3901:        <button class="executive-new-option" type="button" data-new-route="content-studio" data-new-prompt="Create a blog post workflow for the current project. Ask for topic, audience, language, SEO goal, and call to action.">
+public/control-center/app.js:3907:        <button class="executive-new-option" type="button" data-new-route="media-studio" data-new-prompt="Create a media generation workflow. Ask for format, platform, product, style, language, and assets needed.">
+public/control-center/app.js:3913:        <button class="executive-new-option" type="button" data-new-route="publishing" data-new-prompt="Prepare a publishing workflow. Ask what content should be reviewed, approved, scheduled, or published.">
+public/control-center/app.js:3915:          <strong>Publishing Task</strong>
+public/control-center/app.js:4085:    newCampaignBtn.setAttribute("data-action", "open-campaign-studio");
+public/control-center/app.js:4089:    scheduleBtn.textContent = "Open Publishing";
+public/control-center/app.js:4090:    scheduleBtn.setAttribute("data-action", "open-publishing");
+public/control-center/pages/ai-command/tool-dock.js:3:  setSharedLibrarySourceBridge,
+public/control-center/pages/ai-command/tool-dock.js:46:function tryAutoOpenDrawerAfterLibrary(projectName) {
+public/control-center/pages/ai-command/tool-dock.js:159:// --- When Open Library is clicked from tool dock, store both bridge and drawer return context ---
+public/control-center/pages/ai-command/tool-dock.js:160:function handleOpenLibraryFromDrawer({
+public/control-center/pages/ai-command/tool-dock.js:182:  // Also set library source bridge context if needed (existing logic)
+public/control-center/pages/ai-command/tool-dock.js:186:export function openLibrarySourcePickerFromAiCommand({
+public/control-center/pages/ai-command/tool-dock.js:210:    type: "library_source_selection",
+public/control-center/pages/ai-command/tool-dock.js:214:    libraryFilter: mapping.libraryFilter,
+public/control-center/pages/ai-command/tool-dock.js:220:  setSharedLibrarySourceBridge(project, payload);
+public/control-center/pages/ai-command/tool-dock.js:221:  setSharedLibrarySourceBridge("__default__", payload);
+public/control-center/pages/ai-command/tool-dock.js:226:  updateStatus?.("Library opened. Select an asset, click Use as Source in AI Command, then return to AI Command.");
+public/control-center/pages/ai-command/tool-dock.js:229:    window.location.hash = "#library";
+public/control-center/pages/ai-command/tool-dock.js:243:export function getSelectedLibrarySource(projectName = "") {
+public/control-center/pages/ai-command/tool-dock.js:263:  const source = getSelectedLibrarySource(projectName);
+public/control-center/pages/ai-command/tool-dock.js:266:  const name = source.name || source.filename || source.fileName || "Selected Library source";
+public/control-center/pages/ai-command/tool-dock.js:267:  const type = source.asset_type || source.type || source.source_type || "Library asset";
+public/control-center/pages/ai-command/tool-dock.js:276:    "Selected Library source context:",
+public/control-center/pages/ai-command/tool-dock.js:286:  lines.push("Use this Library source as trusted context. Do not add unsupported claims.");
+public/control-center/pages/ai-command/tool-dock.js:298:function sourceMetadataNeedsLibrarySource(rawValue = "") {
+public/control-center/pages/ai-command/tool-dock.js:312:  const source = getSelectedLibrarySource(projectName);
+public/control-center/pages/ai-command/tool-dock.js:320:    "This prompt tool needs a trusted Library source first. Choose a source from Library, then return to prepare the composer prompt."
+public/control-center/pages/ai-command/tool-dock.js:327:  const source = getSelectedLibrarySource(projectName);
+public/control-center/pages/ai-command/tool-dock.js:334:      selectedNode.innerHTML = `<span class=\"mhos-tool-drawer-selected-source-empty\">No trusted Library source selected yet.</span>`;
+public/control-center/pages/ai-command/tool-dock.js:350:        <div class=\"mhos-tool-drawer-source-meta\">${escapeHtml(type)} · Added from Library · Not approval or publish readiness</div>
+public/control-center/pages/ai-command/tool-dock.js:367:    const libraryOption = Array.from(sourceSelect.options || []).find((option) => {
+public/control-center/pages/ai-command/tool-dock.js:369:      return /library|source|asset|brand|product/i.test(value);
+public/control-center/pages/ai-command/tool-dock.js:371:    if (libraryOption) sourceSelect.value = libraryOption.value;
+public/control-center/pages/ai-command/tool-dock.js:379:        drawer.querySelector('[data-aicmd-tool-drawer-open-library]')?.click();
+public/control-center/pages/ai-command/tool-dock.js:387:        if (selectedNode) selectedNode.innerHTML = `<span class=\"mhos-tool-drawer-selected-source-empty\">No trusted Library source selected yet.</span>`;
+public/control-center/pages/ai-command/tool-dock.js:430:      frontendOwnerPage: "campaign-studio",
+public/control-center/pages/ai-command/tool-dock.js:431:      destinations: ["chat-preview", "campaign-studio", "content-studio", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:432:      sourceTypes: ["current_chat", "campaign_notes", "market_notes", "audience_notes", "product_data", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:443:      frontendOwnerPage: "campaign-studio",
+public/control-center/pages/ai-command/tool-dock.js:444:      destinations: ["chat-preview", "campaign-studio", "workflows", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:445:      sourceTypes: ["current_chat", "campaign_brief", "asset_requirements", "timeline_notes", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:456:      frontendOwnerPage: "campaign-studio",
+public/control-center/pages/ai-command/tool-dock.js:457:      destinations: ["chat-preview", "campaign-studio", "content-studio", "insights"],
+public/control-center/pages/ai-command/tool-dock.js:458:      sourceTypes: ["current_chat", "market_notes", "customer_notes", "insights_report", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:469:      frontendOwnerPage: "campaign-studio",
+public/control-center/pages/ai-command/tool-dock.js:470:      destinations: ["chat-preview", "campaign-studio", "content-studio", "ads-manager"],
+public/control-center/pages/ai-command/tool-dock.js:471:      sourceTypes: ["current_chat", "product_data", "pricing_notes", "proof_points", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:482:      frontendOwnerPage: "campaign-studio",
+public/control-center/pages/ai-command/tool-dock.js:483:      destinations: ["chat-preview", "campaign-studio", "content-studio", "workflows", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:484:      sourceTypes: ["current_chat", "campaign_brief", "audience_notes", "content_inventory", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:496:      destinations: ["chat-preview", "workflows", "task", "campaign-studio"],
+public/control-center/pages/ai-command/tool-dock.js:511:      frontendOwnerPage: "content-studio",
+public/control-center/pages/ai-command/tool-dock.js:512:      destinations: ["chat-preview", "content-studio", "library", "media-studio", "publishing", "compliance"],
+public/control-center/pages/ai-command/tool-dock.js:513:      sourceTypes: ["current_chat", "library_folder", "brand_profile", "product_data", "legal_pricing_docs", "research_proof_docs", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:525:      destinations: ["composer", "content-studio"],
+public/control-center/pages/ai-command/tool-dock.js:537:      frontendOwnerPage: "content-studio",
+public/control-center/pages/ai-command/tool-dock.js:538:      destinations: ["composer", "content-studio"],
+public/control-center/pages/ai-command/tool-dock.js:551:      destinations: ["composer", "content-studio"],
+public/control-center/pages/ai-command/tool-dock.js:564:      destinations: ["preview", "content-studio", "compliance"],
+public/control-center/pages/ai-command/tool-dock.js:576:      frontendOwnerPage: "library",
+public/control-center/pages/ai-command/tool-dock.js:577:      destinations: ["library", "ai-command", "content-studio"],
+public/control-center/pages/ai-command/tool-dock.js:578:      sourceTypes: ["current_chat", "library_folder", "brand_profile", "product_data", "legal_pricing_docs", "research_proof_docs", "source_of_truth_assets", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:580:      template: "Prepare source context for the next Content Writer task for {projectName}. Ask which source should be used: current chat, Library folder, brand profile, product data, legal/pricing documents, research/proof documents, source-of-truth assets, or manual input."
+public/control-center/pages/ai-command/tool-dock.js:589:      frontendOwnerPage: "content-studio",
+public/control-center/pages/ai-command/tool-dock.js:590:      destinations: ["content-studio", "insights", "library"],
+public/control-center/pages/ai-command/tool-dock.js:591:      sourceTypes: ["topic", "market", "language", "audience", "current_chat", "library_folder"],
+public/control-center/pages/ai-command/tool-dock.js:602:      frontendOwnerPage: "content-studio",
+public/control-center/pages/ai-command/tool-dock.js:603:      destinations: ["chat-preview", "content-studio", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:604:      sourceTypes: ["existing_content", "composer_text", "content_draft", "current_chat", "library_folder"],
+public/control-center/pages/ai-command/tool-dock.js:616:      destinations: ["content-studio", "library", "media-studio", "publishing", "compliance", "task", "handoff"],
+public/control-center/pages/ai-command/tool-dock.js:618:      outputTypes: ["content_studio_draft", "library_save", "media_brief", "publishing_package", "compliance_review", "task_preview", "handoff_preview"],
+public/control-center/pages/ai-command/tool-dock.js:619:      template: "Prepare safe routing for this Content Writer output for {projectName}. Ask the destination: Content Studio, Save to Library, Prepare Media Brief, Publishing package, Compliance review, Task, or Handoff. Do not route or execute before review."
+public/control-center/pages/ai-command/tool-dock.js:630:      frontendOwnerPage: "media-studio",
+public/control-center/pages/ai-command/tool-dock.js:631:      destinations: ["chat-preview", "media-studio", "library", "content-studio", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:632:      sourceTypes: ["current_chat", "campaign_brief", "brand_guidelines", "product_images", "reference_asset", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:643:      frontendOwnerPage: "media-studio",
+public/control-center/pages/ai-command/tool-dock.js:644:      destinations: ["chat-preview", "media-studio", "library"],
+public/control-center/pages/ai-command/tool-dock.js:645:      sourceTypes: ["current_chat", "brand_guidelines", "reference_asset", "campaign_mood", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:656:      frontendOwnerPage: "media-studio",
+public/control-center/pages/ai-command/tool-dock.js:657:      destinations: ["chat-preview", "media-studio", "library"],
+public/control-center/pages/ai-command/tool-dock.js:669:      frontendOwnerPage: "media-studio",
+public/control-center/pages/ai-command/tool-dock.js:670:      destinations: ["chat-preview", "media-studio", "library", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:671:      sourceTypes: ["current_chat", "campaign_brief", "library_folder", "brand_assets", "product_images", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:682:      frontendOwnerPage: "media-studio",
+public/control-center/pages/ai-command/tool-dock.js:683:      destinations: ["chat-preview", "media-studio", "content-studio", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:695:      frontendOwnerPage: "media-studio",
+public/control-center/pages/ai-command/tool-dock.js:696:      destinations: ["chat-preview", "media-studio", "governance", "library"],
+public/control-center/pages/ai-command/tool-dock.js:697:      sourceTypes: ["current_chat", "brand_guidelines", "visual_brief", "selected_asset", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:711:      frontendOwnerPage: "media-studio",
+public/control-center/pages/ai-command/tool-dock.js:712:      destinations: ["chat-preview", "media-studio", "content-studio", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:713:      sourceTypes: ["current_chat", "campaign_brief", "content_draft", "product_data", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:724:      frontendOwnerPage: "media-studio",
+public/control-center/pages/ai-command/tool-dock.js:725:      destinations: ["chat-preview", "media-studio", "library", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:737:      frontendOwnerPage: "media-studio",
+public/control-center/pages/ai-command/tool-dock.js:738:      destinations: ["chat-preview", "media-studio", "workflows", "library"],
+public/control-center/pages/ai-command/tool-dock.js:750:      frontendOwnerPage: "media-studio",
+public/control-center/pages/ai-command/tool-dock.js:751:      destinations: ["chat-preview", "media-studio", "content-studio"],
+public/control-center/pages/ai-command/tool-dock.js:763:      frontendOwnerPage: "media-studio",
+public/control-center/pages/ai-command/tool-dock.js:764:      destinations: ["chat-preview", "media-studio", "publishing", "ads-manager"],
+public/control-center/pages/ai-command/tool-dock.js:779:      frontendOwnerPage: "publishing",
+public/control-center/pages/ai-command/tool-dock.js:780:      destinations: ["chat-preview", "publishing", "governance", "content-studio", "media-studio"],
+public/control-center/pages/ai-command/tool-dock.js:781:      sourceTypes: ["content_draft", "media_asset", "publishing_package", "approval_notes", "current_chat", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:782:      outputTypes: ["publishing_readiness_check", "missing_items", "channel_fit_review", "risk_notes"],
+public/control-center/pages/ai-command/tool-dock.js:783:      template: "Review publishing readiness for {projectName}. Check copy, assets, channel fit, schedule, approvals, and missing items. Do not publish."
+public/control-center/pages/ai-command/tool-dock.js:792:      frontendOwnerPage: "publishing",
+public/control-center/pages/ai-command/tool-dock.js:793:      destinations: ["chat-preview", "publishing", "content-studio", "media-studio"],
+public/control-center/pages/ai-command/tool-dock.js:794:      sourceTypes: ["content_draft", "media_asset", "campaign_brief", "channel_notes", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:805:      frontendOwnerPage: "publishing",
+public/control-center/pages/ai-command/tool-dock.js:806:      destinations: ["chat-preview", "publishing", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:807:      sourceTypes: ["publishing_package", "campaign_timeline", "channel_notes", "approval_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:809:      template: "Draft a publishing schedule for {projectName}. Include channels, timing, dependencies, review gates, and next actions."
+public/control-center/pages/ai-command/tool-dock.js:818:      frontendOwnerPage: "publishing",
+public/control-center/pages/ai-command/tool-dock.js:819:      destinations: ["chat-preview", "publishing", "content-studio", "insights"],
+public/control-center/pages/ai-command/tool-dock.js:832:      destinations: ["chat-preview", "governance", "publishing", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:833:      sourceTypes: ["final_copy", "media_asset", "approval_notes", "claim_review", "publishing_package", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:847:      frontendOwnerPage: "ads-manager",
+public/control-center/pages/ai-command/tool-dock.js:848:      destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:849:      sourceTypes: ["campaign_brief", "audience_notes", "offer_data", "proof_points", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:860:      frontendOwnerPage: "ads-manager",
+public/control-center/pages/ai-command/tool-dock.js:861:      destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:873:      frontendOwnerPage: "ads-manager",
+public/control-center/pages/ai-command/tool-dock.js:874:      destinations: ["chat-preview", "ads-manager", "insights", "campaign-studio"],
+public/control-center/pages/ai-command/tool-dock.js:875:      sourceTypes: ["audience_notes", "insights_report", "campaign_brief", "customer_notes", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:886:      frontendOwnerPage: "ads-manager",
+public/control-center/pages/ai-command/tool-dock.js:887:      destinations: ["chat-preview", "ads-manager", "media-studio", "insights", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:899:      frontendOwnerPage: "ads-manager",
+public/control-center/pages/ai-command/tool-dock.js:900:      destinations: ["chat-preview", "ads-manager", "content-studio", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:901:      sourceTypes: ["ad_copy", "landing_page_copy", "offer_data", "proof_points", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:915:      frontendOwnerPage: "insights",
+public/control-center/pages/ai-command/tool-dock.js:916:      destinations: ["chat-preview", "insights", "content-studio", "library"],
+public/control-center/pages/ai-command/tool-dock.js:917:      sourceTypes: ["topic", "market", "language", "audience", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:922:      id: "insights",
+public/control-center/pages/ai-command/tool-dock.js:924:      label: "Insights",
+public/control-center/pages/ai-command/tool-dock.js:928:      frontendOwnerPage: "insights",
+public/control-center/pages/ai-command/tool-dock.js:929:      destinations: ["chat-preview", "insights", "campaign-studio", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:930:      sourceTypes: ["insights_data", "analytics_summary", "performance_notes", "current_chat", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:931:      outputTypes: ["insights_summary", "optimization_actions", "missing_data_notes", "risk_notes"],
+public/control-center/pages/ai-command/tool-dock.js:932:      template: "Summarize insights for {projectName}. Include what is working, what is weak, missing data, and next optimization actions."
+public/control-center/pages/ai-command/tool-dock.js:941:      frontendOwnerPage: "insights",
+public/control-center/pages/ai-command/tool-dock.js:942:      destinations: ["chat-preview", "insights", "content-studio", "library"],
+public/control-center/pages/ai-command/tool-dock.js:943:      sourceTypes: ["topic", "market", "audience", "seo_brief", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:954:      frontendOwnerPage: "insights",
+public/control-center/pages/ai-command/tool-dock.js:955:      destinations: ["chat-preview", "insights", "campaign-studio", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:967:      frontendOwnerPage: "insights",
+public/control-center/pages/ai-command/tool-dock.js:968:      destinations: ["chat-preview", "insights", "content-studio", "campaign-studio"],
+public/control-center/pages/ai-command/tool-dock.js:969:      sourceTypes: ["content_inventory", "seo_brief", "audience_notes", "competitor_notes", "library_source", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:984:      destinations: ["chat-preview", "governance", "content-studio", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:997:      destinations: ["chat-preview", "governance", "content-studio"],
+public/control-center/pages/ai-command/tool-dock.js:1010:      destinations: ["chat-preview", "governance", "library", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:1023:      destinations: ["chat-preview", "governance", "workflows", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:1036:      destinations: ["chat-preview", "governance", "publishing", "workflows"],
+public/control-center/pages/ai-command/tool-dock.js:1052:      destinations: ["chat-preview", "workflows", "task", "content-studio", "media-studio"],
+public/control-center/pages/ai-command/tool-dock.js:1078:      destinations: ["chat-preview", "handoff", "workflows", "content-studio", "media-studio", "publishing", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:1079:      sourceTypes: ["current_chat", "ai_preview", "content_draft", "media_job", "publishing_package", "manual_input"],
+public/control-center/pages/ai-command/tool-dock.js:1091:      destinations: ["chat-preview", "workflows", "campaign-studio", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:1104:      destinations: ["chat-preview", "workflows", "governance", "publishing"],
+public/control-center/pages/ai-command/tool-dock.js:1175:      destinations: ["chat-preview", "workflows", "content-studio", "sales-crm-draft"],
+public/control-center/pages/ai-command/tool-dock.js:1188:      destinations: ["chat-preview", "content-studio", "workflows", "sales-crm-draft"],
+public/control-center/pages/ai-command/tool-dock.js:1201:      destinations: ["chat-preview", "workflows", "content-studio", "governance"],
+public/control-center/pages/ai-command/tool-dock.js:1293:    "data-aicmd-tool-dock-sources": joinMetaList(getToolMetaList(tool, "sourceTypes", ["current_chat", "library_source", "manual_input"])),
+public/control-center/pages/ai-command/tool-dock.js:1373:                placeholder="Example: use the selected Library source for facts only, avoid unsupported claims..."
+public/control-center/pages/ai-command/tool-dock.js:1404:          <button class="btn btn-secondary" type="button" data-aicmd-tool-drawer-open-library>Choose Library Source</button>
+public/control-center/pages/ai-command/tool-dock.js:1692:  const hardSourceDefaults = ["current_chat", "market_notes", "customer_notes", "library_source", "manual_input"];
+public/control-center/pages/ai-command/tool-dock.js:1693:  const hardDestinationDefaults = ["chat-preview", "campaign-studio", "content-studio", "composer"];
+public/control-center/pages/ai-command/tool-dock.js:1703:  drawer.dataset.sourceRequired = actionType === "source_required" || sourceMetadataNeedsLibrarySource(rawSources) ? "true" : "false";
+public/control-center/pages/ai-command/tool-dock.js:1778:  const openLibraryBtn = root.querySelector("[data-aicmd-tool-drawer-open-library]");
+public/control-center/pages/ai-command/tool-dock.js:1779:  if (openLibraryBtn) {
+public/control-center/pages/ai-command/tool-dock.js:1780:    openLibraryBtn.onclick = () => {
+public/control-center/pages/ai-command/tool-dock.js:1781:      // Library Source Bridge workflow
+public/control-center/pages/ai-command/tool-dock.js:1799:        type: "library_source_selection",
+public/control-center/pages/ai-command/tool-dock.js:1803:        libraryFilter: mapping.libraryFilter,
+public/control-center/pages/ai-command/tool-dock.js:1808:      setSharedLibrarySourceBridge(project, payload);
+public/control-center/pages/ai-command/tool-dock.js:1809:      setSharedLibrarySourceBridge("__default__", payload);
+public/control-center/pages/ai-command/tool-dock.js:1813:      updateStatus?.("Library guide opened. Select an asset, click Use as Source in AI Command, then return to AI Command.");
+public/control-center/pages/ai-command/tool-dock.js:1815:        window.location.hash = "#library";
+public/control-center/pages/ai-command/tool-dock.js:1832:        updateStatus?.("This prompt tool needs a trusted Library source first. Choose one from Library before continuing.");
+public/control-center/pages/ai-command/tool-dock.js:1909:  // --- Ensure drawer is restored after navigation from Library ---
+public/control-center/pages/ai-command/tool-dock.js:1912:    setTimeout(() => tryAutoOpenDrawerAfterLibrary(restoreProjectName), delay);
+public/control-center/pages/publishing/publishing-payloads.js:75:    title: firstText(session.form.title, session.form.contentItem, "Publishing item"),
+public/control-center/pages/publishing/publishing-payloads.js:92:    title: firstText(session.form.title, session.form.contentItem, "Publishing draft"),
+public/control-center/pages/publishing/publishing-payloads.js:105:export function buildPublishingAiPrompt(projectName, selectedItem, session, handoff) {
+public/control-center/pages/publishing/publishing-payloads.js:108:    `Review this publishing execution plan for ${projectName || "the current project"}.`,
+public/control-center/pages/campaign-studio.js:7:} from "../asset-library.js";
+public/control-center/pages/campaign-studio.js:54:const PUBLISHING_KEYS = ["instagram", "facebook", "tiktok", "youtube", "email"];
+public/control-center/pages/campaign-studio.js:63:  "content-studio": { role: "writer", domain: "content" },
+public/control-center/pages/campaign-studio.js:64:  "media-studio": { role: "designer", domain: "media" },
+public/control-center/pages/campaign-studio.js:65:  publishing: { role: "publisher", domain: "publishing" },
+public/control-center/pages/campaign-studio.js:66:  "ads-manager": { role: "ads_operator", domain: "campaign" },
+public/control-center/pages/campaign-studio.js:120:      <div class="data-row"><span>Route map</span><strong>${escapeHtml(`Content ${titleCase(CAMPAIGN_ROUTE_ROLES["content-studio"].role)} • Media ${titleCase(CAMPAIGN_ROUTE_ROLES["media-studio"].role)} • Publishing ${titleCase(CAMPAIGN_ROUTE_ROLES.publishing.role)} • Ads ${titleCase(CAMPAIGN_ROUTE_ROLES["ads-manager"].role)}`)}</strong></div>
+public/control-center/pages/campaign-studio.js:181:  return message.includes("insights") || message.includes("learning") || message.includes("not found");
+public/control-center/pages/campaign-studio.js:266:        insights: null,
+public/control-center/pages/campaign-studio.js:279:      insights: session.intelligence?.insights || null,
+public/control-center/pages/campaign-studio.js:325:    source_page: "campaign-studio",
+public/control-center/pages/campaign-studio.js:380:  const handoff = getSharedHandoff(projectName, "campaign-studio", operations, "ai-command");
+public/control-center/pages/campaign-studio.js:467:    source_page: "campaign-studio",
+public/control-center/pages/campaign-studio.js:484:    source_page: "campaign-studio",
+public/control-center/pages/campaign-studio.js:493:      route: "campaign-studio",
+public/control-center/pages/campaign-studio.js:547:    <div class="campaign-studio-empty-state">
+public/control-center/pages/campaign-studio.js:560:    <div class="insights-mini-list">
+public/control-center/pages/campaign-studio.js:562:        <div class="insights-mini-item">
+public/control-center/pages/campaign-studio.js:571:function getInsightSource(state, session) {
+public/control-center/pages/campaign-studio.js:574:  const fetchedInsights = asObject(session.intelligence?.insights);
+public/control-center/pages/campaign-studio.js:578:    insights: asObject(
+public/control-center/pages/campaign-studio.js:579:      fetchedInsights.insights ||
+public/control-center/pages/campaign-studio.js:580:      fetchedInsights.data ||
+public/control-center/pages/campaign-studio.js:581:      fetchedInsights ||
+public/control-center/pages/campaign-studio.js:582:      activity.insights ||
+public/control-center/pages/campaign-studio.js:583:      activity.marketing_insights ||
+public/control-center/pages/campaign-studio.js:584:      activity.performance_insights ||
+public/control-center/pages/campaign-studio.js:585:      overview.insights
+public/control-center/pages/campaign-studio.js:619:function collectPublishingWindows(insights, learning, topContent) {
+public/control-center/pages/campaign-studio.js:620:  const social = asObject(insights.social);
+public/control-center/pages/campaign-studio.js:630:    body: "Best publishing window detected from current campaign intelligence."
+public/control-center/pages/campaign-studio.js:634:function collectSeoOpportunities(insights) {
+public/control-center/pages/campaign-studio.js:635:  const seo = asObject(insights.seo);
+public/control-center/pages/campaign-studio.js:659:function collectPaidSignals(insights) {
+public/control-center/pages/campaign-studio.js:660:  const paid = asObject(insights.paid);
+public/control-center/pages/campaign-studio.js:839:      label: "Insights feedback loop",
+public/control-center/pages/campaign-studio.js:862:  const publishingBlockers = [];
+public/control-center/pages/campaign-studio.js:868:  if (!values.startDate) publishingBlockers.push("Set a launch start date before pushing work downstream.");
+public/control-center/pages/campaign-studio.js:869:  if (!values.channelPlan) publishingBlockers.push("Define the operational channel plan so scheduling knows what to activate.");
+public/control-center/pages/campaign-studio.js:870:  if (!connectedChannels.some((item) => PUBLISHING_KEYS.includes(item))) {
+public/control-center/pages/campaign-studio.js:871:    publishingBlockers.push("No publishing channel is connected yet.");
+public/control-center/pages/campaign-studio.js:874:    publishingBlockers.push("Critical creative or offer assets are still missing.");
+public/control-center/pages/campaign-studio.js:903:    publishingBlockers.length ||
+public/control-center/pages/campaign-studio.js:917:    publishingBlockers,
+public/control-center/pages/campaign-studio.js:925:      publishingBlockers.length +
+public/control-center/pages/campaign-studio.js:1034:  const { insights, learning } = getInsightSource(state, session);
+public/control-center/pages/campaign-studio.js:1036:    asArray(learning.recommendations || insights.recommendations || overviewBlock.next_best_actions || readiness.next_best_actions)
+public/control-center/pages/campaign-studio.js:1065:  const sourceCoverage = asObject(insights.data_coverage);
+public/control-center/pages/campaign-studio.js:1097:  const topContent = asArray(insights.best_performing_content || insights.top_content);
+public/control-center/pages/campaign-studio.js:1098:  const weakContent = asArray(insights.underperforming_content || insights.weak_content);
+public/control-center/pages/campaign-studio.js:1108:  const publishingWindows = collectPublishingWindows(insights, learning, topContent);
+public/control-center/pages/campaign-studio.js:1109:  const seoOpportunities = collectSeoOpportunities(insights);
+public/control-center/pages/campaign-studio.js:1110:  const paidSignals = collectPaidSignals(insights);
+public/control-center/pages/campaign-studio.js:1134:    aiRecommendations: asObject(learning.ai_recommendations || insights.ai_recommendations),
+public/control-center/pages/campaign-studio.js:1159:    publishingWindows,
+public/control-center/pages/campaign-studio.js:1168:    hasLiveIntelligence: Boolean(Object.keys(insights).length || Object.keys(learning).length)
+public/control-center/pages/campaign-studio.js:1215:  fetchProjectInsights,
+public/control-center/pages/campaign-studio.js:1222:  if (typeof fetchProjectInsights !== "function" && typeof fetchProjectLearning !== "function") return;
+public/control-center/pages/campaign-studio.js:1228:    typeof fetchProjectInsights === "function" ? fetchProjectInsights(projectName) : Promise.resolve(null),
+public/control-center/pages/campaign-studio.js:1231:    .then(([insightsResult, learningResult]) => {
+public/control-center/pages/campaign-studio.js:1232:      const insightsMissing = insightsResult?.status === "rejected" && isMissingIntelligenceError(insightsResult.reason);
+public/control-center/pages/campaign-studio.js:1234:      const insights = insightsResult?.status === "fulfilled"
+public/control-center/pages/campaign-studio.js:1235:        ? insightsResult.value
+public/control-center/pages/campaign-studio.js:1236:        : (insightsMissing ? { project: projectName, generated_at: new Date().toISOString(), data_coverage: {} } : null);
+public/control-center/pages/campaign-studio.js:1241:        insightsResult?.status === "rejected" && !insightsMissing ? insightsResult.reason?.message : "",
+public/control-center/pages/campaign-studio.js:1245:      session.intelligence.status = (insights || learning) ? "loaded" : "error";
+public/control-center/pages/campaign-studio.js:1246:      session.intelligence.insights = insights;
+public/control-center/pages/campaign-studio.js:1271:  fetchProjectInsights,
+public/control-center/pages/campaign-studio.js:1376:        source_page: "campaign-studio",
+public/control-center/pages/campaign-studio.js:1388:        source_page: "campaign-studio",
+public/control-center/pages/campaign-studio.js:1415:  const publishingBtn = $("campaignOpenPublishingBtn");
+public/control-center/pages/campaign-studio.js:1416:  if (publishingBtn) {
+public/control-center/pages/campaign-studio.js:1417:    publishingBtn.onclick = () => {
+public/control-center/pages/campaign-studio.js:1418:      const accepted = persistCampaignRouteHandoff({ projectName, session, destinationPage: "publishing", createProjectHandoff });
+public/control-center/pages/campaign-studio.js:1419:      if (accepted) navigateTo("publishing");
+public/control-center/pages/campaign-studio.js:1425:    assetsBtn.onclick = () => navigateTo("library");
+public/control-center/pages/campaign-studio.js:1431:      const accepted = persistCampaignRouteHandoff({ projectName, session, destinationPage: "content-studio", createProjectHandoff });
+public/control-center/pages/campaign-studio.js:1432:      if (accepted) navigateTo("content-studio");
+public/control-center/pages/campaign-studio.js:1439:      const accepted = persistCampaignRouteHandoff({ projectName, session, destinationPage: "media-studio", createProjectHandoff });
+public/control-center/pages/campaign-studio.js:1440:      if (accepted) navigateTo("media-studio");
+public/control-center/pages/campaign-studio.js:1447:      const accepted = persistCampaignRouteHandoff({ projectName, session, destinationPage: "ads-manager", createProjectHandoff });
+public/control-center/pages/campaign-studio.js:1448:      if (accepted) navigateTo("ads-manager");
+public/control-center/pages/campaign-studio.js:1470:        navigateTo("library");
+public/control-center/pages/campaign-studio.js:1473:      navigateTo("insights");
+public/control-center/pages/campaign-studio.js:1485:        fetchProjectInsights,
+public/control-center/pages/campaign-studio.js:1497:  id: "campaign-studio",
+public/control-center/pages/campaign-studio.js:1505:    <section class="page is-active" data-page="campaign-studio">
+public/control-center/pages/campaign-studio.js:1517:    fetchProjectInsights,
+public/control-center/pages/campaign-studio.js:1538:      fetchProjectInsights,
+public/control-center/pages/campaign-studio.js:1547:      fetchProjectInsights,
+public/control-center/pages/campaign-studio.js:1567:      publishingWindows,
+public/control-center/pages/campaign-studio.js:1627:      <div class="campaign-studio-wrapper">
+public/control-center/pages/campaign-studio.js:1681:        <div class="campaign-studio-layout">
+public/control-center/pages/campaign-studio.js:1682:          <form id="campaignStudioForm" class="campaign-studio-main">
+public/control-center/pages/campaign-studio.js:1698:                <div class="campaign-studio-panel-block">
+public/control-center/pages/campaign-studio.js:1699:                  <h4 class="insights-subtitle">Campaign Brief Snapshot</h4>
+public/control-center/pages/campaign-studio.js:1710:                <div class="campaign-studio-panel-block">
+public/control-center/pages/campaign-studio.js:1711:                  <h4 class="insights-subtitle">Strategy Readiness</h4>
+public/control-center/pages/campaign-studio.js:1722:                <div class="campaign-studio-panel-block">
+public/control-center/pages/campaign-studio.js:1723:                  <h4 class="insights-subtitle">Launch Waves Snapshot</h4>
+public/control-center/pages/campaign-studio.js:1733:                <div class="campaign-studio-panel-block">
+public/control-center/pages/campaign-studio.js:1734:                  <h4 class="insights-subtitle">Team Handoff Packet</h4>
+public/control-center/pages/campaign-studio.js:1738:                    <li><strong>Publisher / Publishing</strong>: Readiness status, blockers, timeline, and approval notes.</li>
+public/control-center/pages/campaign-studio.js:1745:              <div class="campaign-studio-panel-block" style="margin-top: 12px;">
+public/control-center/pages/campaign-studio.js:1746:                <h4 class="insights-subtitle">Recommended Strategist Tools</h4>
+public/control-center/pages/campaign-studio.js:1752:              <div class="campaign-helper-note">Strategy War Room outputs are preview and review only. Publishing, sending, workflow execution, and spend actions remain gated in their owning workspaces.</div>
+public/control-center/pages/campaign-studio.js:2013:                <div class="campaign-studio-panel-block">
+public/control-center/pages/campaign-studio.js:2014:                  <h4 class="insights-subtitle">Recommended organic channels</h4>
+public/control-center/pages/campaign-studio.js:2017:                <div class="campaign-studio-panel-block">
+public/control-center/pages/campaign-studio.js:2018:                  <h4 class="insights-subtitle">Recommended paid channels</h4>
+public/control-center/pages/campaign-studio.js:2021:                <div class="campaign-studio-panel-block">
+public/control-center/pages/campaign-studio.js:2022:                  <h4 class="insights-subtitle">Recommended support channels</h4>
+public/control-center/pages/campaign-studio.js:2046:              <div class="campaign-studio-panel-block">
+public/control-center/pages/campaign-studio.js:2047:                <h4 class="insights-subtitle">Library inputs for campaign planning</h4>
+public/control-center/pages/campaign-studio.js:2065:                  "Publishing blockers",
+public/control-center/pages/campaign-studio.js:2066:                  executionReadiness.publishingBlockers,
+public/control-center/pages/campaign-studio.js:2068:                  "No publishing blocker is currently stopping launch routing."
+public/control-center/pages/campaign-studio.js:2098:          <aside class="campaign-studio-side">
+public/control-center/pages/campaign-studio.js:2130:                <button id="campaignOpenPublishingBtn" class="quick-action-btn" type="button">
+public/control-center/pages/campaign-studio.js:2131:                  <span class="home-action-title">Send to Publishing</span>
+public/control-center/pages/campaign-studio.js:2132:                  <span class="home-action-meta">Open Publishing with a campaign handoff attached.</span>
+public/control-center/pages/campaign-studio.js:2143:                  <span class="home-action-title">Review campaign assets in Library</span>
+public/control-center/pages/campaign-studio.js:2160:      fetchProjectInsights,
+public/control-center/pages/media-studio-workspace.js:25:} from "../asset-library.js";
+public/control-center/pages/media-studio-workspace.js:29:const MEDIA_LOCAL_DRAFTS_KEY = "mh-media-studio-local-drafts-v1";
+public/control-center/pages/media-studio-workspace.js:30:const MEDIA_LIBRARY_LOCAL_ASSETS_KEY = "mh-media-library-assets-v1";
+public/control-center/pages/media-studio-workspace.js:32:const MEDIA_STATUSES = ["draft", "prompt_ready", "generating", "needs_review", "approved", "publishing_ready", "sent_to_publishing", "failed"];
+public/control-center/pages/media-studio-workspace.js:33:const MEDIA_PREVIEW_STATES = ["provider_not_configured", "generation_error", "prompt_ready", "generated", "saved_to_library", "needs_review", "approved", "publishing_ready", "sent_to_publishing"];
+public/control-center/pages/media-studio-workspace.js:71:    bestUse: "Before approvals and publishing handoff, especially for regulated or claim-sensitive content.",
+public/control-center/pages/media-studio-workspace.js:82:    id: "publishing-assistant",
+public/control-center/pages/media-studio-workspace.js:83:    title: "Publishing Assistant",
+public/control-center/pages/media-studio-workspace.js:84:    purpose: "Finalize readiness signals and handoff payload quality before publishing.",
+public/control-center/pages/media-studio-workspace.js:85:    bestUse: "Right before preparing a Publishing package for downstream review.",
+public/control-center/pages/media-studio-workspace.js:86:    suggestedPrompt: "Act as Publishing Assistant. Produce a final publishing handoff summary with readiness status, blockers, approval notes, and channel delivery checklist."
+public/control-center/pages/media-studio-workspace.js:170:  if (["publishing_ready", "publishing ready", "handoff", "ready_for_publishing"].includes(normalized)) return "publishing_ready";
+public/control-center/pages/media-studio-workspace.js:171:  if (["sent_to_publishing", "sent to publishing", "sent"].includes(normalized)) return "sent_to_publishing";
+public/control-center/pages/media-studio-workspace.js:177:  if (status === "approved" || status === "publishing_ready" || status === "sent_to_publishing") return "success";
+public/control-center/pages/media-studio-workspace.js:204:function readLibraryAssetMap() {
+public/control-center/pages/media-studio-workspace.js:207:    const parsed = JSON.parse(window.localStorage?.getItem(MEDIA_LIBRARY_LOCAL_ASSETS_KEY) || "{}");
+public/control-center/pages/media-studio-workspace.js:214:function writeLibraryAssetMap(map) {
+public/control-center/pages/media-studio-workspace.js:217:    window.localStorage?.setItem(MEDIA_LIBRARY_LOCAL_ASSETS_KEY, JSON.stringify(map || {}));
+public/control-center/pages/media-studio-workspace.js:230:function loadLocalLibraryAssets(projectName) {
+public/control-center/pages/media-studio-workspace.js:231:  return asArray(readLibraryAssetMap()[projectKey(projectName)]);
+public/control-center/pages/media-studio-workspace.js:234:function upsertLocalLibraryAsset(projectName, asset) {
+public/control-center/pages/media-studio-workspace.js:235:  const map = readLibraryAssetMap();
+public/control-center/pages/media-studio-workspace.js:239:    id: asString(asset.id || `media-library-${Date.now()}`),
+public/control-center/pages/media-studio-workspace.js:249:  writeLibraryAssetMap(map);
+public/control-center/pages/media-studio-workspace.js:279:    objective: firstText(overview.primary_goal, overview.goal, "Create publishing-ready media"),
+public/control-center/pages/media-studio-workspace.js:304:  libraryAssetRef = null,
+public/control-center/pages/media-studio-workspace.js:317:    library_asset_ref: libraryAssetRef == null ? null : asObject(libraryAssetRef),
+public/control-center/pages/media-studio-workspace.js:342:    libraryAssetRef: raw.library_asset_ref || null,
+public/control-center/pages/media-studio-workspace.js:528:    publishing_job_id: asString(raw.publishing_job_id || ""),
+public/control-center/pages/media-studio-workspace.js:557:    publishing_ready: 1,
+public/control-center/pages/media-studio-workspace.js:558:    sent_to_publishing: 2,
+public/control-center/pages/media-studio-workspace.js:693:  const aiCommandLocalHandoff = getAiCommandLocalCampaignHandoff("media-studio");
+public/control-center/pages/media-studio-workspace.js:698:    getSharedHandoff(projectName, "media-studio", operations, "workflows") ||
+public/control-center/pages/media-studio-workspace.js:699:    getSharedHandoff(projectName, "media-studio", operations, "ai-command") ||
+public/control-center/pages/media-studio-workspace.js:700:    getSharedHandoff(projectName, "media-studio", operations, "content-studio") ||
+public/control-center/pages/media-studio-workspace.js:701:    getSharedHandoff(projectName, "media-studio", operations)
+public/control-center/pages/media-studio-workspace.js:846:    `Create ${form.outputPurpose || "publishing-ready media"} for ${form.product || overview.project_name || "the product"}.`,
+public/control-center/pages/media-studio-workspace.js:851:    "Keep product identity accurate, leave safe text area, avoid unsupported claims, and prepare for Publishing handoff."
+public/control-center/pages/media-studio-workspace.js:857:  return `${base}\n\nProduction constraints: accurate product identity, clean composition, strong focal hierarchy, channel-safe crop, no unsupported claims, no cluttered text, and enough negative space for publishing copy.`;
+public/control-center/pages/media-studio-workspace.js:893:    `${contextPrompt}\n\nCampaign pack outputs: image hero, video short, voiceover script, channel cutdowns, and publishing-ready metadata.`
+public/control-center/pages/media-studio-workspace.js:935:      library_asset_ref: version.library_asset_ref || null,
+public/control-center/pages/media-studio-workspace.js:938:    actor: "media-studio"
+public/control-center/pages/media-studio-workspace.js:995:  if (["approved", "publishing_ready", "sent_to_publishing"].includes(normalized)) return "approved";
+public/control-center/pages/media-studio-workspace.js:1000:function classifyLibraryUsage(session, selectedItem, version, readiness) {
+public/control-center/pages/media-studio-workspace.js:1011:  if (["publishing_ready", "sent_to_publishing", "approved"].includes(normalizeStatus(readiness.readinessStatus, "draft"))) {
+public/control-center/pages/media-studio-workspace.js:1012:    usage.push("publishing");
+public/control-center/pages/media-studio-workspace.js:1017:function buildLibraryAssetPayload(projectName, session, selectedItem, version) {
+public/control-center/pages/media-studio-workspace.js:1051:    source: "media-studio",
+public/control-center/pages/media-studio-workspace.js:1052:    usage: classifyLibraryUsage(session, selectedItem, version, readiness),
+public/control-center/pages/media-studio-workspace.js:1060:function findExistingLibrarySave(session, projectName, sourceSignature) {
+public/control-center/pages/media-studio-workspace.js:1061:  const local = loadLocalLibraryAssets(projectName).find((item) => asString(item.source_signature) === asString(sourceSignature));
+public/control-center/pages/media-studio-workspace.js:1064:    const libraryAsset = asObject(payload.library_asset);
+public/control-center/pages/media-studio-workspace.js:1065:    const routeMatches = asString(entry?.destination_page) === "library" && asString(entry?.source_page) === "media-studio";
+public/control-center/pages/media-studio-workspace.js:1066:    return routeMatches && asString(libraryAsset.source_signature) === asString(sourceSignature);
+public/control-center/pages/media-studio-workspace.js:1074:async function saveVersionToLibrary({
+public/control-center/pages/media-studio-workspace.js:1085:    session.validation = { ...session.validation, librarySave: "Select a version before saving to Library." };
+public/control-center/pages/media-studio-workspace.js:1094:    session.validation = { ...session.validation, librarySave: "Version needs prompt or output payload before saving to Library." };
+public/control-center/pages/media-studio-workspace.js:1099:  const libraryAsset = buildLibraryAssetPayload(projectName, session, selectedItem, version);
+public/control-center/pages/media-studio-workspace.js:1100:  const existing = findExistingLibrarySave(session, projectName, libraryAsset.source_signature);
+public/control-center/pages/media-studio-workspace.js:1104:    showMessage?.("Already saved to Library (local reference).");
+public/control-center/pages/media-studio-workspace.js:1110:    source_page: "media-studio",
+public/control-center/pages/media-studio-workspace.js:1111:    destination_page: "library",
+public/control-center/pages/media-studio-workspace.js:1115:    destination_service_domain: "library",
+public/control-center/pages/media-studio-workspace.js:1119:      route: "media-studio",
+public/control-center/pages/media-studio-workspace.js:1123:      project: libraryAsset.project,
+public/control-center/pages/media-studio-workspace.js:1124:      campaign: libraryAsset.campaign,
+public/control-center/pages/media-studio-workspace.js:1125:      media_type: libraryAsset.media_type,
+public/control-center/pages/media-studio-workspace.js:1126:      usage: libraryAsset.usage,
+public/control-center/pages/media-studio-workspace.js:1127:      library_asset: libraryAsset
+public/control-center/pages/media-studio-workspace.js:1130:    actor: "media-studio"
+public/control-center/pages/media-studio-workspace.js:1133:  setSharedHandoff(projectName || "__default__", "library", handoffPayload);
+public/control-center/pages/media-studio-workspace.js:1135:    setSharedHandoff("__default__", "library", handoffPayload);
+public/control-center/pages/media-studio-workspace.js:1140:    source_signature: libraryAsset.source_signature,
+public/control-center/pages/media-studio-workspace.js:1143:    status: "saved_to_library"
+public/control-center/pages/media-studio-workspace.js:1151:      upsertLocalLibraryAsset(projectName, {
+public/control-center/pages/media-studio-workspace.js:1152:        ...libraryAsset,
+public/control-center/pages/media-studio-workspace.js:1153:        id: savedId || libraryAsset.id,
+public/control-center/pages/media-studio-workspace.js:1156:        source: "media-studio"
+public/control-center/pages/media-studio-workspace.js:1160:        source_signature: libraryAsset.source_signature,
+public/control-center/pages/media-studio-workspace.js:1163:        status: "saved_to_library"
+public/control-center/pages/media-studio-workspace.js:1166:      showMessage?.(existing.backend ? "Already saved. Library metadata updated." : "Selected version saved to Library.");
+public/control-center/pages/media-studio-workspace.js:1168:      upsertLocalLibraryAsset(projectName, {
+public/control-center/pages/media-studio-workspace.js:1169:        ...libraryAsset,
+public/control-center/pages/media-studio-workspace.js:1170:        id: libraryAsset.id,
+public/control-center/pages/media-studio-workspace.js:1172:        source: "media-studio"
+public/control-center/pages/media-studio-workspace.js:1174:      showMessage?.("Library backend unavailable. Saved as local library handoff.");
+public/control-center/pages/media-studio-workspace.js:1177:    upsertLocalLibraryAsset(projectName, {
+public/control-center/pages/media-studio-workspace.js:1178:      ...libraryAsset,
+public/control-center/pages/media-studio-workspace.js:1179:      id: libraryAsset.id,
+public/control-center/pages/media-studio-workspace.js:1181:      source: "media-studio"
+public/control-center/pages/media-studio-workspace.js:1183:    showMessage?.("Selected version saved to Library (local handoff).");
+public/control-center/pages/media-studio-workspace.js:1186:  version.library_asset_ref = reference;
+public/control-center/pages/media-studio-workspace.js:1187:  version.provider_status = "saved_to_library";
+public/control-center/pages/media-studio-workspace.js:1189:    version.readiness_status = "publishing_ready";
+public/control-center/pages/media-studio-workspace.js:1190:    session.form.status = "publishing_ready";
+public/control-center/pages/media-studio-workspace.js:1192:  session.validation = { ...session.validation, librarySave: "" };
+public/control-center/pages/media-studio-workspace.js:1194:  saveDraftToSession(projectName, state, session, normalizeStatus(session.form.status || version.readiness_status || "publishing_ready", "publishing_ready"));
+public/control-center/pages/media-studio-workspace.js:1233:    readyAssets: counts.approved + counts.publishing_ready + counts.sent_to_publishing,
+public/control-center/pages/media-studio-workspace.js:1237:    publishingReady: counts.publishing_ready,
+public/control-center/pages/media-studio-workspace.js:1257:  const ready = selectedItem?.status === "publishing_ready" ? selectedItem : null;
+public/control-center/pages/media-studio-workspace.js:1261:      why: `${ready.title} is ready for a safe Publishing package handoff.`
+public/control-center/pages/media-studio-workspace.js:1278:    why: "No media job is ready yet. Start with a brief, build a brand-safe prompt, then review and prepare a Publishing package."
+public/control-center/pages/media-studio-workspace.js:1295:  const publishingConnected = hasBackend || capabilityFromOperations(operations, ["publishing", "handoff"]);
+public/control-center/pages/media-studio-workspace.js:1302:    publishing_handoff: publishingConnected,
+public/control-center/pages/media-studio-workspace.js:1495:      .media-status-pill.is-publishing-ready {
+public/control-center/pages/media-studio-workspace.js:1505:      .media-status-pill.is-sent-to-publishing {
+public/control-center/pages/media-studio-workspace.js:1642:      /* MEDIA-STUDIO-PHASE2R2-CONTENT-STUDIO-STYLE-EXECUTION-ROOM */
+public/control-center/pages/media-studio-workspace.js:1643:/* MEDIA-STUDIO-PHASE2R2-REPAIR-RESTORE-OVERVIEW-RECOMMENDATION */
+public/control-center/pages/media-studio-workspace.js:1957:      /* MEDIA-STUDIO-PHASE3A-PRODUCTION-INTELLIGENCE-ROUTER-UI\n      /* MEDIA-STUDIO-PHASE3A-REPAIR-LICENSE-MARKER */ */
+public/control-center/pages/media-studio-workspace.js:2113:      /* MEDIA-STUDIO-PHASE3B-PRODUCT-LOCK-PROMPT-COMPILER */
+public/control-center/pages/media-studio-workspace.js:2234:      /* MEDIA-STUDIO-PHASE3C-SCENE-PLANNER-START-END-FRAME-WORKFLOW */
+public/control-center/pages/media-studio-workspace.js:2377:      /* MEDIA-STUDIO-UX1A-INTERNATIONAL-CREATION-STUDIO-SHELL */
+public/control-center/pages/media-studio-workspace.js:2683:      /* MEDIA-STUDIO-UX1B-REPAIR-DUPLICATE-PREVIEW-QUEUE-ID-AUTHORITY */
+public/control-center/pages/media-studio-workspace.js:2684:      /* MEDIA-STUDIO-UX1B-PREVIEW-FIRST-CANVAS-QUEUE-THEME-COMPRESSION */
+public/control-center/pages/media-studio-workspace.js:2907:      /* MEDIA-STUDIO-UX1C-PROVIDER-MODEL-SELECTOR-MATRIX */
+public/control-center/pages/media-studio-workspace.js:3006:      /* MEDIA-STUDIO-UX-R1-CLEAN-GLOBAL-SHELL-MODE-FIRST MEDIA-STUDIO-UX-R1-REPAIR-ADVANCED-DETAILS-MARKER */
+public/control-center/pages/media-studio-workspace.js:3010:      .media-os-shell details.media-studio-advanced-stack {
+public/control-center/pages/media-studio-workspace.js:3019:      .media-os-shell details.media-studio-advanced-stack > summary {
+public/control-center/pages/media-studio-workspace.js:3034:      .media-os-shell details.media-studio-advanced-stack > summary::-webkit-details-marker {
+public/control-center/pages/media-studio-workspace.js:3041:      .media-os-shell details.media-studio-advanced-stack > summary::after {
+public/control-center/pages/media-studio-workspace.js:3055:      .media-os-shell details.media-studio-advanced-stack[open] > summary::after {
+public/control-center/pages/media-studio-workspace.js:3065:      .media-os-shell .media-studio-advanced-stack:not([open]) > *:not(summary) {
+public/control-center/pages/media-studio-workspace.js:3091:      .media-os-shell .media-studio-creation-shell,
+public/control-center/pages/media-studio-workspace.js:3120:      /* MEDIA-STUDIO-UX-R2R-TRUE-MODE-SPECIFIC-CANVAS-REPAIR */
+public/control-center/pages/media-studio-workspace.js:3471:      /* MEDIA-STUDIO-UX-R2S-FIRST-SCREEN-POLISH-ADVANCED-CLEANUP */
+public/control-center/pages/media-studio-workspace.js:3556:      .media-os-shell details.media-studio-advanced-stack[open],
+public/control-center/pages/media-studio-workspace.js:3565:      .media-os-shell details.media-studio-advanced-stack > summary,
+public/control-center/pages/media-studio-workspace.js:3612:      /* MEDIA-STUDIO-UX-R3-PROFESSIONAL-PROVIDER-MODEL-PICKER */
+public/control-center/pages/media-studio-workspace.js:3799:      /* MEDIA-STUDIO-UX-R3B-REPAIR-SIMPLE-PROVIDER-MENU-IN-PLACE */
+public/control-center/pages/media-studio-workspace.js:3893:      /* MEDIA-STUDIO-UX-R3D-STABLE-PROVIDER-UI */
+public/control-center/pages/media-studio-workspace.js:4008:      /* MEDIA-STUDIO-UX-R3E-COMPACT-COMPOSER-NO-CARDS */
+public/control-center/pages/media-studio-workspace.js:4124:      /* MEDIA-STUDIO-UX-R3F-HIGGSFIELD-STYLE-COMPACT-COMPOSER */
+public/control-center/pages/media-studio-workspace.js:4275:      /* MEDIA-STUDIO-UX-R3G-COMPOSER-DEDUP-FINAL-POLISH */
+public/control-center/pages/media-studio-workspace.js:4292:      /* MEDIA-STUDIO-UX-R3H-COMPOSER-CATALOG-FINAL-POLISH */
+public/control-center/pages/media-studio-workspace.js:4356:      /* MEDIA-STUDIO-UX-R3I-COMPOSER-SPACING-LABEL-POLISH */
+public/control-center/pages/media-studio-workspace.js:4428:  if (normalized === "publishing_ready") return "Package Ready";
+public/control-center/pages/media-studio-workspace.js:4429:  if (normalized === "sent_to_publishing") return "Handoff Prepared";
+public/control-center/pages/media-studio-workspace.js:4452:  const hasLibraryRef = Boolean(
+public/control-center/pages/media-studio-workspace.js:4453:    selectedItem?.library_asset_ref?.handoff_id ||
+public/control-center/pages/media-studio-workspace.js:4454:    selectedVersionEntry(session)?.library_asset_ref?.handoff_id
+public/control-center/pages/media-studio-workspace.js:4460:  if (hasLibraryRef) {
+public/control-center/pages/media-studio-workspace.js:4463:      status: "Library source",
+public/control-center/pages/media-studio-workspace.js:4464:      detail: "Linked Library provenance is available for this package."
+public/control-center/pages/media-studio-workspace.js:4478:      detail: "Inbound or job context exists; attach Library source when claims or product truth matter."
+public/control-center/pages/media-studio-workspace.js:4484:    detail: "Attach a Library asset or load a source-backed handoff before final package routing."
+public/control-center/pages/media-studio-workspace.js:4499:  const packageReady = ["publishing_ready", "sent_to_publishing", "approved"].includes(readiness.readinessStatus) && hasOutput;
+public/control-center/pages/media-studio-workspace.js:4529:      key: "publishing",
+public/control-center/pages/media-studio-workspace.js:4530:      label: "Publishing",
+public/control-center/pages/media-studio-workspace.js:4534:        ? "Selected version can be prepared as a Publishing package."
+public/control-center/pages/media-studio-workspace.js:4598:        <button id="mediaHeaderSaveLibraryBtn" class="btn btn-secondary" type="button">Save to Library</button>
+public/control-center/pages/media-studio-workspace.js:4599:        <button id="mediaSendToPublishingBtn" class="btn btn-primary" type="button">Prepare Campaign Pack</button>
+public/control-center/pages/media-studio-workspace.js:4613:  const savedToLibrary = Boolean(version?.library_asset_ref?.handoff_id || selectedItem?.library_asset_ref?.handoff_id);
+public/control-center/pages/media-studio-workspace.js:4614:  const handoffPrepared = readiness.readinessStatus === "sent_to_publishing";
+public/control-center/pages/media-studio-workspace.js:4615:  const packageReady = ["publishing_ready", "approved", "sent_to_publishing"].includes(readiness.readinessStatus) && hasOutput;
+public/control-center/pages/media-studio-workspace.js:4635:      state: ["approved", "publishing_ready", "sent_to_publishing"].includes(readiness.readinessStatus) ? "ready" : hasOutput ? "active" : "missing",
+public/control-center/pages/media-studio-workspace.js:4639:      label: "Save to Library",
+public/control-center/pages/media-studio-workspace.js:4640:      state: savedToLibrary ? "ready" : hasOutput || hasBrief ? "active" : "missing",
+public/control-center/pages/media-studio-workspace.js:4641:      detail: savedToLibrary ? "Library linked" : "Available after draft"
+public/control-center/pages/media-studio-workspace.js:4654:    <nav class="media-workflow-strip" id="mediaWorkflowStrip" aria-label="Media Studio workflow: Brief Source Generate Prepare Review Save to Library Handoff">
+public/control-center/pages/media-studio-workspace.js:4655:      <div class="media-workflow-title">Brief &rarr; Source &rarr; Generate/Prepare &rarr; Review &rarr; Save to Library &rarr; Handoff</div>
+public/control-center/pages/media-studio-workspace.js:4687:        <div class="media-overview-item"><span>Publishing handoffs</span><strong>${escapeHtml(formatCount(metrics.publishingReady))}</strong></div>
+public/control-center/pages/media-studio-workspace.js:4699:    ["Publishing", metrics.publishingReady ? "Ready" : "Prepare"],
+public/control-center/pages/media-studio-workspace.js:4766:          <h3>Brief -> Source -> Generate/Prepare -> Review -> Save to Library -> Handoff</h3>
+public/control-center/pages/media-studio-workspace.js:4796:        ${renderField({ id: "mediaPromptInput", name: "prompt", label: "Prompt / brief", value: form.prompt, multiline: true, rows: 7, helper: "Use this as the creative brief. If no generation provider is connected, Media Studio keeps it as a prompt/job-ready draft for review, Library save, AI review, or provider handoff." }, session, escapeHtml)}
+public/control-center/pages/media-studio-workspace.js:4883:  const isContentBrief = summary.sourcePage === "content-studio";
+public/control-center/pages/media-studio-workspace.js:4958:              <button type="button" data-media-action="send-publishing" data-media-id="${escapeHtml(item.id)}">Prepare Campaign Pack</button>
+public/control-center/pages/media-studio-workspace.js:4990:  const publishingReady = ["publishing_ready", "sent_to_publishing", "approved"].includes(readinessStatus) && hasOutput;
+public/control-center/pages/media-studio-workspace.js:4991:  const approvalStatus = ["approved", "publishing_ready", "sent_to_publishing"].includes(readinessStatus) ? "approved" : "pending";
+public/control-center/pages/media-studio-workspace.js:4997:    ["package ready", publishingReady],
+public/control-center/pages/media-studio-workspace.js:5018:  if (key === "publishing-readiness") return item.status === "publishing_ready" || item.status === "sent_to_publishing" ? "Ready" : "Prepare";
+public/control-center/pages/media-studio-workspace.js:5157:      : `<div class="media-prompt-box">${escapeHtml(JSON.stringify(payload, null, 2) || "No image output was returned yet. If the provider is not connected or timed out, keep the prompt/job-ready draft and continue with review, Library save, or provider setup in Integrations.")}</div>`;
+public/control-center/pages/media-studio-workspace.js:5205:        <div class="media-check-item"><span>Captions/notes</span><strong>${escapeHtml(firstText(campaignPack.channel_notes, campaignPack.publishing_notes, "Missing"))}</strong></div>
+public/control-center/pages/media-studio-workspace.js:5278:          <span>Library link</span>
+public/control-center/pages/media-studio-workspace.js:5279:          <strong>${escapeHtml(selected?.library_asset_ref?.handoff_id ? `Saved (${selected.library_asset_ref.local_only ? "Local" : "Backend"})` : "Not saved")}</strong>
+public/control-center/pages/media-studio-workspace.js:5320:        <button class="btn btn-secondary" type="button" data-media-version-action="save-library">Save to Library</button>
+public/control-center/pages/media-studio-workspace.js:5321:        <button class="btn btn-primary" type="button" data-media-version-action="send-publishing">Prepare Campaign Pack</button>
+public/control-center/pages/media-studio-workspace.js:5323:      ${fieldError(session, "librarySave", escapeHtml)}
+public/control-center/pages/media-studio-workspace.js:5341:    ["publishing-readiness", "Publishing readiness"]
