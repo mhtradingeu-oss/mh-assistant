@@ -23830,11 +23830,6 @@ function autoSyncAfterMediaGeneration(projectName) {
 // PHASE 2F.2 - PUBLISHING API LAYER
 // ===============================
 
-const {
-  publishAsset,
-  publishBatch
-} = require('./lib/media/publishing/publishEngine');
-
 // Publish single asset
 // PHASE 3T-0E SAFETY REPAIR:
 // Direct media publish is blocked here to prevent bypassing the governed Publishing workflow.
@@ -23872,31 +23867,17 @@ app.post('/media-manager/project/:project/publish/batch', (req, res) => {
 // PHASE 2F.6 - PUBLISH LIFECYCLE API BRIDGE
 // ===============================
 
-const {
-  getJob
-} = require('./lib/media/publishing/publishLifecycleEngine');
-
-// GET publish job status (UI polling endpoint)
+// GET publish job status (legacy UI polling endpoint)
+// M0-D RUNTIME CLOSURE REPAIR:
+// Disabled until Media Engine Recovery restores the governed publish lifecycle module closure.
 app.get('/media-manager/publish/job/:jobId', (req, res) => {
-  try {
-    const jobId = req.params.jobId;
-
-    const job = getJob(jobId);
-
-    if (!job) {
-      return res.status(404).json({
-        success: false,
-        error: 'Job not found'
-      });
-    }
-
-    return res.json(job);
-
-  } catch (err) {
-    return res.status(500).json({
-      success: false,
-      error: err.message || 'Failed to fetch job'
-    });
-  }
+  return res.status(410).json({
+    success: false,
+    error: 'publishing_lifecycle_bridge_not_active',
+    code: 'media_engine_recovery_required',
+    message: 'The legacy media publish lifecycle polling bridge is disabled until the governed Media Engine lifecycle is restored and closed.',
+    required_phase: 'media_engine_recovery_and_publishing_lifecycle_closeout',
+    job_id: req.params.jobId
+  });
 });
 
