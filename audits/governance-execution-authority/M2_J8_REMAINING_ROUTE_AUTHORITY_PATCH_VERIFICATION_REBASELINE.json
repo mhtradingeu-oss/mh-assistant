@@ -1,0 +1,337 @@
+{
+  "artifact_id": "M2_J8_REMAINING_ROUTE_AUTHORITY_PATCH_VERIFICATION_REBASELINE",
+  "status": "PATCH_VERIFICATION_REBASELINE_RECORDED",
+  "source_m2j6_proof_scan": "audits/governance-execution-authority/M2_J6_REMAINING_ROUTE_BODY_PROOF_SCAN.json",
+  "source_m2j7_patch_doc": "audits/governance-execution-authority/M2_J7_NARROW_REMAINING_ROUTE_AUTHORITY_PATCH.md",
+  "helper_proof": {
+    "server_sha256": "2745f6472bdcc131a3de46bbc23609ba52408e2ad3cc4d939af57ce48760fcf5",
+    "helper_sha256": "d33a017d9f8ee884bff5e7d4b9a509856db01261bf6d5bea5d5818b74e18efe0",
+    "m2j7_marker_present": true,
+    "m2j2_middleware_present": true,
+    "protected_route_import_present": true,
+    "helper_exports_present": true,
+    "m2j7_doc_present": true
+  },
+  "summary": {
+    "m2j6_patch_required_routes": 42,
+    "expected_unique_routes": 42,
+    "covered_by_m2j7": 42,
+    "still_uncovered_after_m2j7": 0,
+    "missing_from_m2j7_block": 0,
+    "manual_bucket_missing": 0,
+    "approval_bucket_missing": 0,
+    "delete_bucket_missing": 0,
+    "by_coverage": {
+      "manual_execution_only": 28,
+      "approval_required": 13,
+      "destructive_manual_required": 1
+    }
+  },
+  "closeout_decision": {
+    "m2_can_close_now": true,
+    "reason": "All 42 M2-J6 patch_required routes are now covered by M2-J7 protected-route-authority middleware buckets.",
+    "next_step": "M2-J9 — Governance Execution Authority Closeout",
+    "no_runtime_patch_in_m2j8": true
+  },
+  "covered_routes": [
+    {
+      "method": "POST",
+      "path": "/task",
+      "prior_final_classification": "patch_required_mutation_without_authority_proof",
+      "covered_by_m2j7": true,
+      "m2j7_coverage": "manual_execution_only"
+    },
+    {
+      "method": "POST",
+      "path": "/api/agent-registry/register",
+      "prior_final_classification": "patch_required_mutation_without_authority_proof",
+      "covered_by_m2j7": true,
+      "m2j7_coverage": "manual_execution_only"
+    },
+    {
+      "method": "POST",
+      "path": "/api/agent-registry/resolve",
+      "prior_final_classification": "patch_required_mutation_without_authority_proof",
+      "covered_by_m2j7": true,
+      "m2j7_coverage": "manual_execution_only"
+    },
+    {
+      "method": "POST",
+      "path": "/ingest",
+      "prior_final_classification": "patch_required_mutation_without_authority_proof",
+      "covered_by_m2j7": true,
+      "m2j7_coverage": "manual_execution_only"
+    },
+    {
+      "method": "POST",
+      "path": "/backup-and-clone-product/:id",
+      "prior_final_classification": "patch_required_approval_lifecycle",
+      "covered_by_m2j7": true,
+      "m2j7_coverage": "approval_required"
+    },
+    {
+      "method": "POST",
+      "path": "/apply-prepared-copy-to-clone/:originalId/:cloneId",
+      "prior_final_classification": "patch_required_approval_lifecycle",
+      "covered_by_m2j7": true,
+      "m2j7_coverage": "approval_required"
+    },
+    {
+      "method": "POST",
+      "path": "/media/upload",
+      "prior_final_classification": "patch_required_approval_lifecycle",
+      "covered_by_m2j7": true,
+      "m2j7_coverage": "approval_required"
+    },
+    {
+      "method": "POST",
+      "path": "/media-manager/project/:project/assets/:assetId/rename",
+      "prior_final_classification": "patch_required_approval_lifecycle",
+      "covered_by_m2j7": true,
+      "m2j7_coverage": "approval_required"
+    },
+    {
+      "method": "PATCH",
+      "path": "/media-manager/project/:project/assets/:assetId/classification",
+      "prior_final_classification": "patch_required_destructive",
+      "covered_by_m2j7": true,
+      "m2j7_coverage": "destructive_manual_required"
+    },
+    {
+      "method": "POST",
+      "path": "/media-manager/project/:project/assets/:assetId/source-of-truth",
+      "prior_final_classification": "patch_required_approval_lifecycle",
+      "covered_by_m2j7": true,
+      "m2j7_coverage": "approval_required"
+    },
+    {
+      "method": "POST",
+      "path": "/media-manager/project/:project/assets/:assetId/archive",
+      "prior_final_classification": "patch_required_approval_lifecycle",
+      "covered_by_m2j7": true,
+      "m2j7_coverage": "approval_required"
+    },
+    {
+      "method": "POST",
+      "path": "/media-manager/project/:project/library/refresh",
+      "prior_final_classification": "patch_required_mutation_without_authority_proof",
+      "covered_by_m2j7": true,
+      "m2j7_coverage": "manual_execution_only"
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai-command/project/:project/campaign-preview",
+      "prior_final_classification": "patch_required_approval_lifecycle",
+      "covered_by_m2j7": true,
+      "m2j7_coverage": "approval_required"
+    },
+    {
+      "method": "POST",
+      "path": "/media-manager/project/:project/team",
+      "prior_final_classification": "patch_required_mutation_without_authority_proof",
+      "covered_by_m2j7": true,
+      "m2j7_coverage": "manual_execution_only"
+    },
+    {
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/team",
+      "prior_final_classification": "patch_required_public_high_risk",
+      "covered_by_m2j7": true,
+      "m2j7_coverage": "manual_execution_only"
+    },
+    {
+      "method": "POST",
+      "path": "/media-manager/project/:project/media-jobs",
+      "prior_final_classification": "patch_required_mutation_without_authority_proof",
+      "covered_by_m2j7": true,
+      "m2j7_coverage": "manual_execution_only"
+    },
+    {
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/media-jobs",
+      "prior_final_classification": "patch_required_public_high_risk",
+      "covered_by_m2j7": true,
+      "m2j7_coverage": "manual_execution_only"
+    },
+    {
+      "method": "PATCH",
+      "path": "/media-manager/project/:project/media-jobs/:mediaJobId",
+      "prior_final_classification": "patch_required_mutation_without_authority_proof",
+      "covered_by_m2j7": true,
+      "m2j7_coverage": "manual_execution_only"
+    },
+    {
+      "method": "PATCH",
+      "path": "/public/media-manager/project/:project/media-jobs/:mediaJobId",
+      "prior_final_classification": "patch_required_public_high_risk",
+      "covered_by_m2j7": true,
+      "m2j7_coverage": "manual_execution_only"
+    },
+    {
+      "method": "POST",
+      "path": "/media-manager/project/:project/tasks",
+      "prior_final_classification": "patch_required_approval_lifecycle",
+      "covered_by_m2j7": true,
+      "m2j7_coverage": "approval_required"
+    },
+    {
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/tasks",
+      "prior_final_classification": "patch_required_public_high_risk",
+      "covered_by_m2j7": true,
+      "m2j7_coverage": "manual_execution_only"
+    },
+    {
+      "method": "PATCH",
+      "path": "/media-manager/project/:project/notifications/:notificationId",
+      "prior_final_classification": "patch_required_approval_lifecycle",
+      "covered_by_m2j7": true,
+      "m2j7_coverage": "approval_required"
+    },
+    {
+      "method": "PATCH",
+      "path": "/public/media-manager/project/:project/notifications/:notificationId",
+      "prior_final_classification": "patch_required_public_high_risk",
+      "covered_by_m2j7": true,
+      "m2j7_coverage": "manual_execution_only"
+    },
+    {
+      "method": "POST",
+      "path": "/media-manager/project/:project/handoffs",
+      "prior_final_classification": "patch_required_mutation_without_authority_proof",
+      "covered_by_m2j7": true,
+      "m2j7_coverage": "manual_execution_only"
+    },
+    {
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/handoffs",
+      "prior_final_classification": "patch_required_public_high_risk",
+      "covered_by_m2j7": true,
+      "m2j7_coverage": "manual_execution_only"
+    },
+    {
+      "method": "POST",
+      "path": "/media-manager/project/:project/handoffs/:handoffId/consume",
+      "prior_final_classification": "patch_required_mutation_without_authority_proof",
+      "covered_by_m2j7": true,
+      "m2j7_coverage": "manual_execution_only"
+    },
+    {
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/handoffs/:handoffId/consume",
+      "prior_final_classification": "patch_required_public_high_risk",
+      "covered_by_m2j7": true,
+      "m2j7_coverage": "manual_execution_only"
+    },
+    {
+      "method": "POST",
+      "path": "/media-manager/project/:project/library/index",
+      "prior_final_classification": "patch_required_mutation_without_authority_proof",
+      "covered_by_m2j7": true,
+      "m2j7_coverage": "manual_execution_only"
+    },
+    {
+      "method": "POST",
+      "path": "/media-manager/project/:project/rename",
+      "prior_final_classification": "patch_required_mutation_without_authority_proof",
+      "covered_by_m2j7": true,
+      "m2j7_coverage": "manual_execution_only"
+    },
+    {
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/rename",
+      "prior_final_classification": "patch_required_mutation_without_authority_proof",
+      "covered_by_m2j7": true,
+      "m2j7_coverage": "manual_execution_only"
+    },
+    {
+      "method": "POST",
+      "path": "/media-manager/project/:project/apply-template",
+      "prior_final_classification": "patch_required_mutation_without_authority_proof",
+      "covered_by_m2j7": true,
+      "m2j7_coverage": "manual_execution_only"
+    },
+    {
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/apply-template",
+      "prior_final_classification": "patch_required_mutation_without_authority_proof",
+      "covered_by_m2j7": true,
+      "m2j7_coverage": "manual_execution_only"
+    },
+    {
+      "method": "POST",
+      "path": "/media-manager/projects",
+      "prior_final_classification": "patch_required_mutation_without_authority_proof",
+      "covered_by_m2j7": true,
+      "m2j7_coverage": "manual_execution_only"
+    },
+    {
+      "method": "POST",
+      "path": "/public/media-manager/projects",
+      "prior_final_classification": "patch_required_mutation_without_authority_proof",
+      "covered_by_m2j7": true,
+      "m2j7_coverage": "manual_execution_only"
+    },
+    {
+      "method": "POST",
+      "path": "/media-manager/project/:project/campaigns",
+      "prior_final_classification": "patch_required_approval_lifecycle",
+      "covered_by_m2j7": true,
+      "m2j7_coverage": "approval_required"
+    },
+    {
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/campaigns",
+      "prior_final_classification": "patch_required_approval_lifecycle",
+      "covered_by_m2j7": true,
+      "m2j7_coverage": "approval_required"
+    },
+    {
+      "method": "PATCH",
+      "path": "/media-manager/project/:project/campaigns/:campaignId",
+      "prior_final_classification": "patch_required_approval_lifecycle",
+      "covered_by_m2j7": true,
+      "m2j7_coverage": "approval_required"
+    },
+    {
+      "method": "PATCH",
+      "path": "/public/media-manager/project/:project/campaigns/:campaignId",
+      "prior_final_classification": "patch_required_approval_lifecycle",
+      "covered_by_m2j7": true,
+      "m2j7_coverage": "approval_required"
+    },
+    {
+      "method": "POST",
+      "path": "/media-manager/project/:project/content-items",
+      "prior_final_classification": "patch_required_mutation_without_authority_proof",
+      "covered_by_m2j7": true,
+      "m2j7_coverage": "manual_execution_only"
+    },
+    {
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/content-items",
+      "prior_final_classification": "patch_required_mutation_without_authority_proof",
+      "covered_by_m2j7": true,
+      "m2j7_coverage": "manual_execution_only"
+    },
+    {
+      "method": "PATCH",
+      "path": "/media-manager/project/:project/content-items/:contentItemId",
+      "prior_final_classification": "patch_required_mutation_without_authority_proof",
+      "covered_by_m2j7": true,
+      "m2j7_coverage": "manual_execution_only"
+    },
+    {
+      "method": "PATCH",
+      "path": "/public/media-manager/project/:project/content-items/:contentItemId",
+      "prior_final_classification": "patch_required_mutation_without_authority_proof",
+      "covered_by_m2j7": true,
+      "m2j7_coverage": "manual_execution_only"
+    }
+  ],
+  "still_uncovered_routes": [],
+  "missing_from_m2j7_block": [],
+  "manual_bucket_missing": [],
+  "approval_bucket_missing": [],
+  "delete_bucket_missing": []
+}
