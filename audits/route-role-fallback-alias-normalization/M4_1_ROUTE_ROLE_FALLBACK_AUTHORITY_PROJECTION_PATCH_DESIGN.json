@@ -1,0 +1,689 @@
+{
+  "artifact_id": "M4_1_ROUTE_ROLE_FALLBACK_AUTHORITY_PROJECTION_PATCH_DESIGN",
+  "status": "PATCH_DESIGN_RECORDED",
+  "phase": "M4 — Route Role Fallback Alias Normalization / Authority Projection Narrow Review",
+  "mode": "design only",
+  "head": "7b11c82 (HEAD -> main, origin/main, origin/HEAD) Record route role fallback alias truth scan",
+  "git_status_short": "",
+  "git_sync": "0\t0",
+  "m4_0_status": "TRUTH_SCAN_RECORDED",
+  "m4_0_committed": true,
+  "runtime_changes_in_m4_1": false,
+  "server_changes_in_m4_1": false,
+  "ui_source_changes_in_m4_1": false,
+  "execution_authority_expansion_in_m4_1": false,
+  "m4_1_patches_now": false,
+  "observed_truth": {
+    "route_role_fallback_file_present_at_expected_path": false,
+    "authority_projection_file_present_at_expected_path": false,
+    "conformance_warnings": "10",
+    "conformance_failures": "0",
+    "unknown_route_candidates": "6",
+    "alias_drift_signals": "53",
+    "target_alias_hit_count": 164,
+    "blind_global_normalization_safe": false
+  },
+  "current_conformance_metrics": {
+    "failures": "0",
+    "warnings": "10",
+    "unknown_route_candidates": "6",
+    "alias_drift_signals": "53",
+    "handoff_drift_pairs": "0",
+    "verdict": "READY FOR NARROW AI COMMAND ALIAS INTEGRATION CANDIDATE"
+  },
+  "source_anchor_review": {
+    "warning_source_anchor_count": 42,
+    "contract_role_anchor_count": 41,
+    "ai_command_post_m3_anchor_count": 18,
+    "warning_source_anchors": [
+      {
+        "file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+        "line": 47,
+        "term": "warn(",
+        "text": "function warn(label, detail = \"\") {"
+      },
+      {
+        "file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+        "line": 176,
+        "term": "route-role-fallback",
+        "text": "routeRoleFallback: \"public/control-center/runtime/authority/route-role-fallback.js\","
+      },
+      {
+        "file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+        "line": 177,
+        "term": "authority-projection",
+        "text": "authorityProjection: \"public/control-center/runtime/authority/authority-projection.js\","
+      },
+      {
+        "file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+        "line": 323,
+        "term": "role_alias",
+        "text": "if (AI_TEAM_ROLE_ALIASES[id]) return \"role_alias\";"
+      },
+      {
+        "file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+        "line": 323,
+        "term": "alias",
+        "text": "if (AI_TEAM_ROLE_ALIASES[id]) return \"role_alias\";"
+      },
+      {
+        "file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+        "line": 333,
+        "term": "unknown_candidate",
+        "text": "return \"unknown_candidate\";"
+      },
+      {
+        "file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+        "line": 353,
+        "term": "alias",
+        "text": "assert(\"contract aliases >= 40\", contractAliases.length >= 40, String(contractAliases.length));"
+      },
+      {
+        "file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+        "line": 365,
+        "term": "alias",
+        "text": "const aiCommandCoveredRoles = contractRoleIds.filter((roleId) => hasToken(src.aiCommand, roleId) || contractAliases.some((alias) => AI_TEAM_ROLE_ALIASES[alias] === roleId && hasToken(src.aiCommand, alias)));"
+      },
+      {
+        "file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+        "line": 369,
+        "term": "warn(",
+        "text": "if (missingAiCommandRoles.length) warn(\"AI Command missing role coverage\", missingAiCommandRoles.join(\", \"));"
+      },
+      {
+        "file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+        "line": 370,
+        "term": "alias",
+        "text": "else pass(\"AI Command covers all canonical roles or aliases\");"
+      },
+      {
+        "file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+        "line": 372,
+        "term": "alias",
+        "text": "const aiCommandAliasDrift = contractAliases.filter((alias) => hasToken(src.aiCommand, alias));"
+      },
+      {
+        "file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+        "line": 373,
+        "term": "alias",
+        "text": "note(\"AI Command alias drift signals\", aiCommandAliasDrift.join(\", \"));"
+      },
+      {
+        "file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+        "line": 375,
+        "term": "warn(",
+        "text": "if (aiCommandAliasDrift.includes(\"admin\")) warn(\"AI Command admin alias still present\", \"expected until alias normalization integration\");"
+      },
+      {
+        "file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+        "line": 375,
+        "term": "alias",
+        "text": "if (aiCommandAliasDrift.includes(\"admin\")) warn(\"AI Command admin alias still present\", \"expected until alias normalization integration\");"
+      },
+      {
+        "file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+        "line": 376,
+        "term": "warn(",
+        "text": "if (aiCommandAliasDrift.includes(\"media\")) warn(\"AI Command media alias still present\", \"expected until alias normalization integration\");"
+      },
+      {
+        "file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+        "line": 376,
+        "term": "alias",
+        "text": "if (aiCommandAliasDrift.includes(\"media\")) warn(\"AI Command media alias still present\", \"expected until alias normalization integration\");"
+      },
+      {
+        "file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+        "line": 377,
+        "term": "warn(",
+        "text": "if (aiCommandAliasDrift.includes(\"ads\")) warn(\"AI Command ads alias still present\", \"expected until alias normalization integration\");"
+      },
+      {
+        "file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+        "line": 377,
+        "term": "alias",
+        "text": "if (aiCommandAliasDrift.includes(\"ads\")) warn(\"AI Command ads alias still present\", \"expected until alias normalization integration\");"
+      },
+      {
+        "file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+        "line": 387,
+        "term": "alias",
+        "text": "const homeCoveredRoles = contractRoleIds.filter((roleId) => hasToken(src.home, roleId) || contractAliases.some((alias) => AI_TEAM_ROLE_ALIASES[alias] === roleId && hasToken(src.home, alias)));"
+      },
+      {
+        "file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+        "line": 393,
+        "term": "route-role-fallback",
+        "text": "assert(\"route-role-fallback exists\", Boolean(src.routeRoleFallback.trim()));"
+      },
+      {
+        "file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+        "line": 394,
+        "term": "authority-projection",
+        "text": "assert(\"authority-projection exists\", Boolean(src.authorityProjection.trim()));"
+      },
+      {
+        "file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+        "line": 396,
+        "term": "alias",
+        "text": "const fallbackCoveredRoles = contractRoleIds.filter((roleId) => hasToken(src.routeRoleFallback, roleId) || contractAliases.some((alias) => AI_TEAM_ROLE_ALIASES[alias] === roleId && hasToken(src.routeRoleFallback, alias)));"
+      },
+      {
+        "file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+        "line": 397,
+        "term": "route-role-fallback",
+        "text": "note(\"route-role-fallback covered roles\", fallbackCoveredRoles.join(\", \"));"
+      },
+      {
+        "file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+        "line": 399,
+        "term": "alias",
+        "text": "const fallbackAliases = contractAliases.filter((alias) => hasToken(src.routeRoleFallback, alias));"
+      },
+      {
+        "file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+        "line": 400,
+        "term": "route-role-fallback uses aliases",
+        "text": "if (fallbackAliases.length) warn(\"route-role-fallback uses aliases\", fallbackAliases.join(\", \"));"
+      },
+      {
+        "file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+        "line": 400,
+        "term": "route-role-fallback",
+        "text": "if (fallbackAliases.length) warn(\"route-role-fallback uses aliases\", fallbackAliases.join(\", \"));"
+      },
+      {
+        "file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+        "line": 400,
+        "term": "warn(",
+        "text": "if (fallbackAliases.length) warn(\"route-role-fallback uses aliases\", fallbackAliases.join(\", \"));"
+      },
+      {
+        "file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+        "line": 400,
+        "term": "alias",
+        "text": "if (fallbackAliases.length) warn(\"route-role-fallback uses aliases\", fallbackAliases.join(\", \"));"
+      },
+      {
+        "file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+        "line": 401,
+        "term": "route-role-fallback",
+        "text": "else pass(\"route-role-fallback has no role alias drift\");"
+      },
+      {
+        "file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+        "line": 401,
+        "term": "alias",
+        "text": "else pass(\"route-role-fallback has no role alias drift\");"
+      },
+      {
+        "file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+        "line": 421,
+        "term": "role_alias",
+        "text": "role_alias: [],"
+      },
+      {
+        "file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+        "line": 421,
+        "term": "alias",
+        "text": "role_alias: [],"
+      },
+      {
+        "file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+        "line": 428,
+        "term": "unknown_candidate",
+        "text": "unknown_candidate: []"
+      },
+      {
+        "file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+        "line": 446,
+        "term": "warn(",
+        "text": "else warn(`contract page ${pageId} not found in runtime`, \"may be future page or sub-view\");"
+      },
+      {
+        "file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+        "line": 449,
+        "term": "unknown_candidate",
+        "text": "for (const id of buckets.unknown_candidate) {"
+      },
+      {
+        "file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+        "line": 450,
+        "term": "warn(",
+        "text": "warn(\"unknown route candidate missing owner\", id);"
+      },
+      {
+        "file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+        "line": 476,
+        "term": "warn(",
+        "text": "warn(`handoff ${source} -> ${destination} not in contract rules`, \"review before enforcing handoffs\");"
+      },
+      {
+        "file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+        "line": 487,
+        "term": "warn(",
+        "text": "if (outputMissingRuntime.length) warn(\"output vocabulary not yet in runtime\", outputMissingRuntime.join(\", \"));"
+      },
+      {
+        "file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+        "line": 494,
+        "term": "warn(",
+        "text": "if (requestMissingRuntime.length) warn(\"request vocabulary not yet in runtime\", \"expected until intake router integration\");"
+      },
+      {
+        "file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+        "line": 501,
+        "term": "unknown_candidate",
+        "text": "const unknownCandidates = buckets.unknown_candidate.length;"
+      },
+      {
+        "file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+        "line": 502,
+        "term": "alias",
+        "text": "const aliasDriftCount = aiCommandAliasDrift.length + fallbackAliases.length;"
+      },
+      {
+        "file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+        "line": 510,
+        "term": "alias",
+        "text": "console.log(`Alias drift signals: ${aliasDriftCount}`);"
+      }
+    ],
+    "contract_role_anchors": [
+      {
+        "file": "public/control-center/runtime/ai-team/ai-team-operating-contract.js",
+        "line": 96,
+        "term": "primaryPages",
+        "text": "primaryPages: [\"home\", \"ai-command\", \"workflows\", \"task-center\", \"queue-center\", \"job-monitor\", \"notification-center\", \"operations-centers\"],"
+      },
+      {
+        "file": "public/control-center/runtime/ai-team/ai-team-operating-contract.js",
+        "line": 97,
+        "term": "supportPages",
+        "text": "supportPages: [\"governance\", \"integrations\", \"setup\", \"customer-center\"],"
+      },
+      {
+        "file": "public/control-center/runtime/ai-team/ai-team-operating-contract.js",
+        "line": 98,
+        "term": "outputTargets",
+        "text": "outputTargets: [\"task-center\", \"workflows\", \"operations-centers\", \"governance\"],"
+      },
+      {
+        "file": "public/control-center/runtime/ai-team/ai-team-operating-contract.js",
+        "line": 110,
+        "term": "primaryPages",
+        "text": "primaryPages: [\"campaign-studio\", \"home\", \"ai-command\"],"
+      },
+      {
+        "file": "public/control-center/runtime/ai-team/ai-team-operating-contract.js",
+        "line": 111,
+        "term": "supportPages",
+        "text": "supportPages: [\"workflows\", \"insights\", \"research\", \"ads-manager\"],"
+      },
+      {
+        "file": "public/control-center/runtime/ai-team/ai-team-operating-contract.js",
+        "line": 112,
+        "term": "outputTargets",
+        "text": "outputTargets: [\"campaign-studio\", \"workflows\", \"content-studio\", \"ads-manager\"],"
+      },
+      {
+        "file": "public/control-center/runtime/ai-team/ai-team-operating-contract.js",
+        "line": 124,
+        "term": "primaryPages",
+        "text": "primaryPages: [\"content-studio\", \"ai-command\"],"
+      },
+      {
+        "file": "public/control-center/runtime/ai-team/ai-team-operating-contract.js",
+        "line": 125,
+        "term": "supportPages",
+        "text": "supportPages: [\"campaign-studio\", \"publishing\", \"media-studio\", \"library\"],"
+      },
+      {
+        "file": "public/control-center/runtime/ai-team/ai-team-operating-contract.js",
+        "line": 126,
+        "term": "outputTargets",
+        "text": "outputTargets: [\"content-studio\", \"publishing\", \"media-studio\", \"library\"],"
+      },
+      {
+        "file": "public/control-center/runtime/ai-team/ai-team-operating-contract.js",
+        "line": 138,
+        "term": "primaryPages",
+        "text": "primaryPages: [\"media-studio\", \"library\", \"ai-command\"],"
+      },
+      {
+        "file": "public/control-center/runtime/ai-team/ai-team-operating-contract.js",
+        "line": 139,
+        "term": "supportPages",
+        "text": "supportPages: [\"content-studio\", \"campaign-studio\", \"publishing\", \"governance\"],"
+      },
+      {
+        "file": "public/control-center/runtime/ai-team/ai-team-operating-contract.js",
+        "line": 140,
+        "term": "outputTargets",
+        "text": "outputTargets: [\"media-studio\", \"library\", \"publishing\", \"governance\"],"
+      },
+      {
+        "file": "public/control-center/runtime/ai-team/ai-team-operating-contract.js",
+        "line": 152,
+        "term": "primaryPages",
+        "text": "primaryPages: [\"media-studio\", \"ai-command\"],"
+      },
+      {
+        "file": "public/control-center/runtime/ai-team/ai-team-operating-contract.js",
+        "line": 153,
+        "term": "supportPages",
+        "text": "supportPages: [\"content-studio\", \"campaign-studio\", \"publishing\"],"
+      },
+      {
+        "file": "public/control-center/runtime/ai-team/ai-team-operating-contract.js",
+        "line": 154,
+        "term": "outputTargets",
+        "text": "outputTargets: [\"media-studio\", \"content-studio\", \"publishing\"],"
+      },
+      {
+        "file": "public/control-center/runtime/ai-team/ai-team-operating-contract.js",
+        "line": 166,
+        "term": "primaryPages",
+        "text": "primaryPages: [\"publishing\", \"ai-command\"],"
+      },
+      {
+        "file": "public/control-center/runtime/ai-team/ai-team-operating-contract.js",
+        "line": 167,
+        "term": "supportPages",
+        "text": "supportPages: [\"content-studio\", \"media-studio\", \"governance\", \"campaign-studio\"],"
+      },
+      {
+        "file": "public/control-center/runtime/ai-team/ai-team-operating-contract.js",
+        "line": 168,
+        "term": "outputTargets",
+        "text": "outputTargets: [\"publishing\", \"governance\", \"content-studio\", \"media-studio\"],"
+      },
+      {
+        "file": "public/control-center/runtime/ai-team/ai-team-operating-contract.js",
+        "line": 180,
+        "term": "primaryPages",
+        "text": "primaryPages: [\"ads-manager\", \"ai-command\"],"
+      },
+      {
+        "file": "public/control-center/runtime/ai-team/ai-team-operating-contract.js",
+        "line": 181,
+        "term": "supportPages",
+        "text": "supportPages: [\"campaign-studio\", \"insights\", \"publishing\", \"media-studio\"],"
+      },
+      {
+        "file": "public/control-center/runtime/ai-team/ai-team-operating-contract.js",
+        "line": 182,
+        "term": "outputTargets",
+        "text": "outputTargets: [\"ads-manager\", \"campaign-studio\", \"insights\"],"
+      },
+      {
+        "file": "public/control-center/runtime/ai-team/ai-team-operating-contract.js",
+        "line": 194,
+        "term": "primaryPages",
+        "text": "primaryPages: [\"insights\", \"ai-command\"],"
+      },
+      {
+        "file": "public/control-center/runtime/ai-team/ai-team-operating-contract.js",
+        "line": 195,
+        "term": "supportPages",
+        "text": "supportPages: [\"campaign-studio\", \"content-studio\", \"ads-manager\", \"home\"],"
+      },
+      {
+        "file": "public/control-center/runtime/ai-team/ai-team-operating-contract.js",
+        "line": 196,
+        "term": "outputTargets",
+        "text": "outputTargets: [\"insights\", \"campaign-studio\", \"content-studio\", \"ads-manager\"],"
+      },
+      {
+        "file": "public/control-center/runtime/ai-team/ai-team-operating-contract.js",
+        "line": 208,
+        "term": "primaryPages",
+        "text": "primaryPages: [\"research\", \"ai-command\"],"
+      },
+      {
+        "file": "public/control-center/runtime/ai-team/ai-team-operating-contract.js",
+        "line": 209,
+        "term": "supportPages",
+        "text": "supportPages: [\"campaign-studio\", \"insights\", \"content-studio\"],"
+      },
+      {
+        "file": "public/control-center/runtime/ai-team/ai-team-operating-contract.js",
+        "line": 210,
+        "term": "outputTargets",
+        "text": "outputTargets: [\"research\", \"campaign-studio\", \"insights\", \"content-studio\"],"
+      },
+      {
+        "file": "public/control-center/runtime/ai-team/ai-team-operating-contract.js",
+        "line": 222,
+        "term": "primaryPages",
+        "text": "primaryPages: [\"governance\", \"ai-command\"],"
+      },
+      {
+        "file": "public/control-center/runtime/ai-team/ai-team-operating-contract.js",
+        "line": 223,
+        "term": "supportPages",
+        "text": "supportPages: [\"publishing\", \"content-studio\", \"media-studio\", \"ads-manager\", \"library\"],"
+      },
+      {
+        "file": "public/control-center/runtime/ai-team/ai-team-operating-contract.js",
+        "line": 224,
+        "term": "outputTargets",
+        "text": "outputTargets: [\"governance\", \"publishing\", \"content-studio\", \"media-studio\"],"
+      },
+      {
+        "file": "public/control-center/runtime/ai-team/ai-team-operating-contract.js",
+        "line": 236,
+        "term": "primaryPages",
+        "text": "primaryPages: [\"customer-center\", \"operations-centers\", \"ai-command\"],"
+      },
+      {
+        "file": "public/control-center/runtime/ai-team/ai-team-operating-contract.js",
+        "line": 237,
+        "term": "supportPages",
+        "text": "supportPages: [\"task-center\", \"governance\", \"workflows\"],"
+      },
+      {
+        "file": "public/control-center/runtime/ai-team/ai-team-operating-contract.js",
+        "line": 238,
+        "term": "outputTargets",
+        "text": "outputTargets: [\"customer-center\", \"task-center\", \"operations-centers\", \"governance\"],"
+      },
+      {
+        "file": "public/control-center/runtime/ai-team/ai-team-operating-contract.js",
+        "line": 250,
+        "term": "primaryPages",
+        "text": "primaryPages: [\"ai-command\", \"customer-center\", \"operations-centers\"],"
+      },
+      {
+        "file": "public/control-center/runtime/ai-team/ai-team-operating-contract.js",
+        "line": 251,
+        "term": "supportPages",
+        "text": "supportPages: [\"campaign-studio\", \"workflows\", \"task-center\"],"
+      },
+      {
+        "file": "public/control-center/runtime/ai-team/ai-team-operating-contract.js",
+        "line": 252,
+        "term": "outputTargets",
+        "text": "outputTargets: [\"customer-center\", \"task-center\", \"workflows\", \"operations-centers\"],"
+      },
+      {
+        "file": "public/control-center/runtime/ai-team/ai-team-operating-contract.js",
+        "line": 260,
+        "term": "AI_TEAM_ROLE_ALIASES",
+        "text": "export const AI_TEAM_ROLE_ALIASES = Object.freeze({"
+      },
+      {
+        "file": "public/control-center/runtime/ai-team/ai-team-operating-contract.js",
+        "line": 518,
+        "term": "normalizeAiTeamRoleId",
+        "text": "export function normalizeAiTeamRoleId(roleId, fallback = \"operations\") {"
+      },
+      {
+        "file": "public/control-center/runtime/ai-team/ai-team-operating-contract.js",
+        "line": 524,
+        "term": "AI_TEAM_ROLE_ALIASES",
+        "text": "return AI_TEAM_ROLE_ALIASES[raw] || fallback;"
+      },
+      {
+        "file": "public/control-center/runtime/ai-team/ai-team-operating-contract.js",
+        "line": 527,
+        "term": "getAiTeamRole",
+        "text": "export function getAiTeamRole(roleId) {"
+      },
+      {
+        "file": "public/control-center/runtime/ai-team/ai-team-operating-contract.js",
+        "line": 528,
+        "term": "normalizeAiTeamRoleId",
+        "text": "const normalized = normalizeAiTeamRoleId(roleId);"
+      }
+    ],
+    "ai_command_post_m3_anchors": [
+      {
+        "file": "public/control-center/pages/ai-command.js",
+        "line": 147,
+        "term": "normalizeAiCommandCanonicalRoleId",
+        "text": "function normalizeAiCommandCanonicalRoleId(rawId, fallback = \"operations\") {"
+      },
+      {
+        "file": "public/control-center/pages/ai-command.js",
+        "line": 150,
+        "term": "MODE_ID_ALIASES[",
+        "text": "const legacyResolved = MODE_ID_ALIASES[raw] || raw;"
+      },
+      {
+        "file": "public/control-center/pages/ai-command.js",
+        "line": 640,
+        "term": "normalizeAiCommandSpecialistId",
+        "text": "function normalizeAiCommandSpecialistId(id, fallback = \"operations\") {"
+      },
+      {
+        "file": "public/control-center/pages/ai-command.js",
+        "line": 643,
+        "term": "MODE_ID_ALIASES[",
+        "text": "const legacyResolved = MODE_ID_ALIASES[raw] || raw;"
+      },
+      {
+        "file": "public/control-center/pages/ai-command.js",
+        "line": 644,
+        "term": "normalizeAiCommandCanonicalRoleId",
+        "text": "const canonicalResolved = normalizeAiCommandCanonicalRoleId(legacyResolved, fallbackId);"
+      },
+      {
+        "file": "public/control-center/pages/ai-command.js",
+        "line": 683,
+        "term": "normalizeAiCommandSpecialistId",
+        "text": "if (text.includes(keyword)) return normalizeAiCommandSpecialistId(specialistId);"
+      },
+      {
+        "file": "public/control-center/pages/ai-command.js",
+        "line": 687,
+        "term": "normalizeAiCommandSpecialistId",
+        "text": "return normalizeAiCommandSpecialistId(classified?.modeId, \"operations\");"
+      },
+      {
+        "file": "public/control-center/pages/ai-command.js",
+        "line": 692,
+        "term": "normalizeAiCommandSpecialistId",
+        "text": "const resolvedId = normalizeAiCommandSpecialistId(id);"
+      },
+      {
+        "file": "public/control-center/pages/ai-command.js",
+        "line": 944,
+        "term": "normalizeAiCommandSpecialistId",
+        "text": "const resolvedId = normalizeAiCommandSpecialistId(id);"
+      },
+      {
+        "file": "public/control-center/pages/ai-command.js",
+        "line": 1348,
+        "term": "normalizeAiCommandSpecialistId",
+        "text": "const id = normalizeAiCommandSpecialistId(rawId);"
+      },
+      {
+        "file": "public/control-center/pages/ai-command.js",
+        "line": 2545,
+        "term": "normalizeAiCommandSpecialistId",
+        "text": "const fallbackId = normalizeAiCommandSpecialistId(fallback);"
+      },
+      {
+        "file": "public/control-center/pages/ai-command.js",
+        "line": 2548,
+        "term": "normalizeAiCommandSpecialistId",
+        "text": "const resolved = normalizeAiCommandSpecialistId(legacy, fallbackId);"
+      },
+      {
+        "file": "public/control-center/pages/ai-command.js",
+        "line": 2549,
+        "term": "normalizeAiCommandSpecialistId",
+        "text": "const finalId = normalizeAiCommandSpecialistId(resolved, fallbackId);"
+      },
+      {
+        "file": "public/control-center/pages/ai-command.js",
+        "line": 3473,
+        "term": "normalizeAiCommandSpecialistId",
+        "text": "const requestedId = normalize(normalizeAiCommandSpecialistId(rawId));"
+      },
+      {
+        "file": "public/control-center/pages/ai-command.js",
+        "line": 3877,
+        "term": "normalizeAiCommandSpecialistId",
+        "text": "const toolModeId = normalizeAiCommandSpecialistId(session.modeId);"
+      },
+      {
+        "file": "public/control-center/pages/ai-command.js",
+        "line": 5189,
+        "term": "normalizeAiCommandSpecialistId",
+        "text": "const promptModeId = normalizeAiCommandSpecialistId(session.modeId);"
+      },
+      {
+        "file": "public/control-center/pages/ai-command.js",
+        "line": 5350,
+        "term": "normalizeAiCommandSpecialistId",
+        "text": "const promptModeId = normalizeAiCommandSpecialistId(session.modeId);"
+      },
+      {
+        "file": "public/control-center/pages/ai-command.js",
+        "line": 5539,
+        "term": "normalizeAiCommandSpecialistId",
+        "text": "const normalizedSessionModeId = normalizeAiCommandSpecialistId(session.modeId);"
+      }
+    ]
+  },
+  "design_decision": {
+    "direct_runtime_patch_safe_now": false,
+    "conformance_checker_patch_may_be_required": true,
+    "reason": "M4-0 found no physical route-role-fallback.js or authority-projection.js at expected paths while conformance warnings are produced by the conformance checker. M4 must first design a checker/classifier refinement or locate the real source anchors before runtime patching.",
+    "prohibited_actions": [
+      "Do not globally replace alias tokens.",
+      "Do not normalize page IDs, route IDs, outputTargets, primaryPages, supportPages, or handoff destinations as role IDs.",
+      "Do not touch runtime/orchestrator-service.",
+      "Do not expand execution authority.",
+      "Do not edit AI Command again unless a new truth scan proves a direct M4 dependency."
+    ],
+    "safe_patch_candidate": {
+      "scope": "scripts/audit/ai-team-contract-conformance-check.mjs only, unless M4-2 proves another exact file",
+      "intent": "separate true role alias warnings from page/route/domain vocabulary and align warning text with M3-normalized AI Command boundary",
+      "expected_effect": "reduce misleading route-role-fallback alias warning only if the checker proves aliases are no longer runtime authority risk",
+      "must_not_change_runtime_behavior": true
+    }
+  },
+  "m4_2_patch_requirements": [
+    "Before patching, prove exact lines in conformance checker that classify route-role-fallback aliases.",
+    "Separate role aliases from contract page IDs and handoff route IDs.",
+    "Preserve unknown route candidate warnings unless separately proven safe.",
+    "Preserve AI Command alias drift warnings unless M4-2 explicitly targets checker wording after M3.",
+    "Run validate-ai-team-operating-contract and ai-team-contract-conformance-check after any patch.",
+    "Diff scope must be limited to the designed checker/artifact files."
+  ],
+  "closeout_decision": {
+    "m4_1_can_patch_now": false,
+    "m4_1_design_ready_for_review": true,
+    "next_step": "M4-2 — Narrow Conformance Classifier Patch / Exact Anchor Patch",
+    "reason": "M4-1 is design only. A patch can only happen after the exact checker anchors are reviewed and the scope is limited to classifier/warning logic or another proven narrow file."
+  },
+  "sha256": {
+    "m40": "7ab4d4a5d2f226f8e4c61c386c123d7bde46ab6ccf387b7fd2317a59c2672e23",
+    "conformance": "4719088b7b1305fd90a3f53363fb5f794bb0d4b4e88c7f1657aba7a54ef34933",
+    "contract": "dda031ae7b65a521746d570d6a2383a73bc9fa440756302fb1f6ca282b3e55b0",
+    "aiCommand": "2d4c6cece0f00b6a25335e80fee794c9db1188d2d60b20f0208c6105144ec18e"
+  }
+}
