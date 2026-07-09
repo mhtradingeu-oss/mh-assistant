@@ -484,6 +484,70 @@ app.use(cors({
 }));
 app.use(compression());
 app.use("/public", publicAliasDeprecationHeaders);
+
+
+/**
+ * M2-J7 remaining route authority middleware coverage.
+ *
+ * Covers the 42 M2-J6 patch_required routes using existing M2-J2 authority middleware.
+ * No route handler rewrite.
+ * No UI/provider behavior changes.
+ * No publish/send/ads/CRM behavior added.
+ */
+app.use([
+  '/task',
+  '/api/agent-registry/register',
+  '/api/agent-registry/resolve',
+  '/ingest',
+  '/media-manager/project/:project/library/refresh',
+  '/media-manager/project/:project/team',
+  '/media-manager/project/:project/media-jobs',
+  '/media-manager/project/:project/media-jobs/:mediaJobId',
+  '/media-manager/project/:project/handoffs',
+  '/media-manager/project/:project/handoffs/:handoffId/consume',
+  '/media-manager/project/:project/library/index',
+  '/media-manager/project/:project/rename',
+  '/public/media-manager/project/:project/rename',
+  '/media-manager/project/:project/apply-template',
+  '/public/media-manager/project/:project/apply-template',
+  '/media-manager/projects',
+  '/public/media-manager/projects',
+  '/media-manager/project/:project/content-items',
+  '/public/media-manager/project/:project/content-items',
+  '/media-manager/project/:project/content-items/:contentItemId',
+  '/public/media-manager/project/:project/content-items/:contentItemId'
+], mhProtectedRouteManualOnly);
+
+app.use([
+  '/backup-and-clone-product/:id',
+  '/apply-prepared-copy-to-clone/:originalId/:cloneId',
+  '/media/upload',
+  '/media-manager/project/:project/assets/:assetId/rename',
+  '/media-manager/project/:project/assets/:assetId/source-of-truth',
+  '/media-manager/project/:project/assets/:assetId/archive',
+  '/api/ai-command/project/:project/campaign-preview',
+  '/media-manager/project/:project/tasks',
+  '/media-manager/project/:project/notifications/:notificationId',
+  '/media-manager/project/:project/campaigns',
+  '/public/media-manager/project/:project/campaigns',
+  '/media-manager/project/:project/campaigns/:campaignId',
+  '/public/media-manager/project/:project/campaigns/:campaignId'
+], mhProtectedRouteApprovalRequired);
+
+app.use([
+  '/media-manager/project/:project/assets/:assetId/classification'
+], mhProtectedRouteDeleteRequired);
+
+app.use([
+  '/public/media-manager/project/:project/team',
+  '/public/media-manager/project/:project/media-jobs',
+  '/public/media-manager/project/:project/media-jobs/:mediaJobId',
+  '/public/media-manager/project/:project/tasks',
+  '/public/media-manager/project/:project/notifications/:notificationId',
+  '/public/media-manager/project/:project/handoffs',
+  '/public/media-manager/project/:project/handoffs/:handoffId/consume'
+], mhProtectedRouteManualOnly);
+
 app.use(express.json());
 
 const appLogger = createLogger({
