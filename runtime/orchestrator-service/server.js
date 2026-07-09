@@ -23625,3 +23625,278 @@ module.exports = {
     upsertCampaign
   }
 };
+
+// ===============================
+// MEDIA LIBRARY INDEX API (PHASE 2D)
+// ===============================
+
+app.post('/media-manager/project/:project/library/index', (req, res) => {
+  try {
+    const project = req.params.project;
+
+    const { buildLibraryIndex } = require('./lib/media/library-engine');
+
+    const result = buildLibraryIndex(project, {
+      getProjectAssetPaths,
+      readJsonFile,
+      normalizeAssetRecord
+    });
+
+    return res.json({
+      success: true,
+      ...result
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      error: error.message || 'Library index failed'
+    });
+  }
+});
+
+
+// ===============================
+// PHASE 2D AUTO SYNC HOOK
+// Media → Library → UI Sync
+// ===============================
+
+function triggerLibraryAutoSync(projectName) {
+  try {
+    const { buildLibraryIndex } = require('./lib/media/library-engine');
+
+    const result = buildLibraryIndex(projectName, {
+      getProjectAssetPaths,
+      readJsonFile,
+      normalizeAssetRecord
+    });
+
+    return {
+      success: true,
+      synced: true,
+      index: result
+    };
+
+  } catch (err) {
+    console.error('[library-sync-error]', err.message);
+    return {
+      success: false,
+      synced: false,
+      error: err.message
+    };
+  }
+}
+
+// Hook into media pipeline automatically
+function autoSyncAfterMediaGeneration(projectName) {
+  return triggerLibraryAutoSync(projectName);
+}
+
+
+// ===============================
+// PHASE 2D AUTO SYNC ACTIVATION
+// REAL PIPELINE HOOK
+// ===============================
+
+// Attach auto-sync directly into media persistence flow
+function maybePersistMediaGenerationResult(req, params) {
+  const result = originalMaybePersistMediaGenerationResult
+    ? originalMaybePersistMediaGenerationResult(req, params)
+    : null;
+
+  try {
+    const projectName = req?.params?.project || req?.body?.project;
+
+    if (projectName) {
+      autoSyncAfterMediaGeneration(projectName);
+    }
+
+  } catch (err) {
+    console.error('[auto-sync-error]', err.message);
+  }
+
+  return result;
+}
+
+
+// ===============================
+// PHASE 2D HARD EVENT WIRING (FINAL)
+// GUARANTEED AUTO SYNC
+// ===============================
+
+function maybePersistMediaGenerationResult(req, params) {
+  const result = originalMaybePersistMediaGenerationResult
+    ? originalMaybePersistMediaGenerationResult(req, params)
+    : null;
+
+  const projectName = req?.params?.project || req?.body?.project;
+
+  if (projectName) {
+    setImmediate(() => {
+      try {
+        const { buildLibraryIndex } = require('./lib/media/library-engine');
+
+        buildLibraryIndex(projectName, {
+          getProjectAssetPaths,
+          readJsonFile,
+          normalizeAssetRecord
+        });
+
+        console.log('[media-sync] library rebuilt for:', projectName);
+
+      } catch (err) {
+        console.error('[media-sync-error]', err.message);
+      }
+    });
+  }
+
+  return result;
+}
+
+
+// ===============================
+// PHASE 2E - MEDIA STUDIO LIVE BRIDGE
+// REAL-TIME MEDIA SYNC LAYER
+// ===============================
+
+// LIVE MEDIA STUDIO INDEX FEED
+app.get('/media-manager/project/:project/media-studio/index', (req, res) => {
+  try {
+    const projectName = req.params.project;
+
+    const { buildLibraryIndex } = require('./lib/media/library-engine');
+
+    const index = buildLibraryIndex(projectName, {
+      getProjectAssetPaths,
+      readJsonFile,
+      normalizeAssetRecord
+    });
+
+    return res.json({
+      success: true,
+      source: 'media-studio-live',
+      timestamp: new Date().toISOString(),
+      ...index
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      error: error.message || 'Media Studio index failed'
+    });
+  }
+});
+
+
+// ===============================
+// AUTO LINK: SYNC → MEDIA STUDIO
+// ===============================
+
+function notifyMediaStudioUpdate(projectName) {
+  try {
+    // This acts as future WebSocket / polling hook
+    console.log('[media-studio-update]', {
+      project: projectName,
+      timestamp: new Date().toISOString(),
+      status: 'updated'
+    });
+  } catch (err) {
+    console.error('[media-studio-notify-error]', err.message);
+  }
+}
+
+// Extend auto sync to notify Media Studio
+function autoSyncAfterMediaGeneration(projectName) {
+  try {
+    const { buildLibraryIndex } = require('./lib/media/library-engine');
+
+    const index = buildLibraryIndex(projectName, {
+      getProjectAssetPaths,
+      readJsonFile,
+      normalizeAssetRecord
+    });
+
+    notifyMediaStudioUpdate(projectName);
+
+    return index;
+
+  } catch (err) {
+    console.error('[auto-sync-error]', err.message);
+  }
+}
+
+
+// ===============================
+// PHASE 2F.2 - PUBLISHING API LAYER
+// ===============================
+
+const {
+  publishAsset,
+  publishBatch
+} = require('./lib/media/publishing/publishEngine');
+
+// Publish single asset
+// PHASE 3T-0E SAFETY REPAIR:
+// Direct media publish is blocked here to prevent bypassing the governed Publishing workflow.
+// Use /media-manager/project/:project/publishing/:jobId/publish after governance approval.
+app.post('/media-manager/project/:project/publish/asset', (req, res) => {
+  return res.status(403).json({
+    success: false,
+    error: 'direct_media_publish_blocked',
+    code: 'governed_publishing_required',
+    message: 'Direct media publish is blocked. Use the governed publishing workflow with approval before publishing.',
+    route_target: 'publishing',
+    required_flow: 'publishing_schedule_ready_publish',
+    project: req.params.project
+  });
+});
+
+// Batch publish
+// PHASE 3T-0E SAFETY REPAIR:
+// Direct batch media publish is blocked here to prevent bypassing the governed Publishing workflow.
+// Use governed publishing jobs and approval lifecycle instead.
+app.post('/media-manager/project/:project/publish/batch', (req, res) => {
+  return res.status(403).json({
+    success: false,
+    error: 'direct_media_batch_publish_blocked',
+    code: 'governed_publishing_required',
+    message: 'Direct batch media publish is blocked. Use governed publishing jobs with approval before publishing.',
+    route_target: 'publishing',
+    required_flow: 'publishing_schedule_ready_publish',
+    project: req.params.project
+  });
+});
+
+
+// ===============================
+// PHASE 2F.6 - PUBLISH LIFECYCLE API BRIDGE
+// ===============================
+
+const {
+  getJob
+} = require('./lib/media/publishing/publishLifecycleEngine');
+
+// GET publish job status (UI polling endpoint)
+app.get('/media-manager/publish/job/:jobId', (req, res) => {
+  try {
+    const jobId = req.params.jobId;
+
+    const job = getJob(jobId);
+
+    if (!job) {
+      return res.status(404).json({
+        success: false,
+        error: 'Job not found'
+      });
+    }
+
+    return res.json(job);
+
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      error: err.message || 'Failed to fetch job'
+    });
+  }
+});
+

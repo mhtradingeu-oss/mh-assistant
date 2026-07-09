@@ -15,6 +15,7 @@ const SENSITIVE_MUTATION_ROUTE_PATTERNS = [
   /^\/(?:public\/)?media-manager\/project\/[^/]+\/integrations\/[^/]+\/(?:connect|reconnect|test|sync|import-history|disconnect)(?:\/)?$/i,
   /^\/(?:public\/)?media-manager\/project\/[^/]+\/publishing\/schedule(?:\/)?$/i,
   /^\/(?:public\/)?media-manager\/project\/[^/]+\/publishing\/[^/]+\/(?:reschedule|ready|publish|fail)(?:\/)?$/i,
+  /^\/(?:public\/)?media-manager\/project\/[^/]+\/publish\/(?:asset|batch)(?:\/)?$/i,
   /^\/(?:public\/)?media-manager\/project\/[^/]+\/native-media\/generate(?:\/)?$/i,
   /^\/execute_publish_package(?:\/)?$/i,
   /^\/execute_email_package(?:\/)?$/i,
