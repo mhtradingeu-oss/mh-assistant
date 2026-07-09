@@ -313,7 +313,14 @@ export const AI_TEAM_ROLE_ALIASES = Object.freeze({
 
   sales: "sales_crm",
   crm: "sales_crm",
-  lead: "sales_crm"
+  lead: "sales_crm",
+  retention: "sales_crm",
+  loyalty: "sales_crm",
+  lifecycle: "sales_crm",
+  data: "analyst",
+  reporting: "analyst",
+  metrics: "analyst",
+  reporting_assistant: "analyst",
 });
 
 export const AI_TEAM_PAGE_OWNER_MATRIX = Object.freeze({
