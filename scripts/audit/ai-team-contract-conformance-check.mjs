@@ -397,8 +397,25 @@ const fallbackCoveredRoles = contractRoleIds.filter((roleId) => hasToken(src.rou
 note("route-role-fallback covered roles", fallbackCoveredRoles.join(", "));
 
 const fallbackAliases = contractAliases.filter((alias) => hasToken(src.routeRoleFallback, alias));
-if (fallbackAliases.length) warn("route-role-fallback uses aliases", fallbackAliases.join(", "));
-else pass("route-role-fallback has no role alias drift");
+
+// M4-2-R2: src.routeRoleFallback is classifier source, not a dedicated runtime file.
+// Alias-like tokens such as publishing, insights, research, and governance can be
+// valid contract page IDs or domain vocabulary. Warn only on aliases that cannot
+// resolve to a canonical role and are not known contract pages.
+const fallbackUnresolvedAliases = fallbackAliases.filter((alias) => {
+  const canonicalRole = AI_TEAM_ROLE_ALIASES[alias];
+  const isKnownRoleAlias = Boolean(canonicalRole && contractRoleIds.includes(canonicalRole));
+  const isKnownContractPage = Boolean(AI_TEAM_PAGE_OWNER_MATRIX[alias]);
+  return !isKnownRoleAlias && !isKnownContractPage;
+});
+
+if (fallbackUnresolvedAliases.length) {
+  warn("route-role-fallback uses unresolved aliases", fallbackUnresolvedAliases.join(", "));
+} else if (fallbackAliases.length) {
+  note("route-role-fallback alias-like values resolved by contract", fallbackAliases.join(", "));
+} else {
+  pass("route-role-fallback has no role alias drift");
+}
 
 console.log("");
 

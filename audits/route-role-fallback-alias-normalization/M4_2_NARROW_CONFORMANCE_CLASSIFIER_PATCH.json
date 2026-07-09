@@ -1,0 +1,101 @@
+{
+  "artifact_id": "M4_2_NARROW_CONFORMANCE_CLASSIFIER_PATCH",
+  "status": "PATCH_APPLIED_FOR_REVIEW",
+  "phase": "M4 — Route Role Fallback Alias Normalization / Authority Projection Narrow Review",
+  "mode": "corrected narrow conformance checker classifier patch",
+  "corrected_attempts": [
+    "M4-2-R1 exact warning rescan",
+    "M4-2-R2 corrected fallbackAliases patch",
+    "M4-2-R3 undefined AI_TEAM_ROLES repair"
+  ],
+  "head": "7fca4ed (HEAD -> main, origin/main, origin/HEAD) Design route role fallback alias normalization patch",
+  "git_status_short": "M scripts/audit/ai-team-contract-conformance-check.mjs",
+  "git_sync": "0\t0",
+  "m4_1_status": "PATCH_DESIGN_RECORDED",
+  "changed_source_files": [
+    "scripts/audit/ai-team-contract-conformance-check.mjs"
+  ],
+  "changed_audit_files": [
+    "audits/route-role-fallback-alias-normalization/M4_2_NARROW_CONFORMANCE_CLASSIFIER_PATCH.json",
+    "audits/route-role-fallback-alias-normalization/M4_2_NARROW_CONFORMANCE_CLASSIFIER_PATCH.md"
+  ],
+  "runtime_changes_in_m4_2": false,
+  "server_changes_in_m4_2": false,
+  "ui_source_changes_in_m4_2": false,
+  "execution_authority_expansion_in_m4_2": false,
+  "patch_scope": {
+    "conformance_checker_only": true,
+    "runtime_orchestrator_changed": false,
+    "ai_command_changed": false,
+    "contract_changed": false
+  },
+  "exact_anchor_proof": [
+    {
+      "file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+      "line": 401,
+      "term": "M4-2-R2:",
+      "text": "// M4-2-R2: src.routeRoleFallback is classifier source, not a dedicated runtime file."
+    },
+    {
+      "file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+      "line": 405,
+      "term": "fallbackUnresolvedAliases",
+      "text": "const fallbackUnresolvedAliases = fallbackAliases.filter((alias) => {"
+    },
+    {
+      "file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+      "line": 407,
+      "term": "contractRoleIds.includes(canonicalRole)",
+      "text": "const isKnownRoleAlias = Boolean(canonicalRole && contractRoleIds.includes(canonicalRole));"
+    },
+    {
+      "file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+      "line": 412,
+      "term": "fallbackUnresolvedAliases",
+      "text": "if (fallbackUnresolvedAliases.length) {"
+    },
+    {
+      "file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+      "line": 413,
+      "term": "fallbackUnresolvedAliases",
+      "text": "warn(\"route-role-fallback uses unresolved aliases\", fallbackUnresolvedAliases.join(\", \"));"
+    },
+    {
+      "file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+      "line": 413,
+      "term": "route-role-fallback uses unresolved aliases",
+      "text": "warn(\"route-role-fallback uses unresolved aliases\", fallbackUnresolvedAliases.join(\", \"));"
+    },
+    {
+      "file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+      "line": 415,
+      "term": "route-role-fallback alias-like values resolved by contract",
+      "text": "note(\"route-role-fallback alias-like values resolved by contract\", fallbackAliases.join(\", \"));"
+    }
+  ],
+  "conformance_metrics": {
+    "post": {
+      "failures": "0",
+      "warnings": "9",
+      "unknown_route_candidates": "6",
+      "alias_drift_signals": "53",
+      "handoff_drift_pairs": "0",
+      "verdict": "READY FOR NARROW AI COMMAND ALIAS INTEGRATION CANDIDATE",
+      "old_route_alias_warning_present": false,
+      "unresolved_route_alias_warning_present": false,
+      "resolved_alias_info_present": true
+    }
+  },
+  "decision": {
+    "patch_objective_completed": true,
+    "ready_for_commit_after_review": true,
+    "reason": "The conformance checker now treats route fallback alias-like values as resolved when they map through the canonical role alias map or are known contract pages. The misleading route-role-fallback alias warning was removed without runtime behavior changes.",
+    "next_step_after_commit": "M4-3 — Route Role Fallback Alias Normalization Closeout"
+  },
+  "sha256": {
+    "m41": "67d895a650cc3ea39d6dbd9a1a6026bb88016e8f8323233d468c769cae958c69",
+    "conformance": "8c94b14efa97348b09bcb444c0259af517776436f95757097756e91db0776256",
+    "contract": "dda031ae7b65a521746d570d6a2383a73bc9fa440756302fb1f6ca282b3e55b0",
+    "aiCommand": "2d4c6cece0f00b6a25335e80fee794c9db1188d2d60b20f0208c6105144ec18e"
+  }
+}
