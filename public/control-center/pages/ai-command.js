@@ -137,6 +137,20 @@ const MODE_ID_ALIASES = {
 	admin: "operations"
 };
 
+/**
+ * M3-2 narrow alias normalization boundary.
+ *
+ * Keep the existing AI Command UI definitions stable while resolving role-like
+ * IDs through the canonical AI Team Operating Contract before falling back to
+ * legacy local aliases. This does not grant execution authority.
+ */
+function normalizeAiCommandCanonicalRoleId(rawId, fallback = "operations") {
+    const fallbackId = getAiRoomRoleId(fallback) || "operations";
+    const raw = getAiRoomRoleId(rawId) || fallbackId;
+    const legacyResolved = MODE_ID_ALIASES[raw] || raw;
+    return normalizeAiTeamRoleId(legacyResolved, fallbackId);
+}
+
 // ============================================================
 //  PHASE 1: SPECIALIST DEFINITIONS — AI TEAM COMMAND CENTER
 // ============================================================
@@ -624,8 +638,15 @@ const aiAutomationState = {
 
 
 function normalizeAiCommandSpecialistId(id, fallback = "operations") {
-    const localResolved = MODE_ID_ALIASES[id] || id;
-    return normalizeAiTeamRoleId(localResolved, fallback);
+    const fallbackId = getAiRoomRoleId(fallback) || "operations";
+    const raw = getAiRoomRoleId(id) || fallbackId;
+    const legacyResolved = MODE_ID_ALIASES[raw] || raw;
+    const canonicalResolved = normalizeAiCommandCanonicalRoleId(legacyResolved, fallbackId);
+    const candidates = [canonicalResolved, legacyResolved, raw, fallbackId, "operations"].filter(Boolean);
+    const modeMatch = candidates.find((candidate) => MODE_DEFS.some((item) => item.id === candidate));
+    if (modeMatch) return modeMatch;
+    const specialistMatch = candidates.find((candidate) => SPECIALIST_DEFS.some((item) => item.id === candidate));
+    return specialistMatch || canonicalResolved || legacyResolved || fallbackId;
 }
 
 function detectSpecialistFromBridgePrompt(prompt) {
@@ -668,7 +689,7 @@ function detectSpecialistFromBridgePrompt(prompt) {
 
 function buildAutoPlanFromCommand(commandText, session) {
 	function getSpecialistById(id) {
-		const resolvedId = MODE_ID_ALIASES[id] || id;
+		const resolvedId = normalizeAiCommandSpecialistId(id);
 		return SPECIALIST_DEFS.find((s) => s.id === resolvedId) ||
 			SPECIALIST_DEFS.find((s) => s.id === "operations") ||
 			SPECIALIST_DEFS[0];
@@ -920,7 +941,7 @@ function formatCurrency(value, currency = "USD") {
 }
 
 function getModeMeta(id) {
-	const resolvedId = MODE_ID_ALIASES[id] || id;
+	const resolvedId = normalizeAiCommandSpecialistId(id);
 	return MODE_DEFS.find((item) => item.id === resolvedId) || MODE_DEFS[0];
 }
 
@@ -1324,7 +1345,7 @@ function extractGeneratedResponseText(response = {}) {
 
 function destinationRouteForSpecialist(specialistId, outputType) {
 	const rawId = getAiRoomRoleId(specialistId || "operations");
-	const id = MODE_ID_ALIASES[rawId] || rawId;
+	const id = normalizeAiCommandSpecialistId(rawId);
 	if (outputType === "workflow") return "workflows";
 	if (id === "strategist") return outputType === "task" ? "campaign-studio" : "workflows";
 	if (id === "writer") return "content-studio";
@@ -2521,11 +2542,11 @@ function normalizeAiInboundSourcePage(value) {
 }
 
 function normalizeAiInboundSpecialistId(value, fallback = "operations") {
-	const fallbackId = MODE_ID_ALIASES[getAiRoomRoleId(fallback)] || getAiRoomRoleId(fallback);
+	const fallbackId = normalizeAiCommandSpecialistId(fallback);
 	const raw = getAiRoomRoleId(value || fallbackId);
 	const legacy = AI_INBOUND_SPECIALIST_ALIASES[raw] || AI_INBOUND_SPECIALIST_ALIASES[asString(value).trim().toLowerCase()] || raw;
-	const resolved = MODE_ID_ALIASES[legacy] || MODE_ID_ALIASES[getAiRoomRoleId(legacy)] || getAiRoomRoleId(legacy);
-	const finalId = MODE_ID_ALIASES[resolved] || resolved;
+	const resolved = normalizeAiCommandSpecialistId(legacy, fallbackId);
+	const finalId = normalizeAiCommandSpecialistId(resolved, fallbackId);
 	return SPECIALIST_DEFS.some((item) => item.id === finalId) ? finalId : fallbackId;
 }
 
@@ -3449,7 +3470,7 @@ function getPhase1SpecialistById(value) {
       .replace(/[\s-]+/g, "_");
 
   const rawId = normalize(value || "strategist");
-  const requestedId = normalize(MODE_ID_ALIASES[rawId] || rawId);
+  const requestedId = normalize(normalizeAiCommandSpecialistId(rawId));
   const rawDefinitions = typeof SPECIALIST_DEFS !== "undefined" ? SPECIALIST_DEFS : [];
 
   const definitions = Array.isArray(rawDefinitions)
@@ -3853,7 +3874,7 @@ function normalizeCanonicalToolForPanel(tool = {}, session) {
 }
 
 function getPhase35ToolSet(session) {
-	const toolModeId = MODE_ID_ALIASES[getAiRoomRoleId(session.modeId)] || getAiRoomRoleId(session.modeId);
+	const toolModeId = normalizeAiCommandSpecialistId(session.modeId);
 	return getAiToolDockTools({
 		specialistId: toolModeId,
 		teamMode: session.teamMode,
@@ -5165,7 +5186,7 @@ function renderPhase3SpecialistConversation(session, bridgeStatus, escapeHtml) {
                 teamMode: session.teamMode,
                 limit: 2
         }).map((tool) => asString(tool.label)).filter(Boolean);
-        const promptModeId = MODE_ID_ALIASES[getAiRoomRoleId(session.modeId)] || getAiRoomRoleId(session.modeId);
+        const promptModeId = normalizeAiCommandSpecialistId(session.modeId);
         const nextPrompts = session.teamMode === "team"
                 ? TEAM_SUGGESTED_PROMPTS
                 : (SPECIALIST_SUGGESTED_PROMPTS[promptModeId] || SPECIALIST_SUGGESTED_PROMPTS.operations);
@@ -5326,7 +5347,7 @@ function renderPhase3SpecialistConversation(session, bridgeStatus, escapeHtml) {
 }
 
 function renderPhase1SuggestedPrompts(session, escapeHtml) {
-	const promptModeId = MODE_ID_ALIASES[getAiRoomRoleId(session.modeId)] || getAiRoomRoleId(session.modeId);
+	const promptModeId = normalizeAiCommandSpecialistId(session.modeId);
 	const prompts = session.teamMode === "team"
 		? TEAM_SUGGESTED_PROMPTS
 		: (SPECIALIST_SUGGESTED_PROMPTS[promptModeId] || SPECIALIST_SUGGESTED_PROMPTS.operations);
@@ -5515,7 +5536,7 @@ export const aiCommandRoute = {
 		const sessionKey = projectName || "__default__";
 		const session = ensureSession(sessionKey);
 		hydrateSessionDraft(sessionKey, session);
-		const normalizedSessionModeId = MODE_ID_ALIASES[getAiRoomRoleId(session.modeId)] || getAiRoomRoleId(session.modeId);
+		const normalizedSessionModeId = normalizeAiCommandSpecialistId(session.modeId);
 		if (normalizedSessionModeId && normalizedSessionModeId !== session.modeId) session.modeId = normalizedSessionModeId;
 		refreshAiChatSessions(sessionKey, session);
            const savedOutput = asObject(loadLocalOutput(sessionKey));

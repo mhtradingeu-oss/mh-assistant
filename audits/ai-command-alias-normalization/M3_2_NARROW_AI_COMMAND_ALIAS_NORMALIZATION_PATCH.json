@@ -1,0 +1,124 @@
+{
+  "artifact_id": "M3_2_NARROW_AI_COMMAND_ALIAS_NORMALIZATION_PATCH",
+  "status": "PATCH_APPLIED_FOR_REVIEW_CLEANED",
+  "phase": "M3 — AI Command Alias Normalization / Narrow Integration Candidate",
+  "mode": "narrow patch",
+  "runtime_changes_in_m3_2": false,
+  "server_changes_in_m3_2": false,
+  "ui_source_changes_in_m3_2": true,
+  "execution_authority_expansion_in_m3_2": false,
+  "changed_source_files": [
+    "public/control-center/pages/ai-command.js"
+  ],
+  "audit_artifacts": [
+    "audits/ai-command-alias-normalization/M3_2_NARROW_AI_COMMAND_ALIAS_NORMALIZATION_PATCH.json",
+    "audits/ai-command-alias-normalization/M3_2_NARROW_AI_COMMAND_ALIAS_NORMALIZATION_PATCH.md"
+  ],
+  "source_design": "audits/ai-command-alias-normalization/M3_1_NARROW_AI_COMMAND_ALIAS_NORMALIZATION_PATCH_DESIGN.json",
+  "source_files": {
+    "aiCommandPath": "public/control-center/pages/ai-command.js",
+    "contractPath": "public/control-center/runtime/ai-team/ai-team-operating-contract.js"
+  },
+  "sha256_before": {
+    "ai_command": "b819f3074df1f891482e8353a89351769db946b340ac08f96ec4d02906445630"
+  },
+  "sha256_after": {
+    "ai_command": "7c22b43d7f9aee420c493e3ebdf4141cb3573aaae523c21953fc90f7559338b0"
+  },
+  "helper_added": [
+    "normalizeAiCommandCanonicalRoleId",
+    "normalizeAiCommandSpecialistId"
+  ],
+  "replacements": [
+    {
+      "label": "resolvedId from local MODE_ID_ALIASES",
+      "type": "literal",
+      "count": 2,
+      "from": "const resolvedId = MODE_ID_ALIASES[id] || id;",
+      "to": "const resolvedId = normalizeAiCommandSpecialistId(id);"
+    },
+    {
+      "label": "rawId direct alias boundary",
+      "type": "literal",
+      "count": 1,
+      "from": "const id = MODE_ID_ALIASES[rawId] || rawId;",
+      "to": "const id = normalizeAiCommandSpecialistId(rawId);"
+    },
+    {
+      "label": "fallbackId direct alias boundary",
+      "type": "literal",
+      "count": 1,
+      "from": "const fallbackId = MODE_ID_ALIASES[getAiRoomRoleId(fallback)] || getAiRoomRoleId(fallback);",
+      "to": "const fallbackId = normalizeAiCommandSpecialistId(fallback);"
+    },
+    {
+      "label": "legacy resolved direct alias boundary",
+      "type": "regex",
+      "count": 1,
+      "pattern": "/const resolved = MODE_ID_ALIASES\\[legacy\\]\\s*\\|\\|\\s*MODE_ID_ALIASES\\[getAiRoomRoleId\\(legacy\\)\\]\\s*\\|\\|\\s*getAiRoomRoleId\\(legacy\\);/g",
+      "to": "const resolved = normalizeAiCommandSpecialistId(legacy, fallbackId);"
+    },
+    {
+      "label": "finalId direct alias boundary",
+      "type": "literal",
+      "count": 1,
+      "from": "const finalId = MODE_ID_ALIASES[resolved] || resolved;",
+      "to": "const finalId = normalizeAiCommandSpecialistId(resolved, fallbackId);"
+    },
+    {
+      "label": "requestedId direct alias boundary",
+      "type": "literal",
+      "count": 1,
+      "from": "const requestedId = normalize(MODE_ID_ALIASES[rawId] || rawId);",
+      "to": "const requestedId = normalize(normalizeAiCommandSpecialistId(rawId));"
+    },
+    {
+      "label": "toolModeId session alias boundary",
+      "type": "literal",
+      "count": 1,
+      "from": "const toolModeId = MODE_ID_ALIASES[getAiRoomRoleId(session.modeId)] || getAiRoomRoleId(session.modeId);",
+      "to": "const toolModeId = normalizeAiCommandSpecialistId(session.modeId);"
+    },
+    {
+      "label": "promptModeId session alias boundary",
+      "type": "literal",
+      "count": 2,
+      "from": "const promptModeId = MODE_ID_ALIASES[getAiRoomRoleId(session.modeId)] || getAiRoomRoleId(session.modeId);",
+      "to": "const promptModeId = normalizeAiCommandSpecialistId(session.modeId);"
+    },
+    {
+      "label": "normalizedSessionModeId session alias boundary",
+      "type": "literal",
+      "count": 1,
+      "from": "const normalizedSessionModeId = MODE_ID_ALIASES[getAiRoomRoleId(session.modeId)] || getAiRoomRoleId(session.modeId);",
+      "to": "const normalizedSessionModeId = normalizeAiCommandSpecialistId(session.modeId);"
+    }
+  ],
+  "preserved_boundaries": [
+    "MODE_ID_ALIASES object preserved for backward compatibility.",
+    "SPECIALIST_DEFS preserved to avoid UI/card rewrite.",
+    "localResolved legacy boundary preserved where the surrounding logic is not safely proven as a specialist final ID.",
+    "Routes such as media-studio and ads-manager were not renamed.",
+    "No provider execution, publishing, ads launch, customer send, CRM mutation, or budget mutation was added."
+  ],
+  "closeout_decision": {
+    "m3_2_ready_for_review": true,
+    "m3_2_can_commit_now": false,
+    "reason": "R2 cleanup removed duplicate helper. Commit only after validation, diff scope, and execution authority guards pass.",
+    "next_step": "M3-2-2 - Commit Narrow AI Command Alias Normalization Patch"
+  },
+  "cleanup": {
+    "status": "DUPLICATE_HELPER_REMOVED_R2",
+    "method": "function-boundary cleanup",
+    "specialist_helper_count_after_cleanup": 1,
+    "canonical_helper_count_after_cleanup": 1,
+    "note": "Removed the inserted duplicate normalizeAiCommandSpecialistId block and upgraded the remaining helper to use normalizeAiCommandCanonicalRoleId.",
+    "format_cleanup": "Inserted missing blank line between normalizeAiCommandSpecialistId and detectSpecialistFromBridgePrompt."
+  },
+  "sha256_after_cleanup": {
+    "ai_command": "42ce43ce4697c06cccd0128d12f73db75dfd23790742967243edef7111af8cab"
+  },
+  "sha256_after_format_cleanup": {
+    "ai_command": "2d4c6cece0f00b6a25335e80fee794c9db1188d2d60b20f0208c6105144ec18e"
+  }
+}
