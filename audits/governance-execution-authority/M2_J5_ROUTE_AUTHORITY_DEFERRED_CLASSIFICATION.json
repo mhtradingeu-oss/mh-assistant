@@ -1,0 +1,1731 @@
+{
+  "artifact_id": "M2_J5_ROUTE_AUTHORITY_DEFERRED_CLASSIFICATION",
+  "status": "DEFERRED_CLASSIFICATION_RECORDED",
+  "source_m2j4_rebaseline": "audits/governance-execution-authority/M2_J4_PROTECTED_ROUTE_AUTHORITY_REBASELINE.json",
+  "helper_proof": {
+    "server_sha256": "4cc23bf58f601e896212895eab7b225ce2904dd91c49f1037fb0661315bcb4b0",
+    "helper_sha256": "d33a017d9f8ee884bff5e7d4b9a509856db01261bf6d5bea5d5818b74e18efe0",
+    "m2j2_middleware_present": true,
+    "protected_route_import_present": true,
+    "helper_exports_present": true,
+    "public_mirror_error_code_present": true,
+    "destructive_error_code_present": true
+  },
+  "summary": {
+    "m2j4_remaining_high_risk_without_guard": 28,
+    "m2j4_remaining_mutating_without_guard": 42,
+    "m2j5_unique_remaining_routes": 42,
+    "m2j5_true_gap_candidates": 42,
+    "m2j5_deferred_or_scanner_candidates": 0,
+    "by_m2j5_classification": {
+      "approval_or_draft_only_candidate_customer_crm": 12,
+      "approval_required_candidate_ads_or_campaign": 10,
+      "true_gap_candidate_destructive_or_disconnect": 1,
+      "true_gap_candidate_public_high_risk": 7,
+      "manual_execution_candidate_workflow_job": 2,
+      "review_output_or_provider_execution_candidate": 10
+    }
+  },
+  "scanner_decision": {
+    "scanner_update_required": true,
+    "reason": "M2-G/M2-J4 route table logic counted missing visible route-body guard signals and does not fully recognize M2-J2 app.use middleware coverage or deferred local-only/review-only semantics.",
+    "recommended_update_scope": "Update the audit scanner only, not runtime, to detect protected-route-authority middleware path patterns and classify remaining routes into true_gap, deferred_local_only, review_output_only, existing_gate_covered, or false_positive."
+  },
+  "closeout_decision": {
+    "m2_can_close_now": false,
+    "reason": "M2-J5 classification reduced ambiguity but still leaves true gap candidates requiring either exact route-body proof or a narrow M2-J6 coverage/false-positive classification before closeout.",
+    "next_step": "M2-J6 — Remaining Route Body Proof Scan and Final Guard Gap Decision",
+    "no_runtime_patch_in_m2j5": true
+  },
+  "routes": [
+    {
+      "method": "POST",
+      "path": "/task",
+      "line_start": 9752,
+      "line_end": 9769,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "approval_governance",
+        "workflow_job_queue_execution",
+        "customer_crm_ticket_send"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "approval_or_draft_only_candidate_customer_crm",
+      "m2j5_reason": "Customer/CRM/ticket/send surfaces need separation between draft/review and live mutation.",
+      "m2j5_recommended_action": "Classify as draft_only/review_only if it only drafts; patch if it sends/mutates CRM/ticket state."
+    },
+    {
+      "method": "POST",
+      "path": "/api/agent-registry/register",
+      "line_start": 9771,
+      "line_end": 9792,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "workflow_job_queue_execution",
+        "customer_crm_ticket_send"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "approval_or_draft_only_candidate_customer_crm",
+      "m2j5_reason": "Customer/CRM/ticket/send surfaces need separation between draft/review and live mutation.",
+      "m2j5_recommended_action": "Classify as draft_only/review_only if it only drafts; patch if it sends/mutates CRM/ticket state."
+    },
+    {
+      "method": "POST",
+      "path": "/api/agent-registry/resolve",
+      "line_start": 9772,
+      "line_end": 9792,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "workflow_job_queue_execution",
+        "customer_crm_ticket_send"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "approval_or_draft_only_candidate_customer_crm",
+      "m2j5_reason": "Customer/CRM/ticket/send surfaces need separation between draft/review and live mutation.",
+      "m2j5_recommended_action": "Classify as draft_only/review_only if it only drafts; patch if it sends/mutates CRM/ticket state."
+    },
+    {
+      "method": "POST",
+      "path": "/ingest",
+      "line_start": 9810,
+      "line_end": 9824,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "workflow_job_queue_execution",
+        "customer_crm_ticket_send"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "approval_or_draft_only_candidate_customer_crm",
+      "m2j5_reason": "Customer/CRM/ticket/send surfaces need separation between draft/review and live mutation.",
+      "m2j5_recommended_action": "Classify as draft_only/review_only if it only drafts; patch if it sends/mutates CRM/ticket state."
+    },
+    {
+      "method": "POST",
+      "path": "/backup-and-clone-product/:id",
+      "line_start": 10319,
+      "line_end": 10401,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "publishing_lifecycle",
+        "integration_provider_state",
+        "customer_crm_ticket_send",
+        "ads_budget_spend"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "approval_required_candidate_ads_or_campaign",
+      "m2j5_reason": "Ads/campaign surfaces require approval semantics before execution authority can close.",
+      "m2j5_recommended_action": "Classify as approval_required; patch only if route can launch/spend/change budget."
+    },
+    {
+      "method": "POST",
+      "path": "/apply-prepared-copy-to-clone/:originalId/:cloneId",
+      "line_start": 10403,
+      "line_end": 10516,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "publishing_lifecycle",
+        "integration_provider_state",
+        "customer_crm_ticket_send",
+        "ads_budget_spend"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "approval_required_candidate_ads_or_campaign",
+      "m2j5_reason": "Ads/campaign surfaces require approval semantics before execution authority can close.",
+      "m2j5_recommended_action": "Classify as approval_required; patch only if route can launch/spend/change budget."
+    },
+    {
+      "method": "POST",
+      "path": "/media/upload",
+      "line_start": 10552,
+      "line_end": 10620,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send",
+        "ads_budget_spend",
+        "library_asset_mutation"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "approval_required_candidate_ads_or_campaign",
+      "m2j5_reason": "Ads/campaign surfaces require approval semantics before execution authority can close.",
+      "m2j5_recommended_action": "Classify as approval_required; patch only if route can launch/spend/change budget."
+    },
+    {
+      "method": "POST",
+      "path": "/media-manager/project/:project/assets/:assetId/rename",
+      "line_start": 11208,
+      "line_end": 11236,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send",
+        "library_asset_mutation"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "approval_or_draft_only_candidate_customer_crm",
+      "m2j5_reason": "Customer/CRM/ticket/send surfaces need separation between draft/review and live mutation.",
+      "m2j5_recommended_action": "Classify as draft_only/review_only if it only drafts; patch if it sends/mutates CRM/ticket state."
+    },
+    {
+      "method": "PATCH",
+      "path": "/media-manager/project/:project/assets/:assetId/classification",
+      "line_start": 11238,
+      "line_end": 11289,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send",
+        "library_asset_mutation",
+        "destructive_or_disconnect"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "true_gap_candidate_destructive_or_disconnect",
+      "m2j5_reason": "Destructive/disconnect-like mutation remains outside M2-J2 coverage.",
+      "m2j5_recommended_action": "M2-J6 narrow middleware coverage unless proven non-destructive."
+    },
+    {
+      "method": "POST",
+      "path": "/media-manager/project/:project/assets/:assetId/source-of-truth",
+      "line_start": 11292,
+      "line_end": 11315,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send",
+        "library_asset_mutation"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "approval_or_draft_only_candidate_customer_crm",
+      "m2j5_reason": "Customer/CRM/ticket/send surfaces need separation between draft/review and live mutation.",
+      "m2j5_recommended_action": "Classify as draft_only/review_only if it only drafts; patch if it sends/mutates CRM/ticket state."
+    },
+    {
+      "method": "POST",
+      "path": "/media-manager/project/:project/assets/:assetId/archive",
+      "line_start": 11317,
+      "line_end": 11343,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send",
+        "library_asset_mutation"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "approval_or_draft_only_candidate_customer_crm",
+      "m2j5_reason": "Customer/CRM/ticket/send surfaces need separation between draft/review and live mutation.",
+      "m2j5_recommended_action": "Classify as draft_only/review_only if it only drafts; patch if it sends/mutates CRM/ticket state."
+    },
+    {
+      "method": "POST",
+      "path": "/media-manager/project/:project/library/refresh",
+      "line_start": 11407,
+      "line_end": 11415,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send",
+        "library_asset_mutation"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "approval_or_draft_only_candidate_customer_crm",
+      "m2j5_reason": "Customer/CRM/ticket/send surfaces need separation between draft/review and live mutation.",
+      "m2j5_recommended_action": "Classify as draft_only/review_only if it only drafts; patch if it sends/mutates CRM/ticket state."
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai-command/project/:project/campaign-preview",
+      "line_start": 11691,
+      "line_end": 11702,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send",
+        "ads_budget_spend"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "approval_required_candidate_ads_or_campaign",
+      "m2j5_reason": "Ads/campaign surfaces require approval semantics before execution authority can close.",
+      "m2j5_recommended_action": "Classify as approval_required; patch only if route can launch/spend/change budget."
+    },
+    {
+      "method": "POST",
+      "path": "/media-manager/project/:project/team",
+      "line_start": 11838,
+      "line_end": 11854,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "approval_or_draft_only_candidate_customer_crm",
+      "m2j5_reason": "Customer/CRM/ticket/send surfaces need separation between draft/review and live mutation.",
+      "m2j5_recommended_action": "Classify as draft_only/review_only if it only drafts; patch if it sends/mutates CRM/ticket state."
+    },
+    {
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/team",
+      "line_start": 11839,
+      "line_end": 11854,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "true_gap_candidate_public_high_risk",
+      "m2j5_reason": "Public high-risk route remains outside M2-J2 coverage and must not bypass backend authority.",
+      "m2j5_recommended_action": "M2-J6 narrow middleware coverage or prove public alias is non-mutating/review-only."
+    },
+    {
+      "method": "POST",
+      "path": "/media-manager/project/:project/media-jobs",
+      "line_start": 12017,
+      "line_end": 12025,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "workflow_job_queue_execution"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "manual_execution_candidate_workflow_job",
+      "m2j5_reason": "Workflow/job/queue execution must require manual owner proof or explicit approval.",
+      "m2j5_recommended_action": "Classify as manual_execution_only; patch if backend job execution is reachable without proof."
+    },
+    {
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/media-jobs",
+      "line_start": 12018,
+      "line_end": 12025,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "workflow_job_queue_execution"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "true_gap_candidate_public_high_risk",
+      "m2j5_reason": "Public high-risk route remains outside M2-J2 coverage and must not bypass backend authority.",
+      "m2j5_recommended_action": "M2-J6 narrow middleware coverage or prove public alias is non-mutating/review-only."
+    },
+    {
+      "method": "PATCH",
+      "path": "/media-manager/project/:project/media-jobs/:mediaJobId",
+      "line_start": 12019,
+      "line_end": 12025,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "workflow_job_queue_execution"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "manual_execution_candidate_workflow_job",
+      "m2j5_reason": "Workflow/job/queue execution must require manual owner proof or explicit approval.",
+      "m2j5_recommended_action": "Classify as manual_execution_only; patch if backend job execution is reachable without proof."
+    },
+    {
+      "method": "PATCH",
+      "path": "/public/media-manager/project/:project/media-jobs/:mediaJobId",
+      "line_start": 12026,
+      "line_end": 12032,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "workflow_job_queue_execution"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "true_gap_candidate_public_high_risk",
+      "m2j5_reason": "Public high-risk route remains outside M2-J2 coverage and must not bypass backend authority.",
+      "m2j5_recommended_action": "M2-J6 narrow middleware coverage or prove public alias is non-mutating/review-only."
+    },
+    {
+      "method": "POST",
+      "path": "/media-manager/project/:project/tasks",
+      "line_start": 12528,
+      "line_end": 12542,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "publishing_lifecycle",
+        "workflow_job_queue_execution",
+        "customer_crm_ticket_send",
+        "ads_budget_spend"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "approval_required_candidate_ads_or_campaign",
+      "m2j5_reason": "Ads/campaign surfaces require approval semantics before execution authority can close.",
+      "m2j5_recommended_action": "Classify as approval_required; patch only if route can launch/spend/change budget."
+    },
+    {
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/tasks",
+      "line_start": 12529,
+      "line_end": 12542,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "publishing_lifecycle",
+        "workflow_job_queue_execution",
+        "customer_crm_ticket_send",
+        "ads_budget_spend"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "true_gap_candidate_public_high_risk",
+      "m2j5_reason": "Public high-risk route remains outside M2-J2 coverage and must not bypass backend authority.",
+      "m2j5_recommended_action": "M2-J6 narrow middleware coverage or prove public alias is non-mutating/review-only."
+    },
+    {
+      "method": "PATCH",
+      "path": "/media-manager/project/:project/notifications/:notificationId",
+      "line_start": 12699,
+      "line_end": 12711,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send",
+        "ads_budget_spend"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "approval_required_candidate_ads_or_campaign",
+      "m2j5_reason": "Ads/campaign surfaces require approval semantics before execution authority can close.",
+      "m2j5_recommended_action": "Classify as approval_required; patch only if route can launch/spend/change budget."
+    },
+    {
+      "method": "PATCH",
+      "path": "/public/media-manager/project/:project/notifications/:notificationId",
+      "line_start": 12712,
+      "line_end": 12724,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send",
+        "ads_budget_spend"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "true_gap_candidate_public_high_risk",
+      "m2j5_reason": "Public high-risk route remains outside M2-J2 coverage and must not bypass backend authority.",
+      "m2j5_recommended_action": "M2-J6 narrow middleware coverage or prove public alias is non-mutating/review-only."
+    },
+    {
+      "method": "POST",
+      "path": "/media-manager/project/:project/handoffs",
+      "line_start": 12774,
+      "line_end": 12792,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "approval_or_draft_only_candidate_customer_crm",
+      "m2j5_reason": "Customer/CRM/ticket/send surfaces need separation between draft/review and live mutation.",
+      "m2j5_recommended_action": "Classify as draft_only/review_only if it only drafts; patch if it sends/mutates CRM/ticket state."
+    },
+    {
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/handoffs",
+      "line_start": 12775,
+      "line_end": 12792,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "true_gap_candidate_public_high_risk",
+      "m2j5_reason": "Public high-risk route remains outside M2-J2 coverage and must not bypass backend authority.",
+      "m2j5_recommended_action": "M2-J6 narrow middleware coverage or prove public alias is non-mutating/review-only."
+    },
+    {
+      "method": "POST",
+      "path": "/media-manager/project/:project/handoffs/:handoffId/consume",
+      "line_start": 12776,
+      "line_end": 12792,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "approval_or_draft_only_candidate_customer_crm",
+      "m2j5_reason": "Customer/CRM/ticket/send surfaces need separation between draft/review and live mutation.",
+      "m2j5_recommended_action": "Classify as draft_only/review_only if it only drafts; patch if it sends/mutates CRM/ticket state."
+    },
+    {
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/handoffs/:handoffId/consume",
+      "line_start": 12777,
+      "line_end": 12792,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "true_gap_candidate_public_high_risk",
+      "m2j5_reason": "Public high-risk route remains outside M2-J2 coverage and must not bypass backend authority.",
+      "m2j5_recommended_action": "M2-J6 narrow middleware coverage or prove public alias is non-mutating/review-only."
+    },
+    {
+      "method": "POST",
+      "path": "/media-manager/project/:project/library/index",
+      "line_start": 23633,
+      "line_end": 23656,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send",
+        "library_asset_mutation"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "approval_or_draft_only_candidate_customer_crm",
+      "m2j5_reason": "Customer/CRM/ticket/send surfaces need separation between draft/review and live mutation.",
+      "m2j5_recommended_action": "Classify as draft_only/review_only if it only drafts; patch if it sends/mutates CRM/ticket state."
+    },
+    {
+      "method": "POST",
+      "path": "/media-manager/project/:project/rename",
+      "line_start": 10955,
+      "line_end": 10956,
+      "mutating": true,
+      "high_risk": false,
+      "guard_signal_count": 0,
+      "categories": [],
+      "preliminary_classification": "mutating-missing-visible-guard",
+      "remaining_sets": [
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "review_output_or_provider_execution_candidate",
+      "m2j5_reason": "Media/provider generation needs distinction between review output and real provider execution.",
+      "m2j5_recommended_action": "Classify as review_output_only if no provider execution occurs; patch if live provider execution occurs."
+    },
+    {
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/rename",
+      "line_start": 10957,
+      "line_end": 10958,
+      "mutating": true,
+      "high_risk": false,
+      "guard_signal_count": 0,
+      "categories": [],
+      "preliminary_classification": "mutating-missing-visible-guard",
+      "remaining_sets": [
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "review_output_or_provider_execution_candidate",
+      "m2j5_reason": "Media/provider generation needs distinction between review output and real provider execution.",
+      "m2j5_recommended_action": "Classify as review_output_only if no provider execution occurs; patch if live provider execution occurs."
+    },
+    {
+      "method": "POST",
+      "path": "/media-manager/project/:project/apply-template",
+      "line_start": 10959,
+      "line_end": 10960,
+      "mutating": true,
+      "high_risk": false,
+      "guard_signal_count": 0,
+      "categories": [],
+      "preliminary_classification": "mutating-missing-visible-guard",
+      "remaining_sets": [
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "review_output_or_provider_execution_candidate",
+      "m2j5_reason": "Media/provider generation needs distinction between review output and real provider execution.",
+      "m2j5_recommended_action": "Classify as review_output_only if no provider execution occurs; patch if live provider execution occurs."
+    },
+    {
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/apply-template",
+      "line_start": 10961,
+      "line_end": 10962,
+      "mutating": true,
+      "high_risk": false,
+      "guard_signal_count": 0,
+      "categories": [],
+      "preliminary_classification": "mutating-missing-visible-guard",
+      "remaining_sets": [
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "review_output_or_provider_execution_candidate",
+      "m2j5_reason": "Media/provider generation needs distinction between review output and real provider execution.",
+      "m2j5_recommended_action": "Classify as review_output_only if no provider execution occurs; patch if live provider execution occurs."
+    },
+    {
+      "method": "POST",
+      "path": "/media-manager/projects",
+      "line_start": 10963,
+      "line_end": 10964,
+      "mutating": true,
+      "high_risk": false,
+      "guard_signal_count": 0,
+      "categories": [],
+      "preliminary_classification": "mutating-missing-visible-guard",
+      "remaining_sets": [
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "review_output_or_provider_execution_candidate",
+      "m2j5_reason": "Media/provider generation needs distinction between review output and real provider execution.",
+      "m2j5_recommended_action": "Classify as review_output_only if no provider execution occurs; patch if live provider execution occurs."
+    },
+    {
+      "method": "POST",
+      "path": "/public/media-manager/projects",
+      "line_start": 10965,
+      "line_end": 10966,
+      "mutating": true,
+      "high_risk": false,
+      "guard_signal_count": 0,
+      "categories": [],
+      "preliminary_classification": "mutating-missing-visible-guard",
+      "remaining_sets": [
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "review_output_or_provider_execution_candidate",
+      "m2j5_reason": "Media/provider generation needs distinction between review output and real provider execution.",
+      "m2j5_recommended_action": "Classify as review_output_only if no provider execution occurs; patch if live provider execution occurs."
+    },
+    {
+      "method": "POST",
+      "path": "/media-manager/project/:project/campaigns",
+      "line_start": 11886,
+      "line_end": 11894,
+      "mutating": true,
+      "high_risk": false,
+      "guard_signal_count": 0,
+      "categories": [],
+      "preliminary_classification": "mutating-missing-visible-guard",
+      "remaining_sets": [
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "approval_required_candidate_ads_or_campaign",
+      "m2j5_reason": "Ads/campaign surfaces require approval semantics before execution authority can close.",
+      "m2j5_recommended_action": "Classify as approval_required; patch only if route can launch/spend/change budget."
+    },
+    {
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/campaigns",
+      "line_start": 11887,
+      "line_end": 11894,
+      "mutating": true,
+      "high_risk": false,
+      "guard_signal_count": 0,
+      "categories": [],
+      "preliminary_classification": "mutating-missing-visible-guard",
+      "remaining_sets": [
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "approval_required_candidate_ads_or_campaign",
+      "m2j5_reason": "Ads/campaign surfaces require approval semantics before execution authority can close.",
+      "m2j5_recommended_action": "Classify as approval_required; patch only if route can launch/spend/change budget."
+    },
+    {
+      "method": "PATCH",
+      "path": "/media-manager/project/:project/campaigns/:campaignId",
+      "line_start": 11888,
+      "line_end": 11894,
+      "mutating": true,
+      "high_risk": false,
+      "guard_signal_count": 0,
+      "categories": [],
+      "preliminary_classification": "mutating-missing-visible-guard",
+      "remaining_sets": [
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "approval_required_candidate_ads_or_campaign",
+      "m2j5_reason": "Ads/campaign surfaces require approval semantics before execution authority can close.",
+      "m2j5_recommended_action": "Classify as approval_required; patch only if route can launch/spend/change budget."
+    },
+    {
+      "method": "PATCH",
+      "path": "/public/media-manager/project/:project/campaigns/:campaignId",
+      "line_start": 11895,
+      "line_end": 11901,
+      "mutating": true,
+      "high_risk": false,
+      "guard_signal_count": 0,
+      "categories": [],
+      "preliminary_classification": "mutating-missing-visible-guard",
+      "remaining_sets": [
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "approval_required_candidate_ads_or_campaign",
+      "m2j5_reason": "Ads/campaign surfaces require approval semantics before execution authority can close.",
+      "m2j5_recommended_action": "Classify as approval_required; patch only if route can launch/spend/change budget."
+    },
+    {
+      "method": "POST",
+      "path": "/media-manager/project/:project/content-items",
+      "line_start": 11951,
+      "line_end": 11959,
+      "mutating": true,
+      "high_risk": false,
+      "guard_signal_count": 0,
+      "categories": [],
+      "preliminary_classification": "mutating-missing-visible-guard",
+      "remaining_sets": [
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "review_output_or_provider_execution_candidate",
+      "m2j5_reason": "Media/provider generation needs distinction between review output and real provider execution.",
+      "m2j5_recommended_action": "Classify as review_output_only if no provider execution occurs; patch if live provider execution occurs."
+    },
+    {
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/content-items",
+      "line_start": 11952,
+      "line_end": 11959,
+      "mutating": true,
+      "high_risk": false,
+      "guard_signal_count": 0,
+      "categories": [],
+      "preliminary_classification": "mutating-missing-visible-guard",
+      "remaining_sets": [
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "review_output_or_provider_execution_candidate",
+      "m2j5_reason": "Media/provider generation needs distinction between review output and real provider execution.",
+      "m2j5_recommended_action": "Classify as review_output_only if no provider execution occurs; patch if live provider execution occurs."
+    },
+    {
+      "method": "PATCH",
+      "path": "/media-manager/project/:project/content-items/:contentItemId",
+      "line_start": 11953,
+      "line_end": 11959,
+      "mutating": true,
+      "high_risk": false,
+      "guard_signal_count": 0,
+      "categories": [],
+      "preliminary_classification": "mutating-missing-visible-guard",
+      "remaining_sets": [
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "review_output_or_provider_execution_candidate",
+      "m2j5_reason": "Media/provider generation needs distinction between review output and real provider execution.",
+      "m2j5_recommended_action": "Classify as review_output_only if no provider execution occurs; patch if live provider execution occurs."
+    },
+    {
+      "method": "PATCH",
+      "path": "/public/media-manager/project/:project/content-items/:contentItemId",
+      "line_start": 11960,
+      "line_end": 11966,
+      "mutating": true,
+      "high_risk": false,
+      "guard_signal_count": 0,
+      "categories": [],
+      "preliminary_classification": "mutating-missing-visible-guard",
+      "remaining_sets": [
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "review_output_or_provider_execution_candidate",
+      "m2j5_reason": "Media/provider generation needs distinction between review output and real provider execution.",
+      "m2j5_recommended_action": "Classify as review_output_only if no provider execution occurs; patch if live provider execution occurs."
+    }
+  ],
+  "true_gap_candidates": [
+    {
+      "method": "POST",
+      "path": "/task",
+      "line_start": 9752,
+      "line_end": 9769,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "approval_governance",
+        "workflow_job_queue_execution",
+        "customer_crm_ticket_send"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "approval_or_draft_only_candidate_customer_crm",
+      "m2j5_reason": "Customer/CRM/ticket/send surfaces need separation between draft/review and live mutation.",
+      "m2j5_recommended_action": "Classify as draft_only/review_only if it only drafts; patch if it sends/mutates CRM/ticket state."
+    },
+    {
+      "method": "POST",
+      "path": "/api/agent-registry/register",
+      "line_start": 9771,
+      "line_end": 9792,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "workflow_job_queue_execution",
+        "customer_crm_ticket_send"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "approval_or_draft_only_candidate_customer_crm",
+      "m2j5_reason": "Customer/CRM/ticket/send surfaces need separation between draft/review and live mutation.",
+      "m2j5_recommended_action": "Classify as draft_only/review_only if it only drafts; patch if it sends/mutates CRM/ticket state."
+    },
+    {
+      "method": "POST",
+      "path": "/api/agent-registry/resolve",
+      "line_start": 9772,
+      "line_end": 9792,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "workflow_job_queue_execution",
+        "customer_crm_ticket_send"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "approval_or_draft_only_candidate_customer_crm",
+      "m2j5_reason": "Customer/CRM/ticket/send surfaces need separation between draft/review and live mutation.",
+      "m2j5_recommended_action": "Classify as draft_only/review_only if it only drafts; patch if it sends/mutates CRM/ticket state."
+    },
+    {
+      "method": "POST",
+      "path": "/ingest",
+      "line_start": 9810,
+      "line_end": 9824,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "workflow_job_queue_execution",
+        "customer_crm_ticket_send"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "approval_or_draft_only_candidate_customer_crm",
+      "m2j5_reason": "Customer/CRM/ticket/send surfaces need separation between draft/review and live mutation.",
+      "m2j5_recommended_action": "Classify as draft_only/review_only if it only drafts; patch if it sends/mutates CRM/ticket state."
+    },
+    {
+      "method": "POST",
+      "path": "/backup-and-clone-product/:id",
+      "line_start": 10319,
+      "line_end": 10401,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "publishing_lifecycle",
+        "integration_provider_state",
+        "customer_crm_ticket_send",
+        "ads_budget_spend"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "approval_required_candidate_ads_or_campaign",
+      "m2j5_reason": "Ads/campaign surfaces require approval semantics before execution authority can close.",
+      "m2j5_recommended_action": "Classify as approval_required; patch only if route can launch/spend/change budget."
+    },
+    {
+      "method": "POST",
+      "path": "/apply-prepared-copy-to-clone/:originalId/:cloneId",
+      "line_start": 10403,
+      "line_end": 10516,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "publishing_lifecycle",
+        "integration_provider_state",
+        "customer_crm_ticket_send",
+        "ads_budget_spend"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "approval_required_candidate_ads_or_campaign",
+      "m2j5_reason": "Ads/campaign surfaces require approval semantics before execution authority can close.",
+      "m2j5_recommended_action": "Classify as approval_required; patch only if route can launch/spend/change budget."
+    },
+    {
+      "method": "POST",
+      "path": "/media/upload",
+      "line_start": 10552,
+      "line_end": 10620,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send",
+        "ads_budget_spend",
+        "library_asset_mutation"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "approval_required_candidate_ads_or_campaign",
+      "m2j5_reason": "Ads/campaign surfaces require approval semantics before execution authority can close.",
+      "m2j5_recommended_action": "Classify as approval_required; patch only if route can launch/spend/change budget."
+    },
+    {
+      "method": "POST",
+      "path": "/media-manager/project/:project/assets/:assetId/rename",
+      "line_start": 11208,
+      "line_end": 11236,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send",
+        "library_asset_mutation"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "approval_or_draft_only_candidate_customer_crm",
+      "m2j5_reason": "Customer/CRM/ticket/send surfaces need separation between draft/review and live mutation.",
+      "m2j5_recommended_action": "Classify as draft_only/review_only if it only drafts; patch if it sends/mutates CRM/ticket state."
+    },
+    {
+      "method": "PATCH",
+      "path": "/media-manager/project/:project/assets/:assetId/classification",
+      "line_start": 11238,
+      "line_end": 11289,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send",
+        "library_asset_mutation",
+        "destructive_or_disconnect"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "true_gap_candidate_destructive_or_disconnect",
+      "m2j5_reason": "Destructive/disconnect-like mutation remains outside M2-J2 coverage.",
+      "m2j5_recommended_action": "M2-J6 narrow middleware coverage unless proven non-destructive."
+    },
+    {
+      "method": "POST",
+      "path": "/media-manager/project/:project/assets/:assetId/source-of-truth",
+      "line_start": 11292,
+      "line_end": 11315,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send",
+        "library_asset_mutation"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "approval_or_draft_only_candidate_customer_crm",
+      "m2j5_reason": "Customer/CRM/ticket/send surfaces need separation between draft/review and live mutation.",
+      "m2j5_recommended_action": "Classify as draft_only/review_only if it only drafts; patch if it sends/mutates CRM/ticket state."
+    },
+    {
+      "method": "POST",
+      "path": "/media-manager/project/:project/assets/:assetId/archive",
+      "line_start": 11317,
+      "line_end": 11343,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send",
+        "library_asset_mutation"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "approval_or_draft_only_candidate_customer_crm",
+      "m2j5_reason": "Customer/CRM/ticket/send surfaces need separation between draft/review and live mutation.",
+      "m2j5_recommended_action": "Classify as draft_only/review_only if it only drafts; patch if it sends/mutates CRM/ticket state."
+    },
+    {
+      "method": "POST",
+      "path": "/media-manager/project/:project/library/refresh",
+      "line_start": 11407,
+      "line_end": 11415,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send",
+        "library_asset_mutation"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "approval_or_draft_only_candidate_customer_crm",
+      "m2j5_reason": "Customer/CRM/ticket/send surfaces need separation between draft/review and live mutation.",
+      "m2j5_recommended_action": "Classify as draft_only/review_only if it only drafts; patch if it sends/mutates CRM/ticket state."
+    },
+    {
+      "method": "POST",
+      "path": "/api/ai-command/project/:project/campaign-preview",
+      "line_start": 11691,
+      "line_end": 11702,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send",
+        "ads_budget_spend"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "approval_required_candidate_ads_or_campaign",
+      "m2j5_reason": "Ads/campaign surfaces require approval semantics before execution authority can close.",
+      "m2j5_recommended_action": "Classify as approval_required; patch only if route can launch/spend/change budget."
+    },
+    {
+      "method": "POST",
+      "path": "/media-manager/project/:project/team",
+      "line_start": 11838,
+      "line_end": 11854,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "approval_or_draft_only_candidate_customer_crm",
+      "m2j5_reason": "Customer/CRM/ticket/send surfaces need separation between draft/review and live mutation.",
+      "m2j5_recommended_action": "Classify as draft_only/review_only if it only drafts; patch if it sends/mutates CRM/ticket state."
+    },
+    {
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/team",
+      "line_start": 11839,
+      "line_end": 11854,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "true_gap_candidate_public_high_risk",
+      "m2j5_reason": "Public high-risk route remains outside M2-J2 coverage and must not bypass backend authority.",
+      "m2j5_recommended_action": "M2-J6 narrow middleware coverage or prove public alias is non-mutating/review-only."
+    },
+    {
+      "method": "POST",
+      "path": "/media-manager/project/:project/media-jobs",
+      "line_start": 12017,
+      "line_end": 12025,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "workflow_job_queue_execution"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "manual_execution_candidate_workflow_job",
+      "m2j5_reason": "Workflow/job/queue execution must require manual owner proof or explicit approval.",
+      "m2j5_recommended_action": "Classify as manual_execution_only; patch if backend job execution is reachable without proof."
+    },
+    {
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/media-jobs",
+      "line_start": 12018,
+      "line_end": 12025,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "workflow_job_queue_execution"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "true_gap_candidate_public_high_risk",
+      "m2j5_reason": "Public high-risk route remains outside M2-J2 coverage and must not bypass backend authority.",
+      "m2j5_recommended_action": "M2-J6 narrow middleware coverage or prove public alias is non-mutating/review-only."
+    },
+    {
+      "method": "PATCH",
+      "path": "/media-manager/project/:project/media-jobs/:mediaJobId",
+      "line_start": 12019,
+      "line_end": 12025,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "workflow_job_queue_execution"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "manual_execution_candidate_workflow_job",
+      "m2j5_reason": "Workflow/job/queue execution must require manual owner proof or explicit approval.",
+      "m2j5_recommended_action": "Classify as manual_execution_only; patch if backend job execution is reachable without proof."
+    },
+    {
+      "method": "PATCH",
+      "path": "/public/media-manager/project/:project/media-jobs/:mediaJobId",
+      "line_start": 12026,
+      "line_end": 12032,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "workflow_job_queue_execution"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "true_gap_candidate_public_high_risk",
+      "m2j5_reason": "Public high-risk route remains outside M2-J2 coverage and must not bypass backend authority.",
+      "m2j5_recommended_action": "M2-J6 narrow middleware coverage or prove public alias is non-mutating/review-only."
+    },
+    {
+      "method": "POST",
+      "path": "/media-manager/project/:project/tasks",
+      "line_start": 12528,
+      "line_end": 12542,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "publishing_lifecycle",
+        "workflow_job_queue_execution",
+        "customer_crm_ticket_send",
+        "ads_budget_spend"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "approval_required_candidate_ads_or_campaign",
+      "m2j5_reason": "Ads/campaign surfaces require approval semantics before execution authority can close.",
+      "m2j5_recommended_action": "Classify as approval_required; patch only if route can launch/spend/change budget."
+    },
+    {
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/tasks",
+      "line_start": 12529,
+      "line_end": 12542,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "publishing_lifecycle",
+        "workflow_job_queue_execution",
+        "customer_crm_ticket_send",
+        "ads_budget_spend"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "true_gap_candidate_public_high_risk",
+      "m2j5_reason": "Public high-risk route remains outside M2-J2 coverage and must not bypass backend authority.",
+      "m2j5_recommended_action": "M2-J6 narrow middleware coverage or prove public alias is non-mutating/review-only."
+    },
+    {
+      "method": "PATCH",
+      "path": "/media-manager/project/:project/notifications/:notificationId",
+      "line_start": 12699,
+      "line_end": 12711,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send",
+        "ads_budget_spend"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "approval_required_candidate_ads_or_campaign",
+      "m2j5_reason": "Ads/campaign surfaces require approval semantics before execution authority can close.",
+      "m2j5_recommended_action": "Classify as approval_required; patch only if route can launch/spend/change budget."
+    },
+    {
+      "method": "PATCH",
+      "path": "/public/media-manager/project/:project/notifications/:notificationId",
+      "line_start": 12712,
+      "line_end": 12724,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send",
+        "ads_budget_spend"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "true_gap_candidate_public_high_risk",
+      "m2j5_reason": "Public high-risk route remains outside M2-J2 coverage and must not bypass backend authority.",
+      "m2j5_recommended_action": "M2-J6 narrow middleware coverage or prove public alias is non-mutating/review-only."
+    },
+    {
+      "method": "POST",
+      "path": "/media-manager/project/:project/handoffs",
+      "line_start": 12774,
+      "line_end": 12792,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "approval_or_draft_only_candidate_customer_crm",
+      "m2j5_reason": "Customer/CRM/ticket/send surfaces need separation between draft/review and live mutation.",
+      "m2j5_recommended_action": "Classify as draft_only/review_only if it only drafts; patch if it sends/mutates CRM/ticket state."
+    },
+    {
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/handoffs",
+      "line_start": 12775,
+      "line_end": 12792,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "true_gap_candidate_public_high_risk",
+      "m2j5_reason": "Public high-risk route remains outside M2-J2 coverage and must not bypass backend authority.",
+      "m2j5_recommended_action": "M2-J6 narrow middleware coverage or prove public alias is non-mutating/review-only."
+    },
+    {
+      "method": "POST",
+      "path": "/media-manager/project/:project/handoffs/:handoffId/consume",
+      "line_start": 12776,
+      "line_end": 12792,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "approval_or_draft_only_candidate_customer_crm",
+      "m2j5_reason": "Customer/CRM/ticket/send surfaces need separation between draft/review and live mutation.",
+      "m2j5_recommended_action": "Classify as draft_only/review_only if it only drafts; patch if it sends/mutates CRM/ticket state."
+    },
+    {
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/handoffs/:handoffId/consume",
+      "line_start": 12777,
+      "line_end": 12792,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "true_gap_candidate_public_high_risk",
+      "m2j5_reason": "Public high-risk route remains outside M2-J2 coverage and must not bypass backend authority.",
+      "m2j5_recommended_action": "M2-J6 narrow middleware coverage or prove public alias is non-mutating/review-only."
+    },
+    {
+      "method": "POST",
+      "path": "/media-manager/project/:project/library/index",
+      "line_start": 23633,
+      "line_end": 23656,
+      "mutating": true,
+      "high_risk": true,
+      "guard_signal_count": 0,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send",
+        "library_asset_mutation"
+      ],
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "remaining_sets": [
+        "high_risk_without_guard",
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "approval_or_draft_only_candidate_customer_crm",
+      "m2j5_reason": "Customer/CRM/ticket/send surfaces need separation between draft/review and live mutation.",
+      "m2j5_recommended_action": "Classify as draft_only/review_only if it only drafts; patch if it sends/mutates CRM/ticket state."
+    },
+    {
+      "method": "POST",
+      "path": "/media-manager/project/:project/rename",
+      "line_start": 10955,
+      "line_end": 10956,
+      "mutating": true,
+      "high_risk": false,
+      "guard_signal_count": 0,
+      "categories": [],
+      "preliminary_classification": "mutating-missing-visible-guard",
+      "remaining_sets": [
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "review_output_or_provider_execution_candidate",
+      "m2j5_reason": "Media/provider generation needs distinction between review output and real provider execution.",
+      "m2j5_recommended_action": "Classify as review_output_only if no provider execution occurs; patch if live provider execution occurs."
+    },
+    {
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/rename",
+      "line_start": 10957,
+      "line_end": 10958,
+      "mutating": true,
+      "high_risk": false,
+      "guard_signal_count": 0,
+      "categories": [],
+      "preliminary_classification": "mutating-missing-visible-guard",
+      "remaining_sets": [
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "review_output_or_provider_execution_candidate",
+      "m2j5_reason": "Media/provider generation needs distinction between review output and real provider execution.",
+      "m2j5_recommended_action": "Classify as review_output_only if no provider execution occurs; patch if live provider execution occurs."
+    },
+    {
+      "method": "POST",
+      "path": "/media-manager/project/:project/apply-template",
+      "line_start": 10959,
+      "line_end": 10960,
+      "mutating": true,
+      "high_risk": false,
+      "guard_signal_count": 0,
+      "categories": [],
+      "preliminary_classification": "mutating-missing-visible-guard",
+      "remaining_sets": [
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "review_output_or_provider_execution_candidate",
+      "m2j5_reason": "Media/provider generation needs distinction between review output and real provider execution.",
+      "m2j5_recommended_action": "Classify as review_output_only if no provider execution occurs; patch if live provider execution occurs."
+    },
+    {
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/apply-template",
+      "line_start": 10961,
+      "line_end": 10962,
+      "mutating": true,
+      "high_risk": false,
+      "guard_signal_count": 0,
+      "categories": [],
+      "preliminary_classification": "mutating-missing-visible-guard",
+      "remaining_sets": [
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "review_output_or_provider_execution_candidate",
+      "m2j5_reason": "Media/provider generation needs distinction between review output and real provider execution.",
+      "m2j5_recommended_action": "Classify as review_output_only if no provider execution occurs; patch if live provider execution occurs."
+    },
+    {
+      "method": "POST",
+      "path": "/media-manager/projects",
+      "line_start": 10963,
+      "line_end": 10964,
+      "mutating": true,
+      "high_risk": false,
+      "guard_signal_count": 0,
+      "categories": [],
+      "preliminary_classification": "mutating-missing-visible-guard",
+      "remaining_sets": [
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "review_output_or_provider_execution_candidate",
+      "m2j5_reason": "Media/provider generation needs distinction between review output and real provider execution.",
+      "m2j5_recommended_action": "Classify as review_output_only if no provider execution occurs; patch if live provider execution occurs."
+    },
+    {
+      "method": "POST",
+      "path": "/public/media-manager/projects",
+      "line_start": 10965,
+      "line_end": 10966,
+      "mutating": true,
+      "high_risk": false,
+      "guard_signal_count": 0,
+      "categories": [],
+      "preliminary_classification": "mutating-missing-visible-guard",
+      "remaining_sets": [
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "review_output_or_provider_execution_candidate",
+      "m2j5_reason": "Media/provider generation needs distinction between review output and real provider execution.",
+      "m2j5_recommended_action": "Classify as review_output_only if no provider execution occurs; patch if live provider execution occurs."
+    },
+    {
+      "method": "POST",
+      "path": "/media-manager/project/:project/campaigns",
+      "line_start": 11886,
+      "line_end": 11894,
+      "mutating": true,
+      "high_risk": false,
+      "guard_signal_count": 0,
+      "categories": [],
+      "preliminary_classification": "mutating-missing-visible-guard",
+      "remaining_sets": [
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "approval_required_candidate_ads_or_campaign",
+      "m2j5_reason": "Ads/campaign surfaces require approval semantics before execution authority can close.",
+      "m2j5_recommended_action": "Classify as approval_required; patch only if route can launch/spend/change budget."
+    },
+    {
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/campaigns",
+      "line_start": 11887,
+      "line_end": 11894,
+      "mutating": true,
+      "high_risk": false,
+      "guard_signal_count": 0,
+      "categories": [],
+      "preliminary_classification": "mutating-missing-visible-guard",
+      "remaining_sets": [
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "approval_required_candidate_ads_or_campaign",
+      "m2j5_reason": "Ads/campaign surfaces require approval semantics before execution authority can close.",
+      "m2j5_recommended_action": "Classify as approval_required; patch only if route can launch/spend/change budget."
+    },
+    {
+      "method": "PATCH",
+      "path": "/media-manager/project/:project/campaigns/:campaignId",
+      "line_start": 11888,
+      "line_end": 11894,
+      "mutating": true,
+      "high_risk": false,
+      "guard_signal_count": 0,
+      "categories": [],
+      "preliminary_classification": "mutating-missing-visible-guard",
+      "remaining_sets": [
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "approval_required_candidate_ads_or_campaign",
+      "m2j5_reason": "Ads/campaign surfaces require approval semantics before execution authority can close.",
+      "m2j5_recommended_action": "Classify as approval_required; patch only if route can launch/spend/change budget."
+    },
+    {
+      "method": "PATCH",
+      "path": "/public/media-manager/project/:project/campaigns/:campaignId",
+      "line_start": 11895,
+      "line_end": 11901,
+      "mutating": true,
+      "high_risk": false,
+      "guard_signal_count": 0,
+      "categories": [],
+      "preliminary_classification": "mutating-missing-visible-guard",
+      "remaining_sets": [
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "approval_required_candidate_ads_or_campaign",
+      "m2j5_reason": "Ads/campaign surfaces require approval semantics before execution authority can close.",
+      "m2j5_recommended_action": "Classify as approval_required; patch only if route can launch/spend/change budget."
+    },
+    {
+      "method": "POST",
+      "path": "/media-manager/project/:project/content-items",
+      "line_start": 11951,
+      "line_end": 11959,
+      "mutating": true,
+      "high_risk": false,
+      "guard_signal_count": 0,
+      "categories": [],
+      "preliminary_classification": "mutating-missing-visible-guard",
+      "remaining_sets": [
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "review_output_or_provider_execution_candidate",
+      "m2j5_reason": "Media/provider generation needs distinction between review output and real provider execution.",
+      "m2j5_recommended_action": "Classify as review_output_only if no provider execution occurs; patch if live provider execution occurs."
+    },
+    {
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/content-items",
+      "line_start": 11952,
+      "line_end": 11959,
+      "mutating": true,
+      "high_risk": false,
+      "guard_signal_count": 0,
+      "categories": [],
+      "preliminary_classification": "mutating-missing-visible-guard",
+      "remaining_sets": [
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "review_output_or_provider_execution_candidate",
+      "m2j5_reason": "Media/provider generation needs distinction between review output and real provider execution.",
+      "m2j5_recommended_action": "Classify as review_output_only if no provider execution occurs; patch if live provider execution occurs."
+    },
+    {
+      "method": "PATCH",
+      "path": "/media-manager/project/:project/content-items/:contentItemId",
+      "line_start": 11953,
+      "line_end": 11959,
+      "mutating": true,
+      "high_risk": false,
+      "guard_signal_count": 0,
+      "categories": [],
+      "preliminary_classification": "mutating-missing-visible-guard",
+      "remaining_sets": [
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "review_output_or_provider_execution_candidate",
+      "m2j5_reason": "Media/provider generation needs distinction between review output and real provider execution.",
+      "m2j5_recommended_action": "Classify as review_output_only if no provider execution occurs; patch if live provider execution occurs."
+    },
+    {
+      "method": "PATCH",
+      "path": "/public/media-manager/project/:project/content-items/:contentItemId",
+      "line_start": 11960,
+      "line_end": 11966,
+      "mutating": true,
+      "high_risk": false,
+      "guard_signal_count": 0,
+      "categories": [],
+      "preliminary_classification": "mutating-missing-visible-guard",
+      "remaining_sets": [
+        "mutating_without_guard"
+      ],
+      "m2j5_classification": "review_output_or_provider_execution_candidate",
+      "m2j5_reason": "Media/provider generation needs distinction between review output and real provider execution.",
+      "m2j5_recommended_action": "Classify as review_output_only if no provider execution occurs; patch if live provider execution occurs."
+    }
+  ],
+  "deferred_or_scanner_candidates": []
+}
