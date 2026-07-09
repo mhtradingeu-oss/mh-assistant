@@ -1,0 +1,60 @@
+{
+  "artifact_id": "M3_3_POST_PATCH_ALIAS_NORMALIZATION_VERIFICATION_CLOSEOUT",
+  "status": "M3_READY_FOR_CLOSEOUT_REVIEW",
+  "phase": "M3 — AI Command Alias Normalization / Narrow Integration Candidate",
+  "mode": "post-patch verification and closeout decision",
+  "m3_0_status": "TRUTH_SCAN_RECORDED",
+  "m3_1_status": "PATCH_DESIGN_RECORDED",
+  "m3_2_status": "PATCH_APPLIED_FOR_REVIEW_CLEANED",
+  "head": "c7d6471 (HEAD -> main, origin/main, origin/HEAD) Normalize AI Command role aliases",
+  "git_status_short": "",
+  "git_sync": "0\t0",
+  "runtime_changes_in_m3_3": false,
+  "server_changes_in_m3_3": false,
+  "ui_source_changes_in_m3_3": false,
+  "execution_authority_expansion_in_m3_3": false,
+  "helper_proof": {
+    "canonical_helper_count": 1,
+    "specialist_helper_count": 1,
+    "formatting_issue_count": 0,
+    "uses_contract_normalizer_import": true,
+    "canonical_helper_uses_contract_normalizer": true,
+    "specialist_helper_uses_canonical_helper": true
+  },
+  "remaining_mode_id_alias_hits": [
+    {
+      "line": 150,
+      "text": "    const legacyResolved = MODE_ID_ALIASES[raw] || raw;"
+    },
+    {
+      "line": 643,
+      "text": "    const legacyResolved = MODE_ID_ALIASES[raw] || raw;"
+    }
+  ],
+  "remaining_mode_id_alias_hit_count": 2,
+  "source_files": {
+    "ai_command": "public/control-center/pages/ai-command.js",
+    "contract": "public/control-center/runtime/ai-team/ai-team-operating-contract.js"
+  },
+  "sha256": {
+    "ai_command": "2d4c6cece0f00b6a25335e80fee794c9db1188d2d60b20f0208c6105144ec18e",
+    "contract": "dda031ae7b65a521746d570d6a2383a73bc9fa440756302fb1f6ca282b3e55b0"
+  },
+  "validation_expectations": {
+    "failures_expected": 0,
+    "known_warning_count_expected": 10,
+    "unknown_route_candidates_expected": 6,
+    "handoff_drift_pairs_expected": 0
+  },
+  "decision": {
+    "m3_patch_objective_completed": true,
+    "m3_can_close_after_commit": true,
+    "reason": "M3-2 normalized AI Command role-like alias boundaries through canonical AI Team role normalization, preserved UI definitions, preserved review/handoff authority, and did not touch runtime/server execution paths.",
+    "accepted_remaining_warnings": [
+      "AI Command alias drift signals may remain in text/domain vocabulary and local compatibility maps.",
+      "route-role-fallback aliases remain outside M3 narrow AI Command scope.",
+      "unknown route candidates action/analysis/automation-engine/command/idle/set-page remain nonblocking from prior conformance scans."
+    ],
+    "next_phase_candidate": "M4 — Route Role Fallback Alias Normalization / Authority Projection Narrow Review"
+  }
+}
