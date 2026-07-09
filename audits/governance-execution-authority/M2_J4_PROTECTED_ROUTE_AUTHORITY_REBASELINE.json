@@ -1,0 +1,2212 @@
+{
+  "artifact_id": "M2_J4_PROTECTED_ROUTE_AUTHORITY_REBASELINE",
+  "status": "REBASELINE_RECORDED",
+  "source_file": "runtime/orchestrator-service/server.js",
+  "prior_route_table": "audits/governance-execution-authority/M2_G_PROTECTED_BACKEND_ROUTE_TABLE.json",
+  "helper_file": "runtime/orchestrator-service/lib/security/protected-route-authority.js",
+  "helper_proof": {
+    "server_sha256_after_m2j2": "4cc23bf58f601e896212895eab7b225ce2904dd91c49f1037fb0661315bcb4b0",
+    "helper_sha256": "d33a017d9f8ee884bff5e7d4b9a509856db01261bf6d5bea5d5818b74e18efe0",
+    "m2j2_middleware_present": true,
+    "protected_route_import_present": true,
+    "helper_exports_present": true,
+    "error_codes_present": true,
+    "proof_headers_present": true
+  },
+  "summary": {
+    "prior_total_protected_routes": 237,
+    "prior_total_mutating_routes": 114,
+    "prior_total_high_risk_routes": 100,
+    "prior_high_risk_without_guard_signals": 66,
+    "prior_mutating_without_guard_signals": 80,
+    "m2j2_phase1_middleware_patterns": 46,
+    "m2j2_phase1_patterns_missing_from_server": 0,
+    "phase1_prior_routes_covered_by_path": 46,
+    "high_risk_without_guard_covered_by_m2j2": 38,
+    "high_risk_without_guard_remaining_uncovered": 28,
+    "mutating_without_guard_covered_by_m2j2": 38,
+    "mutating_without_guard_remaining_uncovered": 42,
+    "destructive_routes_total_prior": 7,
+    "destructive_routes_covered_by_m2j2": 4,
+    "public_high_risk_without_guard_total_prior": 18,
+    "public_high_risk_without_guard_covered_by_m2j2": 11
+  },
+  "missing_middleware_patterns": [],
+  "phase1_covered_routes": [
+    {
+      "id": "dca1ab2ad578",
+      "method": "POST",
+      "path": "/execute_publish_package",
+      "line_start": 9826,
+      "line_end": 9912,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "approval_governance",
+        "integration_provider_state",
+        "workflow_job_queue_execution",
+        "customer_crm_ticket_send",
+        "ads_budget_spend"
+      ],
+      "guard_signal_count": 3,
+      "guard_signals": [
+        "governance",
+        "approval",
+        "risk"
+      ],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-with-visible-guard-signals",
+      "next_action": "verify guard is backend-enforced and not copy/comment only",
+      "window_hash": "57f787c7625bed1af371194a9d7ca72a6b563248"
+    },
+    {
+      "id": "bfdc1789e65c",
+      "method": "POST",
+      "path": "/execute_email_package",
+      "line_start": 9914,
+      "line_end": 10000,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "approval_governance",
+        "integration_provider_state",
+        "workflow_job_queue_execution",
+        "customer_crm_ticket_send",
+        "ads_budget_spend"
+      ],
+      "guard_signal_count": 3,
+      "guard_signals": [
+        "governance",
+        "approval",
+        "risk"
+      ],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-with-visible-guard-signals",
+      "next_action": "verify guard is backend-enforced and not copy/comment only",
+      "window_hash": "58a675193f21cee449998923138f0db34c284937"
+    },
+    {
+      "id": "d0f796faeb0a",
+      "method": "POST",
+      "path": "/generate_media_from_prompt",
+      "line_start": 10002,
+      "line_end": 10081,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "approval_governance",
+        "integration_provider_state",
+        "workflow_job_queue_execution",
+        "customer_crm_ticket_send",
+        "ads_budget_spend",
+        "media_provider_generation"
+      ],
+      "guard_signal_count": 3,
+      "guard_signals": [
+        "governance",
+        "approval",
+        "risk"
+      ],
+      "high_risk": true,
+      "preliminary_classification": "provider-execution-needs-review",
+      "next_action": "inspect provider side effects and approval requirement",
+      "window_hash": "dd934f86a0150d6cb0abb1261ab12438cd13679b"
+    },
+    {
+      "id": "254734d251d3",
+      "method": "POST",
+      "path": "/build_ad_execution_package",
+      "line_start": 10083,
+      "line_end": 10167,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "approval_governance",
+        "integration_provider_state",
+        "workflow_job_queue_execution",
+        "customer_crm_ticket_send",
+        "ads_budget_spend"
+      ],
+      "guard_signal_count": 3,
+      "guard_signals": [
+        "governance",
+        "approval",
+        "risk"
+      ],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-with-visible-guard-signals",
+      "next_action": "verify guard is backend-enforced and not copy/comment only",
+      "window_hash": "c575ef94dde380fccdb93dc23b2c6e9af46db3e4"
+    },
+    {
+      "id": "620b718e42bb",
+      "method": "POST",
+      "path": "/media-manager/project/:project/assets/:assetId/delete",
+      "line_start": 11345,
+      "line_end": 11374,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send",
+        "library_asset_mutation",
+        "destructive_or_disconnect"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "03b2dd3dedfc0728673bd01050a1b0b342d4866d"
+    },
+    {
+      "id": "35cd2d418e4b",
+      "method": "DELETE",
+      "path": "/media-manager/project/:project/assets/:assetId",
+      "line_start": 11376,
+      "line_end": 11405,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send",
+        "library_asset_mutation",
+        "destructive_or_disconnect"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "3e4a4df8b5eb921ac13f218c450296be7f0f4ef0"
+    },
+    {
+      "id": "3009737ff92a",
+      "method": "POST",
+      "path": "/media-manager/project/:project/workflows/:workflowId/run",
+      "line_start": 12138,
+      "line_end": 12214,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "approval_governance",
+        "integration_provider_state",
+        "workflow_job_queue_execution",
+        "customer_crm_ticket_send",
+        "ads_budget_spend"
+      ],
+      "guard_signal_count": 3,
+      "guard_signals": [
+        "governance",
+        "approval",
+        "risk"
+      ],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-with-visible-guard-signals",
+      "next_action": "verify guard is backend-enforced and not copy/comment only",
+      "window_hash": "cbffc2f8e50ed8bcd759ac2173efa2929432690d"
+    },
+    {
+      "id": "fe19ae99b1dc",
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/workflows/:workflowId/run",
+      "line_start": 12139,
+      "line_end": 12214,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "approval_governance",
+        "integration_provider_state",
+        "workflow_job_queue_execution",
+        "customer_crm_ticket_send",
+        "ads_budget_spend"
+      ],
+      "guard_signal_count": 3,
+      "guard_signals": [
+        "governance",
+        "approval",
+        "risk"
+      ],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-with-visible-guard-signals",
+      "next_action": "verify guard is backend-enforced and not copy/comment only",
+      "window_hash": "77c2853315d667fb5107b10b4290eded2c041d54"
+    },
+    {
+      "id": "52bf6a44e067",
+      "method": "POST",
+      "path": "/media-manager/project/:project/ai/command",
+      "line_start": 12482,
+      "line_end": 12510,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "workflow_job_queue_execution",
+        "customer_crm_ticket_send"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "53f1b59c1aef05f32aa578050602605f6456aaca"
+    },
+    {
+      "id": "229e5ca80daf",
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/ai/command",
+      "line_start": 12483,
+      "line_end": 12510,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "workflow_job_queue_execution",
+        "customer_crm_ticket_send"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "e8629a66de340c0a2467517a4632b62ac890ff8e"
+    },
+    {
+      "id": "c9a117c06e64",
+      "method": "POST",
+      "path": "/media-manager/project/:project/ai/chat",
+      "line_start": 12484,
+      "line_end": 12510,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "workflow_job_queue_execution",
+        "customer_crm_ticket_send"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "473d11bb708ec8786239430e15a894fafe707fc3"
+    },
+    {
+      "id": "375a727289ce",
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/ai/chat",
+      "line_start": 12485,
+      "line_end": 12510,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "workflow_job_queue_execution",
+        "customer_crm_ticket_send"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "484154ab9fe2b19e7b4c9269793d3f5fdcc16298"
+    },
+    {
+      "id": "dab3bb9c9530",
+      "method": "POST",
+      "path": "/media-manager/project/:project/ai/guidance",
+      "line_start": 12486,
+      "line_end": 12510,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "workflow_job_queue_execution",
+        "customer_crm_ticket_send"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "d926be1d17792976af6cd4cb4e84cd6240ccad38"
+    },
+    {
+      "id": "b6fd277e2dca",
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/ai/guidance",
+      "line_start": 12487,
+      "line_end": 12510,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "workflow_job_queue_execution",
+        "customer_crm_ticket_send"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "bbac3748c5b41e2096d0cb5293d8df48cfd4339d"
+    },
+    {
+      "id": "773f81801989",
+      "method": "POST",
+      "path": "/media-manager/project/:project/ai/workflows/:workflowId/run",
+      "line_start": 12488,
+      "line_end": 12510,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "workflow_job_queue_execution",
+        "customer_crm_ticket_send"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "c9ed902da71c114596427de425b4aba0a42f75be"
+    },
+    {
+      "id": "2bb43077c3d7",
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/ai/workflows/:workflowId/run",
+      "line_start": 12489,
+      "line_end": 12510,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "workflow_job_queue_execution",
+        "customer_crm_ticket_send"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "e3c50540190019ab68b79399c3bcc92529c89243"
+    },
+    {
+      "id": "f0b3e9b6f947",
+      "method": "POST",
+      "path": "/media-manager/project/:project/native-media/generate",
+      "line_start": 13573,
+      "line_end": 13583,
+      "mutating": true,
+      "categories": [
+        "integration_provider_state",
+        "media_provider_generation"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "provider-execution-needs-review",
+      "next_action": "inspect provider side effects and approval requirement",
+      "window_hash": "fa8589101ac90b2c8b671c53728df1a71c902054"
+    },
+    {
+      "id": "8856365fb4ab",
+      "method": "POST",
+      "path": "/media-manager/project/:project/integrations/:integrationId/connect",
+      "line_start": 13579,
+      "line_end": 13583,
+      "mutating": true,
+      "categories": [
+        "integration_provider_state"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "ac9c2b80983656c05d559018aa61ceb261a68602"
+    },
+    {
+      "id": "cc7b2ecfc25f",
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/integrations/:integrationId/connect",
+      "line_start": 13585,
+      "line_end": 13589,
+      "mutating": true,
+      "categories": [
+        "integration_provider_state"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "9a8727cebfa1ee8c4c802567821d5e2b5861e38a"
+    },
+    {
+      "id": "853b197ae451",
+      "method": "POST",
+      "path": "/media-manager/project/:project/integrations/:integrationId",
+      "line_start": 13591,
+      "line_end": 13595,
+      "mutating": true,
+      "categories": [
+        "integration_provider_state"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "d7092ba225d2723e89035625f154186bea55ee83"
+    },
+    {
+      "id": "b05943eebd08",
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/integrations/:integrationId",
+      "line_start": 13597,
+      "line_end": 13601,
+      "mutating": true,
+      "categories": [
+        "integration_provider_state"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "bc3929c93848b236b07dffc6cb3c2da8b8c7f913"
+    },
+    {
+      "id": "60e3d62aa087",
+      "method": "POST",
+      "path": "/media-manager/project/:project/integrations/:integrationId/reconnect",
+      "line_start": 13603,
+      "line_end": 13607,
+      "mutating": true,
+      "categories": [
+        "integration_provider_state"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "bf18f6b771f6b54286e8d718105effa89109cce9"
+    },
+    {
+      "id": "fee1b9b0708e",
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/integrations/:integrationId/reconnect",
+      "line_start": 13609,
+      "line_end": 13613,
+      "mutating": true,
+      "categories": [
+        "integration_provider_state"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "e91275e537f475946739c376109f0eccb8d410fe"
+    },
+    {
+      "id": "df9f5d404be3",
+      "method": "POST",
+      "path": "/media-manager/project/:project/integrations/:integrationId/test",
+      "line_start": 13615,
+      "line_end": 13617,
+      "mutating": true,
+      "categories": [
+        "integration_provider_state"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "2e6ad899c20600bdeafa3aacae611f58314171ac"
+    },
+    {
+      "id": "36b0285bef00",
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/integrations/:integrationId/test",
+      "line_start": 13619,
+      "line_end": 13621,
+      "mutating": true,
+      "categories": [
+        "integration_provider_state"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "9a31a4695109e4be516e70d10fde3c2bbb2a5ab2"
+    },
+    {
+      "id": "549fe218c71b",
+      "method": "POST",
+      "path": "/media-manager/project/:project/integrations/:integrationId/sync",
+      "line_start": 13623,
+      "line_end": 13625,
+      "mutating": true,
+      "categories": [
+        "integration_provider_state"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "5cdc68edba0d81feb2318c508d367f659aa0f6bd"
+    },
+    {
+      "id": "1d6a08a9a990",
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/integrations/:integrationId/sync",
+      "line_start": 13627,
+      "line_end": 13629,
+      "mutating": true,
+      "categories": [
+        "integration_provider_state"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "5d4585ef5211f5a046de942ba5cba99b9e83fe9a"
+    },
+    {
+      "id": "6959a5800ecc",
+      "method": "POST",
+      "path": "/media-manager/project/:project/integrations/:integrationId/import-history",
+      "line_start": 13631,
+      "line_end": 13633,
+      "mutating": true,
+      "categories": [
+        "integration_provider_state"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "05ae6b8a3dc6d0312ff7bd75f95071da7c2d3ef1"
+    },
+    {
+      "id": "c91573214758",
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/integrations/:integrationId/import-history",
+      "line_start": 13635,
+      "line_end": 13637,
+      "mutating": true,
+      "categories": [
+        "integration_provider_state"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "88e2f3c9bf5f788cb92d056cc5262a0c12743297"
+    },
+    {
+      "id": "197f2e8f3c0f",
+      "method": "POST",
+      "path": "/media-manager/project/:project/integrations/:integrationId/disconnect",
+      "line_start": 13639,
+      "line_end": 13641,
+      "mutating": true,
+      "categories": [
+        "integration_provider_state",
+        "destructive_or_disconnect"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "92821421f512abf12033a8fcc0570aa8e2bf2eb6"
+    },
+    {
+      "id": "0bce23e6a872",
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/integrations/:integrationId/disconnect",
+      "line_start": 13643,
+      "line_end": 13645,
+      "mutating": true,
+      "categories": [
+        "integration_provider_state",
+        "destructive_or_disconnect"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "34276019099afddbf0f3fc5f7fe936cae9a0625b"
+    },
+    {
+      "id": "fbf73d68c556",
+      "method": "POST",
+      "path": "/telegram-command",
+      "line_start": 16331,
+      "line_end": 16491,
+      "mutating": true,
+      "categories": [
+        "integration_provider_state",
+        "workflow_job_queue_execution",
+        "customer_crm_ticket_send",
+        "ads_budget_spend",
+        "media_provider_generation"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "provider-execution-needs-review",
+      "next_action": "inspect provider side effects and approval requirement",
+      "window_hash": "44e6332fa6a9f60628365408812ec1471b823337"
+    },
+    {
+      "id": "7b143afc4488",
+      "method": "POST",
+      "path": "/publish-clone/:cloneId",
+      "line_start": 22275,
+      "line_end": 22316,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "integration_provider_state",
+        "customer_crm_ticket_send"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "7fc4f1219c1c354a2a9b2122d070c25e23a02bbb"
+    },
+    {
+      "id": "8a7f568ebd49",
+      "method": "POST",
+      "path": "/replace-original-product/:originalId/:cloneId",
+      "line_start": 22318,
+      "line_end": 22405,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "integration_provider_state",
+        "customer_crm_ticket_send",
+        "ads_budget_spend"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "775e2d411b5762357c454e88d1eae594e851eb2d"
+    },
+    {
+      "id": "6caead4cc583",
+      "method": "POST",
+      "path": "/cleanup-clone/:cloneId",
+      "line_start": 22407,
+      "line_end": 22452,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "integration_provider_state",
+        "customer_crm_ticket_send"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "4cd9491f5ab75b8c0338eceb5e72647c69f92d83"
+    },
+    {
+      "id": "720ebe38b052",
+      "method": "POST",
+      "path": "/publish-blog/:draftId",
+      "line_start": 22454,
+      "line_end": 22558,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "integration_provider_state",
+        "workflow_job_queue_execution",
+        "customer_crm_ticket_send"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "aab2c07dab283b17b491d24b2c23562b9c237a31"
+    },
+    {
+      "id": "8becd27c0192",
+      "method": "POST",
+      "path": "/rollback-product/:productId",
+      "line_start": 22560,
+      "line_end": 22626,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "integration_provider_state",
+        "customer_crm_ticket_send",
+        "ads_budget_spend"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "b13f01bffc2e25aa391ff483838d5314cd1e5df7"
+    },
+    {
+      "id": "7af0f0320e56",
+      "method": "POST",
+      "path": "/run_scheduler_worker_once",
+      "line_start": 23080,
+      "line_end": 23208,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "integration_provider_state",
+        "workflow_job_queue_execution",
+        "customer_crm_ticket_send",
+        "ads_budget_spend",
+        "media_provider_generation"
+      ],
+      "guard_signal_count": 2,
+      "guard_signals": [
+        "audit",
+        "auditLog"
+      ],
+      "high_risk": true,
+      "preliminary_classification": "provider-execution-needs-review",
+      "next_action": "inspect provider side effects and approval requirement",
+      "window_hash": "dea80fca6e975cb29ec27a830e6657f83012807c"
+    },
+    {
+      "id": "5db620b84aaa",
+      "method": "POST",
+      "path": "/record_execution_feedback",
+      "line_start": 23210,
+      "line_end": 23280,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "workflow_job_queue_execution",
+        "customer_crm_ticket_send"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "381b2585bbdc569b76d853f88d2e0cc7fac88c1a"
+    },
+    {
+      "id": "a223374b8503",
+      "method": "POST",
+      "path": "/generate_optimization_recommendations",
+      "line_start": 23301,
+      "line_end": 23327,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "integration_provider_state",
+        "customer_crm_ticket_send",
+        "media_provider_generation"
+      ],
+      "guard_signal_count": 1,
+      "guard_signals": [
+        "risk"
+      ],
+      "high_risk": true,
+      "preliminary_classification": "provider-execution-needs-review",
+      "next_action": "inspect provider side effects and approval requirement",
+      "window_hash": "0a38341cc55db062bc73b8c4b28d2220bd94ff56"
+    },
+    {
+      "id": "4bb1ef04f095",
+      "method": "POST",
+      "path": "/api/media/improve-prompt",
+      "line_start": 23329,
+      "line_end": 23357,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "integration_provider_state",
+        "customer_crm_ticket_send",
+        "media_provider_generation"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "provider-execution-review-output-candidate",
+      "next_action": "inspect provider boundary and confirm review-only persistence",
+      "window_hash": "85100003aa116ebd5382a5bae75437441038d1e0"
+    },
+    {
+      "id": "1cbaf77d48b1",
+      "method": "POST",
+      "path": "/api/media/brand-check",
+      "line_start": 23359,
+      "line_end": 23387,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "integration_provider_state",
+        "workflow_job_queue_execution",
+        "customer_crm_ticket_send",
+        "media_provider_generation"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "provider-execution-review-output-candidate",
+      "next_action": "inspect provider boundary and confirm review-only persistence",
+      "window_hash": "d35ff695f12d3d158a97b5229dfe024ad7fb70db"
+    },
+    {
+      "id": "f0153accf0bf",
+      "method": "POST",
+      "path": "/api/media/generate-image",
+      "line_start": 23389,
+      "line_end": 23417,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "integration_provider_state",
+        "customer_crm_ticket_send",
+        "media_provider_generation"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "provider-execution-review-output-candidate",
+      "next_action": "inspect provider boundary and confirm review-only persistence",
+      "window_hash": "66e454289edcf8ad355001b5d4c6f9f9243c1a34"
+    },
+    {
+      "id": "93f34c883c73",
+      "method": "POST",
+      "path": "/api/media/generate-video-brief",
+      "line_start": 23419,
+      "line_end": 23447,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "integration_provider_state",
+        "customer_crm_ticket_send",
+        "media_provider_generation"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "provider-execution-review-output-candidate",
+      "next_action": "inspect provider boundary and confirm review-only persistence",
+      "window_hash": "71d03f3af2ee94dfc445b5cf52f2bc1c162006fe"
+    },
+    {
+      "id": "dd9f22239795",
+      "method": "POST",
+      "path": "/api/media/generate-voice-script",
+      "line_start": 23449,
+      "line_end": 23477,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "integration_provider_state",
+        "customer_crm_ticket_send",
+        "media_provider_generation"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "provider-execution-review-output-candidate",
+      "next_action": "inspect provider boundary and confirm review-only persistence",
+      "window_hash": "f4a45feb02c109a8b2ca36a0b8d77c46938101e2"
+    },
+    {
+      "id": "0bae4e03c409",
+      "method": "POST",
+      "path": "/api/media/generate-campaign-pack",
+      "line_start": 23479,
+      "line_end": 23507,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "integration_provider_state",
+        "customer_crm_ticket_send",
+        "media_provider_generation"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "provider-execution-review-output-candidate",
+      "next_action": "inspect provider boundary and confirm review-only persistence",
+      "window_hash": "f75f8845fddbbc3e4265e099ae6f037cad599266"
+    }
+  ],
+  "high_risk_without_guard_remaining_uncovered": [
+    {
+      "id": "bc2ffce4d6b4",
+      "method": "POST",
+      "path": "/task",
+      "line_start": 9752,
+      "line_end": 9769,
+      "mutating": true,
+      "categories": [
+        "approval_governance",
+        "workflow_job_queue_execution",
+        "customer_crm_ticket_send"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "680997d0e7fd22d5ea648ba686ceef7485974337"
+    },
+    {
+      "id": "4e61b85704b2",
+      "method": "POST",
+      "path": "/api/agent-registry/register",
+      "line_start": 9771,
+      "line_end": 9792,
+      "mutating": true,
+      "categories": [
+        "workflow_job_queue_execution",
+        "customer_crm_ticket_send"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "1e5733026bc3cc3a374d9ee798093dcc35340490"
+    },
+    {
+      "id": "f15d4d568a68",
+      "method": "POST",
+      "path": "/api/agent-registry/resolve",
+      "line_start": 9772,
+      "line_end": 9792,
+      "mutating": true,
+      "categories": [
+        "workflow_job_queue_execution",
+        "customer_crm_ticket_send"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "3ac1f344868b01836b91e14415461e6272c78069"
+    },
+    {
+      "id": "1759c35a8bf2",
+      "method": "POST",
+      "path": "/ingest",
+      "line_start": 9810,
+      "line_end": 9824,
+      "mutating": true,
+      "categories": [
+        "workflow_job_queue_execution",
+        "customer_crm_ticket_send"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "66cfbd4338818df340f8464a935b78d09a111e50"
+    },
+    {
+      "id": "6c7c6b1f8f2d",
+      "method": "POST",
+      "path": "/backup-and-clone-product/:id",
+      "line_start": 10319,
+      "line_end": 10401,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "integration_provider_state",
+        "customer_crm_ticket_send",
+        "ads_budget_spend"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "c871a180efd720e0c596d445d67c2262ff3f61b2"
+    },
+    {
+      "id": "5ed60a31cee0",
+      "method": "POST",
+      "path": "/apply-prepared-copy-to-clone/:originalId/:cloneId",
+      "line_start": 10403,
+      "line_end": 10516,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "integration_provider_state",
+        "customer_crm_ticket_send",
+        "ads_budget_spend"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "9670c73e27c9de0c9ca83651ddc1c318ee2b3b84"
+    },
+    {
+      "id": "9e22db289975",
+      "method": "POST",
+      "path": "/media/upload",
+      "line_start": 10552,
+      "line_end": 10620,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send",
+        "ads_budget_spend",
+        "library_asset_mutation"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "09c422e830758c010e9ec7e7f1086d00d220ecf7"
+    },
+    {
+      "id": "ba2733abaea1",
+      "method": "POST",
+      "path": "/media-manager/project/:project/assets/:assetId/rename",
+      "line_start": 11208,
+      "line_end": 11236,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send",
+        "library_asset_mutation"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "98961d3e207f26ccab23399ccbb731c58f0986cb"
+    },
+    {
+      "id": "d3f6a2f3689c",
+      "method": "PATCH",
+      "path": "/media-manager/project/:project/assets/:assetId/classification",
+      "line_start": 11238,
+      "line_end": 11289,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send",
+        "library_asset_mutation",
+        "destructive_or_disconnect"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "71154d8ffa9416ed64fb38738c57a1074ef98cbf"
+    },
+    {
+      "id": "e5359c421827",
+      "method": "POST",
+      "path": "/media-manager/project/:project/assets/:assetId/source-of-truth",
+      "line_start": 11292,
+      "line_end": 11315,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send",
+        "library_asset_mutation"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "b8965b52afd55c658a538e1c8e22b58b38817591"
+    },
+    {
+      "id": "3f43193ebdce",
+      "method": "POST",
+      "path": "/media-manager/project/:project/assets/:assetId/archive",
+      "line_start": 11317,
+      "line_end": 11343,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send",
+        "library_asset_mutation"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "8beb9a581ac6cb1fb172769a6b2ad13bdb9db297"
+    },
+    {
+      "id": "30bfdecea1cb",
+      "method": "POST",
+      "path": "/media-manager/project/:project/library/refresh",
+      "line_start": 11407,
+      "line_end": 11415,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send",
+        "library_asset_mutation"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "7a805b47b565b7df3f31ff32ab1ba3c33635ef50"
+    },
+    {
+      "id": "b8e6753cf733",
+      "method": "POST",
+      "path": "/api/ai-command/project/:project/campaign-preview",
+      "line_start": 11691,
+      "line_end": 11702,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send",
+        "ads_budget_spend"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "f6d6ce3f4e959c6155e2be31aea565b95cee3b34"
+    },
+    {
+      "id": "e8c8c7f56b14",
+      "method": "POST",
+      "path": "/media-manager/project/:project/team",
+      "line_start": 11838,
+      "line_end": 11854,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "94dff3e34fe5dfc2f64f8f3b0bcc030c5aed7201"
+    },
+    {
+      "id": "a3ca323eee63",
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/team",
+      "line_start": 11839,
+      "line_end": 11854,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "9d349217760b8adbfc2bd8ac0e751ea38aa11372"
+    },
+    {
+      "id": "d9381330e974",
+      "method": "POST",
+      "path": "/media-manager/project/:project/media-jobs",
+      "line_start": 12017,
+      "line_end": 12025,
+      "mutating": true,
+      "categories": [
+        "workflow_job_queue_execution"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "135c0cbd78cf81956658648399b07978fdf6d900"
+    },
+    {
+      "id": "5737c5bb1c25",
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/media-jobs",
+      "line_start": 12018,
+      "line_end": 12025,
+      "mutating": true,
+      "categories": [
+        "workflow_job_queue_execution"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "e2589e88c75fe6081bf80457c82d33c8ede5ede3"
+    },
+    {
+      "id": "2ecbb8c08f93",
+      "method": "PATCH",
+      "path": "/media-manager/project/:project/media-jobs/:mediaJobId",
+      "line_start": 12019,
+      "line_end": 12025,
+      "mutating": true,
+      "categories": [
+        "workflow_job_queue_execution"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "77b861dee941bf9f8e365999673f4f7372fa3578"
+    },
+    {
+      "id": "6a52f499d7c3",
+      "method": "PATCH",
+      "path": "/public/media-manager/project/:project/media-jobs/:mediaJobId",
+      "line_start": 12026,
+      "line_end": 12032,
+      "mutating": true,
+      "categories": [
+        "workflow_job_queue_execution"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "e59a6f2db8e0b11883eecee100e32e1065241567"
+    },
+    {
+      "id": "b3726f434692",
+      "method": "POST",
+      "path": "/media-manager/project/:project/tasks",
+      "line_start": 12528,
+      "line_end": 12542,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "workflow_job_queue_execution",
+        "customer_crm_ticket_send",
+        "ads_budget_spend"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "ffc8eb50bebffebfb7f1265ae362fdb70967b29e"
+    },
+    {
+      "id": "66fc0d1579a5",
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/tasks",
+      "line_start": 12529,
+      "line_end": 12542,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "workflow_job_queue_execution",
+        "customer_crm_ticket_send",
+        "ads_budget_spend"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "ccff54fba77b23fe0753ea4b3f5591090a64b965"
+    },
+    {
+      "id": "b68bf27ea312",
+      "method": "PATCH",
+      "path": "/media-manager/project/:project/notifications/:notificationId",
+      "line_start": 12699,
+      "line_end": 12711,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send",
+        "ads_budget_spend"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "f9c8296babea4474c1176f1069587cb1dcf0544c"
+    },
+    {
+      "id": "772b837ed0e6",
+      "method": "PATCH",
+      "path": "/public/media-manager/project/:project/notifications/:notificationId",
+      "line_start": 12712,
+      "line_end": 12724,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send",
+        "ads_budget_spend"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "12805870d85736354ea4fde627dadfbf9795732e"
+    },
+    {
+      "id": "df519785446a",
+      "method": "POST",
+      "path": "/media-manager/project/:project/handoffs",
+      "line_start": 12774,
+      "line_end": 12792,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "f1ac711b55b7538361a22f26a30426af8bee501b"
+    },
+    {
+      "id": "76c08d64e599",
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/handoffs",
+      "line_start": 12775,
+      "line_end": 12792,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "cef64444062694368c61343c67611bd748593fee"
+    },
+    {
+      "id": "4a664aaf7b29",
+      "method": "POST",
+      "path": "/media-manager/project/:project/handoffs/:handoffId/consume",
+      "line_start": 12776,
+      "line_end": 12792,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "a5f8f0b84faf2f1e61b42b67faaac25e1e6c7b1d"
+    },
+    {
+      "id": "a1eb7746e4e5",
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/handoffs/:handoffId/consume",
+      "line_start": 12777,
+      "line_end": 12792,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "89ed3f1ae2d162c8414a13cb7154a80749dd9769"
+    },
+    {
+      "id": "6072036cf400",
+      "method": "POST",
+      "path": "/media-manager/project/:project/library/index",
+      "line_start": 23633,
+      "line_end": 23656,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send",
+        "library_asset_mutation"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "c3fc37b5649ef538fc5597b8fbb2c03da19f159f"
+    }
+  ],
+  "mutating_without_guard_remaining_uncovered": [
+    {
+      "id": "bc2ffce4d6b4",
+      "method": "POST",
+      "path": "/task",
+      "line_start": 9752,
+      "line_end": 9769,
+      "mutating": true,
+      "categories": [
+        "approval_governance",
+        "workflow_job_queue_execution",
+        "customer_crm_ticket_send"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "680997d0e7fd22d5ea648ba686ceef7485974337"
+    },
+    {
+      "id": "4e61b85704b2",
+      "method": "POST",
+      "path": "/api/agent-registry/register",
+      "line_start": 9771,
+      "line_end": 9792,
+      "mutating": true,
+      "categories": [
+        "workflow_job_queue_execution",
+        "customer_crm_ticket_send"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "1e5733026bc3cc3a374d9ee798093dcc35340490"
+    },
+    {
+      "id": "f15d4d568a68",
+      "method": "POST",
+      "path": "/api/agent-registry/resolve",
+      "line_start": 9772,
+      "line_end": 9792,
+      "mutating": true,
+      "categories": [
+        "workflow_job_queue_execution",
+        "customer_crm_ticket_send"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "3ac1f344868b01836b91e14415461e6272c78069"
+    },
+    {
+      "id": "1759c35a8bf2",
+      "method": "POST",
+      "path": "/ingest",
+      "line_start": 9810,
+      "line_end": 9824,
+      "mutating": true,
+      "categories": [
+        "workflow_job_queue_execution",
+        "customer_crm_ticket_send"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "66cfbd4338818df340f8464a935b78d09a111e50"
+    },
+    {
+      "id": "6c7c6b1f8f2d",
+      "method": "POST",
+      "path": "/backup-and-clone-product/:id",
+      "line_start": 10319,
+      "line_end": 10401,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "integration_provider_state",
+        "customer_crm_ticket_send",
+        "ads_budget_spend"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "c871a180efd720e0c596d445d67c2262ff3f61b2"
+    },
+    {
+      "id": "5ed60a31cee0",
+      "method": "POST",
+      "path": "/apply-prepared-copy-to-clone/:originalId/:cloneId",
+      "line_start": 10403,
+      "line_end": 10516,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "integration_provider_state",
+        "customer_crm_ticket_send",
+        "ads_budget_spend"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "9670c73e27c9de0c9ca83651ddc1c318ee2b3b84"
+    },
+    {
+      "id": "9e22db289975",
+      "method": "POST",
+      "path": "/media/upload",
+      "line_start": 10552,
+      "line_end": 10620,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send",
+        "ads_budget_spend",
+        "library_asset_mutation"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "09c422e830758c010e9ec7e7f1086d00d220ecf7"
+    },
+    {
+      "id": "b06ff11a0fa7",
+      "method": "POST",
+      "path": "/media-manager/project/:project/rename",
+      "line_start": 10955,
+      "line_end": 10956,
+      "mutating": true,
+      "categories": [],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": false,
+      "preliminary_classification": "mutating-missing-visible-guard",
+      "next_action": "manual review required",
+      "window_hash": "3a2d14290380a935584f157424add6dee9551a4c"
+    },
+    {
+      "id": "81dd244122df",
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/rename",
+      "line_start": 10957,
+      "line_end": 10958,
+      "mutating": true,
+      "categories": [],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": false,
+      "preliminary_classification": "mutating-missing-visible-guard",
+      "next_action": "manual review required",
+      "window_hash": "625fb38a07235f530c8052d950f822cfd42e6fbe"
+    },
+    {
+      "id": "737a75dd67f8",
+      "method": "POST",
+      "path": "/media-manager/project/:project/apply-template",
+      "line_start": 10959,
+      "line_end": 10960,
+      "mutating": true,
+      "categories": [],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": false,
+      "preliminary_classification": "mutating-missing-visible-guard",
+      "next_action": "manual review required",
+      "window_hash": "4fd62d92cf07caea60129f8c2f14f9e9fa372ab7"
+    },
+    {
+      "id": "32834f855d9f",
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/apply-template",
+      "line_start": 10961,
+      "line_end": 10962,
+      "mutating": true,
+      "categories": [],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": false,
+      "preliminary_classification": "mutating-missing-visible-guard",
+      "next_action": "manual review required",
+      "window_hash": "89ee1b9e686d5afe568ea6ebf7c641b92ea847ad"
+    },
+    {
+      "id": "709ae235958a",
+      "method": "POST",
+      "path": "/media-manager/projects",
+      "line_start": 10963,
+      "line_end": 10964,
+      "mutating": true,
+      "categories": [],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": false,
+      "preliminary_classification": "mutating-missing-visible-guard",
+      "next_action": "manual review required",
+      "window_hash": "3c29768f530761c4ad74bf06f245ad51734ef8f7"
+    },
+    {
+      "id": "9394d475387b",
+      "method": "POST",
+      "path": "/public/media-manager/projects",
+      "line_start": 10965,
+      "line_end": 10966,
+      "mutating": true,
+      "categories": [],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": false,
+      "preliminary_classification": "mutating-missing-visible-guard",
+      "next_action": "manual review required",
+      "window_hash": "afb6e24d19877256de2daf89312ce0a3bdaea444"
+    },
+    {
+      "id": "ba2733abaea1",
+      "method": "POST",
+      "path": "/media-manager/project/:project/assets/:assetId/rename",
+      "line_start": 11208,
+      "line_end": 11236,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send",
+        "library_asset_mutation"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "98961d3e207f26ccab23399ccbb731c58f0986cb"
+    },
+    {
+      "id": "d3f6a2f3689c",
+      "method": "PATCH",
+      "path": "/media-manager/project/:project/assets/:assetId/classification",
+      "line_start": 11238,
+      "line_end": 11289,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send",
+        "library_asset_mutation",
+        "destructive_or_disconnect"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "71154d8ffa9416ed64fb38738c57a1074ef98cbf"
+    },
+    {
+      "id": "e5359c421827",
+      "method": "POST",
+      "path": "/media-manager/project/:project/assets/:assetId/source-of-truth",
+      "line_start": 11292,
+      "line_end": 11315,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send",
+        "library_asset_mutation"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "b8965b52afd55c658a538e1c8e22b58b38817591"
+    },
+    {
+      "id": "3f43193ebdce",
+      "method": "POST",
+      "path": "/media-manager/project/:project/assets/:assetId/archive",
+      "line_start": 11317,
+      "line_end": 11343,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send",
+        "library_asset_mutation"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "8beb9a581ac6cb1fb172769a6b2ad13bdb9db297"
+    },
+    {
+      "id": "30bfdecea1cb",
+      "method": "POST",
+      "path": "/media-manager/project/:project/library/refresh",
+      "line_start": 11407,
+      "line_end": 11415,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send",
+        "library_asset_mutation"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "7a805b47b565b7df3f31ff32ab1ba3c33635ef50"
+    },
+    {
+      "id": "b8e6753cf733",
+      "method": "POST",
+      "path": "/api/ai-command/project/:project/campaign-preview",
+      "line_start": 11691,
+      "line_end": 11702,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send",
+        "ads_budget_spend"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "f6d6ce3f4e959c6155e2be31aea565b95cee3b34"
+    },
+    {
+      "id": "e8c8c7f56b14",
+      "method": "POST",
+      "path": "/media-manager/project/:project/team",
+      "line_start": 11838,
+      "line_end": 11854,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "94dff3e34fe5dfc2f64f8f3b0bcc030c5aed7201"
+    },
+    {
+      "id": "a3ca323eee63",
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/team",
+      "line_start": 11839,
+      "line_end": 11854,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "9d349217760b8adbfc2bd8ac0e751ea38aa11372"
+    },
+    {
+      "id": "d017126f69af",
+      "method": "POST",
+      "path": "/media-manager/project/:project/campaigns",
+      "line_start": 11886,
+      "line_end": 11894,
+      "mutating": true,
+      "categories": [],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": false,
+      "preliminary_classification": "mutating-missing-visible-guard",
+      "next_action": "manual review required",
+      "window_hash": "9b7d5cc5aba572030efc4da16fa4744023432dc6"
+    },
+    {
+      "id": "471665e23a96",
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/campaigns",
+      "line_start": 11887,
+      "line_end": 11894,
+      "mutating": true,
+      "categories": [],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": false,
+      "preliminary_classification": "mutating-missing-visible-guard",
+      "next_action": "manual review required",
+      "window_hash": "af5dca14e55f09120d7668981e33c21f7191b05f"
+    },
+    {
+      "id": "eb7f6c164db2",
+      "method": "PATCH",
+      "path": "/media-manager/project/:project/campaigns/:campaignId",
+      "line_start": 11888,
+      "line_end": 11894,
+      "mutating": true,
+      "categories": [],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": false,
+      "preliminary_classification": "mutating-missing-visible-guard",
+      "next_action": "manual review required",
+      "window_hash": "b5786c5eb86f772a03700275fce95b1e87ee5ab9"
+    },
+    {
+      "id": "d11a84425918",
+      "method": "PATCH",
+      "path": "/public/media-manager/project/:project/campaigns/:campaignId",
+      "line_start": 11895,
+      "line_end": 11901,
+      "mutating": true,
+      "categories": [],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": false,
+      "preliminary_classification": "mutating-missing-visible-guard",
+      "next_action": "manual review required",
+      "window_hash": "83af59d6e7e78990ee78d119e37edd906e305a3b"
+    },
+    {
+      "id": "5b134bc7c745",
+      "method": "POST",
+      "path": "/media-manager/project/:project/content-items",
+      "line_start": 11951,
+      "line_end": 11959,
+      "mutating": true,
+      "categories": [],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": false,
+      "preliminary_classification": "mutating-missing-visible-guard",
+      "next_action": "manual review required",
+      "window_hash": "39dd5ab5aca2a99c986f1c0965b0e52325629d98"
+    },
+    {
+      "id": "9a1ba4d1e23f",
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/content-items",
+      "line_start": 11952,
+      "line_end": 11959,
+      "mutating": true,
+      "categories": [],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": false,
+      "preliminary_classification": "mutating-missing-visible-guard",
+      "next_action": "manual review required",
+      "window_hash": "eaf56cc9f79d72bc08017c4664ecacce6bd7fc9c"
+    },
+    {
+      "id": "71de9bd24666",
+      "method": "PATCH",
+      "path": "/media-manager/project/:project/content-items/:contentItemId",
+      "line_start": 11953,
+      "line_end": 11959,
+      "mutating": true,
+      "categories": [],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": false,
+      "preliminary_classification": "mutating-missing-visible-guard",
+      "next_action": "manual review required",
+      "window_hash": "1fe93997d4ac8b47fd1bdef35353e0f206a96a8f"
+    },
+    {
+      "id": "15515d117284",
+      "method": "PATCH",
+      "path": "/public/media-manager/project/:project/content-items/:contentItemId",
+      "line_start": 11960,
+      "line_end": 11966,
+      "mutating": true,
+      "categories": [],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": false,
+      "preliminary_classification": "mutating-missing-visible-guard",
+      "next_action": "manual review required",
+      "window_hash": "b205c29a5b865026d590ca284a4882822b26a486"
+    },
+    {
+      "id": "d9381330e974",
+      "method": "POST",
+      "path": "/media-manager/project/:project/media-jobs",
+      "line_start": 12017,
+      "line_end": 12025,
+      "mutating": true,
+      "categories": [
+        "workflow_job_queue_execution"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "135c0cbd78cf81956658648399b07978fdf6d900"
+    },
+    {
+      "id": "5737c5bb1c25",
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/media-jobs",
+      "line_start": 12018,
+      "line_end": 12025,
+      "mutating": true,
+      "categories": [
+        "workflow_job_queue_execution"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "e2589e88c75fe6081bf80457c82d33c8ede5ede3"
+    },
+    {
+      "id": "2ecbb8c08f93",
+      "method": "PATCH",
+      "path": "/media-manager/project/:project/media-jobs/:mediaJobId",
+      "line_start": 12019,
+      "line_end": 12025,
+      "mutating": true,
+      "categories": [
+        "workflow_job_queue_execution"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "77b861dee941bf9f8e365999673f4f7372fa3578"
+    },
+    {
+      "id": "6a52f499d7c3",
+      "method": "PATCH",
+      "path": "/public/media-manager/project/:project/media-jobs/:mediaJobId",
+      "line_start": 12026,
+      "line_end": 12032,
+      "mutating": true,
+      "categories": [
+        "workflow_job_queue_execution"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "e59a6f2db8e0b11883eecee100e32e1065241567"
+    },
+    {
+      "id": "b3726f434692",
+      "method": "POST",
+      "path": "/media-manager/project/:project/tasks",
+      "line_start": 12528,
+      "line_end": 12542,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "workflow_job_queue_execution",
+        "customer_crm_ticket_send",
+        "ads_budget_spend"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "ffc8eb50bebffebfb7f1265ae362fdb70967b29e"
+    },
+    {
+      "id": "66fc0d1579a5",
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/tasks",
+      "line_start": 12529,
+      "line_end": 12542,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "workflow_job_queue_execution",
+        "customer_crm_ticket_send",
+        "ads_budget_spend"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "ccff54fba77b23fe0753ea4b3f5591090a64b965"
+    },
+    {
+      "id": "b68bf27ea312",
+      "method": "PATCH",
+      "path": "/media-manager/project/:project/notifications/:notificationId",
+      "line_start": 12699,
+      "line_end": 12711,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send",
+        "ads_budget_spend"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "f9c8296babea4474c1176f1069587cb1dcf0544c"
+    },
+    {
+      "id": "772b837ed0e6",
+      "method": "PATCH",
+      "path": "/public/media-manager/project/:project/notifications/:notificationId",
+      "line_start": 12712,
+      "line_end": 12724,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send",
+        "ads_budget_spend"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "12805870d85736354ea4fde627dadfbf9795732e"
+    },
+    {
+      "id": "df519785446a",
+      "method": "POST",
+      "path": "/media-manager/project/:project/handoffs",
+      "line_start": 12774,
+      "line_end": 12792,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "f1ac711b55b7538361a22f26a30426af8bee501b"
+    },
+    {
+      "id": "76c08d64e599",
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/handoffs",
+      "line_start": 12775,
+      "line_end": 12792,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "cef64444062694368c61343c67611bd748593fee"
+    },
+    {
+      "id": "4a664aaf7b29",
+      "method": "POST",
+      "path": "/media-manager/project/:project/handoffs/:handoffId/consume",
+      "line_start": 12776,
+      "line_end": 12792,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "a5f8f0b84faf2f1e61b42b67faaac25e1e6c7b1d"
+    },
+    {
+      "id": "a1eb7746e4e5",
+      "method": "POST",
+      "path": "/public/media-manager/project/:project/handoffs/:handoffId/consume",
+      "line_start": 12777,
+      "line_end": 12792,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "89ed3f1ae2d162c8414a13cb7154a80749dd9769"
+    },
+    {
+      "id": "6072036cf400",
+      "method": "POST",
+      "path": "/media-manager/project/:project/library/index",
+      "line_start": 23633,
+      "line_end": 23656,
+      "mutating": true,
+      "categories": [
+        "publishing_lifecycle",
+        "customer_crm_ticket_send",
+        "library_asset_mutation"
+      ],
+      "guard_signal_count": 0,
+      "guard_signals": [],
+      "high_risk": true,
+      "preliminary_classification": "protected-lifecycle-missing-visible-guard",
+      "next_action": "manual review required; possible narrow guard patch candidate",
+      "window_hash": "c3fc37b5649ef538fc5597b8fbb2c03da19f159f"
+    }
+  ],
+  "decision": {
+    "m2_can_close_now": false,
+    "reason": "M2-J2 adds and verifies a narrow Phase 1 guard, but the old route-table classifier is not yet re-run or updated to recognize the new middleware as route-level protection. Remaining uncovered prior high-risk/mutating routes must be classified as false-positive/local-only/deferred or covered by M2-J5 before full M2 closeout.",
+    "next_step": "M2-J5 — Route Authority Scanner Update or Deferred Route Classification",
+    "closeout_condition": "M2 may close only after the rebaseline distinguishes M2-J2-covered routes from true remaining gaps and documents remaining deferred routes."
+  }
+}
