@@ -1,3 +1,4 @@
+const { createProtectedRouteMiddleware, PROTECTED_ROUTE_AUTHORITY_LEVELS } = require('./lib/security/protected-route-authority');
 // Deterministic source registry extraction for canonical/legacy compatibility
 const fsBoot = require('node:fs');
 const pathBoot = require('node:path');
@@ -270,6 +271,117 @@ process.on('unhandledRejection', (reason) => {
 
 const customerCenterProjection = require('./lib/customer-operations/projections/customer-center-projection');
 const app = express();
+
+/**
+ * M2-J2 protected route authority middleware.
+ *
+ * Narrow Phase 1 backend guard:
+ * - No UI behavior changes.
+ * - No provider behavior changes.
+ * - No publishing/ads/CRM/customer send behavior added.
+ * - Blocks selected high-risk backend mutations unless explicit approval/manual/owner proof is present.
+ */
+const mhProtectedRouteManualOnly = createProtectedRouteMiddleware({
+  routeId: 'm2j2.phase1.manual_execution_only',
+  authority: PROTECTED_ROUTE_AUTHORITY_LEVELS.MANUAL_EXECUTION_ONLY,
+  category: 'phase1_protected_mutation',
+  forbiddenAction: 'run_backend_job',
+  allowPublicMirror: false
+});
+
+const mhProtectedRouteApprovalRequired = createProtectedRouteMiddleware({
+  routeId: 'm2j2.phase1.approval_required',
+  authority: PROTECTED_ROUTE_AUTHORITY_LEVELS.APPROVAL_REQUIRED,
+  category: 'phase1_protected_lifecycle',
+  forbiddenAction: 'publish',
+  allowPublicMirror: false
+});
+
+const mhProtectedRouteDeleteRequired = createProtectedRouteMiddleware({
+  routeId: 'm2j2.phase1.delete_record',
+  authority: PROTECTED_ROUTE_AUTHORITY_LEVELS.MANUAL_EXECUTION_ONLY,
+  category: 'destructive_or_disconnect',
+  forbiddenAction: 'delete_record',
+  allowPublicMirror: false
+});
+
+const mhProtectedRouteSyncRequired = createProtectedRouteMiddleware({
+  routeId: 'm2j2.phase1.sync_provider',
+  authority: PROTECTED_ROUTE_AUTHORITY_LEVELS.MANUAL_EXECUTION_ONLY,
+  category: 'integration_provider_state',
+  forbiddenAction: 'sync_provider',
+  allowPublicMirror: false
+});
+
+const mhProtectedRouteReviewOutput = createProtectedRouteMiddleware({
+  routeId: 'm2j2.phase1.review_output',
+  authority: PROTECTED_ROUTE_AUTHORITY_LEVELS.REVIEW_OUTPUT_ONLY,
+  category: 'provider_review_output',
+  forbiddenAction: 'run_provider_execution',
+  allowReviewOutput: true,
+  allowPublicMirror: false
+});
+
+app.use(['/media-manager/project/:project/assets/:assetId/delete'], mhProtectedRouteDeleteRequired);
+app.use(['/media-manager/project/:project/assets/:assetId'], function m2j2AssetDeleteGuard(req, res, next) {
+  if (String(req.method || '').toUpperCase() === 'DELETE') {
+    return mhProtectedRouteDeleteRequired(req, res, next);
+  }
+  return next();
+});
+app.use(['/media-manager/project/:project/integrations/:integrationId/disconnect', '/public/media-manager/project/:project/integrations/:integrationId/disconnect'], mhProtectedRouteDeleteRequired);
+app.use([
+  '/media-manager/project/:project/integrations/:integrationId/connect',
+  '/public/media-manager/project/:project/integrations/:integrationId/connect',
+  '/media-manager/project/:project/integrations/:integrationId',
+  '/public/media-manager/project/:project/integrations/:integrationId',
+  '/media-manager/project/:project/integrations/:integrationId/reconnect',
+  '/public/media-manager/project/:project/integrations/:integrationId/reconnect',
+  '/media-manager/project/:project/integrations/:integrationId/test',
+  '/public/media-manager/project/:project/integrations/:integrationId/test',
+  '/media-manager/project/:project/integrations/:integrationId/sync',
+  '/public/media-manager/project/:project/integrations/:integrationId/sync',
+  '/media-manager/project/:project/integrations/:integrationId/import-history',
+  '/public/media-manager/project/:project/integrations/:integrationId/import-history'
+], mhProtectedRouteSyncRequired);
+app.use([
+  '/media-manager/project/:project/ai/command',
+  '/public/media-manager/project/:project/ai/command',
+  '/media-manager/project/:project/ai/chat',
+  '/public/media-manager/project/:project/ai/chat',
+  '/media-manager/project/:project/ai/guidance',
+  '/public/media-manager/project/:project/ai/guidance',
+  '/media-manager/project/:project/ai/workflows/:workflowId/run',
+  '/public/media-manager/project/:project/ai/workflows/:workflowId/run',
+  '/media-manager/project/:project/workflows/:workflowId/run',
+  '/public/media-manager/project/:project/workflows/:workflowId/run',
+  '/run_scheduler_worker_once',
+  '/record_execution_feedback'
+], mhProtectedRouteManualOnly);
+app.use([
+  '/publish-clone/:cloneId',
+  '/replace-original-product/:originalId/:cloneId',
+  '/cleanup-clone/:cloneId',
+  '/publish-blog/:draftId',
+  '/rollback-product/:productId',
+  '/execute_publish_package',
+  '/execute_email_package',
+  '/build_ad_execution_package'
+], mhProtectedRouteApprovalRequired);
+app.use([
+  '/generate_media_from_prompt',
+  '/media-manager/project/:project/native-media/generate',
+  '/telegram-command',
+  '/generate_optimization_recommendations',
+  '/api/media/improve-prompt',
+  '/api/media/brand-check',
+  '/api/media/generate-image',
+  '/api/media/generate-video-brief',
+  '/api/media/generate-voice-script',
+  '/api/media/generate-campaign-pack'
+], mhProtectedRouteReviewOutput);
+
+
 /**
  * PHASE 13B.1 public mutation alias deprecation telemetry
  *
