@@ -1,0 +1,109 @@
+{
+  "phase": "M5-2A",
+  "title": "Context Aware Classifier Patch Design",
+  "status": "PATCH_DESIGN_RECORDED",
+  "mode": "design_only",
+  "source_of_truth": {
+    "m5_1_commit": "39bb54e",
+    "baseline_commit": "7caf9a2"
+  },
+  "scope": {
+    "source_patch": false,
+    "checker_change": false,
+    "runtime_change": false,
+    "ai_command_change": false,
+    "contract_change": false,
+    "route_owner_change": false,
+    "audit_artifacts_only": true
+  },
+  "problem": {
+    "current_behavior": "Classifier uses identifier-first classification and sends unresolved values directly to unknown_candidate.",
+    "risk": "Generic vocabulary and internal identifiers can be confused with real page routes.",
+    "goal": "Reduce false positives without hiding genuine unknown routes."
+  },
+  "classification_pipeline": [
+    "canonical_contract_page",
+    "runtime_page_alias",
+    "role_id",
+    "role_alias",
+    "known_non_page",
+    "provider_integration_channel",
+    "status_lifecycle_identifier",
+    "internal_ai_decision_route",
+    "ui_action_event",
+    "subsystem_handoff_source",
+    "unknown_candidate"
+  ],
+  "safety_invariants": [
+    "Unknown candidates remain the final fallback.",
+    "No token is classified without evidence context.",
+    "No broad ignore list is allowed.",
+    "No unknown route receives an artificial owner.",
+    "Real future pages must remain detectable."
+  ],
+  "context_model": {
+    "required_evidence": [
+      "identifier value",
+      "source file",
+      "source field",
+      "syntax context",
+      "known contract/runtime relationships"
+    ]
+  },
+  "candidate_rules": [
+    {
+      "token": "action",
+      "classification": "ui_action_event",
+      "owner": null
+    },
+    {
+      "token": "analysis",
+      "classification": "internal_ai_decision_route",
+      "owner": null
+    },
+    {
+      "token": "automation-engine",
+      "classification": "subsystem_handoff_source",
+      "owner": null
+    },
+    {
+      "token": "command",
+      "classification": "internal_ai_decision_route",
+      "owner": null
+    },
+    {
+      "token": "idle",
+      "classification": "status_lifecycle_identifier",
+      "owner": null
+    },
+    {
+      "token": "set-page",
+      "classification": "ui_action_event",
+      "owner": null
+    }
+  ],
+  "implementation_scope_for_m5_2": {
+    "target_file": "scripts/audit/ai-team-contract-conformance-check.mjs",
+    "allowed": [
+      "Add context-aware classifier helpers.",
+      "Add evidence-based buckets.",
+      "Preserve unknown_candidate fallback.",
+      "Improve reporting."
+    ],
+    "forbidden": [
+      "Do not change application runtime.",
+      "Do not change AI Command.",
+      "Do not change contract ownership.",
+      "Do not suppress unknown routes globally."
+    ]
+  },
+  "validation_target": {
+    "failures": 0,
+    "handoff_drift_pairs": 0,
+    "unknown_candidates": "zero only when evidence-backed"
+  },
+  "decision": {
+    "ready_for_m5_2_design_review": true,
+    "implementation_allowed": false
+  }
+}
