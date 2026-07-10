@@ -76,6 +76,321 @@ function hasToken(source, token) {
   return new RegExp(`\\b${safeRegexEscape(token)}\\b`).test(source);
 }
 
+function extractNamedObjectBody(source, objectName) {
+  const declarationPattern = new RegExp(
+    `\\bconst\\s+${safeRegexEscape(objectName)}\\s*=\\s*\\{`
+  );
+
+  const declaration = declarationPattern.exec(source);
+
+  if (!declaration) return "";
+
+  const start = source.indexOf("{", declaration.index);
+
+  if (start < 0) return "";
+
+  let depth = 0;
+  let quote = "";
+  let escaped = false;
+
+  for (let index = start; index < source.length; index += 1) {
+    const char = source[index];
+
+    if (quote) {
+      if (escaped) {
+        escaped = false;
+      } else if (char === "\\") {
+        escaped = true;
+      } else if (char === quote) {
+        quote = "";
+      }
+
+      continue;
+    }
+
+    if (char === '"' || char === "'" || char === "`") {
+      quote = char;
+      continue;
+    }
+
+    if (char === "{") depth += 1;
+
+    if (char === "}") {
+      depth -= 1;
+
+      if (depth === 0) {
+        return source.slice(start + 1, index);
+      }
+    }
+  }
+
+  return "";
+}
+
+function extractNamedStringMap(source, objectName) {
+  const body = extractNamedObjectBody(source, objectName);
+  const map = {};
+
+  if (!body) return map;
+
+  const pattern =
+    /(?:^|,)\s*(?:"([^"]+)"|'([^']+)'|([a-zA-Z0-9_-]+))\s*:\s*["']([^"']+)["']/gm;
+
+  for (const match of body.matchAll(pattern)) {
+    const key = match[1] || match[2] || match[3];
+    map[key] = match[4];
+  }
+
+  return map;
+}
+
+function resolveContractRoleIdentity(value, maxDepth = 20) {
+  const start = String(value || "").trim();
+  const chain = [start];
+  const visited = new Set([start]);
+  let current = start;
+
+  for (let depth = 0; depth < maxDepth; depth += 1) {
+    if (contractRoleSet.has(current)) {
+      return {
+        start,
+        chain,
+        terminal: current,
+        status: "canonical",
+        safe: true
+      };
+    }
+
+    const next = AI_TEAM_ROLE_ALIASES[current];
+
+    if (!next) {
+      return {
+        start,
+        chain,
+        terminal: current,
+        status: "unresolved",
+        safe: false
+      };
+    }
+
+    if (next === current) {
+      return contractRoleSet.has(current)
+        ? {
+            start,
+            chain,
+            terminal: current,
+            status: "canonical_self_alias",
+            safe: true
+          }
+        : {
+            start,
+            chain: [...chain, next],
+            terminal: next,
+            status: "self_cycle",
+            safe: false
+          };
+    }
+
+    if (visited.has(next)) {
+      return {
+        start,
+        chain: [...chain, next],
+        terminal: next,
+        status: "cycle",
+        safe: false
+      };
+    }
+
+    chain.push(next);
+    visited.add(next);
+    current = next;
+  }
+
+  return {
+    start,
+    chain,
+    terminal: current,
+    status: "depth_exceeded",
+    safe: false
+  };
+}
+
+function classifyAliasIdentityBridge(mapName, from, to) {
+  const fromResolution =
+    resolveContractRoleIdentity(from);
+
+  const toResolution =
+    resolveContractRoleIdentity(to);
+
+  if (!toResolution.safe) {
+    return {
+      map: mapName,
+      from,
+      to,
+      fromResolution,
+      toResolution,
+      bucket: "unresolved_role_identity",
+      warning: true,
+      reason:
+        "mapped target does not terminate at a canonical role"
+    };
+  }
+
+  if (
+    fromResolution.safe &&
+    fromResolution.terminal !== toResolution.terminal
+  ) {
+    return {
+      map: mapName,
+      from,
+      to,
+      fromResolution,
+      toResolution,
+      bucket: "semantic_bridge_mismatch",
+      warning: true,
+      reason:
+        "known source role is remapped to a different canonical role"
+    };
+  }
+
+  if (mapName === "AI_ROOM_BACKEND_ROLE_ALIASES") {
+    return {
+      map: mapName,
+      from,
+      to,
+      fromResolution,
+      toResolution,
+      bucket: "backend_bridge_alias",
+      warning: false,
+      reason:
+        "backend bridge resolves safely to a canonical role"
+    };
+  }
+
+  return {
+    map: mapName,
+    from,
+    to,
+    fromResolution,
+    toResolution,
+    bucket:
+      fromResolution.safe
+        ? "normalization_boundary"
+        : "safe_compatibility_alias",
+    warning: false,
+    reason:
+      "compatibility mapping resolves safely to a canonical role"
+  };
+}
+
+function classifyAliasSourceOwnership(from, to) {
+  const targetResolution =
+    resolveContractRoleIdentity(to);
+
+  return {
+    map: "AI_INBOUND_SPECIALIST_BY_SOURCE",
+    from,
+    to,
+    targetResolution,
+    bucket:
+      targetResolution.safe
+        ? "route_owner_binding"
+        : "unresolved_role_identity",
+    warning: !targetResolution.safe,
+    reason:
+      targetResolution.safe
+        ? "source-page ownership resolves to a canonical role"
+        : "source-page ownership target is unresolved"
+  };
+}
+
+function buildAiCommandAliasEvidence(aiCommandSource) {
+  const maps = {
+    MODE_ID_ALIASES:
+      extractNamedStringMap(
+        aiCommandSource,
+        "MODE_ID_ALIASES"
+      ),
+
+    AI_ROOM_BACKEND_ROLE_ALIASES:
+      extractNamedStringMap(
+        aiCommandSource,
+        "AI_ROOM_BACKEND_ROLE_ALIASES"
+      ),
+
+    AI_INBOUND_SPECIALIST_ALIASES:
+      extractNamedStringMap(
+        aiCommandSource,
+        "AI_INBOUND_SPECIALIST_ALIASES"
+      ),
+
+    AI_INBOUND_SPECIALIST_BY_SOURCE:
+      extractNamedStringMap(
+        aiCommandSource,
+        "AI_INBOUND_SPECIALIST_BY_SOURCE"
+      )
+  };
+
+  const identityEvidence = [];
+
+  for (const mapName of [
+    "MODE_ID_ALIASES",
+    "AI_ROOM_BACKEND_ROLE_ALIASES",
+    "AI_INBOUND_SPECIALIST_ALIASES"
+  ]) {
+    for (const [from, to] of Object.entries(maps[mapName])) {
+      identityEvidence.push(
+        classifyAliasIdentityBridge(
+          mapName,
+          from,
+          to
+        )
+      );
+    }
+  }
+
+  const sourceOwnershipEvidence =
+    Object.entries(
+      maps.AI_INBOUND_SPECIALIST_BY_SOURCE
+    ).map(([from, to]) =>
+      classifyAliasSourceOwnership(from, to)
+    );
+
+  const allEvidence = [
+    ...identityEvidence,
+    ...sourceOwnershipEvidence
+  ];
+
+  const bucketCounts = {};
+
+  for (const item of allEvidence) {
+    bucketCounts[item.bucket] =
+      (bucketCounts[item.bucket] || 0) + 1;
+  }
+
+  const warnings =
+    allEvidence.filter((item) => item.warning);
+
+  return {
+    maps,
+    identityEvidence,
+    sourceOwnershipEvidence,
+    allEvidence,
+    bucketCounts,
+    warnings,
+    semanticMismatches:
+      warnings.filter(
+        (item) =>
+          item.bucket === "semantic_bridge_mismatch"
+      ),
+    unresolvedIdentities:
+      warnings.filter(
+        (item) =>
+          item.bucket === "unresolved_role_identity"
+      )
+  };
+}
+
 function sourceLineNumber(source, index) {
   return source.slice(0, Math.max(0, index)).split("\n").length;
 }
@@ -764,12 +1079,180 @@ note("AI Command covered canonical roles", aiCommandCoveredRoles.join(", "));
 if (missingAiCommandRoles.length) warn("AI Command missing role coverage", missingAiCommandRoles.join(", "));
 else pass("AI Command covers all canonical roles or aliases");
 
-const aiCommandAliasDrift = contractAliases.filter((alias) => hasToken(src.aiCommand, alias));
-note("AI Command alias drift signals", aiCommandAliasDrift.join(", "));
+const aiCommandAliasTokenSignals =
+  contractAliases.filter((alias) =>
+    hasToken(src.aiCommand, alias)
+  );
 
-if (aiCommandAliasDrift.includes("admin")) warn("AI Command admin alias still present", "expected until alias normalization integration");
-if (aiCommandAliasDrift.includes("media")) warn("AI Command media alias still present", "expected until alias normalization integration");
-if (aiCommandAliasDrift.includes("ads")) warn("AI Command ads alias still present", "expected until alias normalization integration");
+note(
+  "AI Command alias token signals",
+  aiCommandAliasTokenSignals.join(", ")
+);
+
+const aiCommandAliasEvidence =
+  buildAiCommandAliasEvidence(src.aiCommand);
+
+for (
+  const [bucket, count] of Object.entries(
+    aiCommandAliasEvidence.bucketCounts
+  ).sort(([a], [b]) => a.localeCompare(b))
+) {
+  note(
+    `AI Command alias evidence ${bucket}`,
+    String(count)
+  );
+}
+
+for (const item of aiCommandAliasEvidence.warnings) {
+  const sourceTerminal =
+    item.fromResolution?.terminal || "";
+
+  const targetTerminal =
+    item.toResolution?.terminal ||
+    item.targetResolution?.terminal ||
+    "";
+
+  warn(
+    `AI Command alias ${item.bucket}`,
+    [
+      item.map,
+      `${item.from} -> ${item.to}`,
+      sourceTerminal
+        ? `source=${sourceTerminal}`
+        : "",
+      targetTerminal
+        ? `target=${targetTerminal}`
+        : "",
+      item.reason
+    ].filter(Boolean).join(" | ")
+  );
+}
+
+assert(
+  "AI Command contextual alias evidence extracted",
+  aiCommandAliasEvidence.allEvidence.length > 0,
+  String(aiCommandAliasEvidence.allEvidence.length)
+);
+
+const aiCommandAdminResolution =
+  resolveContractRoleIdentity("admin");
+
+assert(
+  "AI Command admin alias resolves to operations",
+  aiCommandAdminResolution.safe &&
+    aiCommandAdminResolution.terminal === "operations"
+);
+
+const aiCommandMediaResolution =
+  resolveContractRoleIdentity("media");
+
+assert(
+  "AI Command media alias resolves to media_director",
+  aiCommandMediaResolution.safe &&
+    aiCommandMediaResolution.terminal === "media_director"
+);
+
+const aiCommandAdsResolution =
+  resolveContractRoleIdentity("ads");
+
+assert(
+  "AI Command ads alias resolves to ads_operator",
+  aiCommandAdsResolution.safe &&
+    aiCommandAdsResolution.terminal === "ads_operator"
+);
+
+const aiCommandMediaBackendBridge =
+  aiCommandAliasEvidence.identityEvidence.find(
+    (item) =>
+      item.map ===
+        "AI_ROOM_BACKEND_ROLE_ALIASES" &&
+      item.from === "media" &&
+      item.to === "designer"
+  );
+
+assert(
+  "AI Command media backend bridge preserves canonical role",
+  Boolean(
+    aiCommandMediaBackendBridge &&
+    aiCommandMediaBackendBridge.warning === false &&
+    aiCommandMediaBackendBridge.fromResolution.terminal ===
+      "media_director" &&
+    aiCommandMediaBackendBridge.toResolution.terminal ===
+      "media_director"
+  )
+);
+
+const aiCommandResearchSourceOwnership =
+  aiCommandAliasEvidence.sourceOwnershipEvidence.find(
+    (item) =>
+      item.from === "research" &&
+      item.to === "seo"
+  );
+
+assert(
+  "AI Command research source ownership remains route binding",
+  Boolean(
+    aiCommandResearchSourceOwnership &&
+    aiCommandResearchSourceOwnership.bucket ===
+      "route_owner_binding" &&
+    aiCommandResearchSourceOwnership.warning === false &&
+    aiCommandResearchSourceOwnership.targetResolution.terminal ===
+      "analyst"
+  )
+);
+
+const aiCommandResearcherMismatch =
+  aiCommandAliasEvidence.semanticMismatches.find(
+    (item) =>
+      item.map ===
+        "AI_INBOUND_SPECIALIST_ALIASES" &&
+      item.from === "researcher" &&
+      item.to === "seo"
+  );
+
+assert(
+  "AI Command researcher to SEO semantic mismatch detected",
+  Boolean(
+    aiCommandResearcherMismatch &&
+    aiCommandResearcherMismatch.fromResolution.terminal ===
+      "researcher" &&
+    aiCommandResearcherMismatch.toResolution.terminal ===
+      "analyst"
+  )
+);
+
+assert(
+  "AI Command has exactly one semantic alias mismatch",
+  aiCommandAliasEvidence.semanticMismatches.length === 1,
+  String(
+    aiCommandAliasEvidence.semanticMismatches.length
+  )
+);
+
+assert(
+  "AI Command has zero unresolved role identities",
+  aiCommandAliasEvidence.unresolvedIdentities.length === 0,
+  String(
+    aiCommandAliasEvidence.unresolvedIdentities.length
+  )
+);
+
+const aiCommandSyntheticUnresolvedAlias =
+  classifyAliasIdentityBridge(
+    "AI_INBOUND_SPECIALIST_ALIASES",
+    "future-specialist",
+    "missing-role"
+  );
+
+assert(
+  "AI Command synthetic unresolved alias warns",
+  aiCommandSyntheticUnresolvedAlias.bucket ===
+    "unresolved_role_identity" &&
+  aiCommandSyntheticUnresolvedAlias.warning === true &&
+  aiCommandSyntheticUnresolvedAlias.toResolution.safe === false &&
+  aiCommandSyntheticUnresolvedAlias.toResolution.status ===
+    "unresolved"
+);
 
 console.log("");
 
@@ -1084,7 +1567,7 @@ console.log("");
 console.log("8) REFINED INTEGRATION READINESS DECISION");
 
 const unknownCandidates = buckets.unknown_candidate.length;
-const aliasDriftCount = aiCommandAliasDrift.length + fallbackAliases.length;
+const aliasDriftCount = aiCommandAliasEvidence.warnings.length + fallbackUnresolvedAliases.length;
 const handoffDriftCount = handoffDrift.length;
 const hardFailureCount = failures.length;
 
