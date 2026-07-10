@@ -76,11 +76,65 @@ function hasToken(source, token) {
   return new RegExp(`\\b${safeRegexEscape(token)}\\b`).test(source);
 }
 
-function extractObjectKeysNear(source, objectName) {
-  const index = source.indexOf(objectName);
-  if (index < 0) return [];
+function sourceLineNumber(source, index) {
+  return source.slice(0, Math.max(0, index)).split("\n").length;
+}
 
-  const start = source.indexOf("{", index);
+function sourceContext(source, index, length = 0, radius = 220) {
+  const start = Math.max(0, index - radius);
+  const end = Math.min(source.length, index + length + radius);
+  return source.slice(start, end).replace(/\s+/g, " ").trim();
+}
+
+function makeRouteLikeEntry({
+  id,
+  sourceFile,
+  sourceField,
+  syntaxContext,
+  extractor,
+  line,
+  routeBearing = false
+}) {
+  return {
+    id: String(id || "").trim(),
+    sourceFile: String(sourceFile || ""),
+    sourceField: String(sourceField || ""),
+    syntaxContext: String(syntaxContext || ""),
+    extractor: String(extractor || ""),
+    line: Number(line || 0),
+    routeBearing: routeBearing === true
+  };
+}
+
+function uniqueRouteLikeEntries(entries) {
+  const seen = new Set();
+
+  return entries.filter((entry) => {
+    if (!entry?.id) return false;
+
+    const key = [
+      entry.id,
+      entry.sourceFile,
+      entry.sourceField,
+      entry.extractor,
+      entry.line
+    ].join("|");
+
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function extractObjectKeyEntries(source, objectName, sourceFile) {
+  const declarationPattern = new RegExp(
+    `\\b(?:const|let|var)\\s+${safeRegexEscape(objectName)}\\s*=\\s*\\{`
+  );
+
+  const declaration = declarationPattern.exec(source);
+  if (!declaration) return [];
+
+  const start = source.indexOf("{", declaration.index);
   if (start < 0) return [];
 
   let depth = 0;
@@ -116,52 +170,193 @@ function extractObjectKeysNear(source, objectName) {
   if (end < 0) return [];
 
   const body = source.slice(start + 1, end);
-  const keys = [];
+  const entries = [];
+  const keyPattern = /^\s*["']?([a-zA-Z0-9_-]+)["']?\s*:/gm;
 
-  for (const match of body.matchAll(/^\s*["']?([a-zA-Z0-9_-]+)["']?\s*:/gm)) {
-    keys.push(match[1]);
+  for (const match of body.matchAll(keyPattern)) {
+    const absoluteIndex = start + 1 + match.index;
+
+    entries.push(makeRouteLikeEntry({
+      id: match[1],
+      sourceFile,
+      sourceField: objectName,
+      syntaxContext: sourceContext(source, absoluteIndex, match[0].length),
+      extractor: "route_role_access",
+      line: sourceLineNumber(source, absoluteIndex),
+      routeBearing: true
+    }));
   }
 
-  return unique(keys);
+  return uniqueRouteLikeEntries(entries);
 }
 
-function extractRouterRoutes(routerSource) {
-  const routes = [];
-
-  for (const match of routerSource.matchAll(/["']([a-z0-9_-]+)["']\s*:\s*\{/gi)) {
-    routes.push(match[1]);
-  }
-
-  for (const match of routerSource.matchAll(/case\s+["']([a-z0-9_-]+)["']/gi)) {
-    routes.push(match[1]);
-  }
-
-  for (const match of routerSource.matchAll(/navigateTo\(\s*["']([a-z0-9_-]+)["']/gi)) {
-    routes.push(match[1]);
-  }
-
-  return unique(routes);
-}
-
-function extractExplicitRouteStrings(source) {
-  const routes = [];
+function extractRouterEntries(source, sourceFile) {
+  const entries = [];
 
   const patterns = [
-    /targetPage:\s*["']([a-z0-9_-]+)["']/gi,
-    /destination_page:\s*["']([a-z0-9_-]+)["']/gi,
-    /destinationPage:\s*["']([a-z0-9_-]+)["']/gi,
-    /route:\s*["']([a-z0-9_-]+)["']/gi,
-    /page:\s*["']([a-z0-9_-]+)["']/gi,
-    /navigateTo\(\s*["']([a-z0-9_-]+)["']/gi
+    {
+      sourceField: "router_map_key",
+      pattern: /["']([a-z0-9_-]+)["']\s*:\s*\{/gi
+    },
+    {
+      sourceField: "switch_case",
+      pattern: /\bcase\s+["']([a-z0-9_-]+)["']/gi
+    },
+    {
+      sourceField: "navigateTo",
+      pattern: /\bnavigateTo\(\s*["']([a-z0-9_-]+)["']/gi
+    }
   ];
 
-  for (const pattern of patterns) {
+  for (const { sourceField, pattern } of patterns) {
     for (const match of source.matchAll(pattern)) {
-      routes.push(match[1]);
+      entries.push(makeRouteLikeEntry({
+        id: match[1],
+        sourceFile,
+        sourceField,
+        syntaxContext: sourceContext(source, match.index, match[0].length),
+        extractor: "router",
+        line: sourceLineNumber(source, match.index),
+        routeBearing: true
+      }));
     }
   }
 
-  return unique(routes);
+  return uniqueRouteLikeEntries(entries);
+}
+
+function extractExplicitRouteEntries(source, sourceFile) {
+  const entries = [];
+
+  const fieldPatterns = [
+    ["targetPage", /(?:^|[,{]\s*)targetPage\s*:\s*["']([a-z0-9_-]+)["']/gim],
+    ["destination_page", /(?:^|[,{]\s*)destination_page\s*:\s*["']([a-z0-9_-]+)["']/gim],
+    ["destinationPage", /(?:^|[,{]\s*)destinationPage\s*:\s*["']([a-z0-9_-]+)["']/gim],
+    ["route", /(?:^|[,{]\s*)route\s*:\s*["']([a-z0-9_-]+)["']/gim],
+    ["page", /(?:^|[,{]\s*)page\s*:\s*["']([a-z0-9_-]+)["']/gim]
+  ];
+
+  for (const [sourceField, pattern] of fieldPatterns) {
+    for (const match of source.matchAll(pattern)) {
+      entries.push(makeRouteLikeEntry({
+        id: match[1],
+        sourceFile,
+        sourceField,
+        syntaxContext: sourceContext(source, match.index, match[0].length),
+        extractor: "explicit_route_field",
+        line: sourceLineNumber(source, match.index),
+        routeBearing: true
+      }));
+    }
+  }
+
+  for (const match of source.matchAll(/\bnavigateTo\(\s*["']([a-z0-9_-]+)["']/gi)) {
+    entries.push(makeRouteLikeEntry({
+      id: match[1],
+      sourceFile,
+      sourceField: "navigateTo",
+      syntaxContext: sourceContext(source, match.index, match[0].length),
+      extractor: "explicit_navigation_call",
+      line: sourceLineNumber(source, match.index),
+      routeBearing: true
+    }));
+  }
+
+  return uniqueRouteLikeEntries(entries);
+}
+
+function extractAiCommandDecisionEntries(source, sourceFile) {
+  if (sourceFile !== files.aiCommand) return [];
+
+  const brainStart = source.indexOf("const AiCommandBrain");
+  const routerStart = source.indexOf("const AiCommandRouter", brainStart);
+
+  if (brainStart < 0 || routerStart < 0 || routerStart <= brainStart) {
+    return [];
+  }
+
+  const brainBlock = source.slice(brainStart, routerStart);
+  const decideMatch = /\bdecide\s*\([^)]*\)\s*\{/.exec(brainBlock);
+
+  if (!decideMatch) return [];
+
+  const decideStart = brainStart + decideMatch.index;
+  const decideBlock = source.slice(decideStart, routerStart);
+  const entries = [];
+
+  const returnPattern =
+    /\breturn\s*\{\s*route\s*:\s*["']([a-z0-9_-]+)["']\s*,\s*action\s*:\s*["']([a-z0-9_-]+)["']\s*\}/gi;
+
+  for (const match of decideBlock.matchAll(returnPattern)) {
+    const absoluteIndex = decideStart + match.index;
+
+    entries.push(makeRouteLikeEntry({
+      id: match[1],
+      sourceFile,
+      sourceField: "decision.route",
+      syntaxContext: match[0],
+      extractor: "ai_command_decision",
+      line: sourceLineNumber(source, absoluteIndex),
+      routeBearing: false
+    }));
+  }
+
+  return uniqueRouteLikeEntries(entries);
+}
+
+function extractHandoffSourceEntries(source, sourceFile) {
+  const entries = [];
+  const pattern = /(?:^|[,{]\s*)source_page\s*:\s*["']([a-z0-9_-]+)["']/gim;
+
+  for (const match of source.matchAll(pattern)) {
+    entries.push(makeRouteLikeEntry({
+      id: match[1],
+      sourceFile,
+      sourceField: "source_page",
+      syntaxContext: sourceContext(source, match.index, match[0].length),
+      extractor: "handoff_source",
+      line: sourceLineNumber(source, match.index),
+      routeBearing: false
+    }));
+  }
+
+  return uniqueRouteLikeEntries(entries);
+}
+
+function extractUiCommandEntries(source, sourceFile) {
+  const entries = [];
+
+  if (/\/command-router\.js$/.test(sourceFile)) {
+    const commandPattern = /^\s*[A-Z][A-Z0-9_]*\s*:\s*["']([a-z0-9_-]+)["']/gm;
+
+    for (const match of source.matchAll(commandPattern)) {
+      entries.push(makeRouteLikeEntry({
+        id: match[1],
+        sourceFile,
+        sourceField: "command_constant",
+        syntaxContext: sourceContext(source, match.index, match[0].length),
+        extractor: "ui_command_registry",
+        line: sourceLineNumber(source, match.index),
+        routeBearing: false
+      }));
+    }
+  }
+
+  const dispatchPattern = /\bdispatch[A-Za-z0-9_]*Command\(\s*["']([a-z0-9_-]+)["']/g;
+
+  for (const match of source.matchAll(dispatchPattern)) {
+    entries.push(makeRouteLikeEntry({
+      id: match[1],
+      sourceFile,
+      sourceField: "command_dispatch",
+      syntaxContext: sourceContext(source, match.index, match[0].length),
+      extractor: "ui_command_dispatch",
+      line: sourceLineNumber(source, match.index),
+      routeBearing: false
+    }));
+  }
+
+  return uniqueRouteLikeEntries(entries);
 }
 
 const contractRoleIds = AI_TEAM_CANONICAL_ROLES.map((role) => role.id);
@@ -183,7 +378,25 @@ const files = {
 
 const src = Object.fromEntries(Object.entries(files).map(([key, file]) => [key, read(file)]));
 const pageFiles = listJsFiles("public/control-center/pages");
-const pageSource = pageFiles.map((file) => `\n===== ${file} =====\n${read(file)}`).join("\n");
+
+const runtimeFiles = [
+  ...Object.entries(files).map(([sourceKey, sourceFile]) => ({
+    sourceKey,
+    sourceFile,
+    source: src[sourceKey]
+  })),
+  ...pageFiles.map((sourceFile) => ({
+    sourceKey: "page",
+    sourceFile,
+    source: read(sourceFile)
+  }))
+];
+
+const pageSource = runtimeFiles
+  .filter(({ sourceKey }) => sourceKey === "page")
+  .map(({ sourceFile, source }) => `\n===== ${sourceFile} =====\n${source}`)
+  .join("\n");
+
 const runtimeSource = Object.values(src).join("\n") + "\n" + pageSource;
 
 const knownNonPagePrefixes = [
@@ -316,21 +529,203 @@ const knownNonPageExact = new Set([
   "safety"
 ]);
 
-function classifyRouteLikeId(id) {
-  if (!id) return "empty";
-  if (AI_TEAM_PAGE_OWNER_MATRIX[id]) return "contract_page";
-  if (contractRoleSet.has(id)) return "role_id";
-  if (AI_TEAM_ROLE_ALIASES[id]) return "role_alias";
-  if (knownNonPageExact.has(id)) return "known_non_page";
+function classificationResult(bucket, entry, reason) {
+  return {
+    bucket,
+    entry,
+    reason: String(reason || "")
+  };
+}
 
-  if (knownNonPagePrefixes.some((prefix) => id.startsWith(prefix))) return "known_non_page";
-  if (/Input$/.test(id)) return "input_id";
-  if (/Status$/.test(id)) return "status_id";
-  if (/^[a-z]+[A-Z]/.test(id)) return "camel_case_id";
-  if (/_(image|video|audio|tts|speech|route|open|cloud|local|hybrid|flux|sdxl)$/.test(id)) return "provider_or_mode_id";
-  if (/(pixel|ads|drive|console|commerce|channels|tools)$/.test(id)) return "integration_or_channel_id";
+function isAiCommandBrainDecision(entry) {
+  return (
+    entry.sourceFile === files.aiCommand &&
+    entry.sourceField === "decision.route" &&
+    entry.extractor === "ai_command_decision" &&
+    !knownNonPageExact.has(entry.id)
+  );
+}
 
-  return "unknown_candidate";
+function isAiCommandEmptyStateDecision(entry) {
+  return (
+    entry.sourceFile === files.aiCommand &&
+    entry.sourceField === "decision.route" &&
+    entry.extractor === "ai_command_decision" &&
+    /\baction\s*:\s*["']show_suggestions["']/.test(
+      entry.syntaxContext
+    )
+  );
+}
+
+function classifyRouteLikeEntry(entry) {
+  const id = entry?.id;
+
+  if (!id) return classificationResult("empty", entry, "empty identifier");
+
+  if (AI_TEAM_PAGE_OWNER_MATRIX[id]) {
+    return classificationResult(
+      "contract_page",
+      entry,
+      "canonical AI_TEAM_PAGE_OWNER_MATRIX page"
+    );
+  }
+
+  if (contractRoleSet.has(id)) {
+    return classificationResult(
+      "role_id",
+      entry,
+      "canonical AI team role"
+    );
+  }
+
+  if (AI_TEAM_ROLE_ALIASES[id]) {
+    return classificationResult(
+      "role_alias",
+      entry,
+      "contract AI team role alias"
+    );
+  }
+
+  if (isAiCommandEmptyStateDecision(entry)) {
+    return classificationResult(
+      "status_lifecycle_identifier",
+      entry,
+      "AI Command empty-state lifecycle decision"
+    );
+  }
+
+  if (isAiCommandBrainDecision(entry)) {
+    return classificationResult(
+      "internal_ai_decision_route",
+      entry,
+      "AI Command internal decision branch"
+    );
+  }
+
+  if (
+    entry.extractor === "handoff_source" &&
+    Array.isArray(AI_TEAM_HANDOFF_RULES[id])
+  ) {
+    return classificationResult(
+      "subsystem_handoff_source",
+      entry,
+      "registered AI_TEAM_HANDOFF_RULES source"
+    );
+  }
+
+  if (
+    entry.extractor === "ui_command_registry" ||
+    entry.extractor === "ui_command_dispatch"
+  ) {
+    return classificationResult(
+      "ui_action_event",
+      entry,
+      "explicit UI command registry or dispatcher"
+    );
+  }
+
+  if (knownNonPageExact.has(id)) {
+    return classificationResult(
+      "known_non_page",
+      entry,
+      "known non-page vocabulary"
+    );
+  }
+
+  if (knownNonPagePrefixes.some((prefix) => id.startsWith(prefix))) {
+    return classificationResult(
+      "known_non_page",
+      entry,
+      "known non-page prefix"
+    );
+  }
+
+  if (/Input$/.test(id)) {
+    return classificationResult("input_id", entry, "input identifier");
+  }
+
+  if (/Status$/.test(id)) {
+    return classificationResult("status_id", entry, "status identifier");
+  }
+
+  if (/^[a-z]+[A-Z]/.test(id)) {
+    return classificationResult("camel_case_id", entry, "camel-case identifier");
+  }
+
+  if (/_(image|video|audio|tts|speech|route|open|cloud|local|hybrid|flux|sdxl)$/.test(id)) {
+    return classificationResult(
+      "provider_or_mode_id",
+      entry,
+      "provider or mode identifier"
+    );
+  }
+
+  if (/(pixel|ads|drive|console|commerce|channels|tools)$/.test(id)) {
+    return classificationResult(
+      "integration_or_channel_id",
+      entry,
+      "integration or channel identifier"
+    );
+  }
+
+  return classificationResult(
+    "unknown_candidate",
+    entry,
+    "no evidence-backed classification"
+  );
+}
+
+const routeBearingExtractors = new Set([
+  "router",
+  "explicit_route_field",
+  "explicit_navigation_call",
+  "route_role_access"
+]);
+
+const classificationPriority = [
+  "contract_page",
+  "role_id",
+  "role_alias",
+  "status_lifecycle_identifier",
+  "internal_ai_decision_route",
+  "subsystem_handoff_source",
+  "ui_action_event",
+  "known_non_page",
+  "provider_or_mode_id",
+  "integration_or_channel_id",
+  "input_id",
+  "status_id",
+  "camel_case_id",
+  "unknown_candidate"
+];
+
+function resolveRouteLikeClassifications(id, results) {
+  const canonical = results.find((result) =>
+    ["contract_page", "role_id", "role_alias"].includes(result.bucket)
+  );
+
+  if (canonical) return canonical;
+
+  const unresolvedRouteEvidence = results.find(
+    (result) =>
+      routeBearingExtractors.has(result.entry?.extractor) &&
+      result.bucket === "unknown_candidate"
+  );
+
+  if (unresolvedRouteEvidence) {
+    return unresolvedRouteEvidence;
+  }
+
+  for (const bucket of classificationPriority) {
+    const match = results.find((result) => result.bucket === bucket);
+    if (match) return match;
+  }
+
+  return classificationResult(
+    "unknown_candidate",
+    makeRouteLikeEntry({ id }),
+    "no classification results"
+  );
 }
 
 function printBucket(title, bucket) {
@@ -421,34 +816,99 @@ console.log("");
 
 console.log("5) REAL ROUTE / ID CLASSIFICATION");
 
-const routerRoutes = extractRouterRoutes(src.router);
-const explicitRouteStrings = extractExplicitRouteStrings(runtimeSource);
-const routeRoleKeys = extractObjectKeysNear(src.routeRoleFallback, "ROUTE");
+const routerEntries = extractRouterEntries(src.router, files.router);
+
+const explicitRouteEntries = runtimeFiles.flatMap(
+  ({ sourceFile, source }) =>
+    extractExplicitRouteEntries(source, sourceFile)
+);
+
+const aiCommandDecisionEntries = extractAiCommandDecisionEntries(
+  src.aiCommand,
+  files.aiCommand
+);
+
+const aiCommandDecisionLines = new Set(
+  aiCommandDecisionEntries.map((entry) => entry.line)
+);
+
+const filteredExplicitRouteEntries = explicitRouteEntries.filter(
+  (entry) =>
+    !(
+      entry.sourceFile === files.aiCommand &&
+      entry.sourceField === "route" &&
+      aiCommandDecisionLines.has(entry.line)
+    )
+);
+
+const handoffSourceEntries = runtimeFiles.flatMap(
+  ({ sourceFile, source }) =>
+    extractHandoffSourceEntries(source, sourceFile)
+);
+
+const uiCommandEntries = runtimeFiles.flatMap(
+  ({ sourceFile, source }) =>
+    extractUiCommandEntries(source, sourceFile)
+);
+
+const routeRoleEntries = extractObjectKeyEntries(
+  src.routeRoleFallback,
+  "DEFAULT_ROUTE_ROLE_ACCESS",
+  files.routeRoleFallback
+);
+
 const pageOwnerKeys = contractPageIds;
 
-const allRouteLikeIds = unique([
-  ...routerRoutes,
-  ...explicitRouteStrings,
-  ...routeRoleKeys
+const allRouteLikeEntries = uniqueRouteLikeEntries([
+  ...routerEntries,
+  ...filteredExplicitRouteEntries,
+  ...aiCommandDecisionEntries,
+  ...handoffSourceEntries,
+  ...uiCommandEntries,
+  ...routeRoleEntries
 ]);
+
+const resultsById = new Map();
+
+for (const entry of allRouteLikeEntries) {
+  const result = classifyRouteLikeEntry(entry);
+
+  if (!resultsById.has(entry.id)) {
+    resultsById.set(entry.id, []);
+  }
+
+  resultsById.get(entry.id).push(result);
+}
+
+const resolvedClassifications = new Map();
+
+for (const [id, results] of resultsById.entries()) {
+  resolvedClassifications.set(
+    id,
+    resolveRouteLikeClassifications(id, results)
+  );
+}
 
 const buckets = {
   contract_page: [],
   role_id: [],
   role_alias: [],
   known_non_page: [],
+  provider_or_mode_id: [],
+  integration_or_channel_id: [],
   input_id: [],
   status_id: [],
   camel_case_id: [],
-  provider_or_mode_id: [],
-  integration_or_channel_id: [],
+  status_lifecycle_identifier: [],
+  internal_ai_decision_route: [],
+  ui_action_event: [],
+  subsystem_handoff_source: [],
   unknown_candidate: []
 };
 
-for (const id of allRouteLikeIds) {
-  const bucket = classifyRouteLikeId(id);
-  if (!buckets[bucket]) buckets[bucket] = [];
-  buckets[bucket].push(id);
+for (const [id, result] of resolvedClassifications.entries()) {
+  if (!buckets[result.bucket]) buckets[result.bucket] = [];
+  buckets[result.bucket].push(id);
 }
 
 for (const key of Object.keys(buckets)) {
@@ -456,6 +916,114 @@ for (const key of Object.keys(buckets)) {
 }
 
 printBucket("Route-like ID buckets", buckets);
+
+const evidenceBuckets = new Set([
+  "status_lifecycle_identifier",
+  "internal_ai_decision_route",
+  "ui_action_event",
+  "subsystem_handoff_source"
+]);
+
+for (const [id, result] of resolvedClassifications.entries()) {
+  if (!evidenceBuckets.has(result.bucket)) continue;
+
+  const entry = result.entry || {};
+
+  note(
+    `classified ${result.bucket}`,
+    [
+      id,
+      entry.sourceFile || "unknown source",
+      entry.sourceField || "unknown field",
+      `line ${entry.line || 0}`,
+      entry.extractor || "unknown extractor",
+      result.reason || "no reason"
+    ].join(" | ")
+  );
+}
+
+const regressionCases = [
+  {
+    label: "AI decision extractor classifies internal branch",
+    entry: makeRouteLikeEntry({
+      id: "future-internal-branch",
+      sourceFile: files.aiCommand,
+      sourceField: "decision.route",
+      syntaxContext:
+        'return { route: "future-internal-branch", action: "execute_internal_flow" }',
+      extractor: "ai_command_decision"
+    }),
+    expected: "internal_ai_decision_route"
+  },
+  {
+    label: "AI suggestion decision classifies lifecycle state",
+    entry: makeRouteLikeEntry({
+      id: "future-empty-state",
+      sourceFile: files.aiCommand,
+      sourceField: "decision.route",
+      syntaxContext:
+        'return { route: "future-empty-state", action: "show_suggestions" }',
+      extractor: "ai_command_decision"
+    }),
+    expected: "status_lifecycle_identifier"
+  },
+  {
+    label: "unknown exact route remains unknown",
+    entry: makeRouteLikeEntry({
+      id: "marketing-dashboard-v2",
+      sourceFile: "synthetic/regression.js",
+      sourceField: "route",
+      syntaxContext: 'route: "marketing-dashboard-v2"',
+      extractor: "explicit_route_field",
+      routeBearing: true
+    }),
+    expected: "unknown_candidate"
+  },
+  {
+    label: "unknown exact page remains unknown",
+    entry: makeRouteLikeEntry({
+      id: "future-operations-v3",
+      sourceFile: "synthetic/regression.js",
+      sourceField: "page",
+      syntaxContext: 'page: "future-operations-v3"',
+      extractor: "explicit_route_field",
+      routeBearing: true
+    }),
+    expected: "unknown_candidate"
+  },
+  {
+    label: "unregistered handoff source remains unknown",
+    entry: makeRouteLikeEntry({
+      id: "unregistered-engine",
+      sourceFile: "synthetic/regression.js",
+      sourceField: "source_page",
+      syntaxContext: 'source_page: "unregistered-engine"',
+      extractor: "handoff_source"
+    }),
+    expected: "unknown_candidate"
+  },
+  {
+    label: "arbitrary uppercase property is not a UI event",
+    entry: makeRouteLikeEntry({
+      id: "future-page-v3",
+      sourceFile: "synthetic/regression.js",
+      sourceField: "arbitrary_property",
+      syntaxContext: 'SOME_VALUE: "future-page-v3"',
+      extractor: "arbitrary_property"
+    }),
+    expected: "unknown_candidate"
+  }
+];
+
+for (const regressionCase of regressionCases) {
+  const result = classifyRouteLikeEntry(regressionCase.entry);
+
+  assert(
+    regressionCase.label,
+    result.bucket === regressionCase.expected,
+    result.bucket
+  );
+}
 
 for (const pageId of pageOwnerKeys) {
   const present = hasToken(runtimeSource, pageId);
@@ -526,12 +1094,33 @@ console.log(`Warnings: ${warnings.length}`);
 console.log(`Unknown route candidates: ${unknownCandidates}`);
 console.log(`Alias drift signals: ${aliasDriftCount}`);
 console.log(`Handoff drift pairs: ${handoffDriftCount}`);
+const contractPagesAbsentFromRouteEvidence =
+  contractPageIds.filter(
+    (pageId) => !buckets.contract_page.includes(pageId)
+  );
+
 console.log(`Contract pages: ${contractPageIds.length}`);
-console.log(`Contract page hits: ${buckets.contract_page.length}`);
+console.log(
+  `Contract pages in route-like evidence: ${buckets.contract_page.length}`
+);
+console.log(
+  `Contract pages absent from route-like evidence: ${
+    contractPagesAbsentFromRouteEvidence.length
+  }${
+    contractPagesAbsentFromRouteEvidence.length
+      ? ` | ${contractPagesAbsentFromRouteEvidence.join(", ")}`
+      : ""
+  }`
+);
 console.log(`Ignored known non-pages: ${buckets.known_non_page.length}`);
 console.log(`Ignored providers/modes: ${buckets.provider_or_mode_id.length}`);
 console.log(`Ignored integration/channel ids: ${buckets.integration_or_channel_id.length}`);
 console.log(`Ignored input/status/camel ids: ${buckets.input_id.length + buckets.status_id.length + buckets.camel_case_id.length}`);
+console.log(`Status/lifecycle identifiers: ${buckets.status_lifecycle_identifier.length}`);
+console.log(`Internal AI decision routes: ${buckets.internal_ai_decision_route.length}`);
+console.log(`UI action events: ${buckets.ui_action_event.length}`);
+console.log(`Subsystem handoff sources: ${buckets.subsystem_handoff_source.length}`);
+console.log(`Route-like evidence entries: ${allRouteLikeEntries.length}`);
 
 console.log("");
 
