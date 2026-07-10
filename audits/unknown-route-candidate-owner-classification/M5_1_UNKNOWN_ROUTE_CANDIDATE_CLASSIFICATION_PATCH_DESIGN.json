@@ -1,0 +1,95 @@
+{
+  "phase": "M5-1",
+  "title": "Unknown Route Candidate Classification Patch Design",
+  "status": "PATCH_DESIGN_RECORDED",
+  "mode": "design_only",
+  "source_of_truth_commit": "7caf9a2",
+  "source_phase": "M5-0",
+  "scope": {
+    "source_patch": false,
+    "runtime_change": false,
+    "ai_command_change": false,
+    "operating_contract_change": false,
+    "route_owner_addition": false,
+    "global_unknown_ignore": false,
+    "audit_artifacts_only": true
+  },
+  "problem": {
+    "unknown_candidates": [
+      "action",
+      "analysis",
+      "automation-engine",
+      "command",
+      "idle",
+      "set-page"
+    ]
+  },
+  "classification_design": [
+    {
+      "token": "action",
+      "proposed_bucket": "action_or_event_vocabulary",
+      "page_owner": null,
+      "global_ignore": false,
+      "required_behavior": "Classify only when provenance proves an action or event field."
+    },
+    {
+      "token": "analysis",
+      "proposed_bucket": "domain_or_mode_vocabulary",
+      "page_owner": null,
+      "global_ignore": false,
+      "required_behavior": "Classify only when provenance proves a domain, mode, intent, or output field."
+    },
+    {
+      "token": "automation-engine",
+      "proposed_bucket": "subsystem_or_handoff_source",
+      "page_owner": null,
+      "global_ignore": false,
+      "required_behavior": "Classify only in subsystem, producer, source, or handoff-origin context."
+    },
+    {
+      "token": "command",
+      "proposed_bucket": "command_or_event_vocabulary",
+      "page_owner": null,
+      "global_ignore": false,
+      "required_behavior": "Classify only from command, intent, action, or event provenance."
+    },
+    {
+      "token": "idle",
+      "proposed_bucket": "status_or_state_identifier",
+      "page_owner": null,
+      "global_ignore": false,
+      "required_behavior": "Classify only in status, state, lifecycle, availability, or execution-state context."
+    },
+    {
+      "token": "set-page",
+      "proposed_bucket": "router_action_or_input_event",
+      "page_owner": null,
+      "global_ignore": false,
+      "required_behavior": "Treat only as an action identifier, never as the destination route."
+    }
+  ],
+  "proposed_m5_2_scope": {
+    "target": "scripts/audit/ai-team-contract-conformance-check.mjs",
+    "change_type": "narrow_context_aware_classifier_patch",
+    "allowed_changes": [
+      "Add evidence-based non-page classification buckets.",
+      "Use extraction provenance or source-field context.",
+      "Preserve detection of genuinely unknown routes.",
+      "Report recognized non-page tokens as informational evidence."
+    ],
+    "forbidden_changes": [
+      "No application runtime changes.",
+      "No AI Command changes.",
+      "No operating contract changes.",
+      "No page owners for the six tokens.",
+      "No broad global ignore list.",
+      "No classification solely from token text."
+    ]
+  },
+  "decision": {
+    "can_patch_in_m5_1": false,
+    "recommended_next_phase": "M5-2",
+    "review_required_before_commit": true
+  },
+  "final_note": "ready for review before commit."
+}
