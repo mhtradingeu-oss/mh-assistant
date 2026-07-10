@@ -1201,29 +1201,21 @@ assert(
   )
 );
 
-const aiCommandResearcherMismatch =
-  aiCommandAliasEvidence.semanticMismatches.find(
-    (item) =>
-      item.map ===
-        "AI_INBOUND_SPECIALIST_ALIASES" &&
-      item.from === "researcher" &&
-      item.to === "seo"
-  );
+const aiCommandResearcherIdentity =
+  resolveContractRoleIdentity("researcher");
 
 assert(
-  "AI Command researcher to SEO semantic mismatch detected",
+  "AI Command researcher identity preserved",
   Boolean(
-    aiCommandResearcherMismatch &&
-    aiCommandResearcherMismatch.fromResolution.terminal ===
-      "researcher" &&
-    aiCommandResearcherMismatch.toResolution.terminal ===
-      "analyst"
+    aiCommandResearcherIdentity.safe &&
+    aiCommandResearcherIdentity.terminal ===
+      "researcher"
   )
 );
 
 assert(
-  "AI Command has exactly one semantic alias mismatch",
-  aiCommandAliasEvidence.semanticMismatches.length === 1,
+  "AI Command has zero semantic alias mismatches",
+  aiCommandAliasEvidence.semanticMismatches.length === 0,
   String(
     aiCommandAliasEvidence.semanticMismatches.length
   )
@@ -1252,6 +1244,12 @@ assert(
   aiCommandSyntheticUnresolvedAlias.toResolution.safe === false &&
   aiCommandSyntheticUnresolvedAlias.toResolution.status ===
     "unresolved"
+);
+
+assert(
+  "AI Command research source ownership remains analyst route binding",
+  aiCommandResearchSourceOwnership.targetResolution.terminal ===
+    "analyst"
 );
 
 console.log("");

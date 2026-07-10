@@ -2469,7 +2469,7 @@ const AI_INBOUND_SPECIALIST_BY_SOURCE = {
 
 const AI_INBOUND_SPECIALIST_ALIASES = {
 	designer: "media",
-	researcher: "seo",
+	researcher: "researcher",
 	compliance: "compliance_reviewer",
 	"customer-ops": "customer_ops",
 	customer_ops: "customer_ops",
