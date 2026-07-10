@@ -23837,36 +23837,10 @@ app.post('/media-manager/project/:project/library/index', (req, res) => {
 // Media → Library → UI Sync
 // ===============================
 
-function triggerLibraryAutoSync(projectName) {
-  try {
-    const { buildLibraryIndex } = require('./lib/media/library-engine');
 
-    const result = buildLibraryIndex(projectName, {
-      getProjectAssetPaths,
-      readJsonFile,
-      normalizeAssetRecord
-    });
-
-    return {
-      success: true,
-      synced: true,
-      index: result
-    };
-
-  } catch (err) {
-    console.error('[library-sync-error]', err.message);
-    return {
-      success: false,
-      synced: false,
-      error: err.message
-    };
-  }
-}
 
 // Hook into media pipeline automatically
-function autoSyncAfterMediaGeneration(projectName) {
-  return triggerLibraryAutoSync(projectName);
-}
+
 
 
 // ===============================
@@ -23875,24 +23849,7 @@ function autoSyncAfterMediaGeneration(projectName) {
 // ===============================
 
 // Attach auto-sync directly into media persistence flow
-function maybePersistMediaGenerationResult(req, params) {
-  const result = originalMaybePersistMediaGenerationResult
-    ? originalMaybePersistMediaGenerationResult(req, params)
-    : null;
 
-  try {
-    const projectName = req?.params?.project || req?.body?.project;
-
-    if (projectName) {
-      autoSyncAfterMediaGeneration(projectName);
-    }
-
-  } catch (err) {
-    console.error('[auto-sync-error]', err.message);
-  }
-
-  return result;
-}
 
 
 // ===============================
@@ -23968,38 +23925,10 @@ app.get('/media-manager/project/:project/media-studio/index', (req, res) => {
 // AUTO LINK: SYNC → MEDIA STUDIO
 // ===============================
 
-function notifyMediaStudioUpdate(projectName) {
-  try {
-    // This acts as future WebSocket / polling hook
-    console.log('[media-studio-update]', {
-      project: projectName,
-      timestamp: new Date().toISOString(),
-      status: 'updated'
-    });
-  } catch (err) {
-    console.error('[media-studio-notify-error]', err.message);
-  }
-}
+
 
 // Extend auto sync to notify Media Studio
-function autoSyncAfterMediaGeneration(projectName) {
-  try {
-    const { buildLibraryIndex } = require('./lib/media/library-engine');
 
-    const index = buildLibraryIndex(projectName, {
-      getProjectAssetPaths,
-      readJsonFile,
-      normalizeAssetRecord
-    });
-
-    notifyMediaStudioUpdate(projectName);
-
-    return index;
-
-  } catch (err) {
-    console.error('[auto-sync-error]', err.message);
-  }
-}
 
 
 // ===============================
