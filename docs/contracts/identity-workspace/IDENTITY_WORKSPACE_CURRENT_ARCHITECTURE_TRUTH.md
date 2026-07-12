@@ -168,3 +168,5 @@ Action: Rotate the exposed credential after explicit authorization
 Constraint: No credential mutation during Phase 1A-8
 
 The exposed value must not be copied into documentation or reused.
+
+```

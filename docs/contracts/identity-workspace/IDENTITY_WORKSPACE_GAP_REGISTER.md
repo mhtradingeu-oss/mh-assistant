@@ -30,78 +30,71 @@ Principal
 + Governance policy
 GAP-IW-005 — Authenticated approval attribution missing
 
-Approval and audit metadata are not proven to be bound to an authenticated reviewer or actor.
+Approval metadata is not proven to be bound to an authenticated reviewer.
 
+Security gap
 SEC-1A8-001 — Exposed control credential
 
 A control credential appeared in terminal evidence and environment backup data.
 
 Required future action:
 
-rotate the exposed credential;
-invalidate the previous value;
-inspect tracked and untracked backup exposure;
-verify ignore rules and secret scanning;
+rotate the credential;
+invalidate the old value;
+inspect exposure;
+verify secret scanning;
 do not perform credential mutation during Phase 1A-8.
 High gaps
-GAP-IW-006 — Canonical Workspace runtime missing
+GAP-IW-006 — Workspace runtime missing
 
 Workspace currently exists as approved target architecture only.
 
 GAP-IW-007 — Role vocabulary drift
 
-Backend operational roles and frontend experience roles use different identifiers.
+Backend operational role IDs and frontend experience role IDs differ.
 
 Examples:
 
-writer       ↔ content_writer
-designer     ↔ media_director
-analyst      ↔ seo_insights_analyst
+writer ↔ content_writer
+designer ↔ media_director
+analyst ↔ seo_insights_analyst
 ads_operator ↔ ads_optimizer
+GAP-IW-008 — Frontend fallback authority debt
 
-Some frontend experience roles do not yet have direct backend operational equivalents.
-
-GAP-IW-008 — Frontend compatibility fallback remains
-
-Frontend fallback route rules remain necessary for degraded or startup behavior, but they are not a security boundary.
+Frontend fallback maps remain compatibility only and are not a security boundary.
 
 GAP-IW-009 — Owner-workspace proof is non-authoritative
 
-The current owner-workspace proof is a boolean/manual request signal and does not resolve a real workspace owner or membership.
+Boolean proof does not establish workspace ownership.
 
 Medium gaps
 GAP-IW-010 — Active project is transient UI context
 
-Frontend project selection does not establish authenticated authorization.
+Frontend selection is not authenticated authorization.
 
 GAP-IW-011 — Transient shared context
 
-Frontend shared-context caches improve UX continuity but do not replace durable backend handoffs or project state.
+Frontend caches do not replace durable backend state.
 
 GAP-IW-012 — Workspace-aware storage ownership absent
 
-The current resolver understands project, execution and legacy roots but does not model canonical Workspace ownership.
+Resolver is project aware but not workspace ownership aware.
 
-GAP-IW-013 — Shared assets and relationships are not canonical
+GAP-IW-013 — Shared assets and relationships not canonical
 
-Workspace-shared assets and relationships remain target concepts and have no proven runtime authority.
+Workspace-shared assets and relationships remain target concepts and require future inventory before runtime authority is assigned.
 
-GAP-IW-014 — Knowledge and readiness ownership remain unresolved
+GAP-IW-014 — Knowledge and readiness ownership unresolved
 
-Knowledge, memory, learning, foundation and readiness ownership require their own source inventories before contract freeze.
+Knowledge, memory, learning, foundation and readiness ownership require dedicated source inventories before contract freeze.
 
 Preserved strengths
-
-The following capabilities must be retained:
-
-project runtime;
-project slug and path isolation;
-compatibility-aware data resolver;
-Operations Backbone;
-route risk classification;
-runtime security enforcement;
-governance mutation gates;
-approval records;
-durable handoffs;
-frontend authority projection boundary;
-project-scoped operational data.
+Project runtime
+Project isolation
+Operations Backbone
+Route security
+Governance gates
+Approval records
+Durable handoffs
+Authority projection
+Data resolver
