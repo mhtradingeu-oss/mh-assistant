@@ -136,7 +136,8 @@ const {
 } = require('./lib/security/runtime-security-enforcement');
 const {
   createLegacyControlKeyAssertion,
-  attachAuthorityContext
+  attachAuthorityContext,
+  recordShadowObservation
 } = require('./lib/security/identity-adapter');
 const {
   evaluateGovernanceMutationGate,
@@ -813,7 +814,19 @@ const runtimeSecurityEnforcement = createRuntimeSecurityEnforcementMiddleware({
   logger: appLogger,
   readProvidedControlWriteKey,
   controlWriteKeyMatches,
-  controlWriteKeyEnv: CONTROL_WRITE_KEY_ENV
+  controlWriteKeyEnv: CONTROL_WRITE_KEY_ENV,
+  observeDecision(req, { decision, hasAuthorizedWriteKey }) {
+    if (!req.mhAuthorityContext) {
+      return;
+    }
+
+    req.mhAuthorityContext = recordShadowObservation(req.mhAuthorityContext, {
+      type: 'runtime_security_decision',
+      source: 'runtime_security_enforcement',
+      authentication_present: hasAuthorizedWriteKey,
+      legacy_decision: decision
+    });
+  }
 });
 
 app.use(runtimeSecurityEnforcement);
