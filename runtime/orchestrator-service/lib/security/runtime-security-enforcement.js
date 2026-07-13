@@ -130,6 +130,10 @@ function createRuntimeSecurityEnforcementMiddleware(options = {}) {
     typeof options.controlWriteKeyMatches === "function"
       ? options.controlWriteKeyMatches
       : () => false;
+  const observeDecision =
+    typeof options.observeDecision === "function"
+      ? options.observeDecision
+      : null;
   const controlWriteKeyEnv = String(options.controlWriteKeyEnv || "MH_CONTROL_CENTER_WRITE_KEY").trim();
 
   return function runtimeSecurityEnforcement(req, res, next) {
@@ -145,6 +149,17 @@ function createRuntimeSecurityEnforcementMiddleware(options = {}) {
       mode: req.body && typeof req.body === "object" ? req.body.mode : undefined,
       hasAuthorizedWriteKey
     });
+
+    if (observeDecision) {
+      try {
+        observeDecision(req, {
+          decision,
+          hasAuthorizedWriteKey
+        });
+      } catch (_error) {
+        // Passive observer failures must never affect runtime behavior.
+      }
+    }
 
     if (!decision.enforced || decision.allowed) {
       return next();
