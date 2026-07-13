@@ -135,6 +135,10 @@ const {
   buildRoutePermissionDeniedResponse
 } = require('./lib/security/runtime-security-enforcement');
 const {
+  createLegacyControlKeyAssertion,
+  attachAuthorityContext
+} = require('./lib/security/identity-adapter');
+const {
   evaluateGovernanceMutationGate,
   evaluateGovernanceApprovalLifecycle
 } = require('./lib/security/governance-mutation-gate');
@@ -717,6 +721,14 @@ function requireProtectedControlWriteKey(req, res, next) {
     });
   }
 
+  attachAuthorityContext(req, {
+    identity_assertion: createLegacyControlKeyAssertion({
+      authenticated: true,
+      validated_by_existing_guard: true,
+      source: 'protected_write_key_guard'
+    })
+  });
+
   return next();
 }
 
@@ -783,6 +795,14 @@ function requireProtectedReadKey(req, res, next) {
       error: 'Invalid read key.'
     });
   }
+
+  attachAuthorityContext(req, {
+    identity_assertion: createLegacyControlKeyAssertion({
+      authenticated: true,
+      validated_by_existing_guard: true,
+      source: 'protected_read_key_guard'
+    })
+  });
 
   return next();
 }
@@ -23985,4 +24005,3 @@ app.get('/media-manager/publish/job/:jobId', (req, res) => {
     job_id: req.params.jobId
   });
 });
-
