@@ -34,6 +34,22 @@ function evidence(referenceType, suffix = "1", overrides = {}) {
   };
 }
 
+function relationship(overrides = {}) {
+  return {
+    relationship_schema_version: 1,
+    relationship_id: `wpr_${"1".repeat(32)}`,
+    project_id: `prj_${"2".repeat(32)}`,
+    relationship_status: "PENDING_ATTACH",
+    validation_state: "VALID",
+    created_at: T1,
+    updated_at: T1,
+    attached_at: null,
+    detached_at: null,
+    archived_at: null,
+    ...overrides
+  };
+}
+
 function record(id, overrides = {}) {
   return {
     schema_version: 1,
@@ -279,6 +295,7 @@ async function verifyLifecycle() {
   for (const [from, to, evidenceType] of transitions) {
     const id = workspaceId("c");
     const relation = {
+      relationship_schema_version: 1,
       relationship_id: `wpr_${String(digit).padStart(32, "0")}`,
       project_id: `prj_${String(digit + 1).padStart(32, "0")}`,
       relationship_status: "PENDING_ATTACH",
@@ -300,6 +317,7 @@ async function verifyLifecycle() {
     assert.equal(result.workspace.created_at, T1);
     assert.equal(result.workspace.schema_version, 1);
     assert.deepEqual(result.workspace.project_relationships, [relation]);
+    assert.equal(result.workspace.project_relationships[0].relationship_schema_version, 1);
     assert.equal(result.workspace.evidence_references.at(-1).reference_type, evidenceType);
     assert.equal(owner.writes.length, 1);
     for (const unsupported of ["activated_at", "suspended_at", "archived_at", "failed_at"]) {
@@ -338,7 +356,11 @@ async function verifyLifecycle() {
   }
 
   const activeId = workspaceId("f");
-  const activeOwner = memoryStorage([record(activeId, { status: "ACTIVE" })]);
+  const activeRelationship = relationship();
+  const activeOwner = memoryStorage([record(activeId, {
+    status: "ACTIVE",
+    project_relationships: [activeRelationship]
+  })]);
   await assertRejectsCode(
     () => runtime.markWorkspaceFailed(activeId, { expected_workspace_version: 1 }, { root: "unused", storage: activeOwner }),
     contract.ERROR_CODES.INVALID_WORKSPACE_TRANSITION,
@@ -350,6 +372,8 @@ async function verifyLifecycle() {
   assert.equal(noop.outcome, runtime.WORKSPACE_MUTATION_OUTCOMES.NOOP);
   assert.equal(noop.changed, false);
   assert.equal(noop.workspace_version, 1);
+  assert.deepEqual(noop.workspace.project_relationships, [activeRelationship]);
+  assert.equal(noop.workspace.project_relationships[0].relationship_schema_version, 1);
   assert.equal(noop.persistence, null);
   assert.equal(activeOwner.writes.length, 0);
   await assertRejectsCode(
@@ -376,7 +400,8 @@ async function verifyLifecycle() {
 
 async function verifyVersioningAndMutations() {
   const id = workspaceId("2");
-  const owner = memoryStorage([record(id)]);
+  const preservedRelationship = relationship();
+  const owner = memoryStorage([record(id, { project_relationships: [preservedRelationship] })]);
   await assertRejectsCode(
     () => runtime.updateWorkspaceName(id, { workspace_name: "Missing version" }, { root: "unused", storage: owner }),
     contract.ERROR_CODES.INVALID_WORKSPACE_VERSION,
@@ -401,6 +426,8 @@ async function verifyVersioningAndMutations() {
   }, { root: "unused", storage: owner, now: () => T2 });
   assert.equal(named.workspace.workspace_name, "Normalized Name");
   assert.equal(named.workspace.workspace_version, 2);
+  assert.deepEqual(named.workspace.project_relationships, [preservedRelationship]);
+  assert.equal(named.workspace.project_relationships[0].relationship_schema_version, 1);
   assert.equal(named.workspace.status, "CREATING");
   assert.equal(named.workspace.updated_at, T2);
   const normalizedNoop = await runtime.updateWorkspaceName(id, {
@@ -408,6 +435,8 @@ async function verifyVersioningAndMutations() {
   }, { root: "unused", storage: owner, now: () => T3 });
   assert.equal(normalizedNoop.outcome, runtime.WORKSPACE_MUTATION_OUTCOMES.NOOP);
   assert.equal(normalizedNoop.workspace_version, 2);
+  assert.deepEqual(normalizedNoop.workspace.project_relationships, [preservedRelationship]);
+  assert.equal(normalizedNoop.workspace.project_relationships[0].relationship_schema_version, 1);
   for (const invalidName of ["   ", "x".repeat(121)]) {
     await assertRejectsCode(
       () => runtime.updateWorkspaceName(id, { workspace_name: invalidName, expected_workspace_version: 2 }, {
@@ -424,6 +453,8 @@ async function verifyVersioningAndMutations() {
     evidence_reference: firstEvidence, expected_workspace_version: 2
   }, { root: "unused", storage: owner, now: () => T3 });
   assert.equal(appended.workspace_version, 3);
+  assert.deepEqual(appended.workspace.project_relationships, [preservedRelationship]);
+  assert.equal(appended.workspace.project_relationships[0].relationship_schema_version, 1);
   assert.deepEqual(appended.workspace.evidence_references, [firstEvidence]);
   const duplicate = await runtime.addWorkspaceEvidenceReference(id, {
     evidence_reference: { ...firstEvidence }, expected_workspace_version: 3

@@ -17,6 +17,7 @@ function assertContractError(fn, code) {
 
 function relationship(overrides = {}) {
   return {
+    relationship_schema_version: 1,
     relationship_id: `wpr_${UUID_HEX}`,
     project_id: `prj_${UUID_HEX}`,
     relationship_status: "PENDING_ATTACH",
@@ -62,6 +63,7 @@ function assertEnum(actual, expected) {
 }
 
 function run() {
+  assert.equal(contract.PROJECT_RELATIONSHIP_SCHEMA_VERSION, 1);
   assertEnum(contract.WORKSPACE_LIFECYCLE_STATES, [
     "CREATING", "ACTIVE", "SUSPENDED", "ARCHIVED", "FAILED"
   ]);
@@ -157,6 +159,14 @@ function run() {
     () => contract.validateProjectRelationshipCreationInput({ relationship_id: validIds.relationship }),
     contract.ERROR_CODES.AUTHORITATIVE_ID_NOT_ALLOWED
   );
+  assertContractError(
+    () => contract.validateProjectRelationshipCreationInput({ project_id: validIds.project }),
+    contract.ERROR_CODES.AUTHORITATIVE_ID_NOT_ALLOWED
+  );
+  assertContractError(
+    () => contract.validateProjectRelationshipCreationInput({ relationship_schema_version: 1 }),
+    contract.ERROR_CODES.AUTHORITATIVE_ID_NOT_ALLOWED
+  );
 
   const validWorkspace = workspace();
   assert.strictEqual(contract.validateWorkspaceRecord(validWorkspace), validWorkspace);
@@ -236,6 +246,25 @@ function run() {
   );
 
   assert.equal(contract.validateProjectRelationship(relationship()).validation_state, "VALID");
+  assert.equal(contract.validateProjectRelationship(relationship()).relationship_schema_version, 1);
+  const missingRelationshipSchemaVersion = relationship();
+  delete missingRelationshipSchemaVersion.relationship_schema_version;
+  assertContractError(
+    () => contract.validateProjectRelationship(missingRelationshipSchemaVersion),
+    contract.ERROR_CODES.MISSING_FIELD
+  );
+  for (const invalidVersion of [null, 0, -1, 1.5, "1", 2]) {
+    assertContractError(
+      () => contract.validateProjectRelationship(relationship({
+        relationship_schema_version: invalidVersion
+      })),
+      contract.ERROR_CODES.INVALID_RELATIONSHIP_SCHEMA_VERSION
+    );
+  }
+  assertContractError(
+    () => contract.validateProjectRelationship({ ...relationship(), unexpected: true }),
+    contract.ERROR_CODES.UNKNOWN_RELATIONSHIP_FIELD
+  );
   assertContractError(
     () => contract.validateProjectRelationship({ ...relationship(), project_slug: "routing-only" }),
     contract.ERROR_CODES.PROJECT_SLUG_FORBIDDEN
@@ -244,6 +273,7 @@ function run() {
   assert.equal(contract.PROJECT_RELATIONSHIP_FIELDS.includes("slug"), false);
   assert.equal(contract.PROJECT_RELATIONSHIP_FIELDS.includes("validation_state"), true);
   assert.equal(contract.PROJECT_RELATIONSHIP_FIELDS.includes("relationship_status"), true);
+  assert.equal(contract.PROJECT_RELATIONSHIP_FIELDS.includes("relationship_schema_version"), true);
   assert.equal(
     contract.PROJECT_RELATIONSHIP_STATES.some((state) => contract.VALIDATION_STATES.includes(state)),
     false
@@ -291,6 +321,7 @@ function run() {
       identifiers: "pass",
       backendGeneration: "pass",
       schemaAndUnknownFields: "pass",
+      relationshipSchemaVersion: "pass",
       lifecycleTransitions: "pass",
       operationalOwnership: "pass",
       relationshipTransitions: "pass",

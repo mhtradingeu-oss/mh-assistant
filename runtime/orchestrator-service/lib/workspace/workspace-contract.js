@@ -7,6 +7,7 @@ const PROJECT_ID_REGEX = /^prj_[0-9a-f]{32}$/;
 const PROJECT_RELATIONSHIP_ID_REGEX = /^wpr_[0-9a-f]{32}$/;
 
 const WORKSPACE_SCHEMA_VERSION = 1;
+const PROJECT_RELATIONSHIP_SCHEMA_VERSION = 1;
 
 const WORKSPACE_LIFECYCLE_STATES = Object.freeze([
   "CREATING",
@@ -110,6 +111,7 @@ const WORKSPACE_FIELDS = Object.freeze([
 ]);
 
 const PROJECT_RELATIONSHIP_FIELDS = Object.freeze([
+  "relationship_schema_version",
   "relationship_id",
   "project_id",
   "relationship_status",
@@ -139,6 +141,7 @@ const ERROR_CODES = Object.freeze({
   INVALID_RELATIONSHIP_ID: "WORKSPACE_CONTRACT_INVALID_RELATIONSHIP_ID",
   AUTHORITATIVE_ID_NOT_ALLOWED: "WORKSPACE_CONTRACT_AUTHORITATIVE_ID_NOT_ALLOWED",
   INVALID_SCHEMA_VERSION: "WORKSPACE_CONTRACT_INVALID_SCHEMA_VERSION",
+  INVALID_RELATIONSHIP_SCHEMA_VERSION: "WORKSPACE_CONTRACT_INVALID_RELATIONSHIP_SCHEMA_VERSION",
   INVALID_WORKSPACE_VERSION: "WORKSPACE_CONTRACT_INVALID_WORKSPACE_VERSION",
   INVALID_WORKSPACE_NAME: "WORKSPACE_CONTRACT_INVALID_WORKSPACE_NAME",
   INVALID_TIMESTAMP: "WORKSPACE_CONTRACT_INVALID_TIMESTAMP",
@@ -293,12 +296,18 @@ function validateProjectCreationInput(input) {
 }
 
 function validateProjectRelationshipCreationInput(input) {
-  rejectCallerProvidedId(input, ["id", "relationship_id", "relationshipId"]);
+  rejectCallerProvidedId(input, [
+    "id",
+    "relationship_schema_version",
+    "relationship_id",
+    "relationshipId",
+    "project_id",
+    "projectId"
+  ]);
   if (Object.prototype.hasOwnProperty.call(input, "project_slug")
     || Object.prototype.hasOwnProperty.call(input, "slug")) {
     fail(ERROR_CODES.PROJECT_SLUG_FORBIDDEN, "Project slug cannot be relationship identity");
   }
-  if (Object.prototype.hasOwnProperty.call(input, "project_id")) validateProjectId(input.project_id);
   return input;
 }
 
@@ -416,6 +425,13 @@ function validateProjectRelationship(relationship) {
     ERROR_CODES.UNKNOWN_RELATIONSHIP_FIELD,
     "project relationship"
   );
+  if (!Number.isSafeInteger(relationship.relationship_schema_version)
+    || relationship.relationship_schema_version !== PROJECT_RELATIONSHIP_SCHEMA_VERSION) {
+    fail(
+      ERROR_CODES.INVALID_RELATIONSHIP_SCHEMA_VERSION,
+      `relationship_schema_version must equal ${PROJECT_RELATIONSHIP_SCHEMA_VERSION}`
+    );
+  }
   validateProjectRelationshipId(relationship.relationship_id);
   validateProjectId(relationship.project_id);
   validateProjectRelationshipStatus(relationship.relationship_status);
@@ -534,6 +550,7 @@ module.exports = Object.freeze({
   PROJECT_ID_REGEX,
   PROJECT_RELATIONSHIP_ID_REGEX,
   WORKSPACE_SCHEMA_VERSION,
+  PROJECT_RELATIONSHIP_SCHEMA_VERSION,
   WORKSPACE_LIFECYCLE_STATES,
   WORKSPACE_OWNERSHIP_STATES,
   P1_1_OPERATIONAL_OWNERSHIP_STATES,
