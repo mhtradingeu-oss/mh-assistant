@@ -86,7 +86,7 @@ Minimum serialized shape:
   "compared_authority": "future-authority-resolver",
   "decision_type": "request_authorization",
   "mismatch_type": "UNTRUSTED_CONTEXT",
-  "evidence_gap": ["future_decision_missing"],
+  "evidence_gap": ["compared_decision_missing"],
   "severity": "REVIEW",
   "confidence": {
     "level": "NONE",
