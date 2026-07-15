@@ -9,6 +9,10 @@ import {
   clearSharedAiDrawerReturn
 } from "../../shared-context.js";
 
+import {
+  recordToolCapabilityShadowObservation
+} from "../../runtime/capabilities/capability-shadow-compare.js";
+
 
 
 function moveFocusOutOfDrawer(drawer, fallbackTarget = null) {
@@ -75,7 +79,10 @@ function tryAutoOpenDrawerAfterLibrary(projectName) {
   );
 
   if (!drawerIsOpen && activeDrawer) {
-    const fallbackTool = findToolMetadataById(returnContext.toolId);
+    const fallbackTool = findToolMetadataById(
+      returnContext.toolId,
+      returnContext.specialistId || returnContext.modeId || ""
+    );
     if (fallbackTool) {
       drawerIsOpen = openToolDrawer({
         drawer: activeDrawer,
@@ -1272,10 +1279,20 @@ function getAllToolDockTools() {
     .filter(Boolean);
 }
 
-function findToolMetadataById(toolId = "") {
+function findToolMetadataById(toolId = "", specialistId = "") {
   const id = String(toolId || "").trim();
   if (!id) return null;
-  return getAllToolDockTools().find((tool) => tool?.id === id) || null;
+
+  const tool = getAllToolDockTools().find((entry) => entry?.id === id) || null;
+
+  if (tool) {
+    recordToolCapabilityShadowObservation({
+      tool,
+      observedSpecialist: specialistId
+    });
+  }
+
+  return tool;
 }
 
 function createToolButtonAdapter(tool = {}) {
@@ -1687,7 +1704,17 @@ function openToolDrawer({ drawer, btn, tool: explicitTool = null, text, input, s
     || btn.getAttribute("data-aicmd-tool-dock-id")
     || btn.getAttribute("data-tool-id")
     || "";
-  const tool = explicitTool || findToolMetadataById(toolId) || {};
+  const tool = explicitTool || findToolMetadataById(
+    toolId,
+    session?.modeId || ""
+  ) || {};
+
+  if (explicitTool?.id) {
+    recordToolCapabilityShadowObservation({
+      tool: explicitTool,
+      observedSpecialist: session?.modeId || ""
+    });
+  }
   const hardOutputDefaults = [toolId || "tool_output", "draft", "review_notes"];
   const hardSourceDefaults = ["current_chat", "market_notes", "customer_notes", "library_source", "manual_input"];
   const hardDestinationDefaults = ["chat-preview", "campaign-studio", "content-studio", "composer"];
@@ -1868,7 +1895,10 @@ export function bindAiToolDock({
       if (!template) return;
 
       if (actionType !== "prefill") {
-        const tool = findToolMetadataById(label);
+        const tool = findToolMetadataById(
+          label,
+          session?.modeId || ""
+        );
         const opened = openToolDrawer({
           drawer,
           btn,
