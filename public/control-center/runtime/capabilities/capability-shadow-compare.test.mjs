@@ -22,9 +22,49 @@ assert.equal(matched.status, "matched");
 assert.equal(matched.capabilityId, "content.rewrite");
 assert.equal(matched.specialistMatch, true);
 assert.equal(matched.destinationMatch, true);
+assert.equal(matched.surfaceOwnerRoute, "content-studio");
+assert.equal(matched.primaryExecutionRoute, "content-studio");
+assert.equal(matched.surfaceOwnerMatch, true);
 assert.equal(matched.candidateCount, 1);
 assert.ok(Object.isFrozen(matched));
 assert.ok(Object.isFrozen(matched.observedDestinations));
+
+const researchSemantics = compareToolToCapabilityIdentity({
+  tool: {
+    id: "keywords",
+    frontendOwnerPage: "insights",
+    destinations: ["research", "content-studio"]
+  },
+  observedSpecialist: "analyst"
+});
+
+assert.equal(researchSemantics.status, "matched");
+assert.equal(researchSemantics.surfaceOwnerRoute, "research");
+assert.equal(researchSemantics.primaryExecutionRoute, "research");
+assert.equal(researchSemantics.surfaceOwnerMatch, false);
+assert.equal(researchSemantics.handoffRouteOverlap, true);
+
+const unresolvedCustomerExecution =
+  compareToolToCapabilityIdentity({
+    tool: {
+      id: "reply-draft",
+      frontendOwnerPage: "operations-centers"
+    },
+    observedSpecialist: "customer_ops"
+  });
+
+assert.equal(
+  unresolvedCustomerExecution.surfaceOwnerRoute,
+  "operations-centers"
+);
+assert.equal(
+  unresolvedCustomerExecution.primaryExecutionRoute,
+  null
+);
+assert.equal(
+  unresolvedCustomerExecution.routeSemanticResolution,
+  "execution_route_requires_proof"
+);
 
 const specialistMismatch = compareToolToCapabilityIdentity({
   tool: {

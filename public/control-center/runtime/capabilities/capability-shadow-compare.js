@@ -2,6 +2,10 @@ import {
   getCapabilitiesByLegacyToolId
 } from "./capability-identity-map.js";
 
+import {
+  getCapabilityRouteSemantics
+} from "./capability-route-semantics.js";
+
 const MAX_SHADOW_OBSERVATIONS = 200;
 const shadowObservations = new Map();
 
@@ -35,6 +39,10 @@ export function compareToolToCapabilityIdentity({
     : [];
 
   const candidate = candidates.length === 1 ? candidates[0] : null;
+  const routeSemantics = candidate
+    ? getCapabilityRouteSemantics(candidate)
+    : null;
+
   const rawDestinations = Array.isArray(tool?.destinations)
     ? tool.destinations.map(normalize).filter(Boolean)
     : [];
@@ -76,6 +84,24 @@ export function compareToolToCapabilityIdentity({
     capabilityId: candidate?.capabilityId || null,
     family: candidate?.family || null,
     destinationRoute: candidate?.destinationRoute || null,
+    surfaceOwnerRoute: routeSemantics?.surfaceOwnerRoute || null,
+    primaryExecutionRoute:
+      routeSemantics?.primaryExecutionRoute || null,
+    handoffRoutes: freezeArray(routeSemantics?.handoffRoutes || []),
+    consumerRoutes: freezeArray(routeSemantics?.consumerRoutes || []),
+    routeSemanticResolution:
+      routeSemantics?.resolution || null,
+    surfaceOwnerMatch:
+      !routeSemantics?.surfaceOwnerRoute || !rawOwnerPage
+        ? null
+        : rawOwnerPage === routeSemantics.surfaceOwnerRoute,
+    handoffRouteOverlap:
+      !routeSemantics?.handoffRoutes?.length ||
+      !rawDestinations.length
+        ? null
+        : rawDestinations.some((route) =>
+            routeSemantics.handoffRoutes.includes(route)
+          ),
     surfaceType: candidate?.surfaceType || null,
     migrationDecision: candidate?.migrationDecision || null,
     executionExpectation: candidate?.executionExpectation || null,
