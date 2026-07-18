@@ -7,9 +7,35 @@ const freezeStrings = (values = []) =>
     )]
   );
 
+export const CAPABILITY_EXECUTION_AUTHORITIES = Object.freeze({
+  CUSTOMER_OPS: "customer_ops",
+  SALES_CRM: "sales_crm",
+  NONE: "none"
+});
+
+const CAPABILITY_EXECUTION_AUTHORITY_VALUES = new Set(
+  Object.values(CAPABILITY_EXECUTION_AUTHORITIES)
+);
+
+const normalizeExecutionAuthority = (value = null) => {
+  if (value == null || value === "") return null;
+
+  const authority = String(value).trim();
+
+  if (!CAPABILITY_EXECUTION_AUTHORITY_VALUES.has(authority)) {
+    throw new TypeError(
+      `Unknown capability execution authority: ${authority}`
+    );
+  }
+
+  return authority;
+};
+
 const defineOverride = ({
   surfaceOwnerRoute = "",
   primaryExecutionRoute = "",
+  executionAuthority = null,
+  executionFlow = [],
   handoffRoutes = [],
   consumerRoutes = [],
   resolution = "explicit"
@@ -17,6 +43,8 @@ const defineOverride = ({
   surfaceOwnerRoute: String(surfaceOwnerRoute || "").trim() || null,
   primaryExecutionRoute:
     String(primaryExecutionRoute || "").trim() || null,
+  executionAuthority: normalizeExecutionAuthority(executionAuthority),
+  executionFlow: freezeStrings(executionFlow),
   handoffRoutes: freezeStrings(handoffRoutes),
   consumerRoutes: freezeStrings(consumerRoutes),
   resolution
@@ -81,24 +109,32 @@ export const CAPABILITY_ROUTE_SEMANTIC_OVERRIDES = Object.freeze({
   }),
 
   "customer.reply_draft": defineOverride({
+    executionAuthority: CAPABILITY_EXECUTION_AUTHORITIES.CUSTOMER_OPS,
+    executionFlow: [],
     surfaceOwnerRoute: "operations-centers",
     primaryExecutionRoute: null,
     resolution: "execution_route_requires_proof"
   }),
 
   "customer.ticket_prepare": defineOverride({
+    executionAuthority: CAPABILITY_EXECUTION_AUTHORITIES.CUSTOMER_OPS,
+    executionFlow: [],
     surfaceOwnerRoute: "operations-centers",
     primaryExecutionRoute: null,
     resolution: "execution_route_requires_proof"
   }),
 
   "customer.sla_review": defineOverride({
+    executionAuthority: CAPABILITY_EXECUTION_AUTHORITIES.CUSTOMER_OPS,
+    executionFlow: [],
     surfaceOwnerRoute: "operations-centers",
     primaryExecutionRoute: null,
     resolution: "execution_route_requires_proof"
   }),
 
   "customer.conversation_summary": defineOverride({
+    executionAuthority: CAPABILITY_EXECUTION_AUTHORITIES.CUSTOMER_OPS,
+    executionFlow: [],
     surfaceOwnerRoute: "operations-centers",
     primaryExecutionRoute: null,
     resolution: "execution_route_requires_proof"
@@ -121,6 +157,8 @@ export const CAPABILITY_ROUTE_SEMANTIC_OVERRIDES = Object.freeze({
   }),
 
   "sales.follow_up": defineOverride({
+    executionAuthority: CAPABILITY_EXECUTION_AUTHORITIES.SALES_CRM,
+    executionFlow: [],
     surfaceOwnerRoute: "ai-command",
     primaryExecutionRoute: null,
     handoffRoutes: [
@@ -134,6 +172,8 @@ export const CAPABILITY_ROUTE_SEMANTIC_OVERRIDES = Object.freeze({
   }),
 
   "sales.lead_brief": defineOverride({
+    executionAuthority: CAPABILITY_EXECUTION_AUTHORITIES.SALES_CRM,
+    executionFlow: [],
     surfaceOwnerRoute: "ai-command",
     primaryExecutionRoute: null,
     handoffRoutes: [
@@ -147,6 +187,8 @@ export const CAPABILITY_ROUTE_SEMANTIC_OVERRIDES = Object.freeze({
   }),
 
   "sales.objection_handling": defineOverride({
+    executionAuthority: CAPABILITY_EXECUTION_AUTHORITIES.SALES_CRM,
+    executionFlow: [],
     surfaceOwnerRoute: "ai-command",
     primaryExecutionRoute: null,
     handoffRoutes: [
@@ -160,6 +202,8 @@ export const CAPABILITY_ROUTE_SEMANTIC_OVERRIDES = Object.freeze({
   }),
 
   "sales.pitch_create": defineOverride({
+    executionAuthority: CAPABILITY_EXECUTION_AUTHORITIES.SALES_CRM,
+    executionFlow: [],
     surfaceOwnerRoute: "ai-command",
     primaryExecutionRoute: null,
     handoffRoutes: [
@@ -173,6 +217,8 @@ export const CAPABILITY_ROUTE_SEMANTIC_OVERRIDES = Object.freeze({
   }),
 
   "strategy.priority_recommendation": defineOverride({
+    executionAuthority: CAPABILITY_EXECUTION_AUTHORITIES.NONE,
+    executionFlow: [],
     surfaceOwnerRoute: "ai-command",
     primaryExecutionRoute: null,
     handoffRoutes: ["campaign-studio", "workflows", "task"],
@@ -210,6 +256,8 @@ export function getCapabilityRouteSemantics(capability = null) {
     legacyDestinationRoute: legacyRoute,
     surfaceOwnerRoute: legacyRoute,
     primaryExecutionRoute: legacyRoute,
+    executionAuthority: null,
+    executionFlow: freezeStrings([]),
     handoffRoutes: freezeStrings([]),
     consumerRoutes: freezeStrings([]),
     resolution: "legacy_destination_compatibility_default"

@@ -6,6 +6,7 @@ import {
 } from "./capability-identity-map.js";
 
 import {
+  CAPABILITY_EXECUTION_AUTHORITIES,
   CAPABILITY_ROUTE_SEMANTIC_OVERRIDES,
   getCapabilityRouteSemantics
 } from "./capability-route-semantics.js";
@@ -66,6 +67,58 @@ assert.equal(
   matchedDefault.resolution,
   "legacy_destination_compatibility_default"
 );
+
+const executionAuthorityExpectations = Object.freeze({
+  "strategy.priority_recommendation": CAPABILITY_EXECUTION_AUTHORITIES.NONE,
+  "customer.reply_draft": CAPABILITY_EXECUTION_AUTHORITIES.CUSTOMER_OPS,
+  "customer.ticket_prepare": CAPABILITY_EXECUTION_AUTHORITIES.CUSTOMER_OPS,
+  "customer.sla_review": CAPABILITY_EXECUTION_AUTHORITIES.CUSTOMER_OPS,
+  "customer.conversation_summary": CAPABILITY_EXECUTION_AUTHORITIES.CUSTOMER_OPS,
+  "sales.pitch_create": CAPABILITY_EXECUTION_AUTHORITIES.SALES_CRM,
+  "sales.follow_up": CAPABILITY_EXECUTION_AUTHORITIES.SALES_CRM,
+  "sales.objection_handling": CAPABILITY_EXECUTION_AUTHORITIES.SALES_CRM,
+  "sales.lead_brief": CAPABILITY_EXECUTION_AUTHORITIES.SALES_CRM
+});
+
+for (const [capabilityId, expectedAuthority] of Object.entries(
+  executionAuthorityExpectations
+)) {
+  const semantics = getCapabilityRouteSemantics(
+    getCapabilityByIdentity(capabilityId)
+  );
+
+  assert.equal(
+    semantics.executionAuthority,
+    expectedAuthority,
+    `${capabilityId} execution authority`
+  );
+  assert.deepEqual(
+    semantics.executionFlow,
+    [],
+    `${capabilityId} execution flow remains unproven`
+  );
+  assert.ok(
+    Object.isFrozen(semantics.executionFlow),
+    `${capabilityId} execution flow is frozen`
+  );
+  assert.equal(
+    semantics.primaryExecutionRoute,
+    null,
+    `${capabilityId} remains fail-closed`
+  );
+}
+
+assert.equal(
+  matchedDefault.executionAuthority,
+  null,
+  "legacy compatibility defaults do not invent execution authority"
+);
+assert.deepEqual(
+  matchedDefault.executionFlow,
+  [],
+  "legacy compatibility defaults do not invent execution flow"
+);
+assert.ok(Object.isFrozen(matchedDefault.executionFlow));
 
 console.log(
   "PASS: 59 capability route semantics validated with 15 explicit overrides"

@@ -41,6 +41,17 @@ Observe -> Decide -> Draft -> Review -> Route -> Execute -> Monitor
 10. `MH_OS_BACKLOG_AND_RELEASE_SEQUENCE.md` - completed work, remaining priorities, and safe release path.
 11. `MH_OS_SAFE_UPGRADE_PROTOCOL.md` - mandatory rules for future Codex prompts and implementation passes.
 
+## Engineering Contracts
+
+The canonical engineering contracts governing architecture, runtime authority,
+identity and Workspace relationships, capabilities, AI roles, governance,
+security, providers, missions, workflows, and artifacts are maintained in the
+[MH-OS Engineering Contracts Index](../contracts/README.md).
+
+Product documentation explains the operating model and user experience.
+Engineering contracts define the reviewed implementation boundaries,
+authority decisions, compatibility requirements, and current-truth records.
+
 ## Evidence Base
 
 Primary evidence came from:

@@ -28,6 +28,7 @@ Principal
 + Resource
 + Risk
 + Governance policy
+```
 GAP-IW-005 — Authenticated approval attribution missing
 
 Approval metadata is not proven to be bound to an authenticated reviewer.

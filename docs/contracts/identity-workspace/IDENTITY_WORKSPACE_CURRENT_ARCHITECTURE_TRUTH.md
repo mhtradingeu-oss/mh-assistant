@@ -4,6 +4,17 @@
 
 Audit complete.
 
+> **Historical audit baseline.** This document records the Phase 1A-8 state at
+> baseline `e3285d15981caf34e5547f343efac4435303e1f0`. Current canonical architecture
+> is defined by
+> [`MH_OS_CANONICAL_ARCHITECTURE.md`](../architecture/MH_OS_CANONICAL_ARCHITECTURE.md)
+> and
+> [`ADR-001-PRINCIPAL-WORKSPACE-PROJECT-MODEL.md`](../architecture/ADR-001-PRINCIPAL-WORKSPACE-PROJECT-MODEL.md).
+> Later verified Workspace runtime facts are recorded in
+> [`IDENTITY_WORKSPACE_RUNTIME_TRUTH_SUPPLEMENT.md`](./IDENTITY_WORKSPACE_RUNTIME_TRUTH_SUPPLEMENT.md).
+> Where this historical baseline conflicts with those current contracts, the
+> current contracts and runtime-truth supplement are authoritative.
+
 ## Repository baseline
 
 - Branch: main
@@ -41,7 +52,10 @@ are not proven to originate from an authenticated principal.
 
 Current workspace state
 
-A canonical MH-OS Workspace runtime is not implemented.
+At this historical Phase 1A-8 baseline, a canonical MH-OS Workspace runtime
+had not yet been implemented. This statement is superseded for current runtime
+state by `IDENTITY_WORKSPACE_RUNTIME_TRUTH_SUPPLEMENT.md` and the canonical
+architecture contract.
 
 Existing workspaceId and organizationId references found in Integrations
 represent external provider identifiers and must not be treated as MH-OS
