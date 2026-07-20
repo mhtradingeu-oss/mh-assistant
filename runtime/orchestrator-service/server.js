@@ -8017,17 +8017,34 @@ function registerProjectAsset(projectName, assetType, filePath) {
   };
 }
 
+function projectAssetRecordForRead(projectName, asset = {}) {
+  const projected = normalizeAssetRecord(projectName, asset);
+  const durableId = normalizeSetupTextValue(asset.id || asset.asset_id);
+  const durableAssetId = normalizeSetupTextValue(asset.asset_id || asset.id);
+  const durableCreatedAt = normalizeSetupTextValue(asset.created_at || asset.registered_at);
+  const durableUpdatedAt = normalizeSetupTextValue(
+    asset.updated_at || asset.created_at || asset.registered_at
+  );
+
+  return {
+    ...projected,
+    id: durableId,
+    asset_id: durableAssetId,
+    created_at: durableCreatedAt,
+    updated_at: durableUpdatedAt,
+    exists: fs.existsSync(projected.file_path)
+  };
+}
+
 function listProjectAssets(projectName) {
-  const paths = getProjectAssetPaths(projectName);
+  const paths = getProjectBaselinePaths(projectName);
 
   if (!fs.existsSync(paths.projectFilePath)) {
     throw new Error('Project not found');
   }
 
-  const normalized = readJsonFile(paths.assetsRegistryPath, [])
-    .map((item) => normalizeAssetRecord(projectName, item));
-  writeJsonFile(paths.assetsRegistryPath, normalized);
-  return normalized;
+  return readJsonFile(paths.assetsRegistryPath, [])
+    .map((item) => projectAssetRecordForRead(projectName, item));
 }
 
 function setProjectSourceOfTruth(projectName, sourceType, sourceValue) {

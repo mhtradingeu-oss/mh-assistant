@@ -17,6 +17,7 @@ const {
     reviewProjectReadiness,
     reviewProjectSources,
     reviewProjectCanonicalParity,
+    ensureProjectBaselineFiles,
     getProjectBaselinePaths,
     registerProjectAsset,
     listProjectAssets,
@@ -28,6 +29,8 @@ const {
 
 const KEEP_PROJECT = process.env.MH_KEEP_MULTI_PROJECT === '1';
 const projectName = (process.env.MH_MULTI_PROJECT_NAME || `multireadiness_${Date.now()}`).toLowerCase();
+const readContractProjectName = `${projectName}_read_contract`;
+const ensureContractProjectName = `${projectName}_ensure_contract`;
 const ROOT = process.env.MH_ASSISTANT_ROOT || path.resolve(__dirname, '..');
 
 const checks = [];
@@ -50,6 +53,38 @@ function freshRequireServer() {
   return require(target);
 }
 
+function snapshotTree(rootPath) {
+  const entries = [];
+
+  (function walk(currentPath, relativePath = '') {
+    fs.readdirSync(currentPath, { withFileTypes: true })
+      .sort((left, right) => left.name.localeCompare(right.name))
+      .forEach((entry) => {
+        const fullPath = path.join(currentPath, entry.name);
+        const relativeEntryPath = path.join(relativePath, entry.name);
+
+        if (entry.isDirectory()) {
+          entries.push({ path: relativeEntryPath, type: 'directory' });
+          walk(fullPath, relativeEntryPath);
+          return;
+        }
+
+        entries.push({
+          path: relativeEntryPath,
+          type: 'file',
+          content_base64: fs.readFileSync(fullPath).toString('base64')
+        });
+      });
+  }(rootPath));
+
+  return JSON.stringify(entries);
+}
+
+function assertJsonFile(filePath, check) {
+  assert(check, fs.existsSync(filePath), { file: filePath });
+  JSON.parse(fs.readFileSync(filePath, 'utf8'));
+}
+
 function cleanup(project) {
   if (KEEP_PROJECT) {
     return;
@@ -68,9 +103,179 @@ function cleanup(project) {
   if (fs.existsSync(projectRoot)) {
     fs.rmSync(projectRoot, { recursive: true, force: true });
   }
+
+  const legacyProjectRoot = path.join(ROOT, 'data', 'brand-assets', project);
+  if (fs.existsSync(legacyProjectRoot)) {
+    fs.rmSync(legacyProjectRoot, { recursive: true, force: true });
+  }
+}
+
+function verifyPureAssetReadContract() {
+  const paths = getProjectBaselinePaths(readContractProjectName);
+  const createdAt = '2026-01-02T03:04:05.000Z';
+  const updatedAt = '2026-02-03T04:05:06.000Z';
+  const missingAssetPath = path.join(paths.baseDir, 'missing-asset.png');
+  const records = [
+    {
+      id: 'durable-existing-id',
+      asset_id: 'durable-existing-asset-id',
+      type: 'brand_guideline',
+      file_path: paths.projectFilePath,
+      created_at: createdAt,
+      updated_at: updatedAt,
+      source: 'project_upload',
+      status: 'connected'
+    },
+    {
+      id: 'durable-missing-id',
+      asset_id: 'durable-missing-asset-id',
+      type: 'image',
+      file_path: missingAssetPath,
+      created_at: createdAt,
+      updated_at: updatedAt,
+      source: 'project_upload',
+      status: 'connected'
+    }
+  ];
+
+  fs.mkdirSync(paths.baseDir, { recursive: true });
+  ensureFile(paths.projectFilePath, `${JSON.stringify({ project_name: readContractProjectName }, null, 2)}\n`);
+  ensureFile(paths.assetsRegistryPath, `${JSON.stringify(records, null, 2)}\n`);
+
+  const forbiddenArtifacts = [
+    paths.brandProfilePath,
+    paths.integrationsRegistryPath,
+    `${paths.integrationsRegistryPath}.backup`,
+    paths.integrationControlCenterPath,
+    path.join(paths.opsDir, 'data-mismatches.json'),
+    paths.sourceOfTruthRegistryPath
+  ];
+  forbiddenArtifacts.forEach((filePath) => {
+    assert(`pure read fixture starts without ${path.relative(paths.baseDir, filePath)}`, !fs.existsSync(filePath));
+  });
+
+  const registryBefore = fs.readFileSync(paths.assetsRegistryPath);
+  const treeBefore = snapshotTree(paths.baseDir);
+  const firstRead = listProjectAssets(readContractProjectName);
+  const treeAfterFirstRead = snapshotTree(paths.baseDir);
+  const secondRead = listProjectAssets(readContractProjectName);
+  const treeAfterSecondRead = snapshotTree(paths.baseDir);
+
+  assert('pure asset read leaves complete project tree byte-for-byte identical after one call', treeAfterFirstRead === treeBefore);
+  assert('repeated pure asset reads leave complete project tree byte-for-byte identical', treeAfterSecondRead === treeBefore);
+  assert(
+    'pure asset read leaves assets-registry.json byte-for-byte identical',
+    fs.readFileSync(paths.assetsRegistryPath).equals(registryBefore)
+  );
+  forbiddenArtifacts.forEach((filePath) => {
+    assert(`pure asset read does not create ${path.relative(paths.baseDir, filePath)}`, !fs.existsSync(filePath));
+  });
+
+  assert('pure asset read returns current projection count', firstRead.length === records.length);
+  const existingProjection = firstRead.find((item) => item.id === records[0].id);
+  const missingProjection = firstRead.find((item) => item.id === records[1].id);
+  assert('durable id remains stable', existingProjection?.id === records[0].id);
+  assert('durable asset_id remains stable', existingProjection?.asset_id === records[0].asset_id);
+  assert('durable created_at remains stable', existingProjection?.created_at === createdAt);
+  assert('durable updated_at remains stable', existingProjection?.updated_at === updatedAt);
+  assert('transient exists is true for a current filesystem path', existingProjection?.exists === true);
+  assert('transient exists is false for a missing filesystem path', missingProjection?.exists === false);
+  assert(
+    'repeated pure reads preserve durable ids and timestamps',
+    JSON.stringify(secondRead.map(({ id, asset_id, created_at, updated_at }) => ({ id, asset_id, created_at, updated_at })))
+      === JSON.stringify(firstRead.map(({ id, asset_id, created_at, updated_at }) => ({ id, asset_id, created_at, updated_at })))
+  );
+
+  const compatibleProjectionFields = [
+    'id',
+    'asset_id',
+    'file_name',
+    'file_path',
+    'name',
+    'title',
+    'display_name',
+    'type',
+    'asset_type',
+    'project',
+    'source',
+    'tags',
+    'status',
+    'readiness_status',
+    'review_status',
+    'created_at',
+    'updated_at',
+    'source_of_truth',
+    'exists',
+    'metadata'
+  ];
+  assert(
+    'pure asset read projection remains compatible with current contract',
+    compatibleProjectionFields.every((field) => Object.prototype.hasOwnProperty.call(existingProjection || {}, field))
+  );
+
+  let missingProjectError = null;
+  try {
+    listProjectAssets(`${readContractProjectName}_missing`);
+  } catch (error) {
+    missingProjectError = error;
+  }
+  assert('missing project throws exactly Project not found', missingProjectError?.message === 'Project not found');
+}
+
+function verifyExplicitEnsureContract() {
+  const paths = getProjectBaselinePaths(ensureContractProjectName);
+  const legacyAsset = {
+    id: 'legacy-id',
+    asset_id: 'legacy-asset-id',
+    type: 'image',
+    file_path: '/disposable/legacy-image.png',
+    created_at: '2025-01-01T00:00:00.000Z',
+    updated_at: '2025-01-02T00:00:00.000Z'
+  };
+
+  fs.mkdirSync(paths.baseDir, { recursive: true });
+  ensureFile(paths.projectFilePath, `${JSON.stringify({ project_name: ensureContractProjectName }, null, 2)}\n`);
+  ensureFile(paths.legacy.brandProfilePath, `${JSON.stringify({ brand_name: 'Legacy Ensure Fixture' }, null, 2)}\n`);
+  ensureFile(paths.legacy.assetsRegistryPath, `${JSON.stringify([legacyAsset], null, 2)}\n`);
+  ensureFile(paths.sourcesRegistryPath, `${JSON.stringify({ website: { value: 'https://legacy.example', status: 'connected' } }, null, 2)}\n`);
+
+  const firstEnsure = ensureProjectBaselineFiles(ensureContractProjectName);
+  assert('explicit ensure migrates legacy brand profile', firstEnsure.required_files.brand_profile.migrated === true);
+  assert('explicit ensure migrates legacy asset registry', firstEnsure.required_files.assets_registry.migrated === true);
+  assert('explicit ensure migrates legacy source-of-truth registry', firstEnsure.required_files.source_of_truth_registry.migrated === true);
+  assert(
+    'explicit ensure preserves migrated legacy asset data',
+    readJsonFile(paths.assetsRegistryPath, [])[0]?.asset_id === legacyAsset.asset_id
+  );
+
+  const expectedArtifacts = [
+    paths.brandProfilePath,
+    paths.assetsRegistryPath,
+    paths.sourcesRegistryPath,
+    paths.sourceOfTruthRegistryPath,
+    paths.integrationsRegistryPath,
+    `${paths.integrationsRegistryPath}.backup`,
+    paths.integrationControlCenterPath,
+    paths.aiCommandsPath,
+    paths.aiArtifactsPath,
+    paths.aiRecommendationsPath,
+    paths.aiMemoryPath
+  ];
+  expectedArtifacts.forEach((filePath) => {
+    assertJsonFile(filePath, `explicit ensure creates valid JSON: ${path.relative(paths.baseDir, filePath)}`);
+  });
+
+  const secondEnsure = ensureProjectBaselineFiles(ensureContractProjectName);
+  assert('repeated explicit ensure remains valid', secondEnsure.project === ensureContractProjectName);
+  expectedArtifacts.forEach((filePath) => {
+    assertJsonFile(filePath, `repeated explicit ensure preserves valid JSON: ${path.relative(paths.baseDir, filePath)}`);
+  });
 }
 
 function run() {
+  verifyPureAssetReadContract();
+  verifyExplicitEnsureContract();
+
   const created = createProject(projectName, 'Germany', 'de', 'ecommerce', 'https://example-multi.test');
   assert('fresh project created', created.project_name === projectName, {
     project: created.project_name
@@ -201,7 +406,38 @@ function run() {
   const asset = registerProjectAsset(projectName, 'brand_guideline', sampleAssetPath);
   assert('asset registration returns id', Boolean(asset.id || asset.asset_id));
 
+  const registryBeforeAssetRead = fs.readFileSync(paths.assetsRegistryPath, 'utf8');
+
   const assets = listProjectAssets(projectName);
+
+  const registryAfterAssetRead = fs.readFileSync(paths.assetsRegistryPath, 'utf8');
+  assert(
+    'asset list read does not rewrite registry',
+    registryAfterAssetRead === registryBeforeAssetRead
+  );
+
+  const repeatedAssets = listProjectAssets(projectName);
+  const registryAfterRepeatedRead = fs.readFileSync(paths.assetsRegistryPath, 'utf8');
+
+  assert(
+    'repeated asset list read does not rewrite registry',
+    registryAfterRepeatedRead === registryBeforeAssetRead
+  );
+
+  const stableAssetProjection = (items) => items.map((item) => ({
+    id: item.id,
+    asset_id: item.asset_id,
+    file_path: item.file_path,
+    created_at: item.created_at,
+    updated_at: item.updated_at
+  }));
+
+  assert(
+    'repeated asset list reads preserve ids and timestamps',
+    JSON.stringify(stableAssetProjection(repeatedAssets))
+      === JSON.stringify(stableAssetProjection(assets))
+  );
+
   const matchedAsset = assets.find((item) => item.file_path === sampleAssetPath);
   assert('asset registry persists asset', Boolean(matchedAsset));
   assert('asset registry has required schema fields', Boolean(
@@ -270,5 +506,5 @@ try {
   process.stderr.write(`${error.message}\n`);
   process.exitCode = 1;
 } finally {
-  cleanup(projectName);
+  [projectName, readContractProjectName, ensureContractProjectName].forEach(cleanup);
 }
