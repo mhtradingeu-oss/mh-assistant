@@ -2,9 +2,9 @@
 
 ## Status
 
-Design proposal only.
+Historical lifecycle/ownership proposal with current-runtime reconciliation.
 
-No workspace lifecycle runtime is implemented.
+Workspace lifecycle, durable storage, and Workspace-to-Project relationship authority are now implemented. Authenticated Workspace ownership, Principal-to-Workspace membership, transfer authority, policy inheritance, and effective permissions remain future-only. See the [Phase 1A universal reconciliation](../contracts/architecture/PHASE_1A_UNIVERSAL_CONTRACT_RECONCILIATION.md).
 
 Existing project and security boundaries remain authoritative.
 
@@ -12,7 +12,7 @@ Existing project and security boundaries remain authoritative.
 
 # 1. Objective
 
-Define the future Workspace lifecycle and ownership model.
+Preserve the original ownership proposal and distinguish it from the implemented Workspace lifecycle and relationship foundation.
 
 Workspace authority must provide:
 
@@ -26,7 +26,7 @@ Workspace authority must provide:
 
 # 2. Workspace Lifecycle
 
-Future lifecycle:
+Original lifecycle design; current lifecycle transitions are governed by `workspace-contract.js` and `workspace-runtime.js`, and only their implemented states/transitions are authoritative:
 
 
 CREATING
@@ -48,7 +48,7 @@ ARCHIVED
 
 # 3. Ownership Model
 
-Future ownership:
+Future authenticated ownership model (not implemented):
 
 
 Principal
@@ -79,7 +79,7 @@ Future enforcement requires validation.
 
 # 5. Ownership Operations
 
-Future operations:
+Original proposed operations. Only operations exposed and validated by the current Workspace runtime are implemented; authenticated claim/transfer authority is not:
 
 
 Create
@@ -97,7 +97,7 @@ Archive
 
 # 6. Project Relationship
 
-Workspace contains projects:
+Workspace has durable versioned relationships to Projects:
 
 
 Workspace
@@ -128,8 +128,7 @@ Workspace lifecycle must:
 
 This phase does not create:
 
-- workspace runtime
-- workspace database
+- a second workspace runtime or store
 - membership system
 - user accounts
 - permission enforcement
@@ -140,4 +139,4 @@ This phase does not create:
 
 BE-2.8:
 
-Workspace Authority Validation Design.
+Validate future ownership and membership separately without replacing the current lifecycle and relationship owners.

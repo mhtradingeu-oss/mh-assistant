@@ -15,17 +15,19 @@ This index is the primary navigation point for `docs/contracts/`. It does not re
 Use this order when reviewing or implementing MH-OS:
 
 1. Current runtime implementation truth and proven backend owners.
-2. Approved canonical architecture and Architecture Decision Records.
-3. Domain-specific canonical contracts and current-truth supplements.
-4. Source inventories, producer-consumer maps, matrices, conflict registers, and freeze recommendations.
-5. Historical audits and evidence.
+2. [Phase 1A Universal Contract Reconciliation](architecture/PHASE_1A_UNIVERSAL_CONTRACT_RECONCILIATION.md) for Phase 1A closeout, precedence, and supersession.
+3. Approved canonical architecture, Architecture Decision Records, and domain-specific closeout decisions.
+4. Domain-specific canonical contracts and current-truth supplements.
+5. Source inventories, producer-consumer maps, matrices, conflict registers, and freeze recommendations.
+6. Historical audits and evidence.
 
-Where documents appear to conflict, prefer the more recent, explicitly scoped current-truth or canonical contract, then verify the active runtime owner before changing code.
+For Phase 1A conflicts, the universal reconciliation supersedes contrary documentation statements while preserving historically accurate baselines. Runtime implementation and the proven backend owner remain authoritative for mutation. A title alone does not establish authority; pages, catalogs, reports, classifiers, shadow models, checklists, and compatibility adapters remain projections unless backend evidence proves otherwise.
 
 ## Canonical Architecture
 
 - [MH-OS Canonical Architecture](architecture/MH_OS_CANONICAL_ARCHITECTURE.md)
 - [ADR-001: Principal, Workspace and Project Model](architecture/ADR-001-PRINCIPAL-WORKSPACE-PROJECT-MODEL.md)
+- [Phase 1A Universal Contract Reconciliation](architecture/PHASE_1A_UNIVERSAL_CONTRACT_RECONCILIATION.md)
 
 ## Identity and Workspace
 
@@ -59,6 +61,7 @@ Where documents appear to conflict, prefer the more recent, explicitly scoped cu
 
 ## Governance
 
+- [Governance and Approval Phase 1A Closeout Decision](governance/GOVERNANCE_APPROVAL_PHASE_1A_CLOSEOUT_DECISION.md)
 - [Governance Approval Matrix](governance/GOVERNANCE_APPROVAL_MATRIX.md)
 - [Governance Source Inventory](governance/GOVERNANCE_SOURCE_INVENTORY.md)
 - [Governance Consumer-Producer Map](governance/GOVERNANCE_CONSUMER_PRODUCER_MAP.md)
@@ -67,6 +70,7 @@ Where documents appear to conflict, prefer the more recent, explicitly scoped cu
 
 ## Security and Route Authority
 
+- [Route, Permission, and Security Phase 1A Closeout Decision](security/ROUTE_PERMISSION_SECURITY_PHASE_1A_CLOSEOUT_DECISION.md)
 - [Route Access Scope Matrix](security/ROUTE_ACCESS_SCOPE_MATRIX.md)
 - [Route, Permission and Security Source Inventory](security/ROUTE_PERMISSION_SECURITY_SOURCE_INVENTORY.md)
 - [Route, Permission and Security Consumer-Producer Map](security/ROUTE_PERMISSION_SECURITY_CONSUMER_PRODUCER_MAP.md)
@@ -75,6 +79,7 @@ Where documents appear to conflict, prefer the more recent, explicitly scoped cu
 
 ## Providers
 
+- [Provider Phase 1A Closeout Decision](providers/PROVIDER_PHASE_1A_CLOSEOUT_DECISION.md)
 - [Provider Source Inventory](providers/PROVIDER_SOURCE_INVENTORY.md)
 - [Provider Consumer-Producer Map](providers/PROVIDER_CONSUMER_PRODUCER_MAP.md)
 - [Provider ID and Operation Model Matrix](providers/PROVIDER_ID_OPERATION_MODEL_MATRIX.md)
@@ -83,6 +88,7 @@ Where documents appear to conflict, prefer the more recent, explicitly scoped cu
 
 ## Missions, Tasks and Workflows
 
+- [Mission and Workflow Phase 1A Closeout Decision](missions/MISSION_WORKFLOW_PHASE_1A_CLOSEOUT_DECISION.md)
 - [Mission, Task, Workflow and Job Matrix](missions/MISSION_TASK_WORKFLOW_JOB_MATRIX.md)
 - [Mission and Workflow Source Inventory](missions/MISSION_WORKFLOW_SOURCE_INVENTORY.md)
 - [Mission and Workflow Consumer-Producer Map](missions/MISSION_WORKFLOW_CONSUMER_PRODUCER_MAP.md)
@@ -91,11 +97,28 @@ Where documents appear to conflict, prefer the more recent, explicitly scoped cu
 
 ## Artifacts and Versioning
 
+- [Artifact and Version Phase 1A Closeout Decision](artifacts/ARTIFACT_VERSION_PHASE_1A_CLOSEOUT_DECISION.md)
 - [Artifact Source Inventory](artifacts/ARTIFACT_SOURCE_INVENTORY.md)
 - [Artifact Consumer-Producer Map](artifacts/ARTIFACT_CONSUMER_PRODUCER_MAP.md)
 - [Artifact ID, Version and Revision Matrix](artifacts/ARTIFACT_ID_VERSION_REVISION_MATRIX.md)
 - [Artifact Conflict Register](artifacts/ARTIFACT_CONFLICT_REGISTER.md)
 - [Artifact Version Vocabulary Freeze Recommendation](artifacts/ARTIFACT_VERSION_VOCABULARY_FREEZE_RECOMMENDATION.md)
+
+## Knowledge and Memory
+
+- [Knowledge and Memory Phase 1A Current Truth and Closeout](knowledge-memory/KNOWLEDGE_MEMORY_PHASE_1A_CURRENT_TRUTH_AND_CLOSEOUT.md)
+
+## Storage, Infrastructure, and Concurrency
+
+- [Storage, Infrastructure, and Concurrency Phase 1A Current Truth and Closeout](storage-infrastructure/STORAGE_INFRASTRUCTURE_CONCURRENCY_PHASE_1A_CURRENT_TRUTH_AND_CLOSEOUT.md)
+
+## Relationships and CRM
+
+- [Relationships and CRM Phase 1A Current Truth and Closeout](relationships-crm/RELATIONSHIPS_CRM_PHASE_1A_CURRENT_TRUTH_AND_CLOSEOUT.md)
+
+## Readiness and Foundation
+
+- [Readiness and Foundation Phase 1A Current Truth and Closeout](readiness-foundation/READINESS_FOUNDATION_PHASE_1A_CURRENT_TRUTH_AND_CLOSEOUT.md)
 
 ## Product Documentation
 

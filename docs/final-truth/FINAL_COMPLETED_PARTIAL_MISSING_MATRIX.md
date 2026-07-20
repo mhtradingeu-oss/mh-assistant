@@ -6,11 +6,17 @@
 > This document is audit, planning, and reconciliation evidence.
 > It is not runtime implementation and is not production certification.
 
+> **Phase 1A current-truth supplement:** The Phase 0 rows remain historical. The added Phase 1A rows below use baseline `baf62a747f5defa51fa1376eb63272cd965a15b3` and the [Phase 1A universal reconciliation](../contracts/architecture/PHASE_1A_UNIVERSAL_CONTRACT_RECONCILIATION.md). Organization, authenticated principal/membership, effective RBAC, universal Mission/Artifact/Knowledge runtimes, live CRM/voice execution, multi-process safety, and production certification remain deferred.
+
 
 Baseline: `bf5681b9f291ed56595860fa4bbcdc747b406271`. “Test state” distinguishes static/syntax/audit scripts from execution proof. Every row uses the required classification vocabulary.
 
 | Domain | Capability | Classification | Backend state | Frontend state | Test state | Provider state | Artifact/version state | Blocker | Target phase | Exact evidence (confidence) |
-|---|---|---|---|---|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Workspace | Schema/storage/lifecycle | IMPLEMENTED_BOUNDED | Contract, durable storage and lifecycle owner exist | Projection only | Existing repository evidence; no verifier run in this documentation task | N/A | Versioned Workspace records | Authenticated ownership/membership and effective permissions | Future identity/security phase | `workspace-contract.js`; `workspace-storage.js`; `workspace-runtime.js`; Phase 1A reconciliation (high) |
+| Workspace relationship | Workspace-to-Project lifecycle | IMPLEMENTED_BOUNDED | Versioned attach/detach authority exists | Project-side projection is derived | Existing repository evidence; no runtime test in this documentation task | N/A | Versioned relationship/projection records | Membership is not authenticated access; cross-process guarantees not proven | Future identity/security/infrastructure phase | `workspace-relationship-runtime.js`; `project-workspace-projection.js`; runtime truth supplement (high) |
+| Organization | Authority/membership | MISSING_DEFERRED | No Organization runtime or authenticated membership authority | Labels/projections are non-authoritative | None claimed | N/A | N/A | Source inventory, lifecycle, ownership and permission contract | Future approved phase | Phase 1A universal reconciliation (high) |
+| Assets | Side-effect-free Project asset list | IMPLEMENTED_STATIC_ONLY | `listProjectAssets` uses baseline paths and does not rewrite registry | Library/list view is a projection | Static verifier coverage added at `baf62a7`; verifier not run here; FC-3C7–FC-3C11 not independently certified | N/A | Durable IDs/timestamps covered statically | Runtime, contention and production proof remain | Future authorized validation | narrow `baf62a7` code shape (high for static claim only) |
 | Repository | Baseline/evidence | CERTIFIED_CURRENT_HEAD | N/A | N/A | Git + 335 syntax files, 0 failures | N/A | N/A | None for Phase 0 | Phase 0 | `/tmp/mhos-phase0-final-truth-20260711-164937/190_phase0_summary.env` (high) |
 | Architecture | Backend authority | IMPLEMENTED | Guards, policies, project isolation | Projection clients | Static/audit coverage | Domain-specific | Entity-specific | Contract fragmentation | Phase 1 | `lib/security/governance-mutation-gate.js`; `project-isolation.js` (high) |
 | Security | Identity/RBAC | PARTIAL | Access key + route permissions | Key storage/projection | Hardening scripts, no adversarial proof | N/A | Audit logs partial | No mature identity/tenant/RBAC contract | Phase 2 | `lib/security/runtime-security-enforcement.js`; `public/control-center/app.js:340-437` (medium-high) |
@@ -28,7 +34,7 @@ Baseline: `bf5681b9f291ed56595860fa4bbcdc747b406271`. “Test state” distingui
 | Provider | Integration registry | PARTIAL | Multiple adapters + unsupported adapter | Integrations control center | No external calls here | Mixed readiness | Sync snapshots/audit | Credential/health/execution certification | Phase 2 | `lib/integrations/provider-registry.js:1-65`; `adapter-manager.js:43-150` (high) |
 | Provider | Global Provider Router | MISSING | Separate AI/integration/media routers | No authority | None | Fragmented | N/A | Common contract and shadow comparison | Phase 1 | `lib/ai/provider-registry.js`; `lib/integrations/provider-registry.js`; `lib/media/native/providers/router/` (high) |
 | Open source | Local/native model runtime | PARTIAL | Catalog/model/worker scaffolding | Media readiness UI | No installed/health/execution proof | Candidate/local | Job/output scaffolding | Runtime installation and worker health | Phase 3 | `lib/media/native/models/default-models.js`; `registry/worker-selection-engine.js:15-27` (high) |
-| Media | Native video | BLOCKED | Returns draft; `available:false` | Workspace labels readiness | No execution | Native unavailable | Draft only | Worker/model runtime | Phase 3 | `native-video-runtime.js:3-24` (high) |
+| Media | Native video | BLOCKED | Returns draft; `available: false` | Workspace labels readiness | No execution | Native unavailable | Draft only | Worker/model runtime | Phase 3 | `native-video-runtime.js:3-24` (high) |
 | Media | Image/audio/voice-chat | PARTIAL | Engine/adapters exist | Media/AI projections | No execution proof | Config-dependent | Media jobs/output stores | Provider and quality proof | Phase 3 | `native-engine-registry.js:3-14`; `media-output-storage.js` (high) |
 | Artifact | Universal Artifact Contract | MISSING | Domain-specific artifacts | Domain-specific projections | No universal validator | N/A | Fragmented | Canonical schema/migration | Phase 1 | `backbone.js:76-79`; `execution-artifact-writer-adapter.js` (high) |
 | Version | Universal Version Contract | MISSING | Entity-specific fields | Content/UI-specific | No universal validator | N/A | Fragmented | Semantics, ancestry, immutability | Phase 1 | `backbone.js`; code search for `version` across page modules (high) |
@@ -55,8 +61,9 @@ Baseline: `bf5681b9f291ed56595860fa4bbcdc747b406271`. “Test state” distingui
 ## Target architecture layers
 
 | Layer | Current strongest reusable foundation | Classification | Missing contract/product behavior | Recommended phase |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | Identity | project isolation, access key, route permission catalog | PARTIAL | user/tenant/role identity and claims | 2 |
+| Workspace | schema, durable storage, lifecycle, relationship, Project projection and reconciliation foundation | IMPLEMENTED_BOUNDED | authenticated ownership/membership, effective permissions, Organization decision | future identity/security phase |
 | Knowledge | Library, project context, AI memory | PARTIAL | provenance graph, retention, Knowledge Graph | 1 then 4 |
 | Operating Intelligence | insights, recommendations, next actions | PARTIAL | confidence, causal/forecast contracts | 3 |
 | AI Workforce | AI Command + orchestrator + backbone roles | DUPLICATED | one role/mission/tool policy contract | 1 |

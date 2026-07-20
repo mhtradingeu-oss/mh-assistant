@@ -2,11 +2,13 @@
 
 ## Status
 
-Design proposal only.
+Historical shadow-model proposal, retained as a read-only comparison design.
 
-No workspace authority runtime is implemented.
+Workspace lifecycle and Workspace-to-Project relationship runtime are now implemented. The shadow model remains non-authoritative and cannot enforce ownership, membership, or permissions. See the [Phase 1A universal reconciliation](../contracts/architecture/PHASE_1A_UNIVERSAL_CONTRACT_RECONCILIATION.md).
 
 Existing project isolation and security boundaries remain authoritative.
+
+Organization, authenticated principal, ownership/membership, and effective permission resolution remain deferred.
 
 ---
 
@@ -25,7 +27,7 @@ It does not control execution.
 
 Current Authority Context
 
-Future Workspace Authority Context
+Supplied or target Workspace Authority Context
 
 ↓
 
@@ -98,8 +100,7 @@ Workspace shadow model:
 
 This phase does not create:
 
-- workspace runtime
-- workspace database
+- a second workspace runtime or store
 - membership system
 - user accounts
 - permission enforcement
@@ -110,4 +111,4 @@ This phase does not create:
 
 BE-2.10:
 
-Workspace Authority Architecture Review.
+Any future enforcement adoption requires the universal reconciliation gate, a current truth scan, and separate approval.

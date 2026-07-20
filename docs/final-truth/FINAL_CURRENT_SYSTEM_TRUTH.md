@@ -6,6 +6,12 @@
 > This document is audit, planning, and reconciliation evidence.
 > It is not runtime implementation and is not production certification.
 
+> **Phase 1A current-truth supplement**
+>
+> The Phase 0 analysis below is preserved as historical evidence. At the Phase 1A baseline `baf62a747f5defa51fa1376eb63272cd965a15b3`, Workspace schema, durable storage, lifecycle runtime, versioned Workspace-to-Project relationship authority, Project Workspace projection, drift inspection, and bounded reconciliation exist. Organization, authenticated principal, Workspace/Project membership, ownership, and effective permission resolution remain missing or deferred. Current documentation precedence and supersession are defined by the [Phase 1A universal reconciliation](../contracts/architecture/PHASE_1A_UNIVERSAL_CONTRACT_RECONCILIATION.md).
+>
+> Commit `baf62a7` establishes only the narrow side-effect-free `listProjectAssets` code shape and added static verifier coverage. The verifier was not run in this documentation task, and FC-3C7 through FC-3C11 are not independently certified by the controlling evidence.
+
 
 Audit: `MH_OS_PHASE_0_FINAL_TRUTH_RECONCILIATION`
 
@@ -31,6 +37,16 @@ Backend authority is materially implemented. The operations backbone defines dur
 
 The architecture is not contract-frozen. AI roles, route access, providers, capabilities, artifacts, versions, and statuses have multiple domain-specific definitions. There is no unified Capability Registry, global Provider Router, universal Artifact Contract, universal Version Contract, Knowledge Graph, Digital Twin, Executive Intelligence contract, or full Mission contract. Classification: **MISSING** for universal contracts and **PARTIAL** for their ingredients; confidence: high.
 
+Current Phase 1A qualification: declarative AI Role and Capability contracts and domain closeout decisions now reconcile terminology, but runtime ownership remains federated. No universal runtime registry or duplicate mutation authority was created.
+
+## Phase 1A Workspace and asset-read supplement
+
+Workspace runtime ownership is now explicit: `workspace-contract.js` owns schema/validation, `workspace-storage.js` owns persistence mechanics, `workspace-runtime.js` owns lifecycle mutations, and `workspace-relationship-runtime.js` owns Workspace-to-Project relationship transitions. `project-identity.js` remains the separate Project identity authority. `project-workspace-projection.js` writes only the derived Project-side projection; drift and reconciliation components inspect, plan, or delegate to those existing owners.
+
+Project scope and Workspace scope remain distinct. The Workspace foundation does not prove authenticated membership, Organization authority, universal Workspace RBAC, or Workspace ownership of every Project-domain store.
+
+At `baf62a7`, the project asset list path is a read-only projection: `listProjectAssets` uses baseline paths and does not rewrite `assets-registry.json`. This is a static code-shape conclusion with added static verifier coverage, not a claim that the verifier ran, that all asset paths are certified, or that production safety is proven.
+
 ## Backend truth
 
 `runtime/orchestrator-service/server.js` is a large monolithic registration/composition owner. It registers health, media, operations, team, campaigns, content, workflows, AI, tasks, approvals, governance, notifications, handoffs, insights, integrations, customer operations, publishing, scheduler, feedback, smart suggestions, and legacy commerce routes (`server.js:9863-23978`). Both canonical-looking and `/public` compatibility aliases are active. Classification: **IMPLEMENTED**, with **LEGACY_COMPATIBILITY** alias debt; confidence: high.
@@ -42,7 +58,7 @@ Authentication/authorization is access-key and route-policy oriented rather than
 The active shell registers Home, Setup/Project Center, Library, Integrations, Research, AI Command, Workflows, Campaign Studio, Content Studio, Media Studio, Publishing, Ads Manager, Insights, Customer Center, Governance, Settings, Operations Overview, Task Center, Queue Center, Job Monitor, and Notifications through `public/control-center/router.js` and page modules under `public/control-center/pages/`. All are real surfaces; completeness differs.
 
 | Surface | Runtime truth | Classification | Confidence / exact evidence |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Home | Executive projection and routing; no execution authority | IMPLEMENTED | high; `pages/home.js:1057-1121` |
 | Setup / Project Center | Project setup/template/source writes via backend | IMPLEMENTED | high; `pages/setup.js`; `server.js:11593-11632` |
 | Library | Asset catalog, upload, classification, source-of-truth, archive/delete handlers | IMPLEMENTED | high; `server.js:11151-11593`; `pages/library.js` |

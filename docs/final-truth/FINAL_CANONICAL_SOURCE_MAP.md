@@ -6,11 +6,17 @@
 > This document is audit, planning, and reconciliation evidence.
 > It is not runtime implementation and is not production certification.
 
+> **Phase 1A current-truth supplement:** The Phase 0 map is preserved and extended at baseline `baf62a747f5defa51fa1376eb63272cd965a15b3`. Current precedence is defined by the [Phase 1A universal reconciliation](../contracts/architecture/PHASE_1A_UNIVERSAL_CONTRACT_RECONCILIATION.md). Organization, authenticated principal/membership, and effective permission resolution remain deferred.
+
 
 Baseline: `bf5681b9f291ed56595860fa4bbcdc747b406271`. “Canonical” means current runtime ownership proven by callers, not filename language. Where authority is split, the required result is `NO_SINGLE_CANONICAL_SOURCE`.
 
 | Domain | Canonical source | Projection source | Compatibility source | Storage source | Tests/evidence | Confidence | Unresolved issue / classification |
-|---|---|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Workspace schema/lifecycle | `lib/workspace/workspace-contract.js` for schema/validation; `lib/workspace/workspace-runtime.js` for lifecycle/mutations | Workspace dashboards and reports | Historical design/shadow documents | `lib/workspace/workspace-storage.js` for persistence mechanics | Runtime truth supplement and Phase 1A reconciliation | high | Authenticated ownership/membership and Organization authority remain deferred |
+| Workspace-to-Project relationship | `lib/workspace/workspace-relationship-runtime.js` | `lib/projects/project-workspace-projection.js`; drift inspector | Projection orchestrator and bounded reconciliation contract/executor delegate to owners | Workspace storage for authoritative relationship; Project writer for derived projection | Runtime truth supplement and Phase 1A reconciliation | high | Projection never outranks relationship authority; multi-process guarantees not proven |
+| Project identity | `lib/projects/project-identity.js` | Project selector and Workspace projection | Existing Project/path compatibility | Project identity record | Identity/Workspace contract evidence | high | Selection/path isolation is not authenticated membership |
+| Project asset list | Project asset registry/domain writers own records; `listProjectAssets` is read-only | Library and asset list projection | Canonical/legacy baseline path resolution | Project asset registry | `baf62a7` static code shape and added verifier coverage; verifier not run here | high for static boundary only | No runtime/production certification; FC-3C7–FC-3C11 not independently certified |
 | AI roles | NO_SINGLE_CANONICAL_SOURCE: `lib/ops/backbone.js:114-178` owns operational team roles; AI Command owns active chat roles | `public/control-center/ai-team-model.js:13-126`; `pages/ai-command.js` | AI Command alias normalizers; route-role fallback | project team JSON via backbone | `scripts/audit/validate-ai-team-operating-contract.mjs` | high | IDs/coverage differ; DUPLICATED |
 | Route permissions | `lib/security/route-permission-catalog.js` + enforcement middleware | `runtime/authority/authority-projection.js` | `runtime/authority/route-role-fallback.js`; `backbone.js:180-194` | policy/project stores | backend permission scripts; route-shadow audits | high | Prove enforcement vs projection parity |
 | Governance | `lib/ops/backbone.js` policy/approval operations + `lib/security/governance-mutation-gate.js` | `pages/governance.js` | default policy merge in backbone | project governance/approval JSON | governance verification scripts | high | Contract split between policy, gate, route |
@@ -41,3 +47,5 @@ Baseline: `bf5681b9f291ed56595860fa4bbcdc747b406271`. “Canonical” means curr
 2. Provider authority is intentionally specialized today; a Phase 1 Provider Contract should federate it rather than replace working registries immediately.
 3. Frontend role/tool/fallback maps are projections or compatibility sources and must not silently become enforcement sources.
 4. Current code and tests outrank every “canonical”, “final”, “master”, “PASS”, or “CERTIFIED” document title.
+5. For Phase 1A documentation status and supersession, use the universal reconciliation; it does not override installed backend owners or create runtime authority.
+6. Workspace lifecycle, storage, relationship, projection, drift, and reconciliation owners are now explicit. They do not establish Organization, authenticated membership, or universal Workspace ownership of Project domains.

@@ -2,17 +2,19 @@
 
 ## Status
 
-Design proposal only.
+Historical design proposal with a current-runtime supplement.
 
-No workspace runtime implementation is created.
+This document did not create runtime implementation. Since its original baseline, Workspace schema, durable storage, lifecycle runtime, Workspace-to-Project relationship authority, Project projection, drift inspection, and bounded reconciliation have been implemented. Current Phase 1A precedence is defined by the [Phase 1A universal reconciliation](../contracts/architecture/PHASE_1A_UNIVERSAL_CONTRACT_RECONCILIATION.md).
 
 Existing project and security boundaries remain authoritative.
+
+The implemented Workspace foundation does not establish Organization authority, authenticated principal or ownership, Workspace/Project membership, effective permissions, or universal Workspace ownership of every domain. The future membership and authority portions below remain proposals.
 
 ---
 
 # 1. Objective
 
-Define the future Workspace Authority model for MH-OS.
+Preserve the original future Workspace Authority model while distinguishing it from the implemented Workspace lifecycle and relationship foundation.
 
 Workspace becomes the primary operating boundary for:
 
@@ -29,7 +31,7 @@ Workspace becomes the primary operating boundary for:
 
 # 2. Workspace Model
 
-Future Workspace:
+Original target Workspace (only the lifecycle/relationship subset is currently established):
 
 
 Workspace
@@ -86,8 +88,13 @@ Decision
 Existing foundations:
 
 | Area | Current Capability |
-|---|---|
-| Identity | Authority context with workspace placeholder |
+| --- | --- |
+| Workspace contract | Versioned schema, validation, transition and relationship contract |
+| Workspace storage | Durable contained persistence, atomic replacement and recovery classifications |
+| Workspace runtime | Lifecycle creation, reads, transitions, version checks and explicit mutation |
+| Workspace relationship | Versioned Workspace-to-Project attach/detach lifecycle |
+| Projection and drift | Project-side Workspace projection, inspection and bounded reconciliation |
+| Identity | Authority context exists, but authenticated principal/membership authority remains missing |
 | Projects | Project isolation and path boundaries |
 | Security | Existing runtime gates |
 | Evidence | Shadow evidence architecture |
@@ -96,7 +103,7 @@ Existing foundations:
 
 # 5. Workspace Responsibilities
 
-Workspace owns:
+The original target proposed that Workspace would own the following. Current runtime proves Workspace lifecycle and Workspace-to-Project relationship ownership only; the remaining domain ownership requires separate adoption:
 
 - project boundaries
 - AI context boundaries
@@ -123,7 +130,7 @@ Workspace Authority must:
 
 This phase does not create:
 
-- workspace database
+- a second Workspace store or lifecycle runtime
 - user management
 - membership runtime
 - permission enforcement
@@ -135,4 +142,4 @@ This phase does not create:
 
 BE-2.5:
 
-Workspace Authority Source Inventory.
+Use the current universal reconciliation and runtime truth supplement before any future membership or authority adoption.

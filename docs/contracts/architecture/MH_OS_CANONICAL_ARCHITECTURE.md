@@ -1,8 +1,8 @@
 # MH-OS Canonical Architecture
 
-Status: Proposed canonical contract
+Status: Current canonical architecture contract for the established Phase 1A boundary
 Scope: Principal, Workspace, Project, Business Identity, API and UI boundaries
-Authority: Runtime evidence from Phase 1A-8A through Phase 1A-9
+Authority: Runtime evidence reconciled at `main` baseline `baf62a747f5defa51fa1376eb63272cd965a15b3`; Phase 1A documentation precedence is defined by the [Phase 1A Universal Contract Reconciliation](PHASE_1A_UNIVERSAL_CONTRACT_RECONCILIATION.md).
 
 ## 1. Purpose
 
@@ -11,6 +11,8 @@ This document defines the canonical architectural model for MH-OS.
 It governs entity authority, runtime ownership, persistence ownership, projection boundaries, API composition, UI responsibilities, and future implementation decisions.
 
 No implementation may introduce a competing authority for a capability already owned by one of the layers defined here.
+
+This document describes current and governing boundaries; it does not itself mutate runtime state. Organization authority, authenticated principal and membership authority, and effective permission resolution remain deferred. Frontend pages, reports, catalogs, classifiers, shadow models, and compatibility adapters remain projections unless installed backend evidence establishes a narrower authority.
 
 ## 2. Canonical Entity Model
 
@@ -43,7 +45,7 @@ Organization is not currently a runtime authority. It remains a conceptual or fu
 ## 3. Canonical Authority Matrix
 
 | Layer | Responsibility | Canonical Authority |
-|---|---|---|
+| --- | --- | --- |
 | Security Principal | Authentication identity adaptation | `runtime/orchestrator-service/lib/security/identity-adapter.js` |
 | Security Principal | Operational principal and access context | `runtime/orchestrator-service/lib/ops/backbone.js` |
 | Workspace | Runtime lifecycle and mutation authority | `runtime/orchestrator-service/lib/workspace/workspace-runtime.js` |
@@ -66,11 +68,13 @@ A principal is not a Project, a brand, a customer profile, an integration accoun
 
 Authentication identity and business identity must remain distinct.
 
+The architectural entity is defined, but a canonical authenticated-principal producer, Workspace/Project membership authority, and effective permission resolver are not proven at the Phase 1A baseline.
+
 ### 4.2 Workspace
 
 A Workspace is the canonical governed operational boundary.
 
-A Workspace contains or scopes Projects, AI team configuration, knowledge, governance, integrations, runtime policies, shared assets, relationships, and workspace-level operating state.
+A Workspace is designed to contain or scope Projects and Workspace-level operating state. Current runtime proof establishes Workspace lifecycle and Workspace-to-Project relationships; it does not establish universal Workspace ownership of AI configuration, knowledge, governance, integrations, shared assets, membership, or permissions.
 
 The Workspace runtime is authoritative for Workspace lifecycle and mutations.
 
@@ -183,11 +187,13 @@ A template must not create a second Project authority.
 - Project is the universal business entity.
 - Project Identity is the business identity authority.
 - Security Principal is separate from business identity.
-- Workspace relationship runtime owns Workspace-to-Project membership.
+- Workspace relationship runtime owns the Workspace-to-Project relationship lifecycle; this is not authenticated principal membership.
 - Project Workspace Projection is derived.
 - Organization is not currently a runtime authority.
 - `server.js` is an API and composition boundary.
 - UI remains a projection layer.
+
+These decisions are reconciled across Phase 1A-1 through Phase 1A-13 by the [Phase 1A Universal Contract Reconciliation](PHASE_1A_UNIVERSAL_CONTRACT_RECONCILIATION.md). That reconciliation closes documentation only; federated domain owners remain current, and deferred runtime adoption requires separate approval and proof.
 
 ## 10. Change Governance
 

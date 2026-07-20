@@ -2,9 +2,9 @@
 
 ## Status
 
-Design proposal only.
+Historical validation proposal with current-runtime qualification.
 
-No workspace authority runtime is implemented.
+Workspace schema/lifecycle and Workspace-to-Project relationship validators now exist in the implemented Workspace foundation. The ownership, membership, authenticated principal, and permission validation below remains future design. See the [Phase 1A universal reconciliation](../contracts/architecture/PHASE_1A_UNIVERSAL_CONTRACT_RECONCILIATION.md).
 
 Existing project isolation and security boundaries remain authoritative.
 
@@ -12,7 +12,7 @@ Existing project isolation and security boundaries remain authoritative.
 
 # 1. Objective
 
-Define a future validation model for Workspace Authority.
+Preserve the future ownership and permission validation model while recognizing existing lifecycle, relationship, projection, drift, and reconciliation validation.
 
 Validation ensures that workspace identity, ownership, and relationships are consistent before future enforcement.
 
@@ -38,7 +38,7 @@ Workspace Validation Result
 
 # 3. Validation Inputs
 
-Future validation consumes:
+Future ownership/membership validation consumes:
 
 
 workspace_identity
@@ -76,9 +76,9 @@ UNTRUSTED
 
 Validator verifies:
 
-- workspace identity consistency
+- workspace identity consistency (current Workspace contract provides a bounded implementation)
 - ownership evidence availability
-- project relationship validity
+- project relationship validity (current Workspace relationship runtime provides a bounded implementation)
 - security context compatibility
 - evidence traceability
 
@@ -100,8 +100,7 @@ Workspace validation:
 
 This phase does not create:
 
-- workspace runtime
-- workspace database
+- a second workspace runtime or store
 - membership system
 - user accounts
 - permission enforcement
@@ -112,4 +111,4 @@ This phase does not create:
 
 BE-2.9:
 
-Workspace Authority Shadow Model.
+Future principal/membership enforcement requires separate authority, adoption approval, and proof; existing lifecycle validation must remain owned by the Workspace modules.
