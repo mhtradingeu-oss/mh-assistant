@@ -8,7 +8,7 @@ MH-OS.
 ```text
 phase=PHASE_L4F
 status=REGISTRATION_READY
-runner_available=NO
+runner_available=YES
 verifier_execution_authorized=NO
 classification_complete=NO
 default_policy=DENY
@@ -60,3 +60,29 @@ safe_for_ci=false
 safe_for_release=false
 
 Classification and profile authorization must follow evidence, not filenames.
+
+
+## Controlled Runner Activation — L5C-C
+
+The minimal governed runner is available under a fail-closed policy.
+
+Executable profiles:
+
+- `READ_ONLY`
+- `TEMP_ROOT`
+
+Current verifier assignments:
+
+- `identity-workspace.pure-read-approval-authority`
+  - profile: `TEMP_ROOT`
+  - local execution only
+- `identity-workspace.production-governance-readiness-recertification`
+  - profile: `TEMP_ROOT`
+  - local execution only
+
+All other registered verifiers remain unassigned and denied.
+
+CI, release, production certification, server, HTTP, network, provider,
+write-key, repository mutation, and live-data mutation remain disabled.
+
+`default_policy=DENY`

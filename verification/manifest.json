@@ -2,12 +2,12 @@
   "manifest_version": "1.0.0",
   "contract_id": "mh-os.verification-governance.v1",
   "strategy": "CONSOLIDATE_EXISTING",
-  "status": "PARTIAL_REGISTRATION",
+  "status": "CONTROLLED_RUNNER_AVAILABLE",
   "default_policy": "DENY",
   "repository_scope": ".",
   "classification_complete": false,
-  "runner_available": false,
-  "generated_from_truth_scan": "PHASE_L5B_BATCH_2_STATIC_CLASSIFICATION",
+  "runner_available": true,
+  "generated_from_truth_scan": "PHASE_L5C_C_CONTROLLED_PROFILE_ACTIVATION",
   "allowed_safety_classes": [
     "PURE_READ_ONLY",
     "TEMP_ROOT_MUTATING",
@@ -529,16 +529,18 @@
       "mutates_repository": false,
       "mutates_live_data": false,
       "explicit_gate": "MH_ASSISTANT_ROOT must resolve to an isolated temporary root.",
-      "safe_for_local": false,
+      "safe_for_local": true,
       "safe_for_ci": false,
       "safe_for_release": false,
-      "profiles": [],
+      "profiles": [
+        "TEMP_ROOT"
+      ],
       "estimated_runtime": "short",
       "timeout_seconds": 30,
       "limitations": [
-        "Registration is deny-only; no execution profile is authorized while the governed runner is unavailable.",
-        "This verifier certifies the Approval pure-read boundary only; it does not authorize Approval creation, decisions, Workspace creation, or production activation.",
-        "Execution requires an explicit isolated temporary root and must not target live project data."
+        "Authorized only for controlled local execution through the governed TEMP_ROOT profile.",
+        "Execution requires an explicit existing temporary root outside the repository.",
+        "CI, release, production, server, HTTP, network, provider, write-key, repository-mutation, and live-data-mutation authority remain denied."
       ]
     },
     {
@@ -559,16 +561,18 @@
       "mutates_repository": false,
       "mutates_live_data": false,
       "explicit_gate": "MH_ASSISTANT_ROOT must be an isolated temporary directory outside the repository root.",
-      "safe_for_local": false,
+      "safe_for_local": true,
       "safe_for_ci": false,
       "safe_for_release": false,
-      "profiles": [],
+      "profiles": [
+        "TEMP_ROOT"
+      ],
       "estimated_runtime": "medium",
       "timeout_seconds": 120,
       "limitations": [
-        "Registration remains deny-only while the governed verification runner is unavailable.",
-        "Certification covers the preparation and authority boundary; it does not authorize real Approval creation, Workspace creation, or production activation.",
-        "Execution must use an explicit isolated temporary root and must never target repository or live project data."
+        "Authorized only for controlled local execution through the governed TEMP_ROOT profile.",
+        "Execution requires an explicit existing temporary root outside the repository.",
+        "CI, release, production, server, HTTP, network, provider, write-key, repository-mutation, and live-data-mutation authority remain denied."
       ]
     },
     {

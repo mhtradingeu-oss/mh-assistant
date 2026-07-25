@@ -278,11 +278,11 @@ function main() {
 
     expectDenied(
       actualRepositoryDenial,
-      "RUNNER_UNAVAILABLE"
+      "VERIFIER_PROFILE_NOT_AUTHORIZED"
     );
 
     cases.push(
-      "actual_repository_runner_unavailable=PASS"
+      "actual_repository_unassigned_verifier_denied=PASS"
     );
 
     const readOnlyResult = runRunner({
