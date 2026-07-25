@@ -1,0 +1,110 @@
+{
+  "profiles_version": "1.0.0",
+  "contract_id": "mh-os.verification-governance.v1",
+  "status": "DECLARATIVE_ONLY",
+  "default_policy": "DENY",
+  "runner_available": false,
+  "profiles": [
+    {
+      "id": "READ_ONLY",
+      "status": "PLANNED_EXECUTABLE",
+      "execution_enabled": false,
+      "description": "Pure read-only verification with no server, HTTP, network, provider, write key, repository mutation, fixture mutation, or live-data mutation.",
+      "allowed_safety_classes": [
+        "PURE_READ_ONLY"
+      ],
+      "requires_explicit_approval": false,
+      "allows_server": false,
+      "allows_http": false,
+      "allows_network": false,
+      "allows_live_provider": false,
+      "allows_write_key": false,
+      "allows_temp_root_mutation": false,
+      "allows_repository_mutation": false,
+      "allows_live_data_mutation": false
+    },
+    {
+      "id": "TEMP_ROOT",
+      "status": "PLANNED_EXECUTABLE",
+      "execution_enabled": false,
+      "description": "Isolated fixture verification whose mutations are constrained to an explicit temporary root.",
+      "allowed_safety_classes": [
+        "PURE_READ_ONLY",
+        "TEMP_ROOT_MUTATING"
+      ],
+      "requires_explicit_approval": false,
+      "allows_server": false,
+      "allows_http": false,
+      "allows_network": false,
+      "allows_live_provider": false,
+      "allows_write_key": false,
+      "allows_temp_root_mutation": true,
+      "allows_repository_mutation": false,
+      "allows_live_data_mutation": false
+    },
+    {
+      "id": "LOCAL_ENGINEERING",
+      "status": "DECLARATIVE_ONLY",
+      "execution_enabled": false,
+      "description": "Future local engineering profile. It must not elevate mutation gates implicitly.",
+      "allowed_safety_classes": [],
+      "requires_explicit_approval": true,
+      "allows_server": false,
+      "allows_http": false,
+      "allows_network": false,
+      "allows_live_provider": false,
+      "allows_write_key": false,
+      "allows_temp_root_mutation": false,
+      "allows_repository_mutation": false,
+      "allows_live_data_mutation": false
+    },
+    {
+      "id": "CI",
+      "status": "DECLARATIVE_ONLY",
+      "execution_enabled": false,
+      "description": "Future deterministic and non-interactive continuous-integration profile.",
+      "allowed_safety_classes": [],
+      "requires_explicit_approval": true,
+      "allows_server": false,
+      "allows_http": false,
+      "allows_network": false,
+      "allows_live_provider": false,
+      "allows_write_key": false,
+      "allows_temp_root_mutation": false,
+      "allows_repository_mutation": false,
+      "allows_live_data_mutation": false
+    },
+    {
+      "id": "RELEASE_CANDIDATE",
+      "status": "DECLARATIVE_ONLY",
+      "execution_enabled": false,
+      "description": "Future release-candidate evidence profile. It is not release approval.",
+      "allowed_safety_classes": [],
+      "requires_explicit_approval": true,
+      "allows_server": false,
+      "allows_http": false,
+      "allows_network": false,
+      "allows_live_provider": false,
+      "allows_write_key": false,
+      "allows_temp_root_mutation": false,
+      "allows_repository_mutation": false,
+      "allows_live_data_mutation": false
+    },
+    {
+      "id": "PRODUCTION_CERTIFICATION",
+      "status": "DECLARATIVE_ONLY",
+      "execution_enabled": false,
+      "description": "Future controlled evidence-collection profile. It never grants automatic production approval.",
+      "allowed_safety_classes": [],
+      "requires_explicit_approval": true,
+      "allows_server": false,
+      "allows_http": false,
+      "allows_network": false,
+      "allows_live_provider": false,
+      "allows_write_key": false,
+      "allows_temp_root_mutation": false,
+      "allows_repository_mutation": false,
+      "allows_live_data_mutation": false
+    }
+  ]
+}
