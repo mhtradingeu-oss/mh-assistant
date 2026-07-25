@@ -1,18 +1,30 @@
 "use strict";
 
 /**
- * Passive MH-OS identity adapter.
+ * Narrow MH-OS service identity and authority-context adapter.
  *
  * This module consumes authentication outcomes established elsewhere. It does
- * not inspect credentials, authorize requests, resolve roles, or replace any
- * existing runtime gate.
+ * not inspect credentials or resolve human roles. Service permissions are
+ * resolved only from backend-created trusted identity assertions.
  */
+
+const {
+  GOVERNANCE_WORKSPACE_CREATION_PREPARE_PERMISSION
+} = require("./route-permission-catalog");
 
 const AUTHORITY_CONTEXT_VERSION = "mh-authority-context-v1";
 const LEGACY_CONTROL_KEY_PRINCIPAL_ID = "legacy-control-center-key";
+const TRUSTED_IDENTITY_ASSERTION = Symbol("trusted-mh-identity-assertion");
 const MAX_EVIDENCE_DEPTH = 6;
 const MAX_EVIDENCE_ITEMS = 50;
 const MAX_TEXT_LENGTH = 500;
+const PERMISSION_PATTERN = /^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$/;
+
+const SERVICE_PRINCIPAL_PERMISSION_GRANTS = Object.freeze({
+  [LEGACY_CONTROL_KEY_PRINCIPAL_ID]: Object.freeze([
+    GOVERNANCE_WORKSPACE_CREATION_PREPARE_PERMISSION
+  ])
+});
 
 const ALLOWED_AUTHENTICATION_SOURCES = new Set([
   "control_key_header",
@@ -49,6 +61,16 @@ function normalizeAuthenticationSource(value) {
     : "existing_control_key_guard";
 }
 
+function trustedAssertion(value) {
+  Object.defineProperty(value, TRUSTED_IDENTITY_ASSERTION, {
+    value: true,
+    enumerable: false,
+    configurable: false,
+    writable: false
+  });
+  return Object.freeze(value);
+}
+
 function createLegacyControlKeyAssertion(result = {}) {
   const authenticated =
   result &&
@@ -56,7 +78,7 @@ function createLegacyControlKeyAssertion(result = {}) {
   result.validated_by_existing_guard === true;
 
   if (!authenticated) {
-    return Object.freeze({
+    return trustedAssertion({
       principal_id: null,
       principal_type: null,
       authenticated: false,
@@ -65,7 +87,7 @@ function createLegacyControlKeyAssertion(result = {}) {
     });
   }
 
-  return Object.freeze({
+  return trustedAssertion({
     principal_id: LEGACY_CONTROL_KEY_PRINCIPAL_ID,
     principal_type: "service",
     authenticated: true,
@@ -105,7 +127,8 @@ function sanitizeAuthorityEvidence(value, depth = 0) {
 }
 
 function normalizePrincipal(assertion) {
-  if (!assertion || assertion.authenticated !== true) {
+  if (!assertion || assertion[TRUSTED_IDENTITY_ASSERTION] !== true
+    || assertion.authenticated !== true) {
     return createLegacyControlKeyAssertion({ authenticated: false });
   }
 
@@ -116,8 +139,41 @@ function normalizePrincipal(assertion) {
   });
 }
 
+function normalizePermissionSet(values) {
+  if (!Array.isArray(values)) return Object.freeze([]);
+  const normalized = [];
+  for (const value of values) {
+    if (typeof value !== "string" || value.trim() !== value
+      || !PERMISSION_PATTERN.test(value)) {
+      return Object.freeze([]);
+    }
+    if (!normalized.includes(value)) normalized.push(value);
+  }
+  return Object.freeze(normalized);
+}
+
+function resolveServicePrincipalPermissions(principal) {
+  if (!principal || principal[TRUSTED_IDENTITY_ASSERTION] !== true
+    || principal.authenticated !== true
+    || principal.principal_type !== "service"
+    || typeof principal.principal_id !== "string") {
+    return Object.freeze([]);
+  }
+  return normalizePermissionSet(
+    SERVICE_PRINCIPAL_PERMISSION_GRANTS[principal.principal_id]
+  );
+}
+
+function deepFreeze(value) {
+  if (!value || typeof value !== "object" || Object.isFrozen(value)) return value;
+  Object.freeze(value);
+  Object.values(value).forEach(deepFreeze);
+  return value;
+}
+
 function createAuthorityContext(input = {}) {
   const principal = normalizePrincipal(input.principal || input.identity_assertion);
+  const permissions = resolveServicePrincipalPermissions(principal);
   const projectId = input.project_id == null ? null : safeText(input.project_id) || null;
   const evidenceReferences = Array.isArray(input.evidence_references)
     ? sanitizeAuthorityEvidence(input.evidence_references)
@@ -126,14 +182,14 @@ function createAuthorityContext(input = {}) {
     ? sanitizeAuthorityEvidence(input.shadow_observations).slice(0, MAX_EVIDENCE_ITEMS)
     : [];
 
-  return {
+  return deepFreeze({
     version: AUTHORITY_CONTEXT_VERSION,
     mode: "shadow",
     principal,
     workspace_id: null,
     project_id: projectId,
     roles: [],
-    permissions: [],
+    permissions,
     authentication_source: principal.authenticated ? principal.source : "none",
     governance_decision: null,
     provider_decision: null,
@@ -144,7 +200,43 @@ function createAuthorityContext(input = {}) {
     },
     evidence_references: evidenceReferences,
     shadow_observations: shadowObservations
-  };
+  });
+}
+
+class AuthorityPermissionError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "AuthorityPermissionError";
+    this.code = "AUTHORITY_PERMISSION_DENIED";
+    this.statusCode = 403;
+  }
+}
+
+function assertAuthorityPermission(context, requiredPermission) {
+  if (typeof requiredPermission !== "string"
+    || requiredPermission.trim() !== requiredPermission
+    || !PERMISSION_PATTERN.test(requiredPermission)) {
+    throw new AuthorityPermissionError("Required authority permission is invalid");
+  }
+  if (!context || typeof context !== "object" || !Object.isFrozen(context)
+    || !context.principal || !Object.isFrozen(context.principal)
+    || context.principal[TRUSTED_IDENTITY_ASSERTION] !== true
+    || context.principal.authenticated !== true
+    || context.principal.principal_type !== "service"
+    || !Array.isArray(context.permissions) || !Object.isFrozen(context.permissions)) {
+    throw new AuthorityPermissionError("Trusted service authority context is required");
+  }
+  const resolvedPermissions = resolveServicePrincipalPermissions(context.principal);
+  const permissionsValid = context.permissions.length === resolvedPermissions.length
+    && context.permissions.every((permission, index) =>
+      typeof permission === "string"
+      && permission === resolvedPermissions[index]
+      && PERMISSION_PATTERN.test(permission)
+    );
+  if (!permissionsValid || !context.permissions.includes(requiredPermission)) {
+    throw new AuthorityPermissionError("Required authority permission is not granted");
+  }
+  return true;
 }
 
 function attachAuthorityContext(req, input = {}) {
@@ -176,9 +268,12 @@ function recordShadowObservation(context, observation = {}) {
 }
 
 module.exports = {
+  AuthorityPermissionError,
   createLegacyControlKeyAssertion,
   createAuthorityContext,
   attachAuthorityContext,
+  resolveServicePrincipalPermissions,
+  assertAuthorityPermission,
   sanitizeAuthorityEvidence,
   recordShadowObservation
 };

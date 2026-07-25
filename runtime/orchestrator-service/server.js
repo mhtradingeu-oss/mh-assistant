@@ -137,8 +137,12 @@ const {
 const {
   createLegacyControlKeyAssertion,
   attachAuthorityContext,
+  assertAuthorityPermission,
   recordShadowObservation
 } = require('./lib/security/identity-adapter');
+const {
+  GOVERNANCE_WORKSPACE_CREATION_PREPARE_PERMISSION
+} = require('./lib/security/route-permission-catalog');
 const {
   evaluateGovernanceMutationGate,
   evaluateGovernanceApprovalLifecycle
@@ -220,6 +224,9 @@ const {
 } = require('./lib/ops/backbone');
 const backboneOps = require('./lib/ops/backbone');
 const resolveGovernanceApproval = backboneOps['decide' + 'Approval'];
+const {
+  prepareProductionGovernanceComposition
+} = require('./lib/workspace/production-governance-composition');
 const { createAiOrchestrationService } = require('./lib/ops/ai-orchestrator');
 const {
   createJobDispatchOrchestrator
@@ -810,6 +817,147 @@ function requireProtectedReadKey(req, res, next) {
 
 app.use(requireProtectedReadKey);
 
+const GOVERNANCE_WORKSPACE_PREPARATION_ROUTE =
+  '/api/governance/workspaces/mh-trading/creation/prepare';
+
+function requireGovernancePreparationAuthentication(req, res, next) {
+  const expectedKey = String(process.env[CONTROL_WRITE_KEY_ENV] || '').trim();
+  if (!expectedKey) {
+    return res.status(503).json({
+      ok: false,
+      error: {
+        code: 'GOVERNANCE_PREPARATION_AUTH_UNAVAILABLE',
+        message: `Governance preparation is disabled until ${CONTROL_WRITE_KEY_ENV} is configured.`
+      }
+    });
+  }
+  const providedKey = readProvidedControlWriteKey(req);
+  if (!providedKey) {
+    return res.status(401).json({
+      ok: false,
+      error: {
+        code: 'GOVERNANCE_PREPARATION_UNAUTHENTICATED',
+        message: 'Authenticated backend context is required.'
+      }
+    });
+  }
+  if (!controlWriteKeyMatches(expectedKey, providedKey)) {
+    return res.status(403).json({
+      ok: false,
+      error: {
+        code: 'GOVERNANCE_PREPARATION_FORBIDDEN',
+        message: 'Authenticated backend context is not authorized.'
+      }
+    });
+  }
+  attachAuthorityContext(req, {
+    identity_assertion: createLegacyControlKeyAssertion({
+      authenticated: true,
+      validated_by_existing_guard: true,
+      source: 'protected_read_key_guard'
+    })
+  });
+  return next();
+}
+
+function requireGovernancePreparationAuthorization(req, res, next) {
+  try {
+    assertAuthorityPermission(
+      req.mhAuthorityContext,
+      GOVERNANCE_WORKSPACE_CREATION_PREPARE_PERMISSION
+    );
+    return next();
+  } catch (_error) {
+    return res.status(403).json({
+      ok: false,
+      error: {
+        code: 'GOVERNANCE_PREPARATION_PERMISSION_DENIED',
+        message: 'The authenticated service is not authorized for this operation.'
+      }
+    });
+  }
+}
+
+const GOVERNANCE_AUTHORITY_INPUT_FIELDS = new Set([
+  'permissions',
+  'permission',
+  'scopes',
+  'scope',
+  'roles',
+  'role',
+  'principal',
+  'principalid',
+  'principaltype',
+  'authoritycontext',
+  'mhauthoritycontext',
+  'authenticated',
+  'serviceidentity',
+  'serviceprincipal',
+  'accesslevel',
+  'capabilities',
+  'grants'
+]);
+
+function normalizedAuthorityInputField(value) {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/^x-mh-/, '')
+    .replace(/^x-/, '')
+    .replace(/[^a-z0-9]/g, '');
+}
+
+function rejectGovernancePreparationAuthoritySpoofing(req, res, next) {
+  const sources = [
+    req && req.body && typeof req.body === 'object' ? Object.keys(req.body) : [],
+    req && req.query && typeof req.query === 'object' ? Object.keys(req.query) : [],
+    req && req.headers && typeof req.headers === 'object' ? Object.keys(req.headers) : []
+  ];
+  const hasAuthorityInput = sources
+    .flat()
+    .map(normalizedAuthorityInputField)
+    .some((field) => GOVERNANCE_AUTHORITY_INPUT_FIELDS.has(field));
+  if (!hasAuthorityInput) {
+    return next();
+  }
+  return res.status(400).json({
+    ok: false,
+    error: {
+      code: 'GOVERNANCE_PREPARATION_AUTHORITY_INPUT_FORBIDDEN',
+      message: 'Caller-supplied authority fields are not accepted.'
+    }
+  });
+}
+
+function createGovernanceWorkspacePreparationHandler(
+  prepare = prepareProductionGovernanceComposition
+) {
+  if (typeof prepare !== 'function') {
+    throw new TypeError('Governance preparation composition function is required');
+  }
+  return async function handleGovernanceWorkspacePreparation(req, res, next) {
+    try {
+      const preparation = await prepare(req.body, {
+        authenticatedContext: req.mhAuthorityContext
+      });
+      return res.json({ ok: true, preparation });
+    } catch (error) {
+      return next(error);
+    }
+  };
+}
+
+const handleGovernanceWorkspacePreparation =
+  createGovernanceWorkspacePreparationHandler();
+
+app.post(
+  GOVERNANCE_WORKSPACE_PREPARATION_ROUTE,
+  requireGovernancePreparationAuthentication,
+  requireGovernancePreparationAuthorization,
+  rejectGovernancePreparationAuthoritySpoofing,
+  handleGovernanceWorkspacePreparation
+);
+
 const runtimeSecurityEnforcement = createRuntimeSecurityEnforcementMiddleware({
   logger: appLogger,
   readProvidedControlWriteKey,
@@ -996,7 +1144,7 @@ function registerGeneratedMediaAssetsFromResult(projectName, {
     if (filePath) {
       record = registerProjectAsset(project, assetType, filePath);
     } else {
-      const paths = getProjectAssetPaths(project);
+      const paths = ensureProjectAssetPaths(project);
       const assets = readJsonFile(paths.assetsRegistryPath, [])
         .map(asset => normalizeAssetRecord(project, asset));
 
@@ -1045,7 +1193,7 @@ function registerGeneratedMediaAssetsFromResult(projectName, {
       writeJsonFile(paths.assetsRegistryPath, withoutExisting);
     }
 
-    const paths = getProjectAssetPaths(project);
+    const paths = ensureProjectAssetPaths(project);
     const assets = readJsonFile(paths.assetsRegistryPath, [])
       .map(asset => normalizeAssetRecord(project, asset));
 
@@ -7690,10 +7838,11 @@ function reviewProject(projectName) {
   return readJsonFile(paths.projectFilePath, {});
 }
 
-function reviewProjectCanonicalParity(projectName) {
+function assessProjectCanonicalParity(projectName) {
   const safeProject = normalizeProjectSlug(projectName);
   const paths = getProjectBaselinePaths(safeProject);
   const checks = [];
+  const mismatchEntries = [];
   const mismatchLogPath = path.join(paths.opsDir, 'data-mismatches.json');
 
   const domains = [
@@ -7719,21 +7868,23 @@ function reviewProjectCanonicalParity(projectName) {
     const legacyExists = fs.existsSync(item.legacy_path);
     const canonicalRaw = canonicalExists ? readJsonFile(item.canonical_path, null) : null;
     const legacyRaw = legacyExists ? readJsonFile(item.legacy_path, null) : null;
-    let canonicalValue, legacyValue;
+    let canonicalValue;
+    let legacyValue;
+
     if (item.domain === 'source_of_truth_registry') {
-      // Deterministic: compare only flat sources map, ignore wrapper metadata
       canonicalValue = extractSourceRegistryEntries(canonicalRaw);
       legacyValue = extractSourceRegistryEntries(legacyRaw);
     } else {
       canonicalValue = canonicalRaw;
       legacyValue = legacyRaw;
     }
+
     const parity = canonicalExists && legacyExists
       ? stableJsonHash(canonicalValue) === stableJsonHash(legacyValue)
       : canonicalExists;
 
     if (canonicalExists && legacyExists && !parity) {
-      logProjectDataMismatch(safeProject, {
+      mismatchEntries.push({
         domain: item.domain,
         reason: 'canonical_legacy_parity_check_mismatch',
         canonical_path: item.canonical_path,
@@ -7756,6 +7907,7 @@ function reviewProjectCanonicalParity(projectName) {
 
   const mismatches = checks.filter((item) => !item.parity).length;
   const fallbackDependencies = checks.filter((item) => item.fallback_in_use).length;
+  const reportPath = path.join(paths.reportsDir, 'canonical-migration-report.json');
   const report = {
     project: safeProject,
     generated_at: new Date().toISOString(),
@@ -7768,12 +7920,92 @@ function reviewProjectCanonicalParity(projectName) {
       : 'Canonical files are aligned with available legacy data.'
   };
 
-  const reportPath = path.join(paths.reportsDir, 'canonical-migration-report.json');
-  writeJsonFile(reportPath, report);
+  return {
+    project: safeProject,
+    report,
+    report_path: reportPath,
+    mismatch_entries: mismatchEntries
+  };
+}
+
+function reviewProjectCanonicalParity(projectName) {
+  const assessment = assessProjectCanonicalParity(projectName);
 
   return {
-    ...report,
-    report_path: reportPath
+    ...assessment.report,
+    report_path: assessment.report_path
+  };
+}
+
+function persistProjectCanonicalParityReview(projectName) {
+  const assessment = assessProjectCanonicalParity(projectName);
+
+  assessment.mismatch_entries.forEach((entry) => {
+    logProjectDataMismatch(assessment.project, entry);
+  });
+
+  writeJsonFile(assessment.report_path, assessment.report);
+
+  return {
+    ...assessment.report,
+    report_path: assessment.report_path,
+    persisted: true
+  };
+}
+
+function inspectProjectBaselineFiles(projectName) {
+  const safeProject = normalizeProjectSlug(projectName);
+  const paths = getProjectBaselinePaths(safeProject);
+
+  if (!fs.existsSync(paths.projectFilePath)) {
+    throw new Error('Project not found');
+  }
+
+  return {
+    project: safeProject,
+    checked_at: new Date().toISOString(),
+    required_files: {
+      project_file: {
+        path: paths.projectFilePath,
+        exists: fs.existsSync(paths.projectFilePath)
+      },
+      brand_profile: {
+        path: paths.brandProfilePath,
+        exists: fs.existsSync(paths.brandProfilePath)
+      },
+      assets_registry: {
+        path: paths.assetsRegistryPath,
+        exists: fs.existsSync(paths.assetsRegistryPath)
+      },
+      source_of_truth_registry: {
+        path: paths.sourceOfTruthRegistryPath,
+        exists: fs.existsSync(paths.sourceOfTruthRegistryPath)
+      },
+      integrations_registry: {
+        path: paths.integrationsRegistryPath,
+        exists: fs.existsSync(paths.integrationsRegistryPath)
+      },
+      ai_commands: {
+        path: paths.aiCommandsPath,
+        exists: fs.existsSync(paths.aiCommandsPath)
+      },
+      ai_artifacts: {
+        path: paths.aiArtifactsPath,
+        exists: fs.existsSync(paths.aiArtifactsPath)
+      },
+      ai_recommendations: {
+        path: paths.aiRecommendationsPath,
+        exists: fs.existsSync(paths.aiRecommendationsPath)
+      },
+      ai_memory: {
+        path: paths.aiMemoryPath,
+        exists: fs.existsSync(paths.aiMemoryPath)
+      },
+      integrations: {
+        path: paths.integrationControlCenterPath,
+        exists: fs.existsSync(paths.integrationControlCenterPath)
+      }
+    }
   };
 }
 
@@ -7786,7 +8018,7 @@ function reviewProjectReadiness(projectName) {
 
   const safeProject = normalizeProjectSlug(projectName);
   const projectData = readJsonFile(paths.projectFilePath, {});
-  const baselineValidation = ensureProjectBaselineFiles(safeProject, projectData);
+  const baselineValidation = inspectProjectBaselineFiles(safeProject);
   const brandProfile = readJsonFile(paths.brandProfilePath, {});
   const sourceRegistry = buildSourceOfTruthRegistry(readJsonFile(paths.sourcesRegistryPath, {}));
   const missingAssets = reviewProjectMissingAssets(safeProject);
@@ -7917,10 +8149,12 @@ function reviewProjectReadiness(projectName) {
   };
 }
 function getProjectAssetPaths(projectName) {
-  const base = getProjectBaselinePaths(projectName);
-  ensureProjectBaselineFiles(projectName);
+  return getProjectBaselinePaths(projectName);
+}
 
-  return base;
+function ensureProjectAssetPaths(projectName) {
+  ensureProjectBaselineFiles(projectName);
+  return getProjectBaselinePaths(projectName);
 }
 
 function normalizeAssetTags(value) {
@@ -7991,7 +8225,7 @@ function normalizeAssetRecord(projectName, asset = {}) {
 }
 
 function registerProjectAsset(projectName, assetType, filePath) {
-  const paths = getProjectAssetPaths(projectName);
+  const paths = ensureProjectAssetPaths(projectName);
 
   if (!fs.existsSync(paths.projectFilePath)) {
     throw new Error('Project not found');
@@ -8048,7 +8282,7 @@ function listProjectAssets(projectName) {
 }
 
 function setProjectSourceOfTruth(projectName, sourceType, sourceValue) {
-  const paths = getProjectAssetPaths(projectName);
+  const paths = ensureProjectAssetPaths(projectName);
 
   if (!fs.existsSync(paths.projectFilePath)) {
     throw new Error('Project not found');
@@ -8075,7 +8309,7 @@ function setProjectSourceOfTruth(projectName, sourceType, sourceValue) {
 }
 
 function removeProjectSourceOfTruth(projectName, sourceType) {
-  const paths = getProjectAssetPaths(projectName);
+  const paths = ensureProjectAssetPaths(projectName);
 
   if (!fs.existsSync(paths.projectFilePath)) {
     throw new Error('Project not found');
@@ -8167,9 +8401,17 @@ function getProjectIntegrationPaths(projectName) {
     throw new Error('Project not found');
   }
 
+  return {
+    ...paths,
+    controlCenterRegistryPath: paths.integrationControlCenterPath
+  };
+}
+
+function ensureProjectIntegrationRegistryStorage(projectName) {
+  const paths = getProjectIntegrationPaths(projectName);
+
   ensureProjectBaselineFiles(projectName);
-  const controlCenterRegistryPath = paths.integrationControlCenterPath;
-  ensureJsonFile(controlCenterRegistryPath, {
+  ensureJsonFile(paths.controlCenterRegistryPath, {
     updated_at: '',
     records: {}
   });
@@ -8178,10 +8420,7 @@ function getProjectIntegrationPaths(projectName) {
     records: {}
   });
 
-  return {
-    ...paths,
-    controlCenterRegistryPath
-  };
+  return paths;
 }
 
 function readProjectIntegrationRegistry(projectName) {
@@ -8199,7 +8438,7 @@ function readProjectIntegrationRegistry(projectName) {
 }
 
 function writeProjectIntegrationRegistry(projectName, registry = {}) {
-  const paths = getProjectIntegrationPaths(projectName);
+  const paths = ensureProjectIntegrationRegistryStorage(projectName);
   const payload = {
     updated_at: new Date().toISOString(),
     records: asPlainObject(registry.records)
@@ -9787,7 +10026,7 @@ function getTargetFolderForAssetType(projectName, assetType) {
 }
 
 function routeProjectAsset(projectName, assetType, sourceFilePath) {
-  const paths = getProjectAssetPaths(projectName);
+  const paths = ensureProjectAssetPaths(projectName);
 
   if (!fs.existsSync(paths.projectFilePath)) {
     throw new Error('Project not found');
@@ -23818,6 +24057,14 @@ if (require.main === module) {
 
 module.exports = {
   app,
+  __governanceWorkspacePreparation: {
+    route: GOVERNANCE_WORKSPACE_PREPARATION_ROUTE,
+    requireAuthentication: requireGovernancePreparationAuthentication,
+    requireAuthorization: requireGovernancePreparationAuthorization,
+    rejectUntrustedAuthority: rejectGovernancePreparationAuthoritySpoofing,
+    createHandler: createGovernanceWorkspacePreparationHandler,
+    handle: handleGovernanceWorkspacePreparation
+  },
   __productionProfile: {
     collectProductionBypassFlags,
     validateProductionProfileHardening,

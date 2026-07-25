@@ -32,6 +32,26 @@ const ROUTE_STATUS = Object.freeze({
   FUTURE: "future"
 });
 
+const GOVERNANCE_WORKSPACE_CREATION_PREPARE_PERMISSION =
+  "governance.workspace_creation.prepare";
+
+const EXACT_ROUTE_PERMISSIONS = Object.freeze({
+  "POST /api/governance/workspaces/mh-trading/creation/prepare": Object.freeze({
+    domain: "governance",
+    readWrite: "read",
+    requiredAccess: ROUTE_ACCESS.SERVICE,
+    requiredScope: GOVERNANCE_WORKSPACE_CREATION_PREPARE_PERMISSION,
+    status: ROUTE_STATUS.ACTIVE,
+    dataRisk: ROUTE_RISK.HIGH,
+    providerRisk: ROUTE_RISK.LOW,
+    destructiveRisk: ROUTE_RISK.LOW,
+    providerExecution: false,
+    destructive: false,
+    auditEvent: "governance.read.canonical",
+    recommendation: "require_authenticated_service_principal"
+  })
+});
+
 const DOMAIN_RULES = Object.freeze([
   {
     domain: "customer_operations",
@@ -154,6 +174,15 @@ function findDomainRule(pathname) {
 function classifyRoute(method, pathname) {
   const normalizedMethod = normalizeMethod(method);
   const routePath = String(pathname || "");
+  const exactPermission = EXACT_ROUTE_PERMISSIONS[`${normalizedMethod} ${routePath}`];
+  if (exactPermission) {
+    return {
+      method: normalizedMethod,
+      route: routePath,
+      publicAlias: false,
+      ...exactPermission
+    };
+  }
   const mutation = isMutationMethod(normalizedMethod);
   const publicAlias = isPublicAlias(routePath);
   const destructive = isDestructiveRoute(normalizedMethod, routePath);
@@ -217,6 +246,8 @@ module.exports = {
   ROUTE_RISK,
   ROUTE_ACCESS,
   ROUTE_STATUS,
+  GOVERNANCE_WORKSPACE_CREATION_PREPARE_PERMISSION,
+  EXACT_ROUTE_PERMISSIONS,
   DOMAIN_RULES,
   classifyRoute,
   isMutationMethod,

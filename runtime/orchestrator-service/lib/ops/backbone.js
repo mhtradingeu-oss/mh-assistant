@@ -1,3 +1,4 @@
+const fs = require('fs');
 const path = require('path');
 const {
   ensureDir,
@@ -465,7 +466,7 @@ function readTeamModel(projectName) {
 }
 
 function updateTeamModel(projectName, patch = {}, actor = 'mh-assistant') {
-  const paths = getOperationsPaths(projectName);
+  const paths = ensureOperationsPaths(projectName);
   let raw;
   try {
     raw = readJsonFileDurable(paths.teamPath);
@@ -776,9 +777,6 @@ function getOperationsPaths(projectName) {
   const projectDir = resolveProjectPath(PROJECTS_DIR, safeProject).projectRoot;
   const opsDir = path.join(projectDir, 'ops');
 
-  ensureDir(projectDir);
-  ensureDir(opsDir);
-
   const paths = {
     project: safeProject,
     projectDir,
@@ -802,6 +800,13 @@ function getOperationsPaths(projectName) {
     handoffsPath: path.join(opsDir, 'handoffs.json')
   };
 
+  return paths;
+}
+
+function ensureOperationsPaths(projectName) {
+  const paths = getOperationsPaths(projectName);
+  ensureDir(paths.projectDir);
+  ensureDir(paths.opsDir);
   ensureOperationsFiles(paths);
   return paths;
 }
@@ -955,6 +960,71 @@ function readCollection(filePath) {
   return raw === null ? [] : asArray(raw);
 }
 
+/**
+ * Resolve the Approval Engine's durable collection without initializing any
+ * project or operations storage. This path capability is Approval-owned and
+ * intentionally separate from getOperationsPaths(), which is writer-oriented.
+ */
+function resolveApprovalReadPath(projectName) {
+  const safeProject = normalizeProjectName(projectName);
+  return resolveProjectPath(
+    PROJECTS_DIR,
+    safeProject,
+    'ops',
+    'approvals.json'
+  ).targetPath;
+}
+
+/**
+ * Strict, non-mutating durable Approval read.
+ *
+ * Missing storage is an empty Approval collection. Existing empty, malformed,
+ * or non-array JSON fails closed without quarantining, renaming, overwriting,
+ * or otherwise mutating the durable file.
+ */
+function readApprovalCollectionReadOnly(projectName) {
+  const approvalsPath = resolveApprovalReadPath(projectName);
+  if (!fs.existsSync(approvalsPath)) {
+    return [];
+  }
+
+  let raw;
+  try {
+    raw = fs.readFileSync(approvalsPath, 'utf8').trim();
+  } catch (error) {
+    throw Object.assign(
+      new Error(`[backbone] Failed to read durable Approval collection: ${error.message}`),
+      { code: 'APPROVAL_STORAGE_READ_ERROR' }
+    );
+  }
+
+  if (!raw) {
+    throw Object.assign(
+      new Error('[backbone] Durable Approval collection is empty'),
+      { code: 'APPROVAL_STORAGE_EMPTY_FILE' }
+    );
+  }
+
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (error) {
+    throw Object.assign(
+      new Error(`[backbone] Durable Approval collection is malformed: ${error.message}`),
+      { code: 'APPROVAL_STORAGE_CORRUPT_JSON' }
+    );
+  }
+
+  if (!Array.isArray(parsed)) {
+    throw Object.assign(
+      new Error('[backbone] Durable Approval collection must be an array'),
+      { code: 'APPROVAL_STORAGE_INVALID_COLLECTION' }
+    );
+  }
+
+  return parsed;
+}
+
 function writeCollection(filePath, items, maxItems) {
   writeLimitedArray(filePath, items, maxItems);
 }
@@ -988,7 +1058,7 @@ function inferEventCategory(type) {
 }
 
 function appendEvent(projectName, event = {}) {
-  const paths = getOperationsPaths(projectName);
+  const paths = ensureOperationsPaths(projectName);
   const items = readCollection(paths.eventsPath);
   const timestamp = asString(event.timestamp) || nowIso();
   const nextEvent = {
@@ -1012,7 +1082,7 @@ function appendEvent(projectName, event = {}) {
 }
 
 function createNotification(projectName, input = {}) {
-  const paths = getOperationsPaths(projectName);
+  const paths = ensureOperationsPaths(projectName);
   const items = readCollection(paths.notificationsPath);
   const status = asBoolean(input.read) ? 'read' : asString(input.status) || 'unread';
   const notification = {
@@ -1045,7 +1115,7 @@ function listNotifications(projectName, options = {}) {
 }
 
 function markNotification(projectName, notificationId, input = {}) {
-  const paths = getOperationsPaths(projectName);
+  const paths = ensureOperationsPaths(projectName);
   const items = readCollection(paths.notificationsPath);
   const index = items.findIndex((item) => asString(item.id) === asString(notificationId));
 
@@ -1069,7 +1139,7 @@ function markNotification(projectName, notificationId, input = {}) {
 }
 
 function upsertQueueItem(projectName, input = {}) {
-  const paths = getOperationsPaths(projectName);
+  const paths = ensureOperationsPaths(projectName);
   const items = readCollection(paths.queuePath);
   const entityType = asString(input.entity_type);
   const entityId = asString(input.entity_id);
@@ -1116,7 +1186,7 @@ function listQueueItems(projectName, options = {}) {
 }
 
 function updateLinkedEntity(projectName, entityType, entityId, updater) {
-  const paths = getOperationsPaths(projectName);
+  const paths = ensureOperationsPaths(projectName);
   const normalizedType = asString(entityType);
   const normalizedId = asString(entityId);
 
@@ -1162,7 +1232,7 @@ function updateLinkedEntity(projectName, entityType, entityId, updater) {
 }
 
 function updateQueueEntity(projectName, entityType, entityId, patch = {}) {
-  const paths = getOperationsPaths(projectName);
+  const paths = ensureOperationsPaths(projectName);
   const items = readCollection(paths.queuePath);
   const index = items.findIndex((item) =>
     asString(item.entity_type) === asString(entityType) &&
@@ -1238,7 +1308,7 @@ function getGovernancePolicy(projectName) {
 }
 
 function updateGovernancePolicy(projectName, patch = {}, actor = 'mh-assistant') {
-  const paths = getOperationsPaths(projectName);
+  const paths = ensureOperationsPaths(projectName);
   const current = getGovernancePolicy(projectName);
   const sourcePatch = { ...asObject(patch) };
   delete sourcePatch.actor;
@@ -1683,7 +1753,7 @@ function syncMediaQueue(projectName, job = {}) {
 }
 
 function upsertCampaign(projectName, input = {}) {
-  const paths = getOperationsPaths(projectName);
+  const paths = ensureOperationsPaths(projectName);
   const items = readCollection(paths.campaignsPath);
   const team = readTeamModel(paths.project);
   const title = asString(input.name || input.title);
@@ -1769,7 +1839,7 @@ function getCampaign(projectName, campaignId) {
 }
 
 function upsertContentItem(projectName, input = {}) {
-  const paths = getOperationsPaths(projectName);
+  const paths = ensureOperationsPaths(projectName);
   const items = readCollection(paths.contentItemsPath);
   const team = readTeamModel(paths.project);
   const title = asString(input.title);
@@ -1911,7 +1981,7 @@ function getContentItem(projectName, contentItemId) {
 }
 
 function upsertMediaJob(projectName, input = {}) {
-  const paths = getOperationsPaths(projectName);
+  const paths = ensureOperationsPaths(projectName);
   const items = readCollection(paths.mediaJobsPath);
   const team = readTeamModel(paths.project);
   const current = findById(items, input.id) || {};
@@ -2050,7 +2120,7 @@ function getMediaJob(projectName, mediaJobId) {
 }
 
 function recordWorkflowRun(projectName, input = {}) {
-  const paths = getOperationsPaths(projectName);
+  const paths = ensureOperationsPaths(projectName);
   const items = readCollection(paths.workflowsPath);
   const workflowId = asString(input.workflow_id || input.workflowId || input.workflow_type);
 
@@ -2159,7 +2229,7 @@ function recordWorkflowRun(projectName, input = {}) {
 }
 
 function createAiCommandRecord(projectName, input = {}) {
-  const paths = getOperationsPaths(projectName);
+  const paths = ensureOperationsPaths(projectName);
   const items = readCollection(paths.aiCommandsPath);
   const current = findById(items, input.id) || {};
   const createdAt = asString(current.created_at) || asString(input.created_at) || nowIso();
@@ -2227,7 +2297,7 @@ function getAiCommandRecord(projectName, commandId) {
 }
 
 function createAiArtifact(projectName, input = {}) {
-  const paths = getOperationsPaths(projectName);
+  const paths = ensureOperationsPaths(projectName);
   const items = readCollection(paths.aiArtifactsPath);
   const current = findById(items, input.id) || {};
   const createdAt = asString(current.created_at) || asString(input.created_at) || nowIso();
@@ -2286,7 +2356,7 @@ function listAiArtifacts(projectName, options = {}) {
 }
 
 function createAiRecommendation(projectName, input = {}) {
-  const paths = getOperationsPaths(projectName);
+  const paths = ensureOperationsPaths(projectName);
   const items = readCollection(paths.aiRecommendationsPath);
   const current = findById(items, input.id) || {};
   const createdAt = asString(current.created_at) || asString(input.created_at) || nowIso();
@@ -2348,7 +2418,7 @@ function listAiRecommendations(projectName, options = {}) {
 }
 
 function upsertAiMemory(projectName, input = {}) {
-  const paths = getOperationsPaths(projectName);
+  const paths = ensureOperationsPaths(projectName);
   const items = readCollection(paths.aiMemoryPath);
   const title = asString(input.title || input.key || input.scope);
 
@@ -2423,7 +2493,7 @@ function getWorkflowRun(projectName, workflowRunId) {
 }
 
 function createTask(projectName, input = {}) {
-  const paths = getOperationsPaths(projectName);
+  const paths = ensureOperationsPaths(projectName);
   const items = readCollection(paths.tasksPath);
   const team = readTeamModel(paths.project);
   const title = asString(input.title);
@@ -2565,7 +2635,7 @@ function getTask(projectName, taskId) {
 }
 
 function createApproval(projectName, input = {}) {
-  const paths = getOperationsPaths(projectName);
+  const paths = ensureOperationsPaths(projectName);
   const items = readCollection(paths.approvalsPath);
   const governance = getGovernancePolicy(projectName);
   const team = readTeamModel(paths.project);
@@ -2755,14 +2825,10 @@ function createApproval(projectName, input = {}) {
 }
 
 function listApprovals(projectName, options = {}) {
-  const paths = getOperationsPaths(projectName);
-  return listItems(readCollection(paths.approvalsPath), options);
+  return listItems(readApprovalCollectionReadOnly(projectName), options);
 }
 
 function decideApproval(projectName, approvalId, input = {}) {
-  const paths = getOperationsPaths(projectName);
-  const items = readCollection(paths.approvalsPath);
-  const team = readTeamModel(paths.project);
   const targetId = asString(approvalId);
   const decision = asString(input.decision).toLowerCase();
 
@@ -2770,6 +2836,15 @@ function decideApproval(projectName, approvalId, input = {}) {
     throw new Error('Invalid approval decision');
   }
 
+  // A decision is a writer operation, but an unknown/absent Approval store
+  // must fail before writer initialization creates project operations state.
+  if (!fs.existsSync(resolveApprovalReadPath(projectName))) {
+    throw new Error('Approval not found');
+  }
+
+  const paths = ensureOperationsPaths(projectName);
+  const items = readCollection(paths.approvalsPath);
+  const team = readTeamModel(paths.project);
   const index = items.findIndex((item) => asString(item.id) === targetId);
   if (index < 0) {
     throw new Error('Approval not found');
@@ -2951,7 +3026,7 @@ function decideApproval(projectName, approvalId, input = {}) {
 }
 
 function createHandoff(projectName, input = {}) {
-  const paths = getOperationsPaths(projectName);
+  const paths = ensureOperationsPaths(projectName);
   const items = readCollection(paths.handoffsPath);
   const team = readTeamModel(paths.project);
   const destinationPage = asString(input.destination_page || input.route || input.destination);
@@ -3119,7 +3194,7 @@ function listHandoffs(projectName, options = {}) {
 }
 
 function consumeHandoff(projectName, handoffId, input = {}) {
-  const paths = getOperationsPaths(projectName);
+  const paths = ensureOperationsPaths(projectName);
   const items = readCollection(paths.handoffsPath);
   const index = items.findIndex((item) => asString(item.id) === asString(handoffId));
 

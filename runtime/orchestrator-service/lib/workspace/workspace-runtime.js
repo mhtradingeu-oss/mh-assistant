@@ -374,6 +374,61 @@ async function inspectWorkspaceRuntimeState(workspaceId, options = {}) {
   });
 }
 
+async function findWorkspaceByCreationEvidence(input, options = {}) {
+  assertExactInput(
+    input,
+    new Set(["workspace_name", "evidence_reference"]),
+    "Workspace creation evidence lookup"
+  );
+  if (typeof input.workspace_name !== "string") {
+    throw runtimeError(WORKSPACE_RUNTIME_ERROR_CODES.INVALID_INPUT, "workspace_name must be a string");
+  }
+  validateEvidenceReference(input.evidence_reference);
+  if (input.evidence_reference.reference_type !== "workspace_creation") {
+    throw runtimeError(
+      WORKSPACE_RUNTIME_ERROR_CODES.INVALID_INPUT,
+      "Creation evidence lookup requires reference_type workspace_creation"
+    );
+  }
+  const dependencies = getDependencies(options);
+  if (typeof dependencies.storage.discoverWorkspacesWithDiagnostics !== "function") {
+    throw runtimeError(
+      WORKSPACE_RUNTIME_ERROR_CODES.INVALID_INPUT,
+      "storage.discoverWorkspacesWithDiagnostics must be a function"
+    );
+  }
+  const discovery = await dependencies.storage.discoverWorkspacesWithDiagnostics(dependencies.root);
+  const nameMatches = discovery.workspaces.filter(
+    (workspace) => workspace.workspace_name === input.workspace_name
+  );
+  if (nameMatches.length > 1) {
+    throw runtimeError(
+      WORKSPACE_RUNTIME_ERROR_CODES.WORKSPACE_RECOVERY_REQUIRED,
+      "Duplicate Workspace names require explicit recovery",
+      {
+        workspace_name: input.workspace_name,
+        workspace_ids: nameMatches.map((workspace) => workspace.workspace_id)
+      },
+      { outcome: WORKSPACE_MUTATION_OUTCOMES.RECOVERY_REQUIRED }
+    );
+  }
+  if (nameMatches.length === 0) return null;
+  const match = nameMatches[0];
+  if (!match.evidence_references.some((reference) => evidenceEqual(reference, input.evidence_reference))) {
+    throw runtimeError(
+      WORKSPACE_RUNTIME_ERROR_CODES.WORKSPACE_RECOVERY_REQUIRED,
+      "Workspace name is already owned by different creation evidence",
+      {
+        workspace_name: input.workspace_name,
+        workspace_id: match.workspace_id,
+        requested_evidence_id: input.evidence_reference.reference_id
+      },
+      { outcome: WORKSPACE_MUTATION_OUTCOMES.RECOVERY_REQUIRED }
+    );
+  }
+  return deepCopy(match);
+}
+
 async function mutateWorkspace(workspaceId, expectedVersion, options, compute) {
   const dependencies = getDependencies(options);
   return withWorkspaceMutationLock(workspaceId, async () => {
@@ -491,6 +546,7 @@ async function addWorkspaceEvidenceReference(workspaceId, input, options = {}) {
 
 module.exports = Object.freeze({
   createWorkspace,
+  findWorkspaceByCreationEvidence,
   getWorkspace,
   inspectWorkspaceRuntimeState,
   transitionWorkspace,

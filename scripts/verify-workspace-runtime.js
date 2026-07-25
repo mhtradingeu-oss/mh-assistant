@@ -576,9 +576,9 @@ function verifyBoundaries() {
   assert.deepEqual(Object.keys(runtime).sort(), [
     "SINGLE_WRITER_ASSUMPTION", "WORKSPACE_MUTATION_OUTCOMES", "WORKSPACE_RUNTIME_ERROR_CODES",
     "WorkspaceRuntimeError", "activateWorkspace", "addWorkspaceEvidenceReference", "archiveWorkspace",
-    "createWorkspace", "getWorkspace", "inspectWorkspaceRuntimeState", "markWorkspaceFailed",
-    "resumeWorkspace", "suspendWorkspace", "transitionWorkspace", "updateWorkspaceName",
-    "withWorkspaceMutationLock"
+    "createWorkspace", "findWorkspaceByCreationEvidence", "getWorkspace", "inspectWorkspaceRuntimeState",
+    "markWorkspaceFailed", "resumeWorkspace", "suspendWorkspace", "transitionWorkspace",
+    "updateWorkspaceName", "withWorkspaceMutationLock"
   ].sort());
   assert.equal(Object.isFrozen(runtime.WORKSPACE_MUTATION_OUTCOMES), true);
   assert.deepEqual(Object.values(runtime.WORKSPACE_MUTATION_OUTCOMES), [
