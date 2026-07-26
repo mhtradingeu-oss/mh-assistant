@@ -191,3 +191,37 @@ Current authority totals:
 - release-authorized verifiers: `0`.
 
 The default policy remains `DENY`.
+
+
+## Fixture-Only Project Lifecycle Certification — L5C-D4D-C
+
+`identity-workspace.project-lifecycle-readiness-fixture` is authorized only for governed local execution through
+the `TEMP_ROOT` profile.
+
+Runtime evidence established:
+
+- successful governed planning and execution;
+- 37 temporary-root write events;
+- zero repository write attempts;
+- zero writes outside the governed temporary root;
+- zero protected live-root reads;
+- complete fixture cleanup;
+- no protected-scope mutation.
+
+The earlier worktree-status mismatch was a measurement-order false positive:
+the original status baseline preceded the intended manifest and README
+changes. It was not evidence of verifier-induced repository mutation.
+
+`identity-workspace.project-lifecycle-readiness-live-root` remains unassigned and denied.
+
+Current authority totals:
+
+- registered verifiers: `37`;
+- governed `READ_ONLY` assignments: `5`;
+- governed `TEMP_ROOT` assignments: `3`;
+- total locally authorized verifiers: `8`;
+- unassigned and denied verifiers: `29`;
+- CI-authorized verifiers: `0`;
+- release-authorized verifiers: `0`.
+
+The default policy remains `DENY`.

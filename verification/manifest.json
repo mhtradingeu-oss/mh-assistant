@@ -7,7 +7,7 @@
   "repository_scope": ".",
   "classification_complete": false,
   "runner_available": true,
-  "generated_from_truth_scan": "PHASE_L5C_D4D_B_PROJECT_LIFECYCLE_VERIFIER_SPLIT",
+  "generated_from_truth_scan": "PHASE_L5C_D4D_C_R_FIXTURE_ONLY_CERTIFICATION",
   "allowed_safety_classes": [
     "PURE_READ_ONLY",
     "TEMP_ROOT_MUTATING",
@@ -981,16 +981,22 @@
       "mutates_repository": false,
       "mutates_live_data": false,
       "explicit_gate": "Execution remains deny-only until an isolated TEMP_ROOT runtime certification and explicit profile assignment.",
-      "safe_for_local": false,
+      "safe_for_local": true,
       "safe_for_ci": false,
       "safe_for_release": false,
-      "profiles": [],
+      "profiles": [
+        "TEMP_ROOT"
+      ],
       "estimated_runtime": "medium",
       "timeout_seconds": 180,
       "limitations": [
         "This verifier contains only synthetic fixture coverage and must not read the repository live data roots.",
         "Registration is deny-only and does not authorize local, CI, release, or production execution.",
-        "A separate governed runtime certification is required before TEMP_ROOT profile assignment."
+        "A separate governed runtime certification is required before TEMP_ROOT profile assignment.",
+        "Authorized only for controlled local execution through the governed TEMP_ROOT profile.",
+        "Certified runtime evidence recorded 37 writes, all confined to the governed temporary root.",
+        "Certified runtime evidence recorded zero protected live-root reads and complete fixture cleanup.",
+        "CI, release, production, repository mutation, and live-data mutation remain denied."
       ]
     },
     {
