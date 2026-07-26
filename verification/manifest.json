@@ -1282,6 +1282,46 @@
         "Authorized only for controlled local execution through READ_ONLY.",
         "CI, release, production observation, HTTP, server, network, provider, write-key, repository mutation, fixture mutation, and live-data mutation remain denied."
       ]
+    },
+    {
+      "id": "authority.effective-permission-shadow-runtime-offline",
+      "path": "scripts/verify-effective-permission-shadow-runtime.js",
+      "domain": "authority",
+      "purpose": "Verify the offline runtime shadow control and request-local observer, including disabled-by-default admission, fail-closed kill-switch behavior, exact canonical GET observation, HEAD and public-alias exclusion, request-local evidence, response preservation, and non-authorizing integration with the effective-permission shadow adapter.",
+      "safety_class": "PURE_READ_ONLY",
+      "evidence_class": "STATIC_CONTRACT",
+      "requires_server": false,
+      "requires_http": false,
+      "requires_network": false,
+      "requires_live_provider": false,
+      "requires_write_key": false,
+      "requires_temp_root": false,
+      "reads_live_root": false,
+      "mutates_fixture": false,
+      "mutates_repository": false,
+      "mutates_live_data": false,
+      "explicit_gate": null,
+      "safe_for_local": true,
+      "safe_for_ci": false,
+      "safe_for_release": false,
+      "profiles": [
+        "READ_ONLY"
+      ],
+      "estimated_runtime": "short",
+      "timeout_seconds": 60,
+      "limitations": [
+        "Offline deterministic runtime-shadow verification only.",
+        "Does not start the server, issue HTTP requests, or install middleware.",
+        "Does not modify server.js, routes, the public alias, HEAD handling, or production configuration.",
+        "Does not read process.env directly; environment state is explicitly injected into the control parser.",
+        "Shadow control defaults disabled and any missing or invalid kill-switch value fails engaged.",
+        "Observations remain request-local and are not written to a persistent sink.",
+        "The observer cannot deny requests, change responses, change handler results, or propagate internal errors.",
+        "The public alias and HEAD requests remain outside the observer boundary.",
+        "Does not authorize identity, Workspace membership, Project membership, roles, grants, provider access, execution, or positive permission decisions.",
+        "Authorized only for controlled local execution through the READ_ONLY profile.",
+        "CI, release, production observation, production authority, server, HTTP, network, provider, write-key, repository mutation, fixture mutation, and live-data mutation remain denied."
+      ]
     }
   ]
 }

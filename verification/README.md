@@ -262,3 +262,25 @@ The default policy remains `DENY`.
 - Observation persistence: none
 - Runtime installation: none
 - Existing security gates remain authoritative
+
+## Effective-permission runtime shadow verifier
+
+- Verifier ID: `authority.effective-permission-shadow-runtime-offline`
+- Path: `scripts/verify-effective-permission-shadow-runtime.js`
+- Profile: `READ_ONLY`
+- Safety class: `PURE_READ_ONLY`
+- Evidence class: `STATIC_CONTRACT`
+- Controlled local governed execution: authorized
+- CI, release, and production execution: denied
+- Certified cases: `15`
+- Control cases: `6`
+- Observer cases: `9`
+- Runtime installation: none
+- Default observer state: disabled
+- Missing or invalid kill-switch state: engaged/fail-closed
+- Public alias observation: excluded
+- HEAD observation: excluded
+- Observation destination: request-local only
+- Persistent sink: none
+- Response and handler result changes: none
+- Production observation and production authority: denied
