@@ -1208,6 +1208,42 @@
         "Registration is deny-only and does not authorize local, CI, release, or production execution.",
         "The conservative classification must be reconciled with isolated runtime evidence before any profile assignment."
       ]
+    },
+    {
+      "id": "authority.effective-permission-resolver-offline",
+      "path": "scripts/verify-effective-permission-resolver.js",
+      "domain": "authority",
+      "purpose": "Verify the offline fail-closed effective-permission resolver contract, deterministic non-authorizing outcomes, deny precedence, secret-safe output, and absence of route or middleware effects.",
+      "safety_class": "PURE_READ_ONLY",
+      "evidence_class": "STATIC_CONTRACT",
+      "requires_server": false,
+      "requires_http": false,
+      "requires_network": false,
+      "requires_live_provider": false,
+      "requires_write_key": false,
+      "requires_temp_root": false,
+      "reads_live_root": false,
+      "mutates_fixture": false,
+      "mutates_repository": false,
+      "mutates_live_data": false,
+      "explicit_gate": null,
+      "safe_for_local": true,
+      "safe_for_ci": false,
+      "safe_for_release": false,
+      "profiles": [
+        "READ_ONLY"
+      ],
+      "estimated_runtime": "short",
+      "timeout_seconds": 60,
+      "limitations": [
+        "Offline deterministic resolver verification only.",
+        "Does not install middleware or connect the resolver to a route.",
+        "Does not authorize a human, service, Workspace membership, Project membership, role, grant, provider, or execution.",
+        "The certified implementation has positive authorization disabled and cannot produce ALLOW.",
+        "Existing key guards, runtime-security enforcement, governance gates, and handler-local safeguards remain authoritative.",
+        "Authorized only for controlled local execution through the governed READ_ONLY profile.",
+        "CI, release, production certification, HTTP, server, network, provider, write-key, repository mutation, fixture mutation, and live-data mutation remain denied."
+      ]
     }
   ]
 }

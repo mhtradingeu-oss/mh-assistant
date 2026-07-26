@@ -225,3 +225,21 @@ Current authority totals:
 - release-authorized verifiers: `0`.
 
 The default policy remains `DENY`.
+
+## Effective-permission resolver verifier
+
+- Verifier ID: `authority.effective-permission-resolver-offline`
+- Path: `scripts/verify-effective-permission-resolver.js`
+- Profile: `READ_ONLY`
+- Safety class: `PURE_READ_ONLY`
+- Evidence class: `STATIC_CONTRACT`
+- Local governed execution: authorized
+- CI execution: denied
+- Release and production execution: denied
+- Server, HTTP, network, provider, write-key, fixture mutation, repository mutation, and live-data mutation: denied
+- Scope: offline deterministic verification of the fail-closed effective-permission resolver
+- Certified outcomes: `DENY`, `INSUFFICIENT_CONTEXT`, and `UNSUPPORTED_ACTION`
+- `ALLOW` and `REQUIRES_APPROVAL` outcomes observed during certification: `0`
+- Resolver route installation: none
+- Middleware installation: none
+- Existing runtime security gates remain authoritative
