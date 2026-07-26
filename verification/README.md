@@ -284,3 +284,29 @@ The default policy remains `DENY`.
 - Persistent sink: none
 - Response and handler result changes: none
 - Production observation and production authority: denied
+
+## Effective-permission runtime installation verifier
+
+- Verifier ID: `authority.effective-permission-shadow-runtime-installation-offline`
+- Path: `scripts/verify-effective-permission-shadow-runtime-installation.js`
+- Profile: `READ_ONLY`
+- Safety class: `PURE_READ_ONLY`
+- Evidence class: `STATIC_CONTRACT`
+- Controlled local governed execution: authorized
+- CI, release, and production execution: denied
+- Certified cases: `14`
+- Canonical GET registrations: `1`
+- Public-alias registrations: `1`, unchanged and excluded
+- Explicit HEAD registrations: `0`
+- Observer constructions: `1` at server startup
+- Observer route insertions: `1`
+- Runtime installation: present
+- Runtime effective state without configuration: disabled
+- Missing kill-switch configuration: engaged/fail-closed
+- Control refresh model: startup-captured
+- Control changes require: controlled process restart
+- Hot kill switch certified: no
+- Shared handler changed: no
+- Response contract changed: no
+- Persistent sink: none
+- Production observation and production authority: denied
