@@ -120,3 +120,33 @@ Current authority totals:
 - release-authorized verifiers: `0`.
 
 The default policy remains `DENY`.
+
+
+## Mixed Verifier Classification Hold — L5C-D4C
+
+`identity-workspace.project-lifecycle-readiness` remains unassigned and
+deny-only.
+
+Controlled execution established that the verifier currently combines:
+
+- temporary fixture mutation confined to an isolated temporary root;
+- protected live-root reads from `data/projects` and `data/workspaces`.
+
+The manifest classification is therefore corrected to:
+
+- `safety_class: UNCLASSIFIED`;
+- `requires_temp_root: true`;
+- `reads_live_root: true`;
+- `mutates_fixture: true`;
+- `mutates_repository: false`;
+- `mutates_live_data: false`;
+- no profile assignment;
+- no local, CI, release, or production authority.
+
+The required remediation is to split the capability into:
+
+1. a fixture-only verifier eligible for later `TEMP_ROOT` certification;
+2. a separate live-root read-only verifier that remains denied until an
+   explicit governed live-root profile and runtime contract are approved.
+
+The default policy remains `DENY`.
