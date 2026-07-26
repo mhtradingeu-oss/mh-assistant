@@ -310,3 +310,39 @@ The default policy remains `DENY`.
 - Response contract changed: no
 - Persistent sink: none
 - Production observation and production authority: denied
+
+<!-- L5C-E3O-CONTROLLED-LOOPBACK-RUNTIME:START -->
+## Controlled loopback runtime verification
+
+The generic minimal governed runner remains fail-closed for server-dependent
+and HTTP-dependent verifiers.
+
+The separately governed controlled proof uses:
+
+- runner:
+  `scripts/verification/run-controlled-loopback-verifier.js`
+- self-test:
+  `scripts/verification/verify-controlled-loopback-runner.js`
+- profile:
+  `CONTROLLED_LOOPBACK_RUNTIME`
+- verifier:
+  `authority.effective-permission-shadow-controlled-local-runtime-proof`
+- safety class:
+  `SERVER_DEPENDENT`
+- evidence class:
+  `HTTP_RUNTIME`
+
+The runner accepts only the exact profile, verifier ID, repository path,
+SHA-256, safety class, evidence class, and capability contract.
+
+It requires an explicit absolute empty temporary directory outside the
+repository. The certified verifier uses only `127.0.0.1` and an
+operating-system-assigned ephemeral port.
+
+External-network authority, live providers, write keys, repository mutation,
+live-data mutation, CI execution, release execution, production observation,
+and production authority remain denied.
+
+No operating-system network sandbox is claimed. The boundary is enforced by
+the exact audited verifier identity, path, SHA-256, and fail-closed contract.
+<!-- L5C-E3O-CONTROLLED-LOOPBACK-RUNTIME:END -->

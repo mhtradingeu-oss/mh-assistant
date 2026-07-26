@@ -1364,6 +1364,45 @@
         "Authorized only for controlled local execution through the READ_ONLY profile.",
         "CI, release, production, server, HTTP, network, provider, write-key, repository mutation, fixture mutation, and live-data mutation remain denied."
       ]
+    },
+    {
+      "id": "authority.effective-permission-shadow-controlled-local-runtime-proof",
+      "path": "scripts/verify-effective-permission-shadow-controlled-local-runtime.js",
+      "domain": "authority",
+      "purpose": "Execute the certified effective-permission shadow controlled local runtime proof through the dedicated loopback runner using only synthetic inputs, 127.0.0.1, an operating-system-assigned ephemeral port, an explicit empty temporary root, and no production Orchestrator or external network authority.",
+      "safety_class": "SERVER_DEPENDENT",
+      "evidence_class": "HTTP_RUNTIME",
+      "requires_server": true,
+      "requires_http": true,
+      "requires_network": false,
+      "requires_live_provider": false,
+      "requires_write_key": false,
+      "requires_temp_root": true,
+      "reads_live_root": false,
+      "mutates_fixture": true,
+      "mutates_repository": false,
+      "mutates_live_data": false,
+      "explicit_gate": null,
+      "safe_for_local": true,
+      "safe_for_ci": false,
+      "safe_for_release": false,
+      "profiles": [
+        "CONTROLLED_LOOPBACK_RUNTIME"
+      ],
+      "estimated_runtime": "short",
+      "timeout_seconds": 90,
+      "limitations": [
+        "Authorized only through the separate controlled loopback runner.",
+        "The generic minimal governed runner remains unchanged and continues to deny server-dependent verification.",
+        "The controlled runner accepts only this exact verifier ID, path, SHA-256, safety class, evidence class, and capability contract.",
+        "Starts only a temporary Node HTTP harness created by the verifier; it does not start the production Orchestrator.",
+        "Binds only to 127.0.0.1 using an operating-system-assigned ephemeral port.",
+        "Requires an explicit empty temporary root outside the repository.",
+        "Uses synthetic project and credential sentinels only.",
+        "External network authority, live providers, write keys, live-root reads, repository mutation, live-data mutation, CI execution, release execution, and production authority are denied.",
+        "No operating-system network sandbox is claimed; external-network denial is bounded by the exact verifier identity, path, SHA-256, and certified contract.",
+        "Production observation and production authorization remain disabled."
+      ]
     }
   ]
 }
