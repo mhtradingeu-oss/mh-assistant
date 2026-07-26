@@ -1,3 +1,27 @@
+const {
+  createEffectivePermissionShadowObserver
+} = require(
+  './lib/security/effective-permission-shadow-observer'
+);
+
+const {
+  SHADOW_ENABLED_ENV,
+  SHADOW_KILL_SWITCH_ENV
+} = require(
+  './lib/security/effective-permission-shadow-control'
+);
+
+const effectivePermissionShadowObserver =
+  createEffectivePermissionShadowObserver({
+    environment: Object.freeze({
+      [SHADOW_ENABLED_ENV]:
+        process.env[SHADOW_ENABLED_ENV],
+
+      [SHADOW_KILL_SWITCH_ENV]:
+        process.env[SHADOW_KILL_SWITCH_ENV]
+    })
+  });
+
 const { createProtectedRouteMiddleware, PROTECTED_ROUTE_AUTHORITY_LEVELS } = require('./lib/security/protected-route-authority');
 // Deterministic source registry extraction for canonical/legacy compatibility
 const fsBoot = require('node:fs');
@@ -13828,6 +13852,7 @@ app.get('/api/projects/:project/customer-operations/channels', (req, res) => {
 
 app.get(
   '/media-manager/project/:project/customer-operations/health',
+  effectivePermissionShadowObserver,
   handleCustomerOperationsHealth
 );
 
