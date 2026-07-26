@@ -150,3 +150,44 @@ The required remediation is to split the capability into:
    explicit governed live-root profile and runtime contract are approved.
 
 The default policy remains `DENY`.
+
+
+## Project Lifecycle Verifier Split — L5C-D4D-B
+
+The mixed verifier `identity-workspace.project-lifecycle-readiness` has been retired and removed from the
+verification manifest.
+
+Its responsibilities are now separated into two deny-only registrations:
+
+- `identity-workspace.project-lifecycle-readiness-fixture`
+  - `TEMP_ROOT_MUTATING`;
+  - `ISOLATED_RUNTIME`;
+  - synthetic fixture mutation only;
+  - no live-root reads;
+  - no profile assignment.
+
+- `identity-workspace.project-lifecycle-readiness-live-root`
+  - `LIVE_ROOT_READ_ONLY`;
+  - `LIVE_ROOT_READ`;
+  - protected live project and workspace reads;
+  - no fixture, repository, or live-data mutation;
+  - no profile assignment.
+
+The old script path remains only as a fail-closed compatibility stub. It
+does not execute either replacement and exits nonzero.
+
+Current authority totals:
+
+- registered verifiers: `37`;
+- governed `READ_ONLY` assignments: `5`;
+- governed `TEMP_ROOT` assignments: `2`;
+- total locally authorized verifiers: `7`;
+- unassigned and denied verifiers: `30`;
+- CI-authorized: `5`;
+- governed `TEMP_ROOT` assignments: `2`;
+- total locally authorized verifiers: `7`;
+- unassigned and denied verifiers: `30`;
+- CI-authorized verifiers: `0`;
+- release-authorized verifiers: `0`.
+
+The default policy remains `DENY`.
