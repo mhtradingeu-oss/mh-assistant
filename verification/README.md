@@ -243,3 +243,22 @@ The default policy remains `DENY`.
 - Resolver route installation: none
 - Middleware installation: none
 - Existing runtime security gates remain authoritative
+
+## Effective-permission shadow adapter verifier
+
+- Verifier ID: `authority.effective-permission-shadow-adapter-offline`
+- Path: `scripts/verify-effective-permission-shadow-adapter.js`
+- Profile: `READ_ONLY`
+- Safety class: `PURE_READ_ONLY`
+- Evidence class: `STATIC_CONTRACT`
+- Controlled local governed execution: authorized
+- CI, release, and production execution: denied
+- Certified cases: `10`
+- Admitted cases: `5`
+- Rejected cases: `5`
+- Resolver outcomes: `DENY=1`, `INSUFFICIENT_CONTEXT=4`, `ALLOW=0`
+- HEAD observation: rejected
+- Public-alias observation: rejected
+- Observation persistence: none
+- Runtime installation: none
+- Existing security gates remain authoritative
