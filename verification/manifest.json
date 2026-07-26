@@ -2,12 +2,12 @@
   "manifest_version": "1.0.0",
   "contract_id": "mh-os.verification-governance.v1",
   "strategy": "CONSOLIDATE_EXISTING",
-  "status": "CONTROLLED_RUNNER_AVAILABLE",
+  "status": "CONTROLLED_REDUCED_READ_ONLY_BATCH_ACTIVE",
   "default_policy": "DENY",
   "repository_scope": ".",
   "classification_complete": false,
   "runner_available": true,
-  "generated_from_truth_scan": "PHASE_L5C_C_CONTROLLED_PROFILE_ACTIVATION",
+  "generated_from_truth_scan": "PHASE_L5C_D2R_REDUCED_READ_ONLY_BATCH_CERTIFICATION",
   "allowed_safety_classes": [
     "PURE_READ_ONLY",
     "TEMP_ROOT_MUTATING",
@@ -139,16 +139,21 @@
       "mutates_repository": false,
       "mutates_live_data": false,
       "explicit_gate": null,
-      "safe_for_local": false,
+      "safe_for_local": true,
       "safe_for_ci": false,
       "safe_for_release": false,
-      "profiles": [],
+      "profiles": [
+        "READ_ONLY"
+      ],
       "estimated_runtime": "short",
       "timeout_seconds": 60,
       "limitations": [
         "Registered from static source classification.",
         "Registration does not authorize execution.",
-        "No governed runtime execution evidence is attached yet."
+        "No governed runtime execution evidence is attached yet.",
+        "Authorized only for controlled local execution through the governed READ_ONLY profile.",
+        "Certification included a Node preload guard that detected zero filesystem write attempts.",
+        "CI, release, production certification, server, HTTP, network, provider, write-key, repository mutation, and live-data mutation remain denied."
       ]
     },
     {
@@ -169,16 +174,21 @@
       "mutates_repository": false,
       "mutates_live_data": false,
       "explicit_gate": null,
-      "safe_for_local": false,
+      "safe_for_local": true,
       "safe_for_ci": false,
       "safe_for_release": false,
-      "profiles": [],
+      "profiles": [
+        "READ_ONLY"
+      ],
       "estimated_runtime": "short",
       "timeout_seconds": 60,
       "limitations": [
         "Static classification only.",
         "Registration does not authorize execution.",
-        "Mutation-gate behavior still requires isolated execution certification."
+        "Mutation-gate behavior still requires isolated execution certification.",
+        "Authorized only for controlled local execution through the governed READ_ONLY profile.",
+        "Certification included a Node preload guard that detected zero filesystem write attempts.",
+        "CI, release, production certification, server, HTTP, network, provider, write-key, repository mutation, and live-data mutation remain denied."
       ]
     },
     {
@@ -319,16 +329,21 @@
       "mutates_repository": false,
       "mutates_live_data": false,
       "explicit_gate": null,
-      "safe_for_local": false,
+      "safe_for_local": true,
       "safe_for_ci": false,
       "safe_for_release": false,
-      "profiles": [],
+      "profiles": [
+        "READ_ONLY"
+      ],
       "estimated_runtime": "short",
       "timeout_seconds": 60,
       "limitations": [
         "Static classification only.",
         "Registration does not authorize execution.",
-        "Runtime enforcement remains uncertified by the governed runner."
+        "Runtime enforcement remains uncertified by the governed runner.",
+        "Authorized only for controlled local execution through the governed READ_ONLY profile.",
+        "Certification included a Node preload guard that detected zero filesystem write attempts.",
+        "CI, release, production certification, server, HTTP, network, provider, write-key, repository mutation, and live-data mutation remain denied."
       ]
     },
     {
@@ -358,7 +373,10 @@
       "limitations": [
         "Registered from static classification.",
         "Registration does not authorize execution.",
-        "No server-runtime evidence is claimed by this registration."
+        "No server-runtime evidence is claimed by this registration.",
+        "READ_ONLY authorization remains denied because a prior certification attempt coincided with a production telemetry append.",
+        "A controlled Node preload capture later reproduced zero verifier-process filesystem writes, but the earlier production-data delta remains unattributed.",
+        "No telemetry producer patch is authorized without deterministic causation evidence."
       ]
     },
     {
@@ -379,16 +397,21 @@
       "mutates_repository": false,
       "mutates_live_data": false,
       "explicit_gate": null,
-      "safe_for_local": false,
+      "safe_for_local": true,
       "safe_for_ci": false,
       "safe_for_release": false,
-      "profiles": [],
+      "profiles": [
+        "READ_ONLY"
+      ],
       "estimated_runtime": "short",
       "timeout_seconds": 60,
       "limitations": [
         "Provides static contract evidence only.",
         "Does not establish runtime authority enforcement.",
-        "Registration does not authorize execution."
+        "Registration does not authorize execution.",
+        "Authorized only for controlled local execution through the governed READ_ONLY profile.",
+        "Certification included a Node preload guard that detected zero filesystem write attempts.",
+        "CI, release, production certification, server, HTTP, network, provider, write-key, repository mutation, and live-data mutation remain denied."
       ]
     },
     {
@@ -409,16 +432,21 @@
       "mutates_repository": false,
       "mutates_live_data": false,
       "explicit_gate": null,
-      "safe_for_local": false,
+      "safe_for_local": true,
       "safe_for_ci": false,
       "safe_for_release": false,
-      "profiles": [],
+      "profiles": [
+        "READ_ONLY"
+      ],
       "estimated_runtime": "short",
       "timeout_seconds": 60,
       "limitations": [
         "Static contract verification only.",
         "Does not prove workspace runtime behavior.",
-        "Registration does not authorize execution."
+        "Registration does not authorize execution.",
+        "Authorized only for controlled local execution through the governed READ_ONLY profile.",
+        "Certification included a Node preload guard that detected zero filesystem write attempts.",
+        "CI, release, production certification, server, HTTP, network, provider, write-key, repository mutation, and live-data mutation remain denied."
       ]
     },
     {

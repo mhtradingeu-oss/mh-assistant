@@ -86,3 +86,37 @@ CI, release, production certification, server, HTTP, network, provider,
 write-key, repository mutation, and live-data mutation remain disabled.
 
 `default_policy=DENY`
+
+
+## Governed READ_ONLY Reduced Batch — L5C-D2R
+
+The following five verifiers are authorized only for controlled local
+execution through the governed `READ_ONLY` profile:
+
+- `backend.durable-approval-lifecycle`
+- `backend.governance-mutation-gates`
+- `backend.public-alias-hardening`
+- `backend.workspace-authority-boundary`
+- `backend.workspace-contract`
+
+Two candidates remain denied:
+
+- `backend.admin-policy-granularity`
+  - static HTTP/network signals remain unresolved;
+- `backend.runtime-security-enforcement`
+  - a previous certification run coincided with an unattributed production
+    telemetry append;
+  - a later controlled preload capture detected no verifier-process writes,
+    but deterministic causation has not been established.
+
+Current authority totals:
+
+- registered verifiers: `36`;
+- governed `TEMP_ROOT` assignments: `2`;
+- governed `READ_ONLY` assignments: `5`;
+- total locally authorized verifiers: `7`;
+- unassigned and denied verifiers: `29`;
+- CI-authorized verifiers: `0`;
+- release-authorized verifiers: `0`.
+
+The default policy remains `DENY`.
