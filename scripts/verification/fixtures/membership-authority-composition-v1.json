@@ -1,0 +1,421 @@
+{
+  "schema_version": "1.0.0",
+  "fixture_contract_id": "membership-authority-composition-offline-fixtures/v1",
+  "subject_contract_id": "membership-authority-composition/v1",
+  "phase": "L5C_E3V_REPOSITORY_CONTRACT_AND_OFFLINE_FIXTURE_IMPLEMENTATION",
+  "execution_mode": "OFFLINE_FIXTURE_ONLY",
+  "fixture_case_count": 21,
+  "constraints": {
+    "server_required": false,
+    "http_required": false,
+    "external_network_allowed": false,
+    "real_project_data_allowed": false,
+    "real_credentials_allowed": false,
+    "repository_writes_allowed": false,
+    "composer_required": false,
+    "resolver_reuse_required": true
+  },
+  "positive_outcomes_forbidden": [
+    "ALLOW",
+    "REQUIRES_APPROVAL"
+  ],
+  "required_reason_code_support": {
+    "WORKSPACE_CONTEXT_UNESTABLISHED": true,
+    "WORKSPACE_MEMBERSHIP_UNAVAILABLE": true,
+    "PROJECT_CONTEXT_UNESTABLISHED": true,
+    "PROJECT_MEMBERSHIP_UNAVAILABLE": true,
+    "SOURCE_PROVENANCE_INVALID": true
+  },
+  "discovered_reason_codes": [
+    "ACTION_UNSUPPORTED",
+    "ALLOW",
+    "AUTHENTICATION_REJECTED",
+    "AUTHENTICATION_STALE",
+    "AUTHENTICATION_UNESTABLISHED",
+    "CONTEXT_AMBIGUOUS",
+    "CONTEXT_INCOMPLETE",
+    "DENY",
+    "EXECUTION_CONTEXT_UNESTABLISHED",
+    "EXECUTION_DENY",
+    "GOVERNANCE_CONTEXT_UNESTABLISHED",
+    "GOVERNANCE_DENY",
+    "GRANT_EXPLICIT_DENY",
+    "GRANT_SCOPE_MISMATCH",
+    "GRANT_SOURCE_UNAVAILABLE",
+    "INSUFFICIENT_CONTEXT",
+    "MAX_SAFE_INTEGER",
+    "PRINCIPAL_INACTIVE",
+    "PRINCIPAL_REVOKED",
+    "PRINCIPAL_UNESTABLISHED",
+    "PROJECT_CONTEXT_UNESTABLISHED",
+    "PROJECT_MEMBERSHIP_INACTIVE",
+    "PROJECT_MEMBERSHIP_UNAVAILABLE",
+    "PROJECT_SCOPE_MISMATCH",
+    "PROVIDER_CONTEXT_UNESTABLISHED",
+    "PROVIDER_DENY",
+    "REQUIRES_APPROVAL",
+    "RESOURCE_UNSUPPORTED",
+    "RUNTIME_SECURITY_BINDING_MISMATCH",
+    "RUNTIME_SECURITY_DENY",
+    "RUNTIME_SECURITY_UNAVAILABLE",
+    "SCOPE_MISMATCH",
+    "SCOPE_UNESTABLISHED",
+    "SOURCE_PROVENANCE_INVALID",
+    "UNSUPPORTED_ACTION",
+    "UNSUPPORTED_ROUTE_CONTRACT",
+    "VERSION_UNSUPPORTED",
+    "WORKSPACE_CONTEXT_UNESTABLISHED",
+    "WORKSPACE_MEMBERSHIP_INACTIVE",
+    "WORKSPACE_MEMBERSHIP_UNAVAILABLE",
+    "WORKSPACE_SCOPE_MISMATCH"
+  ],
+  "reason_family_candidates": {
+    "principal": [
+      "PRINCIPAL_INACTIVE",
+      "PRINCIPAL_REVOKED",
+      "PRINCIPAL_UNESTABLISHED"
+    ],
+    "membership_state": [
+      "PROJECT_MEMBERSHIP_INACTIVE",
+      "WORKSPACE_MEMBERSHIP_INACTIVE"
+    ],
+    "context_mismatch": [
+      "GRANT_SCOPE_MISMATCH",
+      "PROJECT_SCOPE_MISMATCH",
+      "RUNTIME_SECURITY_BINDING_MISMATCH",
+      "SCOPE_MISMATCH",
+      "WORKSPACE_SCOPE_MISMATCH"
+    ],
+    "grant": [
+      "GRANT_EXPLICIT_DENY",
+      "GRANT_SCOPE_MISMATCH",
+      "GRANT_SOURCE_UNAVAILABLE"
+    ]
+  },
+  "global_assertions": [
+    "No case may produce ALLOW",
+    "No case may produce REQUIRES_APPROVAL",
+    "No case may mutate its input",
+    "No case may read real project data",
+    "No case may use real credentials",
+    "No case may start a server",
+    "No case may perform HTTP",
+    "No case may perform external network access",
+    "No case may write repository files",
+    "Existing resolver must be reused",
+    "Missing authoritative membership remains fail closed"
+  ],
+  "cases": [
+    {
+      "id": "contract_schema_valid",
+      "category": "CONTRACT_SCHEMA",
+      "purpose": "Accept the canonical fixture envelope and contract version.",
+      "input_state": "VALID_FIXTURE_ENVELOPE",
+      "expected_composition_status": "VALID",
+      "expected_resolver_outcome": null,
+      "expected_reason": null,
+      "security_invariants": [
+        "NO_RUNTIME_EXECUTION",
+        "NO_PRODUCTION_AUTHORITY"
+      ]
+    },
+    {
+      "id": "principal_missing",
+      "category": "COMPOSER_INPUT",
+      "purpose": "Missing principal must fail closed.",
+      "input_state": "PRINCIPAL_MISSING",
+      "expected_composition_status": "FAIL_CLOSED",
+      "expected_resolver_outcome": "DENY_OR_INSUFFICIENT_CONTEXT",
+      "expected_reason_family": [
+        "PRINCIPAL_INACTIVE",
+        "PRINCIPAL_REVOKED",
+        "PRINCIPAL_UNESTABLISHED"
+      ],
+      "security_invariants": [
+        "MUST_NOT_ALLOW",
+        "MUST_NOT_INFER_PRINCIPAL"
+      ]
+    },
+    {
+      "id": "principal_unauthenticated",
+      "category": "COMPOSER_INPUT",
+      "purpose": "Unauthenticated principal must fail closed.",
+      "input_state": "PRINCIPAL_AUTHENTICATED_FALSE",
+      "expected_composition_status": "FAIL_CLOSED",
+      "expected_resolver_outcome": "DENY",
+      "expected_reason_family": [
+        "PRINCIPAL_INACTIVE",
+        "PRINCIPAL_REVOKED",
+        "PRINCIPAL_UNESTABLISHED"
+      ],
+      "security_invariants": [
+        "MUST_NOT_ALLOW",
+        "MUST_NOT_REPLACE_PRINCIPAL"
+      ]
+    },
+    {
+      "id": "principal_noncanonical",
+      "category": "PROVENANCE",
+      "purpose": "Non-canonical principal evidence must fail closed.",
+      "input_state": "PRINCIPAL_CANONICAL_FALSE",
+      "expected_composition_status": "DENIED",
+      "expected_resolver_outcome": "DENY_OR_INSUFFICIENT_CONTEXT",
+      "expected_reason": "SOURCE_PROVENANCE_INVALID",
+      "security_invariants": [
+        "MUST_NOT_ALLOW"
+      ]
+    },
+    {
+      "id": "route_classification_missing",
+      "category": "COMPOSER_INPUT",
+      "purpose": "Missing route classification must prevent decision eligibility.",
+      "input_state": "ROUTE_CLASSIFICATION_MISSING",
+      "expected_composition_status": "UNRESOLVED",
+      "expected_resolver_outcome": "UNSUPPORTED_ACTION_OR_INSUFFICIENT_CONTEXT",
+      "expected_reason": null,
+      "security_invariants": [
+        "MUST_NOT_ALLOW",
+        "MUST_NOT_INVENT_ROUTE_PERMISSION"
+      ]
+    },
+    {
+      "id": "project_slug_missing",
+      "category": "COMPOSER_INPUT",
+      "purpose": "Missing validated project slug must remain unresolved.",
+      "input_state": "PROJECT_SLUG_MISSING",
+      "expected_composition_status": "UNRESOLVED",
+      "expected_resolver_outcome": "INSUFFICIENT_CONTEXT",
+      "expected_reason": "PROJECT_CONTEXT_UNESTABLISHED",
+      "security_invariants": [
+        "MUST_NOT_ALLOW",
+        "MUST_NOT_INFER_PROJECT"
+      ]
+    },
+    {
+      "id": "workspace_identity_missing",
+      "category": "RESOLVER_COMPATIBILITY",
+      "purpose": "Missing workspace identity must map to the existing resolver reason.",
+      "input_state": "WORKSPACE_IDENTITY_MISSING",
+      "expected_composition_status": "UNRESOLVED",
+      "expected_resolver_outcome": "INSUFFICIENT_CONTEXT",
+      "expected_reason": "WORKSPACE_CONTEXT_UNESTABLISHED",
+      "security_invariants": [
+        "MUST_NOT_ALLOW"
+      ]
+    },
+    {
+      "id": "workspace_membership_missing",
+      "category": "RESOLVER_COMPATIBILITY",
+      "purpose": "Missing workspace membership must map to the existing resolver reason.",
+      "input_state": "WORKSPACE_MEMBERSHIP_MISSING",
+      "expected_composition_status": "UNRESOLVED",
+      "expected_resolver_outcome": "INSUFFICIENT_CONTEXT",
+      "expected_reason": "WORKSPACE_MEMBERSHIP_UNAVAILABLE",
+      "security_invariants": [
+        "MUST_NOT_ALLOW",
+        "MUST_NOT_INFER_MEMBERSHIP_FROM_CONTROL_KEY"
+      ]
+    },
+    {
+      "id": "project_identity_missing",
+      "category": "RESOLVER_COMPATIBILITY",
+      "purpose": "Missing project identity must map to the existing resolver reason.",
+      "input_state": "PROJECT_IDENTITY_MISSING",
+      "expected_composition_status": "UNRESOLVED",
+      "expected_resolver_outcome": "INSUFFICIENT_CONTEXT",
+      "expected_reason": "PROJECT_CONTEXT_UNESTABLISHED",
+      "security_invariants": [
+        "MUST_NOT_ALLOW"
+      ]
+    },
+    {
+      "id": "project_membership_missing",
+      "category": "RESOLVER_COMPATIBILITY",
+      "purpose": "Missing project membership must map to the existing resolver reason.",
+      "input_state": "PROJECT_MEMBERSHIP_MISSING",
+      "expected_composition_status": "UNRESOLVED",
+      "expected_resolver_outcome": "INSUFFICIENT_CONTEXT",
+      "expected_reason": "PROJECT_MEMBERSHIP_UNAVAILABLE",
+      "security_invariants": [
+        "MUST_NOT_ALLOW",
+        "MUST_NOT_INFER_MEMBERSHIP_FROM_PROJECT_IDENTITY"
+      ]
+    },
+    {
+      "id": "workspace_membership_noncanonical",
+      "category": "PROVENANCE",
+      "purpose": "Workspace membership without canonical provenance must fail closed.",
+      "input_state": "WORKSPACE_MEMBERSHIP_CANONICAL_FALSE",
+      "expected_composition_status": "DENIED",
+      "expected_resolver_outcome": "DENY_OR_INSUFFICIENT_CONTEXT",
+      "expected_reason": "SOURCE_PROVENANCE_INVALID",
+      "security_invariants": [
+        "MUST_NOT_ALLOW"
+      ]
+    },
+    {
+      "id": "project_membership_noncanonical",
+      "category": "PROVENANCE",
+      "purpose": "Project membership without canonical provenance must fail closed.",
+      "input_state": "PROJECT_MEMBERSHIP_CANONICAL_FALSE",
+      "expected_composition_status": "DENIED",
+      "expected_resolver_outcome": "DENY_OR_INSUFFICIENT_CONTEXT",
+      "expected_reason": "SOURCE_PROVENANCE_INVALID",
+      "security_invariants": [
+        "MUST_NOT_ALLOW"
+      ]
+    },
+    {
+      "id": "workspace_membership_inactive",
+      "category": "MEMBERSHIP_STATE",
+      "purpose": "Inactive workspace membership must deny.",
+      "input_state": "WORKSPACE_MEMBERSHIP_STATE_INACTIVE",
+      "expected_composition_status": "DENIED",
+      "expected_resolver_outcome": "DENY",
+      "expected_reason_family": [
+        "PROJECT_MEMBERSHIP_INACTIVE",
+        "WORKSPACE_MEMBERSHIP_INACTIVE"
+      ],
+      "security_invariants": [
+        "MUST_NOT_ALLOW"
+      ]
+    },
+    {
+      "id": "project_membership_revoked",
+      "category": "MEMBERSHIP_STATE",
+      "purpose": "Revoked project membership must deny.",
+      "input_state": "PROJECT_MEMBERSHIP_STATE_REVOKED",
+      "expected_composition_status": "DENIED",
+      "expected_resolver_outcome": "DENY",
+      "expected_reason_family": [
+        "PROJECT_MEMBERSHIP_INACTIVE",
+        "WORKSPACE_MEMBERSHIP_INACTIVE"
+      ],
+      "security_invariants": [
+        "MUST_NOT_ALLOW"
+      ]
+    },
+    {
+      "id": "workspace_membership_principal_mismatch",
+      "category": "RELATIONSHIP_BINDING",
+      "purpose": "Workspace membership principal must match the authenticated principal.",
+      "input_state": "WORKSPACE_MEMBERSHIP_PRINCIPAL_MISMATCH",
+      "expected_composition_status": "DENIED",
+      "expected_resolver_outcome": "DENY",
+      "expected_reason_family": [
+        "GRANT_SCOPE_MISMATCH",
+        "PROJECT_SCOPE_MISMATCH",
+        "RUNTIME_SECURITY_BINDING_MISMATCH",
+        "SCOPE_MISMATCH",
+        "WORKSPACE_SCOPE_MISMATCH"
+      ],
+      "security_invariants": [
+        "MUST_NOT_ALLOW",
+        "MUST_NOT_REWRITE_PRINCIPAL"
+      ]
+    },
+    {
+      "id": "project_membership_principal_mismatch",
+      "category": "RELATIONSHIP_BINDING",
+      "purpose": "Project membership principal must match the authenticated principal.",
+      "input_state": "PROJECT_MEMBERSHIP_PRINCIPAL_MISMATCH",
+      "expected_composition_status": "DENIED",
+      "expected_resolver_outcome": "DENY",
+      "expected_reason_family": [
+        "GRANT_SCOPE_MISMATCH",
+        "PROJECT_SCOPE_MISMATCH",
+        "RUNTIME_SECURITY_BINDING_MISMATCH",
+        "SCOPE_MISMATCH",
+        "WORKSPACE_SCOPE_MISMATCH"
+      ],
+      "security_invariants": [
+        "MUST_NOT_ALLOW"
+      ]
+    },
+    {
+      "id": "workspace_project_binding_mismatch",
+      "category": "RELATIONSHIP_BINDING",
+      "purpose": "Project workspace binding must match the resolved workspace.",
+      "input_state": "PROJECT_WORKSPACE_ID_MISMATCH",
+      "expected_composition_status": "DENIED",
+      "expected_resolver_outcome": "DENY",
+      "expected_reason_family": [
+        "GRANT_SCOPE_MISMATCH",
+        "PROJECT_SCOPE_MISMATCH",
+        "RUNTIME_SECURITY_BINDING_MISMATCH",
+        "SCOPE_MISMATCH",
+        "WORKSPACE_SCOPE_MISMATCH"
+      ],
+      "security_invariants": [
+        "MUST_NOT_ALLOW"
+      ]
+    },
+    {
+      "id": "canonical_context_without_grant",
+      "category": "RESOLVER_COMPATIBILITY",
+      "purpose": "Canonical active membership context without an authoritative grant must remain fail closed.",
+      "input_state": "CANONICAL_ACTIVE_CONTEXT_GRANT_MISSING",
+      "expected_composition_status": "READY_FOR_SHADOW_RESOLVER",
+      "expected_resolver_outcome": "INSUFFICIENT_CONTEXT",
+      "expected_reason_family": [
+        "GRANT_EXPLICIT_DENY",
+        "GRANT_SCOPE_MISMATCH",
+        "GRANT_SOURCE_UNAVAILABLE"
+      ],
+      "security_invariants": [
+        "MUST_NOT_ALLOW",
+        "MUST_NOT_REQUIRES_APPROVAL"
+      ]
+    },
+    {
+      "id": "synthetic_fully_populated_context",
+      "category": "POSITIVE_OUTCOME_FIREWALL",
+      "purpose": "Even a fully populated synthetic context must not produce production-positive authority.",
+      "input_state": "SYNTHETIC_FULL_CANONICAL_CONTEXT",
+      "expected_composition_status": "READY_FOR_SHADOW_RESOLVER",
+      "expected_resolver_outcome": "NOT_ALLOW_AND_NOT_REQUIRES_APPROVAL",
+      "expected_reason": null,
+      "security_invariants": [
+        "MUST_NOT_ALLOW",
+        "MUST_NOT_REQUIRES_APPROVAL",
+        "SHADOW_ONLY"
+      ]
+    },
+    {
+      "id": "input_immutability",
+      "category": "SECURITY_INVARIANT",
+      "purpose": "Fixture execution must not mutate principal, route, project, or membership inputs.",
+      "input_state": "FROZEN_VALID_INPUT",
+      "expected_composition_status": "NO_INPUT_MUTATION",
+      "expected_resolver_outcome": null,
+      "expected_reason": null,
+      "security_invariants": [
+        "INPUT_DEEP_EQUAL_BEFORE_AFTER",
+        "PRINCIPAL_IMMUTABLE"
+      ]
+    },
+    {
+      "id": "copy_safe_output",
+      "category": "SECURITY_INVARIANT",
+      "purpose": "Output must be copy-safe and contain no functions, secrets, or mutable source references.",
+      "input_state": "VALID_SYNTHETIC_INPUT",
+      "expected_composition_status": "COPY_SAFE_OUTPUT",
+      "expected_resolver_outcome": null,
+      "expected_reason": null,
+      "security_invariants": [
+        "JSON_SERIALIZABLE",
+        "NO_SECRET_VALUES",
+        "NO_FUNCTIONS",
+        "NO_SOURCE_OBJECT_ALIASING"
+      ]
+    }
+  ],
+  "authority_limits": {
+    "composer_implemented": false,
+    "runtime_binding_present": false,
+    "profile_assignment_present": false,
+    "governed_execution_authorized": false,
+    "production_implementation_authorized": false,
+    "production_authority_granted": false
+  }
+}
