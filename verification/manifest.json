@@ -1437,6 +1437,42 @@
         "Direct E3V self-test evidence does not authorize a READ_ONLY profile assignment or governed execution.",
         "Cannot grant identity, Workspace membership, Project membership, roles, grants, execution, ALLOW, REQUIRES_APPROVAL, production implementation, or production authority."
       ]
+    },
+    {
+      "id": "identity-workspace.postgresql-membership-authority-contract",
+      "path": "scripts/verification/verify-postgresql-membership-authority-contract.js",
+      "domain": "identity-workspace-governance",
+      "purpose": "Validate the PostgreSQL membership-authority static contract, schema mapping, six-table migration blueprint, constraints, transaction boundary, checksum, destructive-statement prohibition, and seed-data prohibition without installing pg, contacting a database, or executing SQL.",
+      "safety_class": "PURE_READ_ONLY",
+      "evidence_class": "STATIC_CONTRACT",
+      "requires_server": false,
+      "requires_http": false,
+      "requires_network": false,
+      "requires_live_provider": false,
+      "requires_write_key": false,
+      "requires_temp_root": false,
+      "reads_live_root": false,
+      "mutates_fixture": false,
+      "mutates_repository": false,
+      "mutates_live_data": false,
+      "explicit_gate": null,
+      "safe_for_local": true,
+      "safe_for_ci": false,
+      "safe_for_release": false,
+      "profiles": [
+        "READ_ONLY"
+      ],
+      "estimated_runtime": "short",
+      "timeout_seconds": 60,
+      "limitations": [
+        "Controlled local READ_ONLY execution only.",
+        "Static contract inspection only.",
+        "Does not install or load pg.",
+        "Does not start PostgreSQL, contact a database, execute SQL, or apply a migration.",
+        "Does not implement an adapter, migration runner, runtime binding, or write authority.",
+        "Does not authorize CI, release, production certification, runtime enforcement, or positive ALLOW activation.",
+        "classification_complete remains false and default_policy remains DENY."
+      ]
     }
   ]
 }
