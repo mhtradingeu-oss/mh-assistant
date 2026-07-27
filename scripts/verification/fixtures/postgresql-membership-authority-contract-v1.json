@@ -1,0 +1,81 @@
+{
+  "contract_id": "postgresql-membership-authority-static-contract/v1",
+  "status": "STATIC_CONTRACT_ONLY",
+  "repository_admission_baseline": "f51e4b916f3d170fab3732fe2fb3ac16ac3a1dd3",
+  "migration_path": "runtime/orchestrator-service/migrations/identity-workspace-authority/0001_initial_authority_schema.sql",
+  "migration_sha256": "336470771832fd7f8c53248fc35a7e5c901b253d530a065ac5d042025f687011",
+  "contract_document_path": "docs/contracts/identity-workspace/POSTGRESQL_MEMBERSHIP_AUTHORITY_PERSISTENCE_V1.md",
+  "governance_document_path": "docs/contracts/verification-governance/PHASE_L5C_E4C_R4_POSTGRESQL_STATIC_CONTRACT_AND_MIGRATION_BLUEPRINT_REPOSITORY_ADMISSION.md",
+  "schema_namespace": "identity_workspace_authority",
+  "expected_counts": {
+    "create_schema": 1,
+    "tables": 6,
+    "functions": 1,
+    "triggers": 1,
+    "indexes": 4
+  },
+  "required_tables": [
+    "identity_workspace_authority.schema_migrations",
+    "identity_workspace_authority.workspaces",
+    "identity_workspace_authority.project_workspace_bindings",
+    "identity_workspace_authority.workspace_memberships",
+    "identity_workspace_authority.project_memberships",
+    "identity_workspace_authority.membership_grants"
+  ],
+  "required_markers": [
+    "BEGIN;",
+    "CREATE SCHEMA identity_workspace_authority;",
+    "CREATE FUNCTION identity_workspace_authority.validate_membership_grant()",
+    "CREATE TRIGGER membership_grants_validate_reference",
+    "FOREIGN KEY (workspace_id, project_id)",
+    "CHECK (canonical = TRUE)",
+    "CHECK (effect IN ('ALLOW', 'DENY'))",
+    "UNIQUE (source_name, source_reference)",
+    "COMMIT;"
+  ],
+  "prohibited_statement_patterns": [
+    "^\\s*CREATE\\s+DATABASE\\b",
+    "^\\s*CREATE\\s+ROLE\\b",
+    "^\\s*DROP\\s+(TABLE|SCHEMA|DATABASE|ROLE|FUNCTION|TRIGGER|INDEX|TYPE|EXTENSION)\\b",
+    "^\\s*TRUNCATE\\b",
+    "^\\s*INSERT\\s+INTO\\b",
+    "^\\s*UPDATE\\s+[A-Za-z_]",
+    "^\\s*DELETE\\s+FROM\\b",
+    "^\\s*ALTER\\s+SYSTEM\\b",
+    "^\\s*CREATE\\s+EXTENSION\\b",
+    "^\\s*COPY\\b"
+  ],
+  "required_contract_document_markers": [
+    "# PostgreSQL Membership Authority Persistence Contract v1",
+    "Database engine: `POSTGRESQL`",
+    "Driver selection: `pg`",
+    "Schema namespace: `identity_workspace_authority`",
+    "336470771832fd7f8c53248fc35a7e5c901b253d530a065ac5d042025f687011",
+    "Installing `pg`.",
+    "Executing the migration.",
+    "Granting production authority."
+  ],
+  "required_governance_document_markers": [
+    "# PHASE L5C E4C-R4",
+    "**Accepted**",
+    "runtime/orchestrator-service/migrations/identity-workspace-authority/0001_initial_authority_schema.sql",
+    "scripts/verification/fixtures/postgresql-membership-authority-contract-v1.json",
+    "scripts/verification/verify-postgresql-membership-authority-contract.js",
+    "DEPENDENCY_INSTALLED=NO",
+    "DATABASE_CREATED=NO",
+    "MIGRATION_EXECUTED=NO",
+    "PRODUCTION_AUTHORITY_GRANTED=NO"
+  ],
+  "authorization_limits": {
+    "dependency_installed": false,
+    "package_manifest_modified": false,
+    "package_lock_modified": false,
+    "verification_manifest_modified": false,
+    "database_created": false,
+    "migration_executed": false,
+    "database_contacted": false,
+    "adapter_implemented": false,
+    "runtime_binding_changed": false,
+    "production_authority_granted": false
+  }
+}
