@@ -88,14 +88,32 @@ assertCondition(
   ),
 );
 
+
 assertCondition(
-  migration.trimStart().startsWith('BEGIN;'),
-  'Migration does not begin with BEGIN;',
+  fixture.transaction_model
+    === 'EXECUTOR_MANAGED_TRANSACTION',
+  'Unexpected migration transaction model',
 );
 
 assertCondition(
-  migration.trimEnd().endsWith('COMMIT;'),
-  'Migration does not end with COMMIT;',
+  String(fixture.advisory_lock_key)
+    === '9051548987079335361',
+  'Unexpected advisory lock key',
+);
+
+assertCondition(
+  !/^\\s*BEGIN\\s*;\\s*$/im.test(migration),
+  'Embedded BEGIN found',
+);
+
+assertCondition(
+  !/^\\s*COMMIT\\s*;\\s*$/im.test(migration),
+  'Embedded COMMIT found',
+);
+
+assertCondition(
+  !/^\\s*ROLLBACK\\s*;\\s*$/im.test(migration),
+  'Embedded ROLLBACK found',
 );
 
 for (const table of fixture.required_tables) {

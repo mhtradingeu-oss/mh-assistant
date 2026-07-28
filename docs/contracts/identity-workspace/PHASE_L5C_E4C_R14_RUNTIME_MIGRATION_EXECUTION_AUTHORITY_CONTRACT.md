@@ -38,7 +38,7 @@ The existing persistence and schema authorities remain unchanged.
 
 ```text
 MIGRATION_ID=0001_initial_authority_schema
-MIGRATION_SHA256=336470771832fd7f8c53248fc35a7e5c901b253d530a065ac5d042025f687011
+MIGRATION_SHA256=4dd610ae30888a95dfa3260bb0021d8bdf61a2eb000d4ce57f67d34667b00f35
 SCHEMA_NAMESPACE=identity_workspace_authority
 
 No duplicate persistence contract or alternate initial schema is authorized.
@@ -85,7 +85,7 @@ The initial approved migration registry contains exactly:
 
 Its approved checksum is:
 
-336470771832fd7f8c53248fc35a7e5c901b253d530a065ac5d042025f687011
+4dd610ae30888a95dfa3260bb0021d8bdf61a2eb000d4ce57f67d34667b00f35
 
 Future migrations require:
 
@@ -423,3 +423,28 @@ R14 Runtime Migration Execution Authority Contract
 → Explicit First Database Contact Authorization
 
 No step may be interpreted as implicit permission for the next.
+
+## R17A migration format, lock, and bootstrap reconciliation
+
+The migration authority transaction model is now frozen.
+
+MIGRATION_SHA256=4dd610ae30888a95dfa3260bb0021d8bdf61a2eb000d4ce57f67d34667b00f35
+MIGRATION_ADVISORY_LOCK_NAMESPACE=mh-os.identity-workspace.migration-authority.v1
+MIGRATION_ADVISORY_LOCK_KEY=9051548987079335361
+MIGRATION_TRANSACTION_MODEL=EXECUTOR_MANAGED_TRANSACTION
+MIGRATION_SQL_EMBEDDED_BEGIN_ALLOWED=NO
+MIGRATION_SQL_EMBEDDED_COMMIT_ALLOWED=NO
+MIGRATION_SQL_EMBEDDED_ROLLBACK_ALLOWED=NO
+BOOTSTRAP_MIGRATION_ID=0001_initial_authority_schema
+GENERIC_HISTORY_ERROR_AS_ABSENCE=PROHIBITED
+FIRST_DATABASE_CONTACT_AUTHORIZED=NO
+
+The future executor owns:
+- advisory lock acquisition;
+- bootstrap/history decision;
+- transaction begin;
+- admitted migration execution;
+- history recording;
+- commit or rollback.
+
+No database contact or migration execution is authorized by this section.

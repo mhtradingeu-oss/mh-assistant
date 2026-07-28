@@ -1,4 +1,3 @@
-BEGIN;
 
 CREATE SCHEMA identity_workspace_authority;
 
@@ -414,5 +413,3 @@ ON identity_workspace_authority.membership_grants (
   effect
 )
 WHERE project_membership_id IS NOT NULL;
-
-COMMIT;

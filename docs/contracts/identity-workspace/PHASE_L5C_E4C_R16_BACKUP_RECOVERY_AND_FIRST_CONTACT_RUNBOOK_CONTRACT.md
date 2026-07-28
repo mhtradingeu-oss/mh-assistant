@@ -258,7 +258,7 @@ credential-presence booleans;
 no secret values.
 16. Migration identity
 MIGRATION_ID=0001_initial_authority_schema
-MIGRATION_SHA256=336470771832fd7f8c53248fc35a7e5c901b253d530a065ac5d042025f687011
+MIGRATION_SHA256=4dd610ae30888a95dfa3260bb0021d8bdf61a2eb000d4ce57f67d34667b00f35
 
 Checksum mismatch must stop before migration execution.
 
@@ -391,3 +391,17 @@ R16 Backup, Recovery, and First-Contact Runbook Contract
 → Explicit First Database Contact Authorization
 
 Every step requires separate evidence and authority.
+
+## 24. R17A transaction-authority reconciliation
+
+MIGRATION_SHA256=4dd610ae30888a95dfa3260bb0021d8bdf61a2eb000d4ce57f67d34667b00f35
+MIGRATION_TRANSACTION_MODEL=EXECUTOR_MANAGED_TRANSACTION
+MIGRATION_ADVISORY_LOCK_NAMESPACE=mh-os.identity-workspace.migration-authority.v1
+MIGRATION_ADVISORY_LOCK_KEY=9051548987079335361
+MIGRATION_SQL_EMBEDDED_TRANSACTION_WRAPPER=NO
+FIRST_CONTACT_COMMAND_DECLARED=NO
+FIRST_DATABASE_CONTACT_AUTHORIZED=NO
+DATABASE_CONTACT=NO
+RUN_MIGRATIONS=NO
+
+The future migration executor owns atomic migration execution.

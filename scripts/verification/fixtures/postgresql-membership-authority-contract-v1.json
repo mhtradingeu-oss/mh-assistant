@@ -3,7 +3,7 @@
   "status": "STATIC_CONTRACT_ONLY",
   "repository_admission_baseline": "f51e4b916f3d170fab3732fe2fb3ac16ac3a1dd3",
   "migration_path": "runtime/orchestrator-service/migrations/identity-workspace-authority/0001_initial_authority_schema.sql",
-  "migration_sha256": "336470771832fd7f8c53248fc35a7e5c901b253d530a065ac5d042025f687011",
+  "migration_sha256": "987dfea602dc9d5a6d392f5e635bd39b52973e4f0f2655de5752a11650313061",
   "contract_document_path": "docs/contracts/identity-workspace/POSTGRESQL_MEMBERSHIP_AUTHORITY_PERSISTENCE_V1.md",
   "governance_document_path": "docs/contracts/verification-governance/PHASE_L5C_E4C_R4_POSTGRESQL_STATIC_CONTRACT_AND_MIGRATION_BLUEPRINT_REPOSITORY_ADMISSION.md",
   "schema_namespace": "identity_workspace_authority",
@@ -23,15 +23,13 @@
     "identity_workspace_authority.membership_grants"
   ],
   "required_markers": [
-    "BEGIN;",
     "CREATE SCHEMA identity_workspace_authority;",
     "CREATE FUNCTION identity_workspace_authority.validate_membership_grant()",
     "CREATE TRIGGER membership_grants_validate_reference",
     "FOREIGN KEY (workspace_id, project_id)",
     "CHECK (canonical = TRUE)",
     "CHECK (effect IN ('ALLOW', 'DENY'))",
-    "UNIQUE (source_name, source_reference)",
-    "COMMIT;"
+    "UNIQUE (source_name, source_reference)"
   ],
   "prohibited_statement_patterns": [
     "^\\s*CREATE\\s+DATABASE\\b",
@@ -43,14 +41,17 @@
     "^\\s*DELETE\\s+FROM\\b",
     "^\\s*ALTER\\s+SYSTEM\\b",
     "^\\s*CREATE\\s+EXTENSION\\b",
-    "^\\s*COPY\\b"
+    "^\\s*COPY\\b",
+    "^\\s*BEGIN\\s*;\\s*$",
+    "^\\s*COMMIT\\s*;\\s*$",
+    "^\\s*ROLLBACK\\s*;\\s*$"
   ],
   "required_contract_document_markers": [
     "# PostgreSQL Membership Authority Persistence Contract v1",
     "Database engine: `POSTGRESQL`",
     "Driver selection: `pg`",
     "Schema namespace: `identity_workspace_authority`",
-    "336470771832fd7f8c53248fc35a7e5c901b253d530a065ac5d042025f687011",
+    "987dfea602dc9d5a6d392f5e635bd39b52973e4f0f2655de5752a11650313061",
     "Installing `pg`.",
     "Executing the migration.",
     "Granting production authority."
@@ -77,5 +78,8 @@
     "adapter_implemented": false,
     "runtime_binding_changed": false,
     "production_authority_granted": false
-  }
+  },
+  "transaction_model": "EXECUTOR_MANAGED_TRANSACTION",
+  "advisory_lock_namespace": "mh-os.identity-workspace.migration-authority.v1",
+  "advisory_lock_key": "9051548987079335361"
 }
