@@ -38,7 +38,7 @@ The existing persistence and schema authorities remain unchanged.
 
 ```text
 MIGRATION_ID=0001_initial_authority_schema
-MIGRATION_SHA256=4dd610ae30888a95dfa3260bb0021d8bdf61a2eb000d4ce57f67d34667b00f35
+MIGRATION_SHA256=987dfea602dc9d5a6d392f5e635bd39b52973e4f0f2655de5752a11650313061
 SCHEMA_NAMESPACE=identity_workspace_authority
 
 No duplicate persistence contract or alternate initial schema is authorized.
@@ -85,7 +85,7 @@ The initial approved migration registry contains exactly:
 
 Its approved checksum is:
 
-4dd610ae30888a95dfa3260bb0021d8bdf61a2eb000d4ce57f67d34667b00f35
+987dfea602dc9d5a6d392f5e635bd39b52973e4f0f2655de5752a11650313061
 
 Future migrations require:
 
@@ -139,21 +139,23 @@ DATABASE_MIGRATION_LOCK_TIMEOUT
 
 The migration authority is the sole owner of migration transaction execution.
 
-The initial migration blueprint already contains:
+The approved migration format contains no embedded transaction wrappers.
 
-BEGIN;
-...
-COMMIT;
+The migration authority must use:
 
-The future executor must not create ambiguous nested transaction behavior.
+MIGRATION_TRANSACTION_MODEL=EXECUTOR_MANAGED_TRANSACTION
 
-Before implementation, it must explicitly decide and test one strategy:
+The executor exclusively owns:
 
-execute the approved self-transactional SQL as a complete unit; or
-use executor-managed transactions after admitting a migration format without
-embedded transaction boundaries.
+BEGIN
+MIGRATION_DDL
+MIGRATION_HISTORY_INSERT
+COMMIT
 
-The two strategies may not be mixed silently.
+On execution, history-write, or commit failure after transaction start, the
+executor must attempt ROLLBACK before releasing the advisory lock.
+
+Nested or mixed transaction ownership is prohibited.
 
 Partial migration success is prohibited.
 
@@ -428,7 +430,7 @@ No step may be interpreted as implicit permission for the next.
 
 The migration authority transaction model is now frozen.
 
-MIGRATION_SHA256=4dd610ae30888a95dfa3260bb0021d8bdf61a2eb000d4ce57f67d34667b00f35
+MIGRATION_SHA256=987dfea602dc9d5a6d392f5e635bd39b52973e4f0f2655de5752a11650313061
 MIGRATION_ADVISORY_LOCK_NAMESPACE=mh-os.identity-workspace.migration-authority.v1
 MIGRATION_ADVISORY_LOCK_KEY=9051548987079335361
 MIGRATION_TRANSACTION_MODEL=EXECUTOR_MANAGED_TRANSACTION

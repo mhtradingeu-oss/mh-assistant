@@ -258,7 +258,7 @@ credential-presence booleans;
 no secret values.
 16. Migration identity
 MIGRATION_ID=0001_initial_authority_schema
-MIGRATION_SHA256=4dd610ae30888a95dfa3260bb0021d8bdf61a2eb000d4ce57f67d34667b00f35
+MIGRATION_SHA256=987dfea602dc9d5a6d392f5e635bd39b52973e4f0f2655de5752a11650313061
 
 Checksum mismatch must stop before migration execution.
 
@@ -394,7 +394,7 @@ Every step requires separate evidence and authority.
 
 ## 24. R17A transaction-authority reconciliation
 
-MIGRATION_SHA256=4dd610ae30888a95dfa3260bb0021d8bdf61a2eb000d4ce57f67d34667b00f35
+MIGRATION_SHA256=987dfea602dc9d5a6d392f5e635bd39b52973e4f0f2655de5752a11650313061
 MIGRATION_TRANSACTION_MODEL=EXECUTOR_MANAGED_TRANSACTION
 MIGRATION_ADVISORY_LOCK_NAMESPACE=mh-os.identity-workspace.migration-authority.v1
 MIGRATION_ADVISORY_LOCK_KEY=9051548987079335361
